@@ -1,0 +1,57 @@
+	::selection{ background-color: #E13300; color: white; }
+	::moz-selection{ background-color: #E13300; color: white; }
+	::webkit-selection{ background-color: #E13300; color: white; }
+
+	body {
+		background-color: #fff;
+		font-size: 18px;
+		font-family: 'Ubuntu', sans-serif;
+		color: #4F5155;
+	}
+	h1 {
+		
+		font-size: 28px;
+        font-family: 'Ubuntu', sans-serif;
+	}
+	h2 {
+		line-height: 60px;
+		font-size: 25px;
+		font-family: 'Ubuntu', sans-serif;
+	}
+	.graybox{
+		width: 100%;
+		background: #4c4c4c;
+		padding: 35px;
+	}
+	.graybox a{
+		color: #fff;
+	}
+	#container{
+		/*margin-top: 250px;*/
+		margin-bottom: 50px;
+		text-align: justify;
+	}
+	.head {
+		background: #f79928;
+
+	}
+	.social {
+		list-style: none;
+	}
+	.social li {
+		float: left;
+		margin-left: 15px;
+	}
+	.logo img{
+		padding: 20px;
+		margin: 0px auto  ;
+
+	}
+	.formulario {
+		margin-top: 40px;
+	}
+	.btn.active.talk {
+		background: #dfdfdf url('../images/bitcointalk_presentacion.png') right no-repeat;
+		padding-right: 35px;
+	}
+	
