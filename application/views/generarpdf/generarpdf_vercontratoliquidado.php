@@ -11,11 +11,18 @@
 */
 ?>
 
+<style type="text/css">
+    .text-center {
+        text-align: center;
+    }
+
+</style>
+
 <div class="row"> 
  <div class="col-sm-12">    
    
     <div class="table-responsive">
-      <table class="table table-striped table-bordered " id="tablaq">
+      <table class="table table-striped table-bordered " id="tablaq" border="1">
  <thead>
     <tr>
      

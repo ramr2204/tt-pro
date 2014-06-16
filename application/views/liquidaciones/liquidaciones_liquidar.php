@@ -17,7 +17,7 @@
       $a.='"'.$value.'", ';
     }
     $a=substr($a, 0, -2);
-    $a.= "]"
+    $a.= "]";
 ?>
 <script type="text/javascript" language="javascript" charset="utf-8">
 //generación de la tabla mediante json
@@ -75,7 +75,7 @@ var oTable = $('#tablaq').dataTable( {
            event.preventDefault();
            var ID = $(this).attr("id");
             $("#idcontrato").val(ID);
-             $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/vercontratoliquidado/'+ID,function(result){
+             $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/verrecibos/'+ID,function(result){
               $('#myModal2').modal({show:true});
              });
          });
@@ -139,6 +139,8 @@ var oTable = $('#tablaq').dataTable( {
 
 
 </script>
+
+
 <style type="text/css">
   .dataTables_filter, .dataTables_length, .dataTables_footer {
     display: none;
@@ -269,3 +271,22 @@ var oTable = $('#tablaq').dataTable( {
   </div>
 </div>
 <?php echo form_close();?>
+
+
+
+
+
+<?php if ($accion=='liquidado') { ?>
+<script type="text/javascript">
+  
+            var ID = <?php echo $idcontrato; ?>;
+            
+            $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/verrecibos/'+ID,function(result){
+            
+            $('#myModal2').modal('show');
+           // alert(ID+'....');
+        });
+        
+ 
+</script>
+<?php   } ?>

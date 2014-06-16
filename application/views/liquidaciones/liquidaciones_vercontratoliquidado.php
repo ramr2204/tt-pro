@@ -27,7 +27,7 @@
    
  <tr>
      <td colspan="3"></td>
-     <th colspan="1"><?php echo anchor(base_url().'generarpdf/generar_liquidacion/'.$result->liqu_contratoid,'<i class="fa fa-file-pdf-o"></i> PDF','class="btn btn-large  btn-primary"'); ?></th>
+     <th colspan="1"><?php echo anchor(base_url().'generarpdf/generar_liquidacion/'.$result->liqu_contratoid,'<i class="fa fa-file-pdf-o fa-2x"></i> PDF','class="btn btn-large  btn-default"'); ?></th>
 
 </tr>
 <tr>

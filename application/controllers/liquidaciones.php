@@ -32,9 +32,15 @@ class Liquidaciones extends MY_Controller {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
 
-              $this->data['successmessage']=$this->session->flashdata('successmessage');
+              $this->data['successmessage2']=$this->session->flashdata('successmessage');
               $this->data['errormessage']=$this->session->flashdata('errormessage');
               $this->data['infomessage']=$this->session->flashdata('infomessage');
+              $this->data['accion']=$this->session->flashdata('accion');
+              if ($this->uri->segment(3)>0){
+                  $this->data['idcontrato']= $this->uri->segment(3);
+               } else {
+               	  $this->data['idcontrato']= 0;
+               }
               //template data
               $this->template->set('title', 'Administrar liquidaciones');
               $this->data['style_sheets']= array(
@@ -105,6 +111,9 @@ class Liquidaciones extends MY_Controller {
       }
 
   }	
+
+ 
+
  function verrecibos()
   {        
       if ($this->ion_auth->logged_in()) {
@@ -117,8 +126,8 @@ class Liquidaciones extends MY_Controller {
               $liquidacion = $this->data['result'];
               $this->data['facturas'] = $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
               $this->template->set('title', 'Contrato liquidado');
-              $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_vercontratoliquidado', $this->data);
-             
+              //$this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_vercontratoliquidado', $this->data);
+              $this->load->view('liquidaciones/liquidaciones_vercontratoliquidado', $this->data); 
           } else {
               redirect(base_url().'index.php/error_404');
           }
@@ -170,14 +179,15 @@ class Liquidaciones extends MY_Controller {
                   	   $this->codegen_model->add('est_facturas',$data);
                   }
 
-
+                  //print_r($data);
                   $data = array(
                    'cntr_estadolocalid' => 1,
                    );
                   if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idcontrato) == TRUE) {
                       
-                      //envia a donde se generan los recibos PDF
-                      redirect(base_url().'index.php/liquidaciones/verrecibos/'.$idcontrato);
+                      $this->session->set_flashdata('successmessage', 'La liquidación se realizó con éxito');
+                      $this->session->set_flashdata('accion', 'liquidado');
+                      redirect(base_url().'index.php/liquidaciones/liquidar/'.$idcontrato);
                      // echo $this->db->last_query();
                   }
               }

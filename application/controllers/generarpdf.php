@@ -48,25 +48,18 @@ class Generarpdf extends CI_controller {
               $pdf->SetTitle('TCPDF Example 003');
               $pdf->SetSubject('TCPDF Tutorial');
               $pdf->SetKeywords('TCPDF, PDF, example, test, guide');
-
-              // set default header data
-              $pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH,'Gobernación del Tolima', 'Departamento Administrativo de Asuntos Jurídicos
-Dirección de Contratación');
-
-              // set header and footer fonts
-              $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-              $pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
-
+              $pdf->SetPrintHeader(false);
+              $pdf->SetPrintFooter(false);
               // set default monospaced font
               $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
               // set margins
-              $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
-              $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-              $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+              $pdf->SetMargins(PDF_MARGIN_LEFT, 2, PDF_MARGIN_RIGHT);
+              $pdf->SetHeaderMargin(0);
+              $pdf->SetFooterMargin(0);
 
               // set auto page breaks
-              $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+              $pdf->SetAutoPageBreak(TRUE, 2);
 
               // set image scale factor
               $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
@@ -78,23 +71,23 @@ Dirección de Contratación');
               }
 
 // ---------------------------------------------------------
-
+            
                // set font
-               $pdf->SetFont('times', 'BI', 12);
+               $pdf->SetFont('times', 'BI', 10);
+                   
 
-               // add a page
-               $pdf->AddPage();
-               $html = $this->load->view('generarpdf/generarpdf_vercontratoliquidado', $this->data, TRUE);  
-               // set some text to print
-
-
-               // print a block of text using Write()
-               $pdf->writeHTML($html, true, false, true, false, '');
+               foreach ($this->data['facturas'] as $key => $value) {
+                $pdf->AddPage();
+                $this->data['facturaestampilla']=$value;
+                $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array('todos los datos', 'C128', '', '', 80, 17, 0.4, array('position'=>'C','align' => 'C', 'border-top'=>true, 'padding'=>2,'margin-top'=>2, 'fgcolor'=>array(0,0,0), 'bgcolor'=>'', 'text'=>true, 'font'=>'helvetica', 'fontsize'=>8, 'stretchtext'=>4), 'N'));
+                $html = $this->load->view('generarpdf/generarpdf_reciboestampilla', $this->data, TRUE);  
+                $pdf->writeHTML($html, true, false, true, false, '');
+               }
 
                // ---------------------------------------------------------
 
                //Close and output PDF document
-               $pdf->Output('example_003.pdf', 'I');            
+               $pdf->Output('recibos_'.$liquidacion->liqu_contratoid.'.pdf', 'I');            
           } else {
               redirect(base_url().'index.php/error_404');
           }
