@@ -70,8 +70,8 @@
 </tr>
 <tr>
      <td colspan="1"><strong>Tipo de contrato</strong></td>
-     <td colspan="3"><?php echo $result->liqu_tipocontrato; ?>
-     </td>
+     <td colspan="1"><?php echo $result->liqu_tipocontrato; ?></td>
+     <td colspan="2" class="text-center"><strong>Régimen <?php echo $result->liqu_regimen; ?></strong>
 </tr>
 <tr>
      <td colspan="4"></td>
@@ -80,7 +80,7 @@
      <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
      <td colspan="1" class="text-center"><strong>Cuenta de ahorro</strong></td>
      <td colspan="1" class="text-center"><strong>Porcentaje</strong></td>
-     <td colspan="1" class="text-center"><strong>Régimen <?php echo $result->liqu_regimen; ?></strong>
+     <td colspan="1" class="text-center"><strong>Valor</strong>
      </td>
 
 </tr>
@@ -94,7 +94,7 @@
      </td>
      <td colspan="1" class="text-center"><?php echo $row2->fact_porcentaje; ?>%
      </td>
-     <td colspan="1" class="text-right"><?php echo $row2->fact_valor; ?>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($row2->fact_valor, 2, ',', '.'); ?>
     
      </td>
 </tr>
@@ -104,7 +104,7 @@
 
 
      </td>
-     <td colspan="1" class="text-right"><?php echo $result->liqu_valortotal; ?>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($result->liqu_valortotal, 2, ',', '.'); ?>
      </td>
 </tr>
  </tbody>     
@@ -122,4 +122,3 @@
 </div>
 </div>   
       </div>
-

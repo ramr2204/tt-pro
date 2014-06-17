@@ -235,8 +235,7 @@ var oTable = $('#tablaq').dataTable( {
 <?php echo form_close();?>
 
 
-
-<?php echo form_open("liquidaciones/procesarpagado",'role="form"');?>
+<?php echo form_open_multipart("liquidaciones/cargar_comprobante",'role="form"');?>
 <div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
