@@ -32,9 +32,15 @@ class Liquidaciones extends MY_Controller {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
 
-              $this->data['successmessage']=$this->session->flashdata('successmessage');
+              $this->data['successmessage2']=$this->session->flashdata('successmessage');
               $this->data['errormessage']=$this->session->flashdata('errormessage');
               $this->data['infomessage']=$this->session->flashdata('infomessage');
+              $this->data['accion']=$this->session->flashdata('accion');
+              if ($this->uri->segment(3)>0){
+                  $this->data['idcontrato']= $this->uri->segment(3);
+               } else {
+               	  $this->data['idcontrato']= 0;
+               }
               //template data
               $this->template->set('title', 'Administrar liquidaciones');
               $this->data['style_sheets']= array(
@@ -105,6 +111,9 @@ class Liquidaciones extends MY_Controller {
       }
 
   }	
+
+ 
+
  function verrecibos()
   {        
       if ($this->ion_auth->logged_in()) {
@@ -114,23 +123,11 @@ class Liquidaciones extends MY_Controller {
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
               $idcontrato=$this->uri->segment(3);
               $this->data['result'] = $this->liquidaciones_model->getrecibos($idcontrato);
-              $contrato = $this->data['result'];
-              print_r($this->data['result']);
-              $this->data['estampillas'] = $this->liquidaciones_model->getestampillas($contrato->liqu_tipocontrato);
-              $estampillas=$this->data['estampillas'];   
-              $valorsiniva = $contrato->liqu_valor-(($contrato->cntr_valor*$contrato->regi_iva)/100);
-              $totalestampilla= array();
-              $valortotal=0;
-              foreach ($estampillas as $key => $value) { 
-                 $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
-                 $valortotal+=$totalestampilla[$value->estm_id];
-              }
-              $this->data['est_totalestampilla']=$totalestampilla;
-              $this->data['cnrt_valorsiniva']=$valorsiniva;
-              $this->data['est_valortotal']=$valortotal;
-              $this->template->set('title', 'Editar contrato');
+              $liquidacion = $this->data['result'];
+              $this->data['facturas'] = $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
+              $this->template->set('title', 'Contrato liquidado');
+              //$this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_vercontratoliquidado', $this->data);
               $this->load->view('liquidaciones/liquidaciones_vercontratoliquidado', $this->data); 
-             
           } else {
               redirect(base_url().'index.php/error_404');
           }
@@ -167,14 +164,30 @@ class Liquidaciones extends MY_Controller {
                    'liqu_codigo' => $codigo
 
                  );
+                  
               if ($this->codegen_model->add('est_liquidaciones',$data) == TRUE) {
+              	  $liquidacionid=$this->db->insert_id();
+                  for ($i=1; $i < $this->input->post('numeroestampillas'); $i++) { 
+                  	   $data = array(
+                       'fact_nombre' => $this->input->post('nombreestampilla'.$i),
+                       'fact_porcentaje' => $this->input->post('porcentaje'.$i),
+                       'fact_valor' => $this->input->post('totalestampilla'.$i),
+                       'fact_banco' => $this->input->post('banco'.$i),
+                       'fact_cuenta' => $this->input->post('cuenta'.$i),
+                       'fact_liquidacionid' => $liquidacionid,
+                       );
+                  	   $this->codegen_model->add('est_facturas',$data);
+                  }
+
+                  //print_r($data);
                   $data = array(
                    'cntr_estadolocalid' => 1,
                    );
                   if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idcontrato) == TRUE) {
                       
-                      //envia a donde se generan los recibos PDF
-                      redirect(base_url().'index.php/liquidaciones/verrecibos/'.$idcontrato);
+                      $this->session->set_flashdata('successmessage', 'La liquidación se realizó con éxito');
+                      $this->session->set_flashdata('accion', 'liquidado');
+                      redirect(base_url().'index.php/liquidaciones/liquidar/'.$idcontrato);
                      // echo $this->db->last_query();
                   }
               }
@@ -218,13 +231,12 @@ function procesarpago()
                  );
               if ($this->codegen_model->add('est_liquidaciones',$data) == TRUE) {
                   $data = array(
-                   'cntr_estadolocalid' => 1,
+                   'cntr_estadolocalid' => 0,
                    );
-                  if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idcontrato) == TRUE) {
-                      
+                  if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idcontrato) == TRUE) { 
                       //envia a donde se generan los recibos PDF
-                     redirect(base_url().'index.php/liquidaciones/liquidar');
-                   // echo $this->db->last_query();
+                      redirect(base_url().'index.php/liquidaciones/liquidar');
+                      echo $this->db->last_query();
                   }
               }
                 
@@ -286,8 +298,8 @@ function procesarpago()
       }
 
   }
-
-
+  
+ 
   function liquidaciones_datatable ()
   {
       if ($this->ion_auth->logged_in()) {

@@ -11,11 +11,18 @@
 */
 ?>
 
+<style type="text/css">
+    .text-center {
+        text-align: center;
+    }
+
+</style>
+
 <div class="row"> 
  <div class="col-sm-12">    
    
     <div class="table-responsive">
-      <table class="table table-striped table-bordered " id="tablaq">
+      <table class="table table-striped table-bordered " id="tablaq" border="1">
  <thead>
     <tr>
      
@@ -26,8 +33,7 @@
  <tbody>
    
  <tr>
-     <td colspan="3"></td>
-     <th colspan="1"><?php echo anchor(base_url().'generarpdf/generar_liquidacion/'.$result->liqu_contratoid,'<i class="fa fa-file-pdf-o fa-2x"></i> PDF','class="btn btn-large  btn-default"'); ?></th>
+     <td colspan="4"></td>
 
 </tr>
 <tr>
