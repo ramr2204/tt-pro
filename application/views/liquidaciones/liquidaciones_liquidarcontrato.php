@@ -99,12 +99,12 @@ $cuentas='';
 <?php  foreach($estampillas as $row2) { ?>
 <tr>
      <td colspan="1"><?php echo $row2->estm_nombre; ?>
-     <input type="hidden" name="nombreestampilla" value="<?php echo $row2->estm_nombre; ?>">
+     <input type="hidden" name="nombreestampilla<?php echo $x; ?>" value="<?php echo $row2->estm_nombre; ?>">
 
      </td>
      <td colspan="1" class="text-center"><?php echo $row2->estm_cuenta; ?><br><?php echo $row2->banc_nombre; ?>
-     <input type="hidden" name="cuenta<?php echo $x; ?>" value="cuenta: <?php echo $row2->estm_cuenta; ?>, banco: <?php echo $row2->banc_nombre; ?> ">
-
+     <input type="hidden" name="cuenta<?php echo $x; ?>" value="<?php echo $row2->estm_cuenta; ?>">
+     <input type="hidden" name="banco<?php echo $x; ?>" value="<?php echo $row2->banc_nombre; ?>">
      </td>
      <td colspan="1" class="text-center"><?php echo $row2->esti_porcentaje; ?>%
      <input type="hidden" name="porcentaje<?php echo $x; ?>" value="<?php echo $row2->esti_porcentaje; ?>">
@@ -113,7 +113,9 @@ $cuentas='';
      <input type="hidden" name="totalestampilla<?php echo $x; ?>" value="<?php echo '$'.number_format($est_totalestampilla[$row2->estm_id], 2, ',', '.'); ?>">
      </td>
 </tr>
-<?php $totalestampillas.= '$'.number_format($est_totalestampilla[$row2->estm_id], 2, ',', '.').'|';
+<?php 
+
+     $totalestampillas.= '$'.number_format($est_totalestampilla[$row2->estm_id], 2, ',', '.').'|';
       $porcentajes.=$row2->esti_porcentaje.'|';
       $cuentas.= 'cuenta: '.$row2->estm_cuenta.' banco: '.$row2->banc_nombre.'|';
       $x++;
@@ -124,7 +126,7 @@ $cuentas='';
      <input type="hidden" name="totalestampillas" value="<?php echo $totalestampillas; ?>">
      <input type="hidden" name="porcentajes" value="<?php echo $porcentajes; ?>">
      <input type="hidden" name="cuentas" value="<?php echo $cuentas; ?>">
-
+     <input type="hidden" name="numeroestampillas" value="<?php echo $x; ?>"
 
      </td>
      <td colspan="1" class="text-right"><?php echo '$'.number_format($est_valortotal, 2, ',', '.'); ?>

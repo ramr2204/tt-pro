@@ -21,8 +21,9 @@ class Liquidaciones_model extends CI_Model {
         return $result;
     }
     function getrecibos($id){
-        $this->db->select('liqu_id, liqu_codigo,liqu_nombreestampilla,liqu_nombrecontratista,liqu_tipocontratista,liqu_nit, liqu_numero,liqu_vigencia,liqu_valorsiniva,liqu_tipocontrato,liqu_regimen,liqu_cuentas,liqu_porcentajes');
+        $this->db->select('liqu_id, liqu_codigo,liqu_nombreestampilla,liqu_nombrecontratista,liqu_tipocontratista,liqu_nit, liqu_numero,liqu_vigencia,liqu_valorsiniva,liqu_valorconiva,liqu_valortotal,liqu_tipocontrato,liqu_regimen,liqu_cuentas,liqu_porcentajes,liqu_contratoid');
         $this->db->from('est_liquidaciones li');
+        $this->db->where('li.liqu_contratoid',$id);
         //$this->db->from('con_contratos c');
   
         $query = $this->db->get();
@@ -40,6 +41,15 @@ class Liquidaciones_model extends CI_Model {
         $query = $this->db->get();
         return $query->result();
     }
+    
+    function getfacturas($id){
+        $this->db->select('f.fact_nombre, f.fact_porcentaje, f.fact_valor, f.fact_banco, f.fact_cuenta');
+        $this->db->from('est_facturas f');
+        $this->db->where('f.fact_liquidacionid',$id);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     function getSelect($table,$fields,$where=''){
         $query = $this->db->query("SELECT ".$fields."  FROM ".$table." ".$where." ");
         return $query->result();

@@ -1,0 +1,103 @@
+<?php if( ! defined('BASEPATH') ) exit('No direct script access allowed');
+/**
+*   Nombre:            contratos
+*   Ruta:              /application/controllers/contratos.php
+*   Descripcion:       controlador de contratos
+*   Fecha Creacion:    20/may/2014
+*   @author            Iván Viña <ivandariovinam@gmail.com>
+*   @version           2014-05-20
+*
+*/
+
+class Generarpdf extends CI_controller {
+    
+  function __construct() 
+  {
+      parent::__construct();
+	    $this->load->library('form_validation');		
+		  $this->load->helper(array('form','url','codegen_helper'));
+      $this->load->model('liquidaciones_model','',TRUE);
+      $this->load->model('codegen_model','',TRUE);
+	}	
+	
+	function index()
+  {
+		  $this->liquidar();
+	}
+
+	
+  function generar_liquidacion()
+  {
+      if ($this->ion_auth->logged_in()){
+          if ($this->uri->segment(3)==''){
+               redirect(base_url().'index.php/error_404');
+          } 
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
+              $this->load->library("Pdf");
+              $idcontrato=$this->uri->segment(3);
+              $this->data['result'] = $this->liquidaciones_model->getrecibos($idcontrato);
+              $liquidacion = $this->data['result'];
+              $this->data['facturas'] = $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
+              
+  // create new PDF document
+              $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+              // set document information
+              $pdf->SetCreator(PDF_CREATOR);
+              $pdf->SetAuthor('Nicola Asuni');
+              $pdf->SetTitle('TCPDF Example 003');
+              $pdf->SetSubject('TCPDF Tutorial');
+              $pdf->SetKeywords('TCPDF, PDF, example, test, guide');
+              $pdf->SetPrintHeader(false);
+              $pdf->SetPrintFooter(false);
+              // set default monospaced font
+              $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+              // set margins
+              $pdf->SetMargins(PDF_MARGIN_LEFT, 2, PDF_MARGIN_RIGHT);
+              $pdf->SetHeaderMargin(0);
+              $pdf->SetFooterMargin(0);
+
+              // set auto page breaks
+              $pdf->SetAutoPageBreak(TRUE, 2);
+
+              // set image scale factor
+              $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+
+              // set some language-dependent strings (optional)
+              if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+                  require_once(dirname(__FILE__).'/lang/eng.php');
+                  $pdf->setLanguageArray($l);
+              }
+
+// ---------------------------------------------------------
+            
+               // set font
+               $pdf->SetFont('times', 'BI', 10);
+                   
+
+               foreach ($this->data['facturas'] as $key => $value) {
+                $pdf->AddPage();
+                $this->data['facturaestampilla']=$value;
+                $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array('todos los datos', 'C128', '', '', 80, 17, 0.4, array('position'=>'C','align' => 'C', 'border-top'=>true, 'padding'=>2,'margin-top'=>2, 'fgcolor'=>array(0,0,0), 'bgcolor'=>'', 'text'=>true, 'font'=>'helvetica', 'fontsize'=>8, 'stretchtext'=>4), 'N'));
+                $html = $this->load->view('generarpdf/generarpdf_reciboestampilla', $this->data, TRUE);  
+                $pdf->writeHTML($html, true, false, true, false, '');
+               }
+
+               // ---------------------------------------------------------
+
+               //Close and output PDF document
+               $pdf->Output('recibos_'.$liquidacion->liqu_contratoid.'.pdf', 'I');            
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+
+      } else {
+              redirect(base_url().'index.php/users/login');
+      }
+
+  }
+
+
+
+}

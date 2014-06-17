@@ -68,8 +68,8 @@ class Tiposcontratos extends MY_Controller {
               $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[500]');
               $x=1;
               while ( $x  <= $this->input->post('numero')) {
-                  $this->form_validation->set_rules('estampillaid'.$x, 'estampillaid', 'trim|xss_clean|max_length[2]|numeric');
-                  $this->form_validation->set_rules('porcentaje'.$x, 'Porcentaje'.$x, 'trim|xss_clean|max_length[2]|numeric');
+                  $this->form_validation->set_rules('estampillaid'.$x, 'estampillaid', 'trim|xss_clean|max_length[5]|numeric');
+                  $this->form_validation->set_rules('porcentaje'.$x, 'Porcentaje'.$x, 'trim|xss_clean|max_length[5]|numeric');
                   $x++;
                } 
 
