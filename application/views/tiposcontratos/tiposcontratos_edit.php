@@ -39,7 +39,28 @@
                                            <textarea class="form-control" id="descripcion" type="descripcion" name="descripcion" maxlength="500"><?php echo $result->tico_descripcion; ?></textarea>
                                            <?php echo form_error('descripcion','<span class="text-danger">','</span>'); ?>
                                     </div>
+                                    
+                                      <table class="table table-condensed">
+                                       <tr>
+                                         <td class="text-center"><strong>Estampilla</strong></td>
+                                         <td class="text-center"><strong>Porcentaje</strong></td>
+                                       </tr>
+                                       <?php $x=0;  ?> 
+                                       <?php  foreach($estampillas as $row) { ?>
+                                       <?php $x++;  ?> 
+                                          <tr>
+                                            <td><?php echo $row->estm_nombre; ?> </td>
+                                            <td>
+                                            <input type="hidden" name="estampillaid<?php echo $x; ?>" value="<?php echo $row->estm_id; ?>">
+                                            <input type="hidden" name="estiid<?php echo $x; ?>" value="<?php echo $row->esti_id; ?>">
+                                            <input class="form-control" id="porcentaje<?php echo $x; ?>" type="number" name="porcentaje<?php echo $x; ?>"  maxlength="3" min="0" step="0.1" value="<?php echo $row->esti_porcentaje; ?>" />
+                                            <?php echo form_error('porcentaje'.$x,'<span class="text-danger">','</span>'); ?>
+                                            </td>
+                                          </tr>
 
+                                       <?php   } ?>
+                                      </table>
+                                      <input type="hidden" name="numero" value="<?php echo $x; ?>">
                                     <div class="pull-right">
                                      <?php  echo anchor('tiposcontratos', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
                                      

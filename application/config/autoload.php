@@ -64,7 +64,7 @@ $autoload['libraries'] = array('session','email','form_validation','template','i
 |	$autoload['helper'] = array('url', 'file');
 */
 
- $autoload['helper'] = array('url','form','html');
+ $autoload['helper'] = array('url','form','html','jsonwrapper/jsonwrapper');
 
 
 /*
