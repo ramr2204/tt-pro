@@ -162,6 +162,13 @@ class Tiposcontratos extends MY_Controller {
               }
 
               $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[500]');
+              $x=1;
+              while ( $x  <= $this->input->post('numero')) {
+                  $this->form_validation->set_rules('estampillaid'.$x, 'estampillaid', 'trim|xss_clean|max_length[5]|numeric');
+                  $this->form_validation->set_rules('estiid'.$x, 'estampillaid', 'trim|xss_clean|max_length[5]|numeric');
+                  $this->form_validation->set_rules('porcentaje'.$x, 'Porcentaje'.$x, 'trim|xss_clean|max_length[5]|numeric');
+                  $x++;
+               }
 
               if ($this->form_validation->run() == false) {
                   
@@ -176,6 +183,31 @@ class Tiposcontratos extends MY_Controller {
                            
                 	if ($this->codegen_model->edit('con_tiposcontratos',$data,'tico_id',$idtipocontrato) == TRUE) {
 
+                	  $x=1; 
+                      while ( $x  <= $this->input->post('numero')) {
+                         
+                          if ($this->input->post('estiid'.$x) > 0) {
+                          	  if ($this->input->post('porcentaje'.$x) > 0) {
+                                   $data = array(
+                                     'esti_porcentaje' => $this->input->post('porcentaje'.$x)
+                                   );
+                                   $this->codegen_model->edit('est_estampillas_tiposcontratos',$data,'esti_id',$this->input->post('estiid'.$x));
+                               } else {
+                               	   $this->codegen_model->delete('est_estampillas_tiposcontratos','esti_id',$this->input->post('estiid'.$x));
+                               }
+                          } else {
+                               if ($this->input->post('porcentaje'.$x) > 0) {
+                               	   $data = array(
+                                     'esti_estampillaid' => $this->input->post('estampillaid'.$x),
+                                     'esti_tipocontratoid' => $idtipocontrato,
+                                     'esti_porcentaje' => $this->input->post('porcentaje'.$x)
+                                   );
+                                   $this->codegen_model->add('est_estampillas_tiposcontratos',$data);
+                               }
+                          }
+                          $x++;
+                      } 	
+
                       $this->session->set_flashdata('successmessage', 'El tipo de contrato se ha editado con éxito');
                       redirect(base_url().'index.php/tiposcontratos/edit/'.$idtipocontrato);
                       
@@ -187,8 +219,10 @@ class Tiposcontratos extends MY_Controller {
               }       
                   $this->data['successmessage']=$this->session->flashdata('successmessage');
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                	$this->data['result'] = $this->codegen_model->get('con_tiposcontratos','tico_id,tico_nombre,tico_descripcion','tico_id = '.$idtipocontrato,1,NULL,true);
+                  $this->data['result'] = $this->codegen_model->get('con_tiposcontratos','tico_id,tico_nombre,tico_descripcion','tico_id = '.$idtipocontrato,1,NULL,true);
                   $this->template->set('title', 'Editar tipo de contrato');
+                  $this->data['estampillas']  = $this->codegen_model->getSelect('est_estampillas','estm_id,estm_nombre,esti_porcentaje,esti_ordenanzaid,esti_id','','LEFT JOIN est_estampillas_tiposcontratos on estm_id = esti_estampillaid');
+                  //echo $this->db->last_query();
                   $this->template->load($this->config->item('admin_template'),'tiposcontratos/tiposcontratos_edit', $this->data);
                         
           }else {

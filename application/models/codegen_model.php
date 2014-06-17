@@ -70,8 +70,8 @@ class Codegen_model extends CI_Model {
            return FALSE;
     }
 
-    function getSelect($table,$fields,$where=''){
-        $query = $this->db->query("SELECT ".$fields."  FROM ".$table." ".$where." ");
+    function getSelect($table,$fields,$where='',$join=''){
+        $query = $this->db->query("SELECT ".$fields."  FROM ".$table." ".$where." ".$join." ");
         return $query->result();
     }
 
