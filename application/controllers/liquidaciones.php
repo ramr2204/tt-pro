@@ -270,6 +270,21 @@ class Liquidaciones extends MY_Controller {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   function liquidaciones_datatable ()
   {
       if ($this->ion_auth->logged_in()) {
