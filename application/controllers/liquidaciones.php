@@ -1,8 +1,8 @@
 <?php if( ! defined('BASEPATH') ) exit('No direct script access allowed');
 /**
-*   Nombre:            contratos
-*   Ruta:              /application/controllers/contratos.php
-*   Descripcion:       controlador de contratos
+*   Nombre:            liquidaciones
+*   Ruta:              /application/controllers/liquidaciones.php
+*   Descripcion:       controlador de liquidaciones
 *   Fecha Creacion:    20/may/2014
 *   @author            Iván Viña <ivandariovinam@gmail.com>
 *   @version           2014-05-20
@@ -44,14 +44,16 @@ class Liquidaciones extends MY_Controller {
               //template data
               $this->template->set('title', 'Administrar liquidaciones');
               $this->data['style_sheets']= array(
-                            'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
+                            'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen',
+                            'css/plugins/bootstrap/fileinput.css' => 'screen'
                         );
               $this->data['javascripts']= array(
                         'js/jquery.dataTables.min.js',
                         'js/plugins/dataTables/dataTables.bootstrap.js',
                         'js/jquery.dataTables.defaults.js',
                         'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
-                        'js/accounting.min.js'
+                        'js/accounting.min.js',
+                        'js/plugins/bootstrap/fileinput.min.js'
                        );
               $resultado = $this->codegen_model->max('con_contratos','cntr_fecha_firma');
               
@@ -209,18 +211,13 @@ class Liquidaciones extends MY_Controller {
       if ($this->ion_auth->logged_in()) {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('bancos/add')) {
-
-              $this->data['successmessage']=$this->session->flashdata('message');  
-              $this->form_validation->set_rules('archivo', 'archivo', '');
-              $this->form_validation->set_rules('facturaid', 'facturaid', 'trim|xss_clean|numeric');
-
-              if ($this->form_validation->run() == false) {
-
-                  $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
-              } else {    
-
-
-                  $path = "uploads/facturas";
+              $this->data['successmessage']=$this->session->flashdata('message');
+              $this->data['errormessage']=''; 
+              $this->form_validation->set_rules('numeroarchivos', 'numero archivos', 'trim|xss_clean|numeric|integer|greater_than[0]');
+              $this->form_validation->set_rules('contratoid', 'contrato id', 'trim|xss_clean|numeric|integer|greater_than[0]');
+              $numeroarchivos=$this->input->post('numeroarchivos');
+              if ($this->input->post('contratoid') >0 && $numeroarchivos > 0 ) {
+                  $path = "uploads/facturas/".$this->input->post('contratoid');
                   if(!is_dir($path)) { //create the folder if it's not already exists
                       mkdir($path,0777,TRUE);      
                   }
@@ -229,36 +226,41 @@ class Liquidaciones extends MY_Controller {
                   $config['remove_spaces']=TRUE;
                   $config['max_size']    = '2048';
                   $this->load->library('upload', $config);
-
-                  if ($this->upload->do_upload("archivo")) 
-                  {
-                      $this->load->helper('path');
-                      $this->load->helper('file');
-                      $file_data= $this->upload->data();
-
-                      $data = array(
-                        'comp_nombre' => $file_data['raw_name'],
-                        'comp_descripcion' => $this->input->post('descripcion')
-
-                      );
-                 
-                      if ($this->codegen_model->add('est_comprobantes',$data) == TRUE) {
-
-                          $this->session->set_flashdata('message', 'El banco se ha creado con éxito');
-                          redirect(base_url().'index.php/bancos/add');
-
+                  $success=0;
+                  for ($i=0; $i < $numeroarchivos; $i++) {
+                      $idfactura=$this->input->post('facturaid'.$i);
+                      $this->form_validation->set_rules('facturaid'.$i, 'factura id '.$i, 'trim|xss_clean|numeric|integer|greater_than[0]'); 
+                      if ($this->form_validation->run() == false) {
+                          $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
                       } else {
-                          $this->data['errormessage'] = 'No se pudo registrar el comprobante';
+                          if ($this->upload->do_upload("comprobante".$i)) {
+                              $file_data= $this->upload->data();
+                              $data = array(
+                                 'fact_rutacomprobante' => $path.'/'.$file_data['raw_name'],
+                                 'fact_fechacomprobante' => date("Y-m-d H:i:s")
+                               );
+                              if ($this->codegen_model->edit('est_facturas',$data,'fact_id',$idfactura) == TRUE) {
+                                  $success++; 
+                                    
+                              } else {
+                                   $this->data['errormessage'] .= '<br>No se pudo registrar el comprobante'.$i;
+                              }  
+                          } else {
+                            // no sube archivo
+                          }  
                       }
-                  } else {
-                      $this->data['errormessage'] = 'No se pudo cargar el archivo';
-                  }   
 
+                  }
+              } else {
+                  $this->data['errormessage'] = 'Datos incorrectos'.$this->input->post('contratoid').' ---- '.$numeroarchivos;
               }
-                
-              $this->template->set('title', 'Nueva tipo banco');
-              $this->template->load($this->config->item('admin_template'),'bancos/bancos_add', $this->data);
-             
+              if ($success > 0) {
+                $this->session->set_flashdata('successmessage', 'El banco se ha editado con éxito');                    
+              } else {
+                $this->session->set_flashdata('errormessage', '<strong>Error!</strong> '.$this->data['errormessage']);
+              }
+              redirect(base_url().'index.php/liquidaciones/liquidar/'.$idcontrato);
+              
           } else {
               redirect(base_url().'index.php/error_404');
           }
@@ -296,6 +298,7 @@ class Liquidaciones extends MY_Controller {
               $this->datatables->from('con_contratos c');
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
               $this->datatables->join('con_estadoslocales el', 'el.eslo_id = c.cntr_estadolocalid', 'left');
+              //$this->datatables->join('est_facturas fa', 'c.cntr_id = fa.fact_contratoid', 'left');
 
               if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
                   
