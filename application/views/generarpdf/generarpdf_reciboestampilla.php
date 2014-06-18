@@ -66,8 +66,8 @@
 </tr>
 <tr>
      <td colspan="1"><strong>Tipo de contrato</strong></td>
-     <td colspan="3"><?php echo $result->liqu_tipocontrato; ?>
-     </td>
+     <td colspan="1"><?php echo $result->liqu_tipocontrato; ?></td>
+     <td colspan="2" class="text-center"><strong>Régimen <?php echo $result->liqu_regimen; ?></strong></td>
 </tr>
 <tr>
      <td colspan="4"></td>
@@ -76,8 +76,7 @@
      <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
      <td colspan="1" class="text-center"><strong>Cuenta de ahorro</strong></td>
      <td colspan="1" class="text-center"><strong>Porcentaje</strong></td>
-     <td colspan="1" class="text-center"><strong>Régimen <?php echo $result->liqu_regimen; ?></strong>
-     </td>
+     <td colspan="1" class="text-center"><strong>Valor</strong></td>
 
 </tr>
 
@@ -90,7 +89,7 @@
      </td>
      <td colspan="1" class="text-center"><?php echo $facturaestampilla->fact_porcentaje; ?>%
      </td>
-     <td colspan="1" class="text-right"><?php echo $facturaestampilla->fact_valor; ?>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 2, ',', '.'); ?>
     
      </td>
 </tr>
@@ -102,7 +101,7 @@
 
 
      </td>
-     <td colspan="1" class="text-right"><?php echo $facturaestampilla->fact_valor; ?>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 2, ',', '.'); ?>
      </td>
 </tr>
  </tbody>     
@@ -171,8 +170,8 @@
 </tr>
 <tr>
      <td colspan="1"><strong>Tipo de contrato</strong></td>
-     <td colspan="3"><?php echo $result->liqu_tipocontrato; ?>
-     </td>
+     <td colspan="1"><?php echo $result->liqu_tipocontrato; ?></td>
+     <td colspan="2" class="text-center"><strong>Régimen <?php echo $result->liqu_regimen; ?></strong></td>
 </tr>
 <tr>
      <td colspan="4"></td>
@@ -181,8 +180,7 @@
      <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
      <td colspan="1" class="text-center"><strong>Cuenta de ahorro</strong></td>
      <td colspan="1" class="text-center"><strong>Porcentaje</strong></td>
-     <td colspan="1" class="text-center"><strong>Régimen <?php echo $result->liqu_regimen; ?></strong>
-     </td>
+     <td colspan="1" class="text-center"><strong>Valor</strong></td>
 
 </tr>
 
@@ -195,7 +193,7 @@
      </td>
      <td colspan="1" class="text-center"><?php echo $facturaestampilla->fact_porcentaje; ?>%
      </td>
-     <td colspan="1" class="text-right"><?php echo $facturaestampilla->fact_valor; ?>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 2, ',', '.'); ?>
     
      </td>
 </tr>
@@ -207,7 +205,7 @@
 
 
      </td>
-     <td colspan="1" class="text-right"><?php echo $facturaestampilla->fact_valor; ?>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 2, ',', '.'); ?>
      </td>
 </tr>
  </tbody>     
@@ -262,9 +260,7 @@
      <td colspan="1"><?php echo $result->liqu_numero; ?>
      </td>
      <td colspan="1"><strong>Vigencia</strong></td>
-     <td colspan="1"><?php echo $result->liqu_vigencia; ?>
-     <input type="hidden" name="vigencia" value="<?php echo $result->liqu_vigencia; ?>">
-     </td>
+     <td colspan="1"><?php echo $result->liqu_vigencia; ?></td>
 </tr>
 <tr>
      <td colspan="1"><strong>Valor del contrato</strong></td>
@@ -276,8 +272,8 @@
 </tr>
 <tr>
      <td colspan="1"><strong>Tipo de contrato</strong></td>
-     <td colspan="3"><?php echo $result->liqu_tipocontrato; ?>
-     </td>
+     <td colspan="1"><?php echo $result->liqu_tipocontrato; ?></td>
+     <td colspan="2" class="text-center"><strong>Régimen <?php echo $result->liqu_regimen; ?></strong></td>
 </tr>
 <tr>
      <td colspan="4"></td>
@@ -286,7 +282,7 @@
      <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
      <td colspan="1" class="text-center"><strong>Cuenta de ahorro</strong></td>
      <td colspan="1" class="text-center"><strong>Porcentaje</strong></td>
-     <td colspan="1" class="text-center"><strong>Régimen <?php echo $result->liqu_regimen; ?></strong>
+     <td colspan="1" class="text-center"><strong>Valor</strong>
      </td>
 
 </tr>
@@ -300,7 +296,7 @@
      </td>
      <td colspan="1" class="text-center"><?php echo $facturaestampilla->fact_porcentaje; ?>%
      </td>
-     <td colspan="1" class="text-right"><?php echo $facturaestampilla->fact_valor; ?>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 2, ',', '.'); ?>
     
      </td>
 </tr>
@@ -312,7 +308,7 @@
 
 
      </td>
-     <td colspan="1" class="text-right"><?php echo $facturaestampilla->fact_valor; ?>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 2, ',', '.'); ?>
      </td>
 </tr>
  </tbody>     

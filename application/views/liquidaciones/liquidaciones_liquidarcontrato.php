@@ -65,18 +65,19 @@
 <tr>
      <td colspan="1"><strong>Valor del contrato</strong></td>
      <td colspan="1"><?php echo '$'.number_format($result->cntr_valor, 2, ',', '.'); ?>
-     <input type="hidden" name="valorconiva" value="<?php echo '$'.number_format($result->cntr_valor, 2, ',', '.'); ?>">
+     <input type="hidden" name="valorconiva" value="<?php echo $result->cntr_valor; ?>">
      </td>
      <td colspan="1"><strong>Valor sin IVA</strong></td>
      <td colspan="1"><?php echo '$'.number_format($cnrt_valorsiniva, 2, ',', '.'); ?>
-     <input type="hidden" name="valorsiniva" value="<?php echo '$'.number_format($cnrt_valorsiniva, 2, ',', '.'); ?>">
+     <input type="hidden" name="valorsiniva" value="<?php echo $cnrt_valorsiniva; ?>">
      </td>
 </tr>
 <tr>
      <td colspan="1"><strong>Tipo de contrato</strong></td>
-     <td colspan="3"><?php echo $result->tico_nombre; ?>
+     <td colspan="1"><?php echo $result->tico_nombre; ?>
      <input type="hidden" name="tipocontrato" value="<?php echo $result->tico_nombre; ?>">
      </td>
+     <td colspan="2" class="text-center"><strong>Régimen <?php echo $result->regi_nombre; ?></strong>
 </tr>
 <tr>
      <td colspan="4"></td>
@@ -85,7 +86,7 @@
      <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
      <td colspan="1" class="text-center"><strong>Cuenta de ahorro</strong></td>
      <td colspan="1" class="text-center"><strong>Porcentaje</strong></td>
-     <td colspan="1" class="text-center"><strong>Régimen <?php echo $result->regi_nombre; ?></strong>
+     <td colspan="1" class="text-center"><strong>Valor</strong>
      <input type="hidden" name="regimen" value="<?php echo $result->regi_nombre; ?>">
      </td>
 
@@ -110,7 +111,7 @@ $cuentas='';
      <input type="hidden" name="porcentaje<?php echo $x; ?>" value="<?php echo $row2->esti_porcentaje; ?>">
      </td>
      <td colspan="1" class="text-right"><?php echo '$'.number_format($est_totalestampilla[$row2->estm_id], 2, ',', '.'); ?>
-     <input type="hidden" name="totalestampilla<?php echo $x; ?>" value="<?php echo '$'.number_format($est_totalestampilla[$row2->estm_id], 2, ',', '.'); ?>">
+     <input type="hidden" name="totalestampilla<?php echo $x; ?>" value="<?php echo $est_totalestampilla[$row2->estm_id]; ?>">
      </td>
 </tr>
 <?php 
@@ -130,7 +131,7 @@ $cuentas='';
 
      </td>
      <td colspan="1" class="text-right"><?php echo '$'.number_format($est_valortotal, 2, ',', '.'); ?>
-     <input type="hidden" name="valortotal" value="<?php echo '$'.number_format($est_valortotal, 2, ',', '.'); ?>">
+     <input type="hidden" name="valortotal" value="<?php echo $est_valortotal; ?>">
      </td>
 </tr>
  </tbody>     

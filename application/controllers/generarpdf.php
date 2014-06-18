@@ -79,7 +79,7 @@ class Generarpdf extends CI_controller {
                foreach ($this->data['facturas'] as $key => $value) {
                 $pdf->AddPage();
                 $this->data['facturaestampilla']=$value;
-                $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array('todos los datos', 'C128', '', '', 80, 17, 0.4, array('position'=>'C','align' => 'C', 'border-top'=>true, 'padding'=>2,'margin-top'=>2, 'fgcolor'=>array(0,0,0), 'bgcolor'=>'', 'text'=>true, 'font'=>'helvetica', 'fontsize'=>8, 'stretchtext'=>4), 'N'));
+                $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array('(123)01010101001(3210)76498237648(26)45343453(322)321423623423', 'C128', '', '', 80, 17, 0.4, array('position'=>'C','align' => 'C', 'border-top'=>true, 'padding'=>2,'margin-top'=>2, 'fgcolor'=>array(0,0,0), 'bgcolor'=>'', 'text'=>true, 'font'=>'helvetica', 'fontsize'=>6, 'stretchtext'=>4), 'N'));
                 $html = $this->load->view('generarpdf/generarpdf_reciboestampilla', $this->data, TRUE);  
                 $pdf->writeHTML($html, true, false, true, false, '');
                }

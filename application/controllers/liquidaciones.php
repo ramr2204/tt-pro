@@ -113,30 +113,6 @@ class Liquidaciones extends MY_Controller {
   }	
 
  
-
- function verrecibos()
-  {        
-      if ($this->ion_auth->logged_in()) {
-          if ($this->uri->segment(3)==''){
-               redirect(base_url().'index.php/error_404');
-          }    
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
-              $idcontrato=$this->uri->segment(3);
-              $this->data['result'] = $this->liquidaciones_model->getrecibos($idcontrato);
-              $liquidacion = $this->data['result'];
-              $this->data['facturas'] = $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
-              $this->template->set('title', 'Contrato liquidado');
-              //$this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_vercontratoliquidado', $this->data);
-              $this->load->view('liquidaciones/liquidaciones_vercontratoliquidado', $this->data); 
-          } else {
-              redirect(base_url().'index.php/error_404');
-          }
-
-      } else {
-          redirect(base_url().'index.php/users/login');
-      }
-
-  } 
   function procesarliquidacion()
   {        
       if ($this->ion_auth->logged_in()) {
@@ -202,44 +178,21 @@ class Liquidaciones extends MY_Controller {
 
   } 
 
-function procesarpago()
-  {        
+ 
+ function verrecibos()
+ {        
       if ($this->ion_auth->logged_in()) {
-
+          if ($this->uri->segment(3)==''){
+               redirect(base_url().'index.php/error_404');
+          }    
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
-               $codigo='00000000';
-               $idcontrato=$this->input->post('idcontrato');
-              $data = array(
-                   'liqu_contratoid' => $this->input->post('idcontrato'),
-                   'liqu_nombrecontratista' => $this->input->post('nombrecontratista'),
-                   'liqu_nit' => $this->input->post('nit'),
-                   'liqu_tipocontratista' => $this->input->post('tipocontratista'),
-                   'liqu_numero' => $this->input->post('numero'),
-                   'liqu_vigencia' => $this->input->post('vigencia'),
-                   'liqu_valorconiva' => $this->input->post('valorconiva'),
-                   'liqu_valorsiniva' => $this->input->post('valorsiniva'),
-                   'liqu_tipocontrato' => $this->input->post('tipocontrato'),
-                   'liqu_regimen' => $this->input->post('regimen'),
-                   'liqu_nombreestampilla' => $this->input->post('nombreestampilla'),
-                   'liqu_cuentas' => $this->input->post('cuentas'),
-                   'liqu_porcentajes' => $this->input->post('porcentajes'),
-                   'liqu_totalestampilla' => $this->input->post('totalestampillas'),
-                   'liqu_valortotal' => $this->input->post('valortotal'),
-                   'liqu_comentarios' => $this->input->post('comentarios'),
-                   'liqu_codigo' => $codigo
-
-                 );
-              if ($this->codegen_model->add('est_liquidaciones',$data) == TRUE) {
-                  $data = array(
-                   'cntr_estadolocalid' => 0,
-                   );
-                  if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idcontrato) == TRUE) { 
-                      //envia a donde se generan los recibos PDF
-                      redirect(base_url().'index.php/liquidaciones/liquidar');
-                      echo $this->db->last_query();
-                  }
-              }
-                
+              $idcontrato=$this->uri->segment(3);
+              $this->data['result'] = $this->liquidaciones_model->getrecibos($idcontrato);
+              $liquidacion = $this->data['result'];
+              $this->data['facturas'] = $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
+              $this->template->set('title', 'Contrato liquidado');
+              //$this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_vercontratoliquidado', $this->data);
+              $this->load->view('liquidaciones/liquidaciones_vercontratoliquidado', $this->data); 
           } else {
               redirect(base_url().'index.php/error_404');
           }
@@ -250,56 +203,88 @@ function procesarpago()
 
   } 
 
-  function procesarterminado()
-  {        
+
+  function cargar_comprobante()
+  {
       if ($this->ion_auth->logged_in()) {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
-               $codigo='00000000';
-               $idcontrato=$this->input->post('idcontrato');
-              $data = array(
-                   'liqu_contratoid' => $this->input->post('idcontrato'),
-                   'liqu_nombrecontratista' => $this->input->post('nombrecontratista'),
-                   'liqu_nit' => $this->input->post('nit'),
-                   'liqu_tipocontratista' => $this->input->post('tipocontratista'),
-                   'liqu_numero' => $this->input->post('numero'),
-                   'liqu_vigencia' => $this->input->post('vigencia'),
-                   'liqu_valor' => $this->input->post('valor'),
-                   'liqu_valorsiniva' => $this->input->post('valorsiniva'),
-                   'liqu_tipocontrato' => $this->input->post('tipocontrato'),
-                   'liqu_regimen' => $this->input->post('regimen'),
-                   'liqu_nombreestampilla' => $this->input->post('nombreestampilla'),
-                   'liqu_cuentas' => $this->input->post('cuentas'),
-                   'liqu_porcentajes' => $this->input->post('porcentajes'),
-                   'liqu_totalestampilla' => $this->input->post('totalestampillas'),
-                   'liqu_valortotal' => $this->input->post('valortotal'),
-                   'liqu_comentarios' => $this->input->post('comentarios'),
-                   'liqu_codigo' => $codigo
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('bancos/add')) {
 
-                 );
-              if ($this->codegen_model->add('est_liquidaciones',$data) == TRUE) {
-                  $data = array(
-                   'cntr_estadolocalid' => 1,
-                   );
-                  if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idcontrato) == TRUE) {
-                      
-                      //envia a donde se generan los recibos PDF
-                     redirect(base_url().'index.php/liquidaciones/liquidar');
-                   // echo $this->db->last_query();
+              $this->data['successmessage']=$this->session->flashdata('message');  
+              $this->form_validation->set_rules('archivo', 'archivo', '');
+              $this->form_validation->set_rules('facturaid', 'facturaid', 'trim|xss_clean|numeric');
+
+              if ($this->form_validation->run() == false) {
+
+                  $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
+              } else {    
+
+
+                  $path = "uploads/facturas";
+                  if(!is_dir($path)) { //create the folder if it's not already exists
+                      mkdir($path,0777,TRUE);      
                   }
+                  $config['upload_path'] = $path;
+                  $config['allowed_types'] = 'pdf,jpg,png';
+                  $config['remove_spaces']=TRUE;
+                  $config['max_size']    = '2048';
+                  $this->load->library('upload', $config);
+
+                  if ($this->upload->do_upload("archivo")) 
+                  {
+                      $this->load->helper('path');
+                      $this->load->helper('file');
+                      $file_data= $this->upload->data();
+
+                      $data = array(
+                        'comp_nombre' => $file_data['raw_name'],
+                        'comp_descripcion' => $this->input->post('descripcion')
+
+                      );
+                 
+                      if ($this->codegen_model->add('est_comprobantes',$data) == TRUE) {
+
+                          $this->session->set_flashdata('message', 'El banco se ha creado con éxito');
+                          redirect(base_url().'index.php/bancos/add');
+
+                      } else {
+                          $this->data['errormessage'] = 'No se pudo registrar el comprobante';
+                      }
+                  } else {
+                      $this->data['errormessage'] = 'No se pudo cargar el archivo';
+                  }   
+
               }
                 
+              $this->template->set('title', 'Nueva tipo banco');
+              $this->template->load($this->config->item('admin_template'),'bancos/bancos_add', $this->data);
+             
           } else {
               redirect(base_url().'index.php/error_404');
           }
 
       } else {
           redirect(base_url().'index.php/users/login');
-      }
-
+      }  
   }
-  
- 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   function liquidaciones_datatable ()
   {
       if ($this->ion_auth->logged_in()) {
@@ -331,5 +316,7 @@ function procesarpago()
               redirect(base_url().'index.php/users/login');
       }           
   }
+
+
 
 }

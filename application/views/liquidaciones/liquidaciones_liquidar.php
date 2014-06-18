@@ -58,7 +58,7 @@ var oTable = $('#tablaq').dataTable( {
    $("td:eq(7)", nRow).html('<a href="#" class="btn btn-default btn-xs ver" title="Ver" id="'+aData[0]+'"><i class="fa fa-eye"></i></a>');
   }
   if (aData[7]==null) {
-   $("td:eq(7)", nRow).html('<a href="#" class="btn btn-default btn-xs liquidar" title="Liquidar" id="'+aData[0]+'"><i class="fa fa-barcode"></i></a>');
+   $("td:eq(7)", nRow).html('<a href="#" class="btn btn-default btn-xs liquidar" title="Liquidar" id="'+aData[0]+'"><i class="fa fa-file-excel-o"></i></a>');
   }
 
  },
@@ -235,8 +235,7 @@ var oTable = $('#tablaq').dataTable( {
 <?php echo form_close();?>
 
 
-
-<?php echo form_open("liquidaciones/procesarpagado",'role="form"');?>
+<?php echo form_open_multipart("liquidaciones/cargar_comprobante",'role="form"');?>
 <div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
