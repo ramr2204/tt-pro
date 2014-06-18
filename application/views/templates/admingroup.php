@@ -32,8 +32,7 @@
      echo link_tag( array( 'href' => 'css/font-awesome.min.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
      echo link_tag( array( 'href' => 'css/stylea.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
      echo link_tag( array( 'href' => 'css/yamm.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
-     //echo link_tag( array( 'href' => 'css/demo-table.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
-     // echo link_tag( array( 'href' => 'http://fonts.googleapis.com/css?family=Ubuntu', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
+     
     // Add any additional stylesheets
     if( isset( $style_sheets ) )
     {

@@ -162,10 +162,10 @@
 </tr>
 <tr>
      <td colspan="1"><strong>Valor del contrato</strong></td>
-     <td colspan="1"><?php echo $result->liqu_valorconiva; ?>
+     <td colspan="1"><?php echo '$'.number_format($result->liqu_valorconiva, 2, ',', '.'); ?>
      </td>
      <td colspan="1"><strong>Valor sin IVA</strong></td>
-     <td colspan="1"><?php echo $result->liqu_valorsiniva; ?>
+     <td colspan="1"><?php echo '$'.number_format($result->liqu_valorsiniva, 2, ',', '.'); ?>
      </td>
 </tr>
 <tr>

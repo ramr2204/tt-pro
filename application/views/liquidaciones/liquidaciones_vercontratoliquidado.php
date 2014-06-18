@@ -84,23 +84,40 @@
      </td>
 
 </tr>
+<?php $x=0; ?>
 <?php foreach($facturas as $row2) { ?>
 <tr>
-     <td colspan="1"><?php echo $row2->fact_nombre; ?>
-
-     </td>
-     <td colspan="1" class="text-center"><?php echo $row2->fact_cuenta; ?><br><?php echo $row2->fact_banco; ?>
-
-     </td>
-     <td colspan="1" class="text-center"><?php echo $row2->fact_porcentaje; ?>%
-     </td>
+     <td colspan="1"><?php echo $row2->fact_nombre; ?> </td>
+     <td colspan="1" class="text-center"><?php echo $row2->fact_cuenta; ?><br><?php echo $row2->fact_banco; ?></td>
+     <td colspan="1" class="text-center"><?php echo $row2->fact_porcentaje; ?>%</td>
      <td colspan="1" class="text-right"><?php echo '$'.number_format($row2->fact_valor, 2, ',', '.'); ?>
-    
+
+     <div class="form-group">
+             <input id="facturaid" type="hidden" name="facturaid<?php echo $x; ?>" value="<?php echo $row2->fact_id; ?>"/> 
+             <input id="file-<?php echo $x; ?>" type="file" class="file" name="comprobante<?php echo $x; ?>" multiple=false>
+     </div>
+
      </td>
 </tr>
+
+<script>
+    $("#file-<?php echo $x; ?>").fileinput({
+        showCaption: false,
+        browseClass: "btn btn-success btn-sm",
+        browseLabel: "Comprobante",
+        fileType: "pdf",
+        showUpload: false,
+        showRemove: false,
+
+    });
+</script>
+
+<?php $x++; ?>
 <?php } ?>
 <tr>
      <td colspan="3" class="text-right"><strong>Total</strong>
+     <input type="hidden" name="numeroarchivos" value="<?php echo $x; ?>">
+     <input class="form-control" id="contratoid" type="hidden" name="contratoid" value="<?php echo $result->liqu_contratoid; ?>"/>
 
 
      </td>
@@ -108,17 +125,8 @@
      </td>
 </tr>
  </tbody>     
- <tfoot>
-   <tr>
-     <th colspan="4" class="text-center">
-     <small> "Unidos por la grandeza del Tolima"<br>
-      Edificio de la Gobernación del Tolima, carrera 3 calle 10 y 11, 9 piso <br>
-      Teléfonos 2610758 - 2611111 -Ext. 209 - 305<br>
-      dcontratos@outlook.com </small> 
-     </th>
-   </tr>
- </tfoot>
 </table>
 </div>
 </div>   
       </div>
+ 
