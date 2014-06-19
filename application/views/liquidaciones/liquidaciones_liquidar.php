@@ -221,6 +221,7 @@ var oTable = $('#tablaq').dataTable( {
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
+    <input class="form-control" id="idcontrato" type="hidden" name="idcontrato" value=""/>
       <div class="modal-body liquida">
          
       </div>
@@ -251,7 +252,7 @@ var oTable = $('#tablaq').dataTable( {
       </div>
          
         <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
-        <button type="submit" class="btn btn-primary">Pagar</button>
+        <button type="submit" class="btn btn-primary">Guardar comprobantes</button>
       </div>
     </div>
   </div>

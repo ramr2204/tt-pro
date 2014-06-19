@@ -19,7 +19,7 @@
  <thead>
     <tr>
      
-     <th colspan="4" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
+     <th colspan="5" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
    
    </tr>
  </thead>
@@ -27,62 +27,56 @@
    
  <tr>
      <td colspan="3"></td>
-     <th colspan="1"><?php echo anchor(base_url().'generarpdf/generar_liquidacion/'.$result->liqu_contratoid,'<i class="fa fa-file-pdf-o fa-2x"></i> PDF','class="btn btn-large  btn-default" target="_blank"'); ?></th>
+     <th colspan="2"><?php echo anchor(base_url().'generarpdf/generar_liquidacion/'.$result->liqu_contratoid,'<i class="fa fa-file-pdf-o fa-2x"></i> PDF','class="btn btn-large  btn-default" target="_blank"'); ?></th>
 
 </tr>
 <tr>
      
-     <td colspan="4"></td>
+     <td colspan="5"></td>
 </tr>
 <tr>
      <td colspan="1"><strong>Nombre del contratista</strong></td>
-     <td colspan="3"><?php echo $result->liqu_nombrecontratista; ?>
+     <td colspan="4"><?php echo $result->liqu_nombrecontratista; ?>
      </td>
 </tr>
 
  <tr>
      <td colspan="1"><strong>C.C. o NIT</strong></td>
-     <td colspan="3"><?php echo $result->liqu_nit; ?>
+     <td colspan="4"><?php echo $result->liqu_nit; ?>
      </td>
 </tr>
 
 <tr>
      <td colspan="1"><strong>Tipo de contratista</strong></td>
-     <td colspan="3"><?php echo $result->liqu_tipocontratista; ?>
-     </td>
+     <td colspan="4"><?php echo $result->liqu_tipocontratista; ?></td>
 </tr>
 <tr>
      <td colspan="1"><strong>Número de contrato</strong></td>
      <td colspan="1"><?php echo $result->liqu_numero; ?>
      </td>
      <td colspan="1"><strong>Vigencia</strong></td>
-     <td colspan="1"><?php echo $result->liqu_vigencia; ?>
-     <input type="hidden" name="vigencia" value="<?php echo $result->liqu_vigencia; ?>">
-     </td>
+     <td colspan="2"><?php echo $result->liqu_vigencia; ?></td>
 </tr>
 <tr>
      <td colspan="1"><strong>Valor del contrato</strong></td>
-     <td colspan="1"><?php echo $result->liqu_valorconiva; ?>
-     </td>
+     <td colspan="1"><?php echo '$'.number_format($result->liqu_valorconiva, 2, ',', '.'); ?></td>
      <td colspan="1"><strong>Valor sin IVA</strong></td>
-     <td colspan="1"><?php echo $result->liqu_valorsiniva; ?>
-     </td>
+     <td colspan="2"><?php echo '$'.number_format($result->liqu_valorsiniva, 2, ',', '.'); ?></td>
 </tr>
 <tr>
      <td colspan="1"><strong>Tipo de contrato</strong></td>
      <td colspan="1"><?php echo $result->liqu_tipocontrato; ?></td>
-     <td colspan="2" class="text-center"><strong>Régimen <?php echo $result->liqu_regimen; ?></strong>
+     <td colspan="3" class="text-center"><strong>Régimen <?php echo $result->liqu_regimen; ?></strong></td>
 </tr>
 <tr>
-     <td colspan="4"></td>
+     <td colspan="5"></td>
 </tr>
 <tr>
      <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
      <td colspan="1" class="text-center"><strong>Cuenta de ahorro</strong></td>
      <td colspan="1" class="text-center"><strong>Porcentaje</strong></td>
-     <td colspan="1" class="text-center"><strong>Valor</strong>
-     </td>
-
+     <td colspan="1" class="text-center"><strong>Valor</strong></td>
+     <td colspan="1" class="text-center"><strong>Estado</strong></td>
 </tr>
 <?php $x=0; ?>
 <?php foreach($facturas as $row2) { ?>
@@ -92,20 +86,34 @@
      <td colspan="1" class="text-center"><?php echo $row2->fact_porcentaje; ?>%</td>
      <td colspan="1" class="text-right"><?php echo '$'.number_format($row2->fact_valor, 2, ',', '.'); ?>
 
+     </td>
+     <td colspan="1" class="text-center">
+       
      <div class="form-group">
              <input id="facturaid" type="hidden" name="facturaid<?php echo $x; ?>" value="<?php echo $row2->fact_id; ?>"/> 
              <input id="file-<?php echo $x; ?>" type="file" class="file" name="comprobante<?php echo $x; ?>" multiple=false>
      </div>
-
+      <div>
+          Banco: pagado
+      </div> 
      </td>
 </tr>
-
 <script>
     $("#file-<?php echo $x; ?>").fileinput({
+        
+      <?php   if ($row2->fact_rutacomprobante != '') { ?>
+            
+            initialPreview: ["<a href='<?php echo base_url().$row2->fact_rutacomprobante; ?>' target='_blank'><img src='<?php echo base_url().$row2->fact_rutacomprobante; ?>' class='file-preview-image' alt='The Moon' title='The Moon'></a>"
+],
+initialCaption: "The Moon and the Earth",
+
+        <?php
+        };
+
+        ?>
         showCaption: false,
         browseClass: "btn btn-success btn-sm",
         browseLabel: "Comprobante",
-        fileType: "pdf",
         showUpload: false,
         showRemove: false,
 

@@ -216,27 +216,37 @@ class Liquidaciones extends MY_Controller {
               $this->form_validation->set_rules('numeroarchivos', 'numero archivos', 'trim|xss_clean|numeric|integer|greater_than[0]');
               $this->form_validation->set_rules('contratoid', 'contrato id', 'trim|xss_clean|numeric|integer|greater_than[0]');
               $numeroarchivos=$this->input->post('numeroarchivos');
-              if ($this->input->post('contratoid') >0 && $numeroarchivos > 0 ) {
-                  $path = "uploads/facturas/".$this->input->post('contratoid');
+              $idcontrato=$this->input->post('contratoid');
+              if ($idcontrato >0 && $numeroarchivos > 0 ) {
+                  $path = "uploads/facturas/".$idcontrato;
                   if(!is_dir($path)) { //create the folder if it's not already exists
                       mkdir($path,0777,TRUE);      
                   }
                   $config['upload_path'] = $path;
-                  $config['allowed_types'] = 'pdf,jpg,png';
+                  $config['allowed_types'] = 'jpg|jpeg|gif|png';
                   $config['remove_spaces']=TRUE;
                   $config['max_size']    = '2048';
-                  $this->load->library('upload', $config);
+                  //$config['overwrite']    = TRUE;
+                  $this->load->library('upload');
+
+
                   $success=0;
                   for ($i=0; $i < $numeroarchivos; $i++) {
                       $idfactura=$this->input->post('facturaid'.$i);
+                      $config['file_name']=$idfactura.'_'.date("F_d_Y");
+                      $this->upload->initialize($config);
+
+                      
+                      
                       $this->form_validation->set_rules('facturaid'.$i, 'factura id '.$i, 'trim|xss_clean|numeric|integer|greater_than[0]'); 
                       if ($this->form_validation->run() == false) {
                           $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
                       } else {
+
                           if ($this->upload->do_upload("comprobante".$i)) {
                               $file_data= $this->upload->data();
                               $data = array(
-                                 'fact_rutacomprobante' => $path.'/'.$file_data['raw_name'],
+                                 'fact_rutacomprobante' => $path.'/'.$file_data['orig_name'],
                                  'fact_fechacomprobante' => date("Y-m-d H:i:s")
                                );
                               if ($this->codegen_model->edit('est_facturas',$data,'fact_id',$idfactura) == TRUE) {
@@ -246,7 +256,7 @@ class Liquidaciones extends MY_Controller {
                                    $this->data['errormessage'] .= '<br>No se pudo registrar el comprobante'.$i;
                               }  
                           } else {
-                            // no sube archivo
+                            $this->data['errormessage'] .=$this->upload->display_errors(); 
                           }  
                       }
 
@@ -255,10 +265,12 @@ class Liquidaciones extends MY_Controller {
                   $this->data['errormessage'] = 'Datos incorrectos'.$this->input->post('contratoid').' ---- '.$numeroarchivos;
               }
               if ($success > 0) {
-                $this->session->set_flashdata('successmessage', 'El banco se ha editado con éxito');                    
+                $this->session->set_flashdata('successmessage', 'E con éxito'); 
+
               } else {
-                $this->session->set_flashdata('errormessage', '<strong>Error!</strong> '.$this->data['errormessage']);
+                $this->session->set_flashdata('errormessage', '<strong>Error!</strong> '.$this->data['errormessage'] );
               }
+              $this->session->set_flashdata('accion', 'liquidado');   
               redirect(base_url().'index.php/liquidaciones/liquidar/'.$idcontrato);
               
           } else {
