@@ -43,8 +43,9 @@ class Liquidaciones_model extends CI_Model {
     }
     
     function getfacturas($id){
-        $this->db->select('f.fact_id, f.fact_nombre, f.fact_porcentaje, f.fact_valor, f.fact_banco, f.fact_cuenta, f.fact_rutacomprobante');
+        $this->db->select('f.fact_id, f.fact_nombre, f.fact_porcentaje, f.fact_valor, f.fact_banco, f.fact_cuenta, f.fact_rutacomprobante, pa.pago_valor, pa.pago_fecha');
         $this->db->from('est_facturas f');
+        $this->db->join('est_pagos pa', 'pa.pago_facturaid = f.fact_id', 'left');
         $this->db->where('f.fact_liquidacionid',$id);
         $query = $this->db->get();
         return $query->result();

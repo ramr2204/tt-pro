@@ -104,3 +104,23 @@
     -moz-border-radius:6px 0 6px 6px;
     border-radius:6px 0 6px 6px;
 }
+.cabecera {
+	background-color: #00632D;
+	color: #FFFFFF;
+	margin-top: -50px;
+}
+
+footer{
+	background-color: #00632D ;
+	color: #FFFFFF;
+	bottom: 1px;
+	margin-top: 30px;
+}
+.btn-primary2 {
+	background-color: #00632D ;
+	color: #FFFFFF;
+}
+.btn-primary2:hover {
+	background-color: #00635D;
+	color: #FFFFFF;
+}

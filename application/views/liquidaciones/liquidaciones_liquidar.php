@@ -235,29 +235,27 @@ var oTable = $('#tablaq').dataTable( {
 <?php echo form_close();?>
 
 
-<?php echo form_open_multipart("liquidaciones/cargar_comprobante",'role="form"');?>
+
 <div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <input class="form-control" id="idcontrato" type="hidden" name="idcontrato" value=""/>
+     
       <div class="modal-body paga">
          
       </div>
       <div class="modal-footer">
-      <div class="pull-left text-center">
+      <div class="text-center">
         <small> "Unidos por la grandeza del Tolima"<br>
       Edificio de la Gobernación del Tolima, carrera 3 calle 10 y 11, 9 piso <br>
       Teléfonos 2610758 - 2611111 -Ext. 209 - 305<br>
       dcontratos@outlook.com </small>
       </div>
-         
-        <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar comprobantes</button>
+        
       </div>
     </div>
   </div>
 </div>
-<?php echo form_close();?>
+
 
 
 

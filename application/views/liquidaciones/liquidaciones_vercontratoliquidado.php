@@ -13,7 +13,7 @@
 
 <div class="row"> 
  <div class="col-sm-12">    
-   
+   <?php echo form_open_multipart("liquidaciones/cargar_comprobante",'role="form"');?>
     <div class="table-responsive">
       <table class="table table-striped table-bordered " id="tablaq">
  <thead>
@@ -25,19 +25,15 @@
  </thead>
  <tbody>
    
- <tr>
-     <td colspan="3"></td>
-     <th colspan="2"><?php echo anchor(base_url().'generarpdf/generar_liquidacion/'.$result->liqu_contratoid,'<i class="fa fa-file-pdf-o fa-2x"></i> PDF','class="btn btn-large  btn-default" target="_blank"'); ?></th>
-
-</tr>
 <tr>
      
      <td colspan="5"></td>
 </tr>
 <tr>
      <td colspan="1"><strong>Nombre del contratista</strong></td>
-     <td colspan="4"><?php echo $result->liqu_nombrecontratista; ?>
-     </td>
+     <td colspan="3"><?php echo $result->liqu_nombrecontratista; ?></td>
+     <td colspan="1"><?php echo anchor(base_url().'generarpdf/generar_liquidacion/'.$result->liqu_contratoid,'<i class="fa fa-file-pdf-o fa-2x"></i> PDF','class="btn btn-large  btn-default" target="_blank"'); ?></td>
+
 </tr>
 
  <tr>
@@ -76,7 +72,7 @@
      <td colspan="1" class="text-center"><strong>Cuenta de ahorro</strong></td>
      <td colspan="1" class="text-center"><strong>Porcentaje</strong></td>
      <td colspan="1" class="text-center"><strong>Valor</strong></td>
-     <td colspan="1" class="text-center"><strong>Estado</strong></td>
+     <td colspan="1" class="text-center"><strong>Procesos</strong></td>
 </tr>
 <?php $x=0; ?>
 <?php foreach($facturas as $row2) { ?>
@@ -93,9 +89,12 @@
              <input id="facturaid" type="hidden" name="facturaid<?php echo $x; ?>" value="<?php echo $row2->fact_id; ?>"/> 
              <input id="file-<?php echo $x; ?>" type="file" class="file" name="comprobante<?php echo $x; ?>" multiple=false>
      </div>
-      <div>
-          Banco: pagado
-      </div> 
+     <?php if ($facturapagada[$row2->fact_id]) {  ?>
+      <div class="bg-success">Pagado: <?php echo '$'.number_format($row2->pago_valor, 2, ',', '.'); ?> <i class="fa fa-check"></i> </div> 
+     <?php  } else { ?>
+      <div class="bg-danger">Pagado: <?php echo '$'.number_format($row2->pago_valor, 2, ',', '.'); ?> <i class="fa fa-times"></i> </div> 
+     <?php  } ?>
+
      </td>
 </tr>
 <script>
@@ -103,17 +102,17 @@
         
       <?php   if ($row2->fact_rutacomprobante != '') { ?>
             
-            initialPreview: ["<a href='<?php echo base_url().$row2->fact_rutacomprobante; ?>' target='_blank'><img src='<?php echo base_url().$row2->fact_rutacomprobante; ?>' class='file-preview-image' alt='The Moon' title='The Moon'></a>"
+        initialPreview: ["<a href='<?php echo base_url().$row2->fact_rutacomprobante; ?>' target='_blank'><img src='<?php echo base_url().$row2->fact_rutacomprobante; ?>' class='file-preview-image' alt='The Moon' title='The Moon'></a>"
 ],
-initialCaption: "The Moon and the Earth",
+        initialCaption: "The Moon and the Earth",
 
         <?php
-        };
+        }
 
         ?>
         showCaption: false,
-        browseClass: "btn btn-success btn-sm",
-        browseLabel: "Comprobante",
+        browseClass: "btn btn-default btn-sm",
+        browseLabel: "Cargar comprobante",
         showUpload: false,
         showRemove: false,
 
@@ -126,14 +125,43 @@ initialCaption: "The Moon and the Earth",
      <td colspan="3" class="text-right"><strong>Total</strong>
      <input type="hidden" name="numeroarchivos" value="<?php echo $x; ?>">
      <input class="form-control" id="contratoid" type="hidden" name="contratoid" value="<?php echo $result->liqu_contratoid; ?>"/>
-
-
      </td>
-     <td colspan="1" class="text-right"><?php echo '$'.number_format($result->liqu_valortotal, 2, ',', '.'); ?>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($result->liqu_valortotal, 2, ',', '.'); ?></td>
+     <td>
+         <?php if ($comprobantes) {  ?>
+                <div class="bg-success">Comprobantes: <?php echo $ncomprobantescargados.'/'.$numerocomprobantes; ?> <i class="fa fa-check"></i> </div> 
+         <?php  } else { ?>
+                <div class="bg-danger">Comprobantes: <?php echo $ncomprobantescargados.'/'.$numerocomprobantes; ?> <i class="fa fa-times"></i> </div>
+         <?php  }  ?>
+         <?php if ($todopago) {  ?>
+                <div class="bg-success">Pagado: <?php echo '$'.number_format($totalpagado, 2, ',', '.'); ?> <i class="fa fa-check"></i> </div> 
+         <?php  } else { ?>
+                <div class="bg-danger">Pagado: <?php echo '$'.number_format($totalpagado, 2, ',', '.'); ?> <i class="fa fa-times"></i> </div>
+         <?php  }  ?>
+
      </td>
 </tr>
- </tbody>     
+ </tbody>  
+ <tfoot>
+     <tr>
+         <th colspan="5">
+         <div class="pull-right">
+        <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar comprobantes</button>
+        </div>     
+         </th>
+     </tr>
+ </tfoot>   
 </table>
+<?php echo form_close();?>
+ <div class="pull-right">
+     <?php echo form_open("liquidaciones/legalizar",'role="form"');?>
+        <?php if ($completado) {  ?>
+        <button type="submit" class="btn btn-success">Legalizar</button>
+        <?php  }  ?>
+     <?php echo form_close();?>
+ </div> 
+
 </div>
 </div>   
       </div>
