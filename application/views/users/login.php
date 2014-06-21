@@ -27,7 +27,10 @@
   </p>
 
 
-  <p><?php echo form_submit('submit', lang('login_submit_btn'));?></p>
+  <p>
+
+<button type="submit" class="btn btn-primary btn-primary2 btn-lg btn-block ">Ingresar</button>
+  </p>
 
 <?php echo form_close();?>
 

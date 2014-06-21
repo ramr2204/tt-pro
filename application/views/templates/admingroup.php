@@ -73,7 +73,29 @@
 
 </head>
 
-<body>    
+<body> 
+
+<?php if (!$this->ion_auth->logged_in()) { ?>
+
+<header class="cabecera">
+      <div class="row">
+        <div class="col-md-3">
+          <div align="center"> 
+            
+          </div>
+        </div>
+        <div class="col-md-9" >
+          <p style="font-size: 55px; padding-top: 4%">
+            Titulo del Sistema
+          </p>
+        </div>
+      </div>      
+    </header>
+
+<?php } ?>
+
+
+
 
 <?php if ($this->ion_auth->logged_in()) { ?>
  <!-- Fixed navbar -->
@@ -212,8 +234,25 @@
       
       </div>
 
- 
+
          
+ </div> 
+ <nav class="navbar navbar-default" role="navigation">
+  <footer>
+      <div >
+        <div class="container">
+          <center>
+            <br/>
+            <p style="font-size: 20px;">
+                TurriSystem © 2014
+            </p>
+
+          </center>
+        </div>
+      </div>
+    </footer>
+</nav>
+
  
 </body>
 </html>

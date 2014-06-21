@@ -192,6 +192,39 @@ class Liquidaciones extends MY_Controller {
               $this->data['result'] = $this->liquidaciones_model->getrecibos($idcontrato);
               $liquidacion = $this->data['result'];
               $this->data['facturas'] = $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
+              $todopago=0;
+              $numerocomprobantes=0;
+              $ncomprobantescargados=0;
+              $totalpagado=0;
+              $comprobantecargado=array();
+              $facturapagada=array();
+              $facturas=$this->data['facturas']; 
+              foreach ($facturas as $key => $value) {
+                  $totalpagado += $value->pago_valor;
+                  $numerocomprobantes++;  
+                 if ($value->pago_valor >= $value->fact_valor) {
+                     $facturapagada[$value->fact_id]=true;
+                 } else {
+                    $todopago=1;
+                    $facturapagada[$value->fact_id]=false;
+                 }
+                 if ($value->fact_rutacomprobante=='') {
+                     $comprobantecargado[$value->fact_id]=true;
+                     
+                 } else {
+                   $comprobantecargado[$value->fact_id]=false;
+                   $ncomprobantescargados++;
+                 }
+              }
+             // print_r($facturapagada);
+              $this->data['comprobantecargado'] = $comprobantecargado;
+              $this->data['facturapagada'] =$facturapagada;
+              $this->data['comprobantes'] = ($numerocomprobantes==$ncomprobantescargados) ? true : false ;
+              $this->data['todopago'] = ($todopago==1) ? false : true ;
+              $this->data['completado'] = ($todopago && $this->data['comprobantes'] ) ? false : true ;
+              $this->data['totalpagado'] =$totalpagado;
+              $this->data['numerocomprobantes'] =$numerocomprobantes;
+              $this->data['ncomprobantescargados'] =$ncomprobantescargados;
               $this->template->set('title', 'Contrato liquidado');
               //$this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_vercontratoliquidado', $this->data);
               $this->load->view('liquidaciones/liquidaciones_vercontratoliquidado', $this->data); 
