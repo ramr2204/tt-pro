@@ -29,9 +29,25 @@
 		margin-bottom: 50px;
 		text-align: justify;
 	}
+	
+
+
+
 	.head {
-		background: #ccc;
+		background: #00632D;
+		color: #fff;
 	}
+	.navbar-default .navbar-nav > li > a { 
+       color: #fff;
+	}
+    .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+    	color:#ccc;
+    }
+
+
+
+
+
 	.social {
 		list-style: none;
 	}

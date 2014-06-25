@@ -157,6 +157,7 @@
  <div class="pull-right">
      <?php echo form_open("liquidaciones/legalizar",'role="form"');?>
         <?php if ($completado) {  ?>
+         <input type="hidden" name="contratoid" value="<?php echo $result->liqu_contratoid; ?>">
         <button type="submit" class="btn btn-success">Legalizar</button>
         <?php  }  ?>
      <?php echo form_close();?>

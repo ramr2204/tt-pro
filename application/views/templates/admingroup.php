@@ -86,7 +86,7 @@
         </div>
         <div class="col-md-9" >
           <p style="font-size: 55px; padding-top: 4%">
-            Titulo del Sistema
+            Sistema De Información De Estampillas PRO
           </p>
         </div>
       </div>      
@@ -108,13 +108,19 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-           <div class="logo"><a class="navbar-brand" href="<?php echo base_url(); ?>"><img src="<?php echo base_url(); ?>/images/logo_presentacion.png" alt="bitbahia.com" class="img-responsive"></a></div>
+           <div class="logo"><a class="navbar-brand" href="<?php echo base_url(); ?>"><img src="<?php echo base_url(); ?>/images/logo_presentacion.jpg" alt="bitbahia.com" class="img-responsive"></a></div>
 
         </div>
 
         <div class="navbar-collapse collapse">
         <?php if ($get_menus==true) { ?>
-           <ul class="nav navbar-nav">        
+           <ul class="nav navbar-nav">  
+          <li class="dropdown">
+            <a href="<?php echo base_url();  ?>liquidaciones/liquidar">Liquidador</a>
+          </li>
+
+
+
        <?php foreach($nav_procesos as $key_proceso => $value_proceso) : ?>
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <span class="glyphicon glyphicon-folder-close"></span> <?php echo $value_proceso['proc_nombre']; ?><b class="caret"></b> </a>
