@@ -153,16 +153,14 @@
      </tr>
  </tfoot>   
 </table>
-
-<?php if ($completado) {  ?>
 <?php echo form_close();?>
+<?php if ($completado) {  ?>
+<?php echo form_open("liquidaciones/legalizar",'role="form"');?>
  <div class="pull-right">
-     <?php echo form_open("liquidaciones/legalizar",'role="form"');?>
-        
-         <input type="hidden" name="contratoid" value="<?php echo $result->liqu_contratoid; ?>">
+      
+        <input type="hidden" name="contratoid" value="<?php echo $result->liqu_contratoid; ?>">
         <button type="submit" class="btn btn-success">Legalizar</button>
        
-     
  </div> 
 <?php echo form_close();?>
  <?php  }  ?>

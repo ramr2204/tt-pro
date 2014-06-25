@@ -317,6 +317,70 @@ class Liquidaciones extends MY_Controller {
 
 
 
+// function legalizar()
+//   {        
+//       if ($this->ion_auth->logged_in()) {
+
+//           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
+//                $codigo='00000000';
+//               echo $idcontrato=$this->input->post('idcontrato');
+//               // $data = array(
+//               //      'liqu_contratoid' => $this->input->post('idcontrato'),
+//               //      'liqu_nombrecontratista' => $this->input->post('nombrecontratista'),
+//               //      'liqu_nit' => $this->input->post('nit'),
+//               //      'liqu_tipocontratista' => $this->input->post('tipocontratista'),
+//               //      'liqu_numero' => $this->input->post('numero'),
+//               //      'liqu_vigencia' => $this->input->post('vigencia'),
+//               //      'liqu_valorconiva' => $this->input->post('valorconiva'),
+//               //      'liqu_valorsiniva' => $this->input->post('valorsiniva'),
+//               //      'liqu_tipocontrato' => $this->input->post('tipocontrato'),
+//               //      'liqu_regimen' => $this->input->post('regimen'),
+//               //      'liqu_nombreestampilla' => $this->input->post('nombreestampilla'),
+//               //      'liqu_cuentas' => $this->input->post('cuentas'),
+//               //      'liqu_porcentajes' => $this->input->post('porcentajes'),
+//               //      'liqu_totalestampilla' => $this->input->post('totalestampillas'),
+//               //      'liqu_valortotal' => $this->input->post('valortotal'),
+//               //      'liqu_comentarios' => $this->input->post('comentarios'),
+//               //      'liqu_codigo' => $codigo
+
+//               //    );
+                  
+//               // if ($this->codegen_model->add('est_liquidaciones',$data) == TRUE) {
+//               //     $liquidacionid=$this->db->insert_id();
+//               //     for ($i=1; $i < $this->input->post('numeroestampillas'); $i++) { 
+//               //          $data = array(
+//               //          'fact_nombre' => $this->input->post('nombreestampilla'.$i),
+//               //          'fact_porcentaje' => $this->input->post('porcentaje'.$i),
+//               //          'fact_valor' => $this->input->post('totalestampilla'.$i),
+//               //          'fact_banco' => $this->input->post('banco'.$i),
+//               //          'fact_cuenta' => $this->input->post('cuenta'.$i),
+//               //          'fact_liquidacionid' => $liquidacionid,
+//               //          );
+//               //          $this->codegen_model->add('est_facturas',$data);
+//               //     }
+
+//               //     //print_r($data);
+//               //     $data = array(
+//               //      'cntr_estadolocalid' => 1,
+//               //      );
+//               //     if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idcontrato) == TRUE) {
+                      
+//               //         $this->session->set_flashdata('successmessage', 'La liquidación se realizó con éxito');
+//               //         $this->session->set_flashdata('accion', 'liquidado');
+//               //         redirect(base_url().'index.php/liquidaciones/liquidar/'.$idcontrato);
+//               //        // echo $this->db->last_query();
+//               //     }
+//               }
+                
+//           } else {
+//               redirect(base_url().'index.php/error_404');
+//           }
+
+//       } else {
+//           redirect(base_url().'index.php/users/login');
+//       }
+
+//   } 
 
 
 
