@@ -186,6 +186,7 @@
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">Usuario<b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li><a href="<?php echo base_url(); ?>index.php/users">Cambiar mis datos</a></li>
+                <li><a href="<?php echo base_url(); ?>index.php/users/logout">Desconectarse</a></li>
               </ul>
             </li>
           </ul>
