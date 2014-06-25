@@ -104,7 +104,7 @@ class Users extends MY_Controller {
 				//if the login is successful
 				//redirect them back to the home page
 				$this->session->set_flashdata('message', $this->ion_auth->messages());
-				redirect(base_url().'users', 'refresh');
+				redirect(base_url().'liquidaciones/liquidar', 'refresh');
 			}
 			else
 			{

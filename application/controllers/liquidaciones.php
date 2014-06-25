@@ -344,16 +344,8 @@ class Liquidaciones extends MY_Controller {
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
               $this->datatables->join('con_estadoslocales el', 'el.eslo_id = c.cntr_estadolocalid', 'left');
               //$this->datatables->join('est_facturas fa', 'c.cntr_id = fa.fact_contratoid', 'left');
-
-              if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
                   
                   $this->datatables->add_column('edit', '-');
-
-              }  else {
-                  
-                  $this->datatables->add_column('edit', '', 'c.cntr_id'); 
-              }
-              
               echo $this->datatables->generate();
 
           } else {
