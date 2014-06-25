@@ -23,16 +23,20 @@
 
     // Add a robots exclusion
     echo ( isset( $no_robots ) ) ? meta('robots', 'index,follow') : '';
-?>
-<?php
+
     // Always add the main stylesheet
      echo link_tag( array( 'href' => 'css/favicon.ico', 'media' => 'screen', 'rel' => 'shortcut icon' ) ) . "\n";
      echo link_tag( array( 'href' => 'css/bootstrap.min.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
      echo link_tag( array( 'href' => 'css/sb-admin.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
-     echo link_tag( array( 'href' => 'css/font-awesome.min.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
+     //echo link_tag( array( 'href' => 'css/font-awesome.min.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n"; 
+     ?> 
+     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+     <?php
      echo link_tag( array( 'href' => 'css/stylea.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
      echo link_tag( array( 'href' => 'css/yamm.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
      
+    
+
     // Add any additional stylesheets
     if( isset( $style_sheets ) )
     {
