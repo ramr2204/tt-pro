@@ -288,7 +288,25 @@ var oTable = $('#tablaq').dataTable( {
             $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/verrecibos/'+ID,function(result){
             
             $('#myModal2').modal('show');
-           // alert(ID+'....');
+            //alert(ID+'....');
+        });
+        
+ 
+</script>
+<?php   } ?>
+
+
+
+
+<?php if ($accion=='legalizado') { ?>
+<script type="text/javascript">
+  
+            var ID = <?php echo $idcontrato; ?>;
+            
+           $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vercontratolegalizado/'+ID,function(result){
+            
+            $('#myModal3').modal('show');
+          
         });
         
  

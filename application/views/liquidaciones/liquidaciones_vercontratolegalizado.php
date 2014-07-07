@@ -31,8 +31,7 @@
 </tr>
 <tr>
      <td colspan="1"><strong>Nombre del contratista</strong></td>
-     <td colspan="3"><?php echo $result->liqu_nombrecontratista; ?></td>
-     <td colspan="1"><?php echo anchor(base_url().'generarpdf/generar_liquidacion/'.$result->liqu_contratoid,'<i class="fa fa-file-pdf-o fa-2x"></i> PDF','class="btn btn-large  btn-default" target="_blank"'); ?></td>
+     <td colspan="4"><?php echo $result->liqu_nombrecontratista; ?></td>
 
 </tr>
 
@@ -85,39 +84,21 @@
      </td>
      <td colspan="1" class="text-center">
        
-     <div class="form-group">
-             <input id="facturaid" type="hidden" name="facturaid<?php echo $x; ?>" value="<?php echo $row2->fact_id; ?>"/> 
-             <input id="file-<?php echo $x; ?>" type="file" class="file" name="comprobante<?php echo $x; ?>" multiple=false>
+     <div>
+      <?php   if ($row2->fact_rutacomprobante != '') { ?>     
+       <a href='<?php echo base_url().$row2->fact_rutacomprobante; ?>' target='_blank'><img src='<?php echo base_url().$row2->fact_rutacomprobante; ?>' class='file-preview-image' alt='comprobante de pago' title='comprobante de pago'  height="42" width="42"></a>
+      <?php } ?> 
      </div>
-     <?php if ($facturapagada[$row2->fact_id]) {  ?>
-      <div class="bg-success">Pagado: <?php echo '$'.number_format($row2->pago_valor, 2, ',', '.'); ?> <i class="fa fa-check"></i> </div> 
+     <?php if ($facturapagada[$row2->fact_id]) {  ?>      
+     <div class="bg-success">Código: <?php echo $row2->fact_codigo; ?> <i class="fa fa-check"></i> </div> 
+     <?php echo anchor(base_url().'generarpdf/generar_liquidacion/'.$result->liqu_contratoid,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large  btn-default" target="_blank"'); ?>
      <?php  } else { ?>
       <div class="bg-danger">Pagado: <?php echo '$'.number_format($row2->pago_valor, 2, ',', '.'); ?> <i class="fa fa-times"></i> </div> 
      <?php  } ?>
-
+     
      </td>
 </tr>
-<script>
-    $("#file-<?php echo $x; ?>").fileinput({
-        
-      <?php   if ($row2->fact_rutacomprobante != '') { ?>
-            
-        initialPreview: ["<a href='<?php echo base_url().$row2->fact_rutacomprobante; ?>' target='_blank'><img src='<?php echo base_url().$row2->fact_rutacomprobante; ?>' class='file-preview-image' alt='The Moon' title='The Moon'></a>"
-],
-        initialCaption: "",
 
-        <?php
-        }
-
-        ?>
-        showCaption: false,
-        browseClass: "btn btn-default btn-sm",
-        browseLabel: "Cargar comprobante",
-        showUpload: false,
-        showRemove: false,
-
-    });
-</script>
 
 <?php $x++; ?>
 <?php } ?>
@@ -141,31 +122,9 @@
 
      </td>
 </tr>
- </tbody>  
- <tfoot>
-     <tr>
-         <th colspan="5">
-         <div class="pull-right">
-        <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar comprobantes</button>
-        </div>     
-         </th>
-     </tr>
- </tfoot>   
+ </tbody>   
 </table>
 <?php echo form_close();?>
-
-<?php if ($completado) {  ?>
-<?php echo form_open("liquidaciones/legalizar",'role="form"');?>
- <div class="pull-right">
-      
-        <input type="hidden" name="contratoid" value="<?php echo $result->liqu_contratoid; ?>">
-        <input type="hidden" name="liquidacionid" value="<?php echo $result->liqu_id; ?>">
-        <button type="submit" class="btn btn-success">Legalizar</button>
-       
- </div> 
-<?php echo form_close();?>
- <?php  }  ?>
 </div>
 </div>   
       </div>

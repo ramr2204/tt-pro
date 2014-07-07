@@ -1,0 +1,260 @@
+<?php if( ! defined('BASEPATH') ) exit('No direct script access allowed');
+/**
+*   Nombre:            papeles
+*   Ruta:              /application/controllers/papeles.php
+*   Descripcion:       controlador de papeles
+*   Fecha Creacion:    20/may/2014
+*   @author            Iván Viña <ivandariovinam@gmail.com>
+*   @version           2014-05-20
+*
+*/
+
+class Papeles extends MY_Controller {
+    
+  function __construct() 
+  {
+      parent::__construct();
+	    $this->load->library('form_validation');		
+		  $this->load->helper(array('form','url','codegen_helper'));
+		  $this->load->model('codegen_model','',TRUE);
+
+	}	
+	
+	function index()
+  {
+		  $this->manage();
+	}
+
+	function manage()
+  {
+      if ($this->ion_auth->logged_in()){
+
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/manage')){
+
+              $this->data['successmessage']=$this->session->flashdata('successmessage');
+              $this->data['errormessage']=$this->session->flashdata('errormessage');
+              $this->data['infomessage']=$this->session->flashdata('infomessage');
+              //template data
+              $this->template->set('title', 'Administrar inventario');
+              $this->data['style_sheets']= array(
+                            'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
+                        );
+              $this->data['javascripts']= array(
+                        'js/jquery.dataTables.min.js',
+                        'js/plugins/dataTables/dataTables.bootstrap.js',
+                        'js/jquery.dataTables.defaults.js'
+                       );
+            
+              $this->template->load($this->config->item('admin_template'),'papeles/papeles_list', $this->data);
+
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+
+      } else {
+              redirect(base_url().'index.php/users/login');
+      }
+
+  }
+	
+  function add()
+  {        
+      if ($this->ion_auth->logged_in()) {
+
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/add')) {
+
+              $this->data['successmessage']=$this->session->flashdata('message');  
+        		  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
+              $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]|is_unique[est_papeles.pape_cuenta]');   
+              $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[256]');
+              $this->form_validation->set_rules('bancoid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
+
+              if ($this->form_validation->run() == false) {
+
+                  $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
+              } else {    
+
+                  $data = array(
+                        'pape_nombre' => $this->input->post('nombre'),
+                        'pape_cuenta' => $this->input->post('cuenta'),
+                        'pape_descripcion' => $this->input->post('descripcion'),
+                        'pape_bancoid' => $this->input->post('bancoid')
+
+                     );
+                 
+    			        if ($this->codegen_model->add('est_papeles',$data) == TRUE) {
+
+                      $this->session->set_flashdata('message', 'El estampilla se ha creado con éxito');
+                      redirect(base_url().'index.php/papeles/add');
+    			        } else {
+
+    				          $this->data['errormessage'] = 'No se pudo registrar el estampilla';
+
+    			        }
+
+    		      }
+              $this->template->set('title', 'Nueva aplicación');
+              $this->data['style_sheets']= array(
+                        'css/chosen.css' => 'screen'
+                    );
+              $this->data['javascripts']= array(
+                        'js/chosen.jquery.min.js'
+                    );  
+              $this->template->set('title', 'Nuevo estampilla');
+              $this->data['bancos']  = $this->codegen_model->getSelect('par_bancos','banc_id,banc_nombre');
+              $this->template->load($this->config->item('admin_template'),'papeles/papeles_add', $this->data);
+             
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+
+      } else {
+          redirect(base_url().'index.php/users/login');
+      }
+
+  }	
+
+
+	function edit()
+  {    
+      if ($this->ion_auth->logged_in()) {
+
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/edit')) {  
+
+              $idregimen = ($this->uri->segment(3)) ? $this->uri->segment(3) : $this->input->post('id') ;
+              if ($idregimen==''){
+                  $this->session->set_flashdata('infomessage', 'Debe elegir un estampilla para editar');
+                  redirect(base_url().'index.php/papeles');
+              }
+              $resultado = $this->codegen_model->get('est_papeles','pape_cuenta','pape_id = '.$idregimen,1,NULL,true);
+              
+              foreach ($resultado as $key => $value) {
+                  $aplilo[$key]=$value;
+              }
+              
+              if ($aplilo['pape_cuenta']==$this->input->post('cuenta')) {
+                  
+                  $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]');
+              
+              } else {
+
+                  $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]|is_unique[est_papeles.pape_cuenta]');
+              
+              }
+              $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]');   
+              $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[256]');
+              $this->form_validation->set_rules('bancoid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
+
+              if ($this->form_validation->run() == false) {
+                  
+                  $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);
+                            
+              } else {                            
+                  
+                  $data = array(
+                        'pape_nombre' => $this->input->post('nombre'),
+                        'pape_cuenta' => $this->input->post('cuenta'),
+                        'pape_descripcion' => $this->input->post('descripcion'),
+                        'pape_bancoid' => $this->input->post('bancoid')
+
+                     );
+                           
+                	if ($this->codegen_model->edit('est_papeles',$data,'pape_id',$idregimen) == TRUE) {
+
+                      $this->session->set_flashdata('successmessage', 'El estampilla se ha editado con éxito');
+                      redirect(base_url().'index.php/papeles/edit/'.$idregimen);
+                      
+                	} else {
+                				  
+                      $this->data['errormessage'] = 'No se pudo registrar el aplilo';
+
+                	}
+              }   
+                  $this->data['style_sheets']= array(
+                        'css/chosen.css' => 'screen'
+                        );
+                  $this->data['javascripts']= array(
+                        'js/chosen.jquery.min.js'
+                        );    
+                  $this->data['successmessage']=$this->session->flashdata('successmessage');
+                  $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
+                	$this->data['result'] = $this->codegen_model->get('est_papeles','pape_id,pape_nombre,pape_cuenta,pape_descripcion,pape_bancoid','pape_id = '.$idregimen,1,NULL,true);
+                  $this->data['bancos']  = $this->codegen_model->getSelect('par_bancos','banc_id,banc_nombre');
+                  $this->template->set('title', 'Editar estampilla');
+                  $this->template->load($this->config->item('admin_template'),'papeles/papeles_edit', $this->data);
+                        
+          }else {
+              redirect(base_url().'index.php/error_404');
+          }
+      } else {
+          redirect(base_url().'index.php/users/login');
+      }
+        
+  }
+	
+  function delete()
+  {
+      if ($this->ion_auth->logged_in()) {
+
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/delete')) {  
+              if ($this->input->post('id')==''){
+                  $this->session->set_flashdata('infomessage', 'Debe elegir un estampilla para eliminar');
+                  redirect(base_url().'index.php/papeles');
+              }
+              if (!$this->codegen_model->depend('con_tiposcontratos','pape_contratoid',$this->input->post('id'))) {
+
+                  $this->codegen_model->delete('est_papeles','pape_id',$this->input->post('id'));
+                  $this->session->set_flashdata('successmessage', 'El estampilla se ha eliminado con éxito');
+                  redirect(base_url().'index.php/papeles');  
+
+              } else {
+
+                  $this->session->set_flashdata('errormessage', 'El estampilla se encuentra en uso, no es posible eliminarlo.');
+                  redirect(base_url().'index.php/papeles/edit/'.$this->input->post('id'));
+
+              }
+                         
+          } else {
+              redirect(base_url().'index.php/error_404');       
+          } 
+      } else {
+          redirect(base_url().'index.php/users/login');
+      }
+  }
+    
+ 
+  function datatable ()
+  {
+      if ($this->ion_auth->logged_in()) {
+          
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/manage') ) { 
+              
+              $this->load->library('datatables');
+              $this->datatables->select('p.pape_id,p.pape_cantidad,p.pape_imprimidos,p.pape_estado,p.pape_fecha,p.pape_observaciones');
+              $this->datatables->from('est_papeles p');
+              
+
+              if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/edit')) {
+                  
+                  $this->datatables->add_column('edit', '<div class="btn-toolbar">
+                                                           <div class="btn-group">
+                                                              <a href="'.base_url().'index.php/papeles/edit/$1" class="btn btn-default btn-xs" title="Editar estampilla"><i class="fa fa-pencil-square-o"></i></a>
+                                                           </div>
+                                                         </div>', 'p.pape_id');
+
+              }  else {
+                  
+                  $this->datatables->add_column('edit', '', 'p.pape_id'); 
+              }
+              
+              echo $this->datatables->generate();
+
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+               
+      } else{
+              redirect(base_url().'index.php/users/login');
+      }           
+  }
+}
