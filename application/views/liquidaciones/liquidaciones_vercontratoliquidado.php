@@ -89,8 +89,11 @@
              <input id="facturaid" type="hidden" name="facturaid<?php echo $x; ?>" value="<?php echo $row2->fact_id; ?>"/> 
              <input id="file-<?php echo $x; ?>" type="file" class="file" name="comprobante<?php echo $x; ?>" multiple=false>
      </div>
-     <?php if ($facturapagada[$row2->fact_id]) {  ?>
+     <?php if ($facturapagada[$row2->fact_id]) {  ?>      
       <div class="bg-success">Pagado: <?php echo '$'.number_format($row2->pago_valor, 2, ',', '.'); ?> <i class="fa fa-check"></i> </div> 
+          <?php if ($row2->impr_codigopapel>0) { ?>
+                <div class="bg-info">legalizado: <?php echo $row2->impr_codigopapel; ?> <i class="fa fa-gavel"></i> </div>
+          <?php  } ?>
      <?php  } else { ?>
       <div class="bg-danger">Pagado: <?php echo '$'.number_format($row2->pago_valor, 2, ',', '.'); ?> <i class="fa fa-times"></i> </div> 
      <?php  } ?>
@@ -104,7 +107,7 @@
             
         initialPreview: ["<a href='<?php echo base_url().$row2->fact_rutacomprobante; ?>' target='_blank'><img src='<?php echo base_url().$row2->fact_rutacomprobante; ?>' class='file-preview-image' alt='The Moon' title='The Moon'></a>"
 ],
-        initialCaption: "The Moon and the Earth",
+        initialCaption: "",
 
         <?php
         }
@@ -154,11 +157,13 @@
  </tfoot>   
 </table>
 <?php echo form_close();?>
+
 <?php if ($completado) {  ?>
 <?php echo form_open("liquidaciones/legalizar",'role="form"');?>
  <div class="pull-right">
-      
+        <input type="hidden" name="numeroarchivos" value="<?php echo $x; ?>">
         <input type="hidden" name="contratoid" value="<?php echo $result->liqu_contratoid; ?>">
+        <input type="hidden" name="liquidacionid" value="<?php echo $result->liqu_id; ?>">
         <button type="submit" class="btn btn-success">Legalizar</button>
        
  </div> 

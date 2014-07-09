@@ -48,7 +48,7 @@ var oTable = $('#tablaq').dataTable( {
    
   var number= accounting.formatMoney(aData[6], "$", 2, ".", ","); // €4.999,99
   $("td:eq(5)", nRow).html('<div class="">' + number + '</div>');
-  if (aData[7]=='Pagado') {
+  if (aData[7]=='Legalizado') {
    $("td:eq(7)", nRow).html('<a href="#" class="btn btn-default btn-xs terminar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-tags"></i></a>');
   }
    if (aData[7]=='Liquidado') {
@@ -83,7 +83,7 @@ var oTable = $('#tablaq').dataTable( {
            event.preventDefault();
            var ID = $(this).attr("id");
             $("#idcontrato").val(ID);
-             $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vercontratoliquidado/'+ID,function(result){
+             $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vercontratolegalizado/'+ID,function(result){
               $('#myModal3').modal({show:true});
              });
          });
@@ -268,8 +268,7 @@ var oTable = $('#tablaq').dataTable( {
          
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
-        <button type="submit" class="btn btn-primary">Terminar</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Cerrar</button>
       </div>
     </div>
   </div>
@@ -288,7 +287,25 @@ var oTable = $('#tablaq').dataTable( {
             $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/verrecibos/'+ID,function(result){
             
             $('#myModal2').modal('show');
-           // alert(ID+'....');
+            //alert(ID+'....');
+        });
+        
+ 
+</script>
+<?php   } ?>
+
+
+
+
+<?php if ($accion=='legalizado') { ?>
+<script type="text/javascript">
+  
+            var ID = <?php echo $idcontrato; ?>;
+            
+           $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vercontratolegalizado/'+ID,function(result){
+            
+            $('#myModal3').modal('show');
+          
         });
         
  

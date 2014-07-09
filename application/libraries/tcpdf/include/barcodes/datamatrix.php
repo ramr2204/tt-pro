@@ -473,6 +473,7 @@ class Datamatrix {
 	 */
 	protected function isCharMode($chr, $mode) {
 		$status = false;
+		echo "---".$mode;
 		switch ($mode) {
 			case ENC_ASCII: { // ASCII character 0 to 127
 				$status = (($chr >= 0) AND ($chr <= 127));

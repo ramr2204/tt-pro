@@ -43,9 +43,10 @@ class Liquidaciones_model extends CI_Model {
     }
     
     function getfacturas($id){
-        $this->db->select('f.fact_id, f.fact_nombre, f.fact_porcentaje, f.fact_valor, f.fact_banco, f.fact_cuenta, f.fact_rutacomprobante, pa.pago_valor, pa.pago_fecha');
+        $this->db->select('f.fact_id,f.fact_codigo, f.fact_nombre, f.fact_porcentaje, f.fact_valor, f.fact_banco, f.fact_cuenta, f.fact_rutacomprobante, pa.pago_valor, pa.pago_fecha, im.impr_codigopapel');
         $this->db->from('est_facturas f');
         $this->db->join('est_pagos pa', 'pa.pago_facturaid = f.fact_id', 'left');
+        $this->db->join('est_impresiones im', 'im.impr_facturaid = f.fact_id', 'left');
         $this->db->where('f.fact_liquidacionid',$id);
         $query = $this->db->get();
         return $query->result();
@@ -55,4 +56,20 @@ class Liquidaciones_model extends CI_Model {
         $query = $this->db->query("SELECT ".$fields."  FROM ".$table." ".$where." ");
         return $query->result();
     }
+
+    function getfactura_legalizada($id){
+        $this->db->select('f.fact_id,f.fact_codigo, f.fact_nombre, f.fact_porcentaje, f.fact_valor,pa.pago_valor, pa.pago_fecha, im.impr_codigopapel,ct.cont_nombre,ct.cont_nit,co.cntr_numero,co.cntr_vigencia');
+        $this->db->from('est_facturas f');
+        $this->db->join('est_pagos pa', 'pa.pago_facturaid = f.fact_id', 'left');
+        $this->db->join('est_impresiones im', 'im.impr_facturaid = f.fact_id AND im.impr_estado = 1', 'left');
+        $this->db->join('est_liquidaciones li', 'li.liqu_id = f.fact_liquidacionid', 'left');
+        $this->db->join('con_contratos co', 'co.cntr_id = li.liqu_contratoid', 'left');
+        $this->db->join('con_contratistas ct', 'ct.cont_id = co.cntr_contratistaid', 'left');
+        $this->db->where('f.fact_id',$id);
+       // $this->db->where('f.fact_id',$id);
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+
 }
