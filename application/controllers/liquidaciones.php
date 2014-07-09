@@ -324,41 +324,54 @@ function legalizar()
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
                $codigo='00000000';
                $idcontrato=$this->input->post('contratoid');
-
-              $data = array(
-                   'lega_contratoid' => $this->input->post('contratoid'),
-                   'lega_fecha' => date('Y-m-d H:i:s',now()),
-                   'lega_liquidacionid' => $this->input->post('liquidacionid'),
-                   'lega_tipocontratista' => $this->input->post('tipocontratista'),
-                   'lega_codigo' => $codigo
-
-                 );
-//               // if ($this->codegen_model->add('est_liquidaciones',$data) == TRUE) {
-//               //     $liquidacionid=$this->db->insert_id();
-//               //     for ($i=1; $i < $this->input->post('numeroestampillas'); $i++) { 
-//               //          $data = array(
-//               //          'fact_nombre' => $this->input->post('nombreestampilla'.$i),
-//               //          'fact_porcentaje' => $this->input->post('porcentaje'.$i),
-//               //          'fact_valor' => $this->input->post('totalestampilla'.$i),
-//               //          'fact_banco' => $this->input->post('banco'.$i),
-//               //          'fact_cuenta' => $this->input->post('cuenta'.$i),
-//               //          'fact_liquidacionid' => $liquidacionid,
-//               //          );
-//               //          $this->codegen_model->add('est_facturas',$data);
-//               //     }
-
-//               //     //print_r($data);
-//               //     $data = array(
-//               //      'cntr_estadolocalid' => 1,
-//               //      );
-//               //     if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idcontrato) == TRUE) {
+               $disponible=0;
+               $nodisponible=0;
+               $x=0;
+               $papelid=array();
+               $this->data['facturas'] = $this->liquidaciones_model->getfacturas($this->input->post('liquidacionid'));
+               foreach ($this->data['facturas'] as $key => $value) {
+                 $max = $this->codegen_model->max('est_impresiones','impr_codigopapel', 'impr_estado <> 0');
+                 $nuevoingreso=$max['impr_codigopapel']+1;
+                 $papeles = $this->codegen_model->get('est_papeles','pape_id,pape_codigoinicial,pape_codigofinal','pape_codigoinicial <= '.$nuevoingreso.' AND pape_codigofinal >= '.$nuevoingreso,1,NULL,true);        
+                 if ($papeles) {
+                     $impreciones = $this->codegen_model->get('est_impresiones','impr_id','impr_facturaid = '.$value->fact_id,1,NULL,true);
+                     if ($impreciones) {
+                       //ya se encuentra asignado
+                     } else {
+                        $data = array(
+                          'impr_codigopapel' => $nuevoingreso,
+                          'impr_papelid' => $papeles->pape_id,
+                          'impr_facturaid' => $value->fact_id,
+                          'impr_observaciones' => 'Correcta',
+                          'impr_fecha' => date('Y-m-d H:i:s',now()),
+                          'impr_codigo' => $codigo,
+                          'impr_estado' => '1'
+                        );
+                         $disponible++;
+                         print_r($data); 
+                         echo'<br>';
+                         $this->codegen_model->add('est_impresiones',$data);
+                     }
                       
-//               //         $this->session->set_flashdata('successmessage', 'La liquidación se realizó con éxito');
+                 } else {
+                    $nodisponible++;
+                 } 
+                 $x++;    
+               } 
+               if ($nodisponible==0) {
+                   $data = array(
+                   'cntr_estadolocalid' => 2,
+                   );
+                  if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idcontrato) == TRUE) {
                       $this->session->set_flashdata('accion', 'legalizado');
-                      redirect(base_url().'index.php/liquidaciones/liquidar/'.$idcontrato);
-//               //        // echo $this->db->last_query();
-//               //     }
-//               }
+                      $this->session->set_flashdata('successmessage', 'La legalización se realizó con éxito');
+                  }
+               } else {
+
+                   $this->session->set_flashdata('errormessage', 'no hay suficientes hojas de estampilla en el inventario para imprimir');
+                   $this->session->set_flashdata('accion', 'liquidado');
+               }
+               redirect(base_url().'index.php/liquidaciones/liquidar/'.$idcontrato);
                 
           } else {
               redirect(base_url().'index.php/error_404');
@@ -367,7 +380,6 @@ function legalizar()
       } else {
           redirect(base_url().'index.php/users/login');
       }
-echo 'legalizado';
   } 
 
 

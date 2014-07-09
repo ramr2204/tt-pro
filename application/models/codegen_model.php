@@ -61,8 +61,11 @@ class Codegen_model extends CI_Model {
 		return $this->db->count_all($table);
 	}
 
-    function max($table, $field) {
+    function max($table, $field, $where='') {
         $this->db->select_max($field);
+        if($where){
+        $this->db->where($where);
+        }
         $query = $this->db->get($table);
         if ($query->num_rows() > 0) {
            return $query->row_array(); //return the row as an associative array

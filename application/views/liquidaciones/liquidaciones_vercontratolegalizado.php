@@ -13,7 +13,7 @@
 
 <div class="row"> 
  <div class="col-sm-12">    
-   <?php echo form_open_multipart("liquidaciones/cargar_comprobante",'role="form"');?>
+ 
     <div class="table-responsive">
       <table class="table table-striped table-bordered " id="tablaq">
  <thead>
@@ -91,7 +91,10 @@
      </div>
      <?php if ($facturapagada[$row2->fact_id]) {  ?>      
      <div class="bg-success">Código: <?php echo $row2->fact_codigo; ?> <i class="fa fa-check"></i> </div> 
-     <?php echo anchor(base_url().'generarpdf/generar_liquidacion/'.$result->liqu_contratoid,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large  btn-default" target="_blank"'); ?>
+     <?php if ($row2->impr_codigopapel>0) { ?>
+                <div class="bg-info">legalizado: <?php echo $row2->impr_codigopapel; ?> <i class="fa fa-gavel"></i> </div>
+                <?php echo anchor(base_url().'generarpdf/generar_estampilla/'.$row2->fact_id,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large  btn-default" target="_blank"'); ?>
+          <?php  } ?>
      <?php  } else { ?>
       <div class="bg-danger">Pagado: <?php echo '$'.number_format($row2->pago_valor, 2, ',', '.'); ?> <i class="fa fa-times"></i> </div> 
      <?php  } ?>
@@ -102,29 +105,11 @@
 
 <?php $x++; ?>
 <?php } ?>
-<tr>
-     <td colspan="3" class="text-right"><strong>Total</strong>
-     <input type="hidden" name="numeroarchivos" value="<?php echo $x; ?>">
-     <input class="form-control" id="contratoid" type="hidden" name="contratoid" value="<?php echo $result->liqu_contratoid; ?>"/>
-     </td>
-     <td colspan="1" class="text-right"><?php echo '$'.number_format($result->liqu_valortotal, 2, ',', '.'); ?></td>
-     <td>
-         <?php if ($comprobantes) {  ?>
-                <div class="bg-success">Comprobantes: <?php echo $ncomprobantescargados.'/'.$numerocomprobantes; ?> <i class="fa fa-check"></i> </div> 
-         <?php  } else { ?>
-                <div class="bg-danger">Comprobantes: <?php echo $ncomprobantescargados.'/'.$numerocomprobantes; ?> <i class="fa fa-times"></i> </div>
-         <?php  }  ?>
-         <?php if ($todopago) {  ?>
-                <div class="bg-success">Pagado: <?php echo '$'.number_format($totalpagado, 2, ',', '.'); ?> <i class="fa fa-check"></i> </div> 
-         <?php  } else { ?>
-                <div class="bg-danger">Pagado: <?php echo '$'.number_format($totalpagado, 2, ',', '.'); ?> <i class="fa fa-times"></i> </div>
-         <?php  }  ?>
 
-     </td>
-</tr>
  </tbody>   
 </table>
-<?php echo form_close();?>
+  <?php //echo form_open_multipart("liquidaciones/cargar_comprobante",'role="form"');?>
+<?php //echo form_close();?>
 </div>
 </div>   
       </div>

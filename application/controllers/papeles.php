@@ -101,7 +101,7 @@ class Papeles extends MY_Controller {
                         'js/chosen.jquery.min.js'
                     );  
               $this->template->set('title', 'Nuevo estampilla');
-              $this->data['bancos']  = $this->codegen_model->getSelect('par_bancos','banc_id,banc_nombre');
+              $this->data['maxcodigofinal']  = $this->codegen_model->max('est_papeles','pape_codigofinal');
               $this->template->load($this->config->item('admin_template'),'papeles/papeles_add', $this->data);
              
           } else {
