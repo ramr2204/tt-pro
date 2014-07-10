@@ -158,7 +158,7 @@
 </table>
 <?php echo form_close();?>
 
-<?php if ($completado) {  ?>
+<?php if ($completado AND $todopago) {  ?>
 <?php echo form_open("liquidaciones/legalizar",'role="form"');?>
  <div class="pull-right">
         <input type="hidden" name="numeroarchivos" value="<?php echo $x; ?>">

@@ -58,57 +58,63 @@ class Contratos extends MY_Controller {
 
   }
 	
-  function liquidar()
-  {
-      if ($this->ion_auth->logged_in()){
-
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/liquidar')){
-
-              $this->data['successmessage']=$this->session->flashdata('successmessage');
-              $this->data['errormessage']=$this->session->flashdata('errormessage');
-              $this->data['infomessage']=$this->session->flashdata('infomessage');
-              //template data
-              $this->template->set('title', 'Administrar contratos');
-              $this->data['style_sheets']= array(
-                            'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
-                        );
-              $this->data['javascripts']= array(
-                        'js/jquery.dataTables.min.js',
-                        'js/plugins/dataTables/dataTables.bootstrap.js',
-                        'js/jquery.dataTables.defaults.js',
-                        'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
-                       );
-              $resultado = $this->codegen_model->max('con_contratos','cntr_fecha_firma');
-              
-              foreach ($resultado as $key => $value) {
-                  $aplilo[$key]=$value;
-              }
-              $vigencia_mayor=substr($aplilo['cntr_fecha_firma'], 0, 4);
-              $vigencia_anterior=$vigencia_mayor-1;
-              $this->data['vigencias']= array($vigencia_mayor,$vigencia_anterior);
-              $this->template->load($this->config->item('admin_template'),'contratos/contratos_liquidar', $this->data);
-              
-          } else {
-              redirect(base_url().'index.php/error_404');
-          }
-
-      } else {
-              redirect(base_url().'index.php/users/login');
-      }
-
-  }
-
-
-
-  function liquidar_contrato()
+ function add()
   {        
       if ($this->ion_auth->logged_in()) {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/liquidar_contrato')) {
-              $idcontrato=$this->uri->segment(3);
-              $this->data['result'] = $this->liquidaciones_model->get($idcontrato);
-              $this->template->set('title', 'Editar contrato');
-              $this->load->view('contratos/contratos_liquidarcontrato', $this->data); 
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/add')) {
+
+              $this->data['successmessage']=$this->session->flashdata('message');  
+              $valor=str_replace('.','',$this->input->post('valor'));
+              $vigencia=explode("-", $this->input->post('fecha'));
+              $this->form_validation->set_rules('contratistaid', 'contratista','required|trim|xss_clean|numeric|greater_than[0]');
+              $this->form_validation->set_rules('tipocontratoid', 'Tipo de contrato','required|trim|xss_clean|numeric|greater_than[0]');
+              $this->form_validation->set_rules('fecha', 'Fecha',  'required|trim|xss_clean');  
+              $this->form_validation->set_rules('objeto', 'objeto',  'required|trim|xss_clean');  
+              $this->form_validation->set_rules('numero', 'Número','required|trim|xss_clean|numeric|greater_than[0]');
+              $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean'); 
+
+              if ($this->form_validation->run() == false) {
+
+                  $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
+              } else {    
+
+                  $data = array(
+                        'cntr_contratistaid' => $this->input->post('contratistaid'),
+                        'cntr_tipocontratoid' => $this->input->post('tipocontratoid'),
+                        'cntr_fecha_firma' => $this->input->post('fecha'),
+                        'cntr_numero' => $this->input->post('numero'),
+                        'cntr_objeto' => $this->input->post('objeto'),
+                        'cntr_valor' => $valor,
+                        'cntr_vigencia' => $vigencia[0],
+                     );
+                 
+                  if ($this->codegen_model->add('con_contratos',$data) == TRUE) {
+
+                      $this->session->set_flashdata('message', 'El contrato se ha creado con éxito');
+                      redirect(base_url().'index.php/contratos/add');
+                  } else {
+
+                      $this->data['errormessage'] = 'No se pudo registrar el contratista';
+
+                  }
+
+              }
+              $this->template->set('title', 'Nueva aplicación');
+              $this->data['style_sheets']= array(
+                        'css/chosen.css' => 'screen',
+                        'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen'
+                    );
+              $this->data['javascripts']= array(
+                        'js/chosen.jquery.min.js',
+                        'js/plugins/bootstrap/moment.js',
+                        'js/plugins/bootstrap/bootstrap-datetimepicker.js',
+                        'js/autoNumeric.js'
+                    );  
+              $this->template->set('title', 'Ingreso manual de contrato');
+              $this->data['tiposcontratos']  = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
+              $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
+              $this->template->load($this->config->item('admin_template'),'contratos/contratos_add', $this->data);
              
           } else {
               redirect(base_url().'index.php/error_404');
@@ -118,7 +124,7 @@ class Contratos extends MY_Controller {
           redirect(base_url().'index.php/users/login');
       }
 
-  }	
+  } 
 
 
 	function edit()
@@ -178,7 +184,7 @@ class Contratos extends MY_Controller {
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
                 	$this->data['result'] = $this->codegen_model->get('con_contratos','cntr_id','cntr_id = '.$idregimen,1,NULL,true);
                   $this->data['municipios']  = $this->codegen_model->getMunicipios();
-                  $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
+                  $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
                   $this->data['tributarios']  = $this->codegen_model->getSelect('con_tributarios','trib_id,trib_nombre');
                   $this->template->set('title', 'Editar contrato');
                   $this->template->load($this->config->item('admin_template'),'contratos/contratos_edit', $this->data);
