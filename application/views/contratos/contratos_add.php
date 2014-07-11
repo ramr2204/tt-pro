@@ -10,6 +10,7 @@
 *
 */
 ?>
+<br>
 <div class="row clearfix">
             <div class="col-md-12 column">
                   <div class="row clearfix">
@@ -17,59 +18,85 @@
                         </div>
                         <div class="col-md-8 column">
                            <div class="panel panel-default">
-                            <div class="panel-heading"><h1>Crear un nuevo contratista</h1></div>
+                            <div class="panel-heading"><h1>Ingreso manual de contratos</h1></div>
                              <div class="panel-body">
+                                
+
                               <?php echo form_open(current_url()); ?>
-                                    <div class="form-group">
-                                           <label for="nit">NIT</label>
-                                           <input class="form-control" id="nit" type="nit" name="nit" value="<?php echo set_value('nit'); ?>" required="required" maxlength="100" />
-                                           <?php echo form_error('nit','<span class="text-danger">','</span>'); ?>
-                                    </div>
-
-                                    <div class="form-group">
-                                           <label for="nombre">Nombre</label>
-                                           <input class="form-control" id="nombre" type="nombre" name="nombre" value="<?php echo set_value('nombre'); ?>" required="required" maxlength="128" />
-                                           <?php echo form_error('nombre','<span class="text-danger">','</span>'); ?>
-                                    </div>
-
-                                    <div class="form-group">
-                                           <label for="direccion">Dirección</label>
-                                           <input class="form-control" id="direccion" type="direccion" name="direccion" value="<?php echo set_value('direccion'); ?>" required="required" maxlength="256" />
-                                           <?php echo form_error('direccion','<span class="text-danger">','</span>'); ?>
-                                    </div>
-
-                                    <div class="form-group">
-                                           <label for="municipioid">Municipio</label>
-                                           <select class="form-control" id="municipioid" name="municipioid" required="required" >
-                                             <option value="0">Seleccione...</option>
-                                             <?php  foreach($municipios as $row) { ?>
-                                             <option value="<?php echo $row->muni_id; ?>"><?php echo $row->muni_nombre.' ( '.$row->depa_nombre.' )'; ?></option>
+                                  
+                                     <div class="col-md-12 column">
+                                      <div class="form-group">
+                                           <label for="contratistaid">Contratista</label>
+                                           <select class="form-control" id="contratistaid" name="contratistaid" required="required" >
+                                           <option value="0">Seleccione...</option>
+                                             <?php  foreach($contratistas as $row) { ?>
+                                             <option value="<?php echo $row->cont_id; ?>"><?php echo $row->cont_nit.' - '.$row->cont_nombre; ?></option>
                                              <?php   } ?>
                                            </select>
-                                           <?php echo form_error('municipioid','<span class="text-danger">','</span>'); ?>
+                                           <?php echo form_error('contratistaid','<span class="text-danger">','</span>'); ?>
                                     </div>
+                                         
 
-                                     <div class="form-group">
-                                           <label for="regimenid">Tipo de régimen</label>
-                                           <select class="form-control" id="regimenid" name="regimenid" required="required" >
+                                     </div>
+                                     <div class="col-md-6 column">
+                                         <div class="form-group">
+                                           <label for="tipocontratoid">Tipo de contrato</label>
+                                           <select class="form-control" id="tipocontratoid" name="tipocontratoid" required="required" >
                                            <option value="0">Seleccione...</option>
-                                             <?php  foreach($regimenes as $row) { ?>
-                                             <option value="<?php echo $row->regi_id; ?>"><?php echo $row->regi_nombre; ?></option>
+                                             <?php  foreach($tiposcontratos as $row) { ?>
+                                             <option value="<?php echo $row->tico_id; ?>"><?php echo $row->tico_nombre; ?></option>
                                              <?php   } ?>
                                            </select>
                                            <?php echo form_error('estadoid','<span class="text-danger">','</span>'); ?>
                                     </div>
+                                         
 
-                                    <div class="form-group">
-                                           <label for="tributarioid">Tipo de tributario</label>
-                                           <select class="form-control" id="tributarioid" name="tributarioid" required="required" >
-                                           <option value="0">Seleccione...</option>
-                                             <?php  foreach($tributarios as $row) { ?>
-                                             <option value="<?php echo $row->trib_id; ?>"><?php echo $row->trib_nombre; ?></option>
-                                             <?php   } ?>
-                                           </select>
-                                           <?php echo form_error('tributarioid','<span class="text-danger">','</span>'); ?>
-                                    </div>
+                                     </div>
+
+                                     <div class="col-md-6 column">
+                                       <div class="form-group">
+                                         <label for="fecha">Fecha de la firma del contrato</label>
+                                         <div class='input-group date' id='datetimepicker5' data-date-format="YYYY-MM-DD">
+                                             <input type='text' class="form-control" name="fecha" value="<?php echo set_value('fecha'); ?>" required="required"/>
+                                             <span class="input-group-addon"><span class="glyphicon glyphicon-time"></span>
+                                             </span>
+                                          </div>
+                                          <?php echo form_error('fecha','<span class="text-danger">','</span>'); ?>
+                                       </div>
+                                     </div>
+                                     <div class="col-md-6 column">
+
+                                          <div class="form-group">
+                                            <label for="numero">Número de contrato</label>
+                                            <input class="form-control" id="numero" type="number" name="numero" value="<?php echo set_value('numero'); ?>" required="required" min="0" />
+                                            <?php echo form_error('numero','<span class="text-danger">','</span>'); ?>
+                                          </div>
+
+                                     </div>
+
+                                      <div class="col-md-6 column">
+
+                                          <div class="form-group">
+                                            <label for="valor">Valor</label>
+                                             <div class="input-group">
+                                              <div class="input-group-addon">$</div>
+                                                <input class="form-control" id="valor" type="text" name="valor" value="<?php echo set_value('valor'); ?>" required="required" maxlength="100" />
+                                              </div>
+                                            <?php echo form_error('valor','<span class="text-danger">','</span>'); ?>
+                                          </div>
+
+                                     </div>
+
+                                     <div class="col-md-12 column">
+
+                                          <div class="form-group">
+                                           <label for="objeto">Objeto</label>
+                                           <textarea class="form-control" id="objeto" name="objeto" maxlength="1000" required="required"><?php echo set_value('objeto'); ?></textarea>
+                                           <?php echo form_error('objeto','<span class="text-danger">','</span>'); ?>
+                                          </div>
+                                     </div>
+
+
 
                                     <div class="pull-right">
                                      <?php  echo anchor('contratistas', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
@@ -87,15 +114,29 @@
             </div>
       </div>
 
+
+  <script type="text/javascript">
+      $(function () {
+          $('#datetimepicker5').datetimepicker({
+              pickTime: false
+          });
+      });
+  </script>
+
   <script type="text/javascript">
     //style selects
     var config = {
       '#municipioid'  : {disable_search_threshold: 10},
-      '#regimenid'  : {disable_search_threshold: 10},
-      '#tributarioid'  : {disable_search_threshold: 10}
+      '#tipocontratoid'  : {disable_search_threshold: 10},
+      '#contratistaid'  : {disable_search_threshold: 10}
     }
     for (var selector in config) {
         $(selector).chosen(config[selector]);
     }
 
+  </script>
+  <script type="text/javascript">
+      $(function () {
+         $('#valor').autoNumeric('init',{aSep: '.' , aDec: ',' }); 
+      });
   </script>

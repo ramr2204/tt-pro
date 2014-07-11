@@ -69,18 +69,6 @@
                                            </select>
                                            <?php echo form_error('regimenid','<span class="text-danger">','</span>'); ?>
                                     </div>
-
-                                    <div class="form-group">
-                                           <label for="tributarioid">Tipo de tributario</label>
-                                           <select class="form-control" id="tributarioid" name="tributarioid" required="required" >
-                                           <option value="0">Seleccione...</option>
-                                             <?php  foreach($tributarios as $row) { ?>
-                                             <option value="<?php echo $row->trib_id; ?>"><?php echo $row->trib_nombre; ?></option>
-                                             <?php   } ?>
-                                           </select>
-                                           <?php echo form_error('tributarioid','<span class="text-danger">','</span>'); ?>
-                                    </div>
-
                                     <div class="pull-right">
                                      <?php  echo anchor('contratistas', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
                                     <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
@@ -102,8 +90,7 @@
     var config = {
       '#tipocontratistaid'  : {disable_search_threshold: 10},
       '#municipioid'  : {disable_search_threshold: 10},
-      '#regimenid'  : {disable_search_threshold: 10},
-      '#tributarioid'  : {disable_search_threshold: 10}
+      '#regimenid'  : {disable_search_threshold: 10}
     }
     for (var selector in config) {
         $(selector).chosen(config[selector]);

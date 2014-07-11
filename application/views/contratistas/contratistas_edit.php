@@ -27,6 +27,21 @@
                                            <p><?php echo $result->cont_id; ?></p>
                                            <?php echo form_error('id','<span class="text-danger">','</span>'); ?>
                                     </div>
+                                    <div class="form-group">
+                                           <label for="tipocontratistaid">Tipo de contratista</label>
+                                           <select class="form-control" id="tipocontratistaid" name="tipocontratistaid" required="required" >
+                                             <option value="0">Seleccione...</option>
+                                             <?php  foreach($tiposcontratistas as $row) { ?>
+                                                 <?php if ($row->tpco_id==$result->cont_municipioid) { ?>
+                                                 <option selected value="<?php echo $row->tpco_id; ?>" ><?php echo $row->tpco_nombre; ?></option>
+                                                 <?php } else { ?>
+                                                 <option value="<?php echo $row->tpco_id; ?>"><?php echo $row->tpco_nombre; ?></option>
+                                                 <?php } ?>
+
+                                             <?php   } ?>
+                                           </select>
+                                           <?php echo form_error('tipocontratistaid','<span class="text-danger">','</span>'); ?>
+                                    </div>
 
                                     <div class="form-group">
                                            <label for="nit">NIT</label>
@@ -62,7 +77,7 @@
                                            <?php echo form_error('municipioid','<span class="text-danger">','</span>'); ?>
                                     </div>
                                     <div class="form-group">
-                                           <label for="regimenid">Tipo de contratista</label>
+                                           <label for="regimenid">Tipo de régimen</label>
                                            <select class="form-control" id="regimenid" name="regimenid" required="required" >
                                              <option value="0">Seleccione...</option>
                                              <?php  foreach($regimenes as $row) { ?>
@@ -75,21 +90,6 @@
                                              <?php   } ?>
                                            </select>
                                            <?php echo form_error('regimenid','<span class="text-danger">','</span>'); ?>
-                                    </div>
-                                    <div class="form-group">
-                                           <label for="tributarioid">Tipo tributario</label>
-                                           <select class="form-control" id="tributarioid" name="tributarioid" required="required" >
-                                             <option value="0">Seleccione...</option>
-                                             <?php  foreach($tributarios as $row) { ?>
-                                                 <?php if ($row->trib_id==$result->cont_tributarioid) { ?>
-                                                 <option selected value="<?php echo $row->trib_id; ?>" ><?php echo $row->trib_nombre; ?></option>
-                                                 <?php } else { ?>
-                                                 <option value="<?php echo $row->trib_id; ?>"><?php echo $row->trib_nombre; ?></option>
-                                                 <?php } ?>
-
-                                             <?php   } ?>
-                                           </select>
-                                           <?php echo form_error('tributarioid','<span class="text-danger">','</span>'); ?>
                                     </div>
 
                                     <div class="pull-right">
@@ -144,7 +144,7 @@
     var config = {
       '#municipioid'  : {disable_search_threshold: 10},
       '#regimenid'  : {disable_search_threshold: 10},
-      '#tributarioid'  : {disable_search_threshold: 10}
+      '#tipocontratistaid'  : {disable_search_threshold: 10}
     }
     for (var selector in config) {
         $(selector).chosen(config[selector]);
