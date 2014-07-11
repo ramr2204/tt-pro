@@ -69,7 +69,7 @@ class Contratistas extends MY_Controller {
               $this->form_validation->set_rules('direccion', 'Dirección', 'trim|xss_clean|max_length[256]');
               $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
               $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
-              $this->form_validation->set_rules('tributarioid', 'Tipo tributario',  'required|numeric|greater_than[0]');  
+              $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|greater_than[0]'); 
 
               if ($this->form_validation->run() == false) {
 
@@ -78,11 +78,11 @@ class Contratistas extends MY_Controller {
 
                   $data = array(
                         'cont_nombre' => $this->input->post('nombre'),
+                        'cont_tipocontratistaid' => $this->input->post('tipocontratistaid'),
                         'cont_nit' => $this->input->post('nit'),
                         'cont_direccion' => $this->input->post('direccion'),
                         'cont_municipioid' => $this->input->post('municipioid'),
-                        'cont_regimenid' => $this->input->post('regimenid'),
-                        'cont_tributarioid' => $this->input->post('tributarioid'),
+                        'cont_regimenid' => $this->input->post('regimenid')
 
                      );
                  
@@ -108,7 +108,6 @@ class Contratistas extends MY_Controller {
               $this->data['municipios']  = $this->codegen_model->getMunicipios();
               $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
               $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
-              $this->data['tributarios']  = $this->codegen_model->getSelect('con_tributarios','trib_id,trib_nombre');
               $this->template->load($this->config->item('admin_template'),'contratistas/contratistas_add', $this->data);
              
           } else {
@@ -152,7 +151,7 @@ class Contratistas extends MY_Controller {
               $this->form_validation->set_rules('direccion', 'Dirección', 'trim|xss_clean|max_length[256]');
               $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
               $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
-              $this->form_validation->set_rules('tributarioid', 'Tipo tributario',  'required|numeric|greater_than[0]');  
+              $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|greater_than[0]');   
 
               if ($this->form_validation->run() == false) {
                   
@@ -166,7 +165,7 @@ class Contratistas extends MY_Controller {
                         'cont_direccion' => $this->input->post('direccion'),
                         'cont_municipioid' => $this->input->post('municipioid'),
                         'cont_regimenid' => $this->input->post('regimenid'),
-                        'cont_tributarioid' => $this->input->post('tributarioid'),
+                        'cont_tipocontratistaid' => $this->input->post('tipocontratistaid')
 
                      );
                            
@@ -192,7 +191,7 @@ class Contratistas extends MY_Controller {
                 	$this->data['result'] = $this->codegen_model->get('con_contratistas','cont_id,cont_nombre,cont_nit,cont_direccion,cont_municipioid,cont_regimenid,cont_tributarioid','cont_id = '.$idregimen,1,NULL,true);
                   $this->data['municipios']  = $this->codegen_model->getMunicipios();
                   $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
-                  $this->data['tributarios']  = $this->codegen_model->getSelect('con_tributarios','trib_id,trib_nombre');
+                  $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
                   $this->template->set('title', 'Editar contratista');
                   $this->template->load($this->config->item('admin_template'),'contratistas/contratistas_edit', $this->data);
                         
@@ -243,13 +242,12 @@ class Contratistas extends MY_Controller {
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/manage') ) { 
               
               $this->load->library('datatables');
-              $this->datatables->select('c.cont_id,c.cont_nit,c.cont_nombre,r.regi_nombre,t.trib_nombre,m.muni_nombre,d.depa_nombre,c.cont_direccion');
+              $this->datatables->select('c.cont_id,c.cont_nit,c.cont_nombre,r.regi_nombre,t.tpco_nombre,m.muni_nombre,d.depa_nombre,c.cont_direccion');
               $this->datatables->from('con_contratistas c');
               $this->datatables->join('par_municipios m', 'm.muni_id = c.cont_municipioid', 'left');
               $this->datatables->join('par_departamentos d', 'd.depa_id = m.muni_departamentoid', 'left');
               $this->datatables->join('con_regimenes r', 'r.regi_id = c.cont_regimenid', 'left');
-              $this->datatables->join('con_tributarios t', 't.trib_id = c.cont_tributarioid', 'left');
-              $this->datatables->join('con_estadoslocales el', 'el.eslo_id = c.cont_estadolocalid', 'left');
+              $this->datatables->join('con_tiposcontratistas t', 't.tpco_id = c.cont_tipocontratistaid', 'left');
 
               if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/edit')) {
                   

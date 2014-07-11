@@ -133,59 +133,63 @@ class Contratos extends MY_Controller {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/edit')) {  
 
-              $idregimen = ($this->uri->segment(3)) ? $this->uri->segment(3) : $this->input->post('id') ;
-              if ($idregimen==''){
+              $idcontrato = ($this->uri->segment(3)) ? $this->uri->segment(3) : $this->input->post('id') ;
+              if ($idcontrato==''){
                   $this->session->set_flashdata('infomessage', 'Debe elegir un contrato para editar');
                   redirect(base_url().'index.php/contratos');
               }
               
-                  
-              $this->form_validation->set_rules('nit', 'NIT', 'required|trim|xss_clean|max_length[100]');
-              $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]');   
-              $this->form_validation->set_rules('direccion', 'Dirección', 'trim|xss_clean|max_length[256]');
-              $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
-              $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
-              $this->form_validation->set_rules('tributarioid', 'Tipo tributario',  'required|numeric|greater_than[0]');  
+              //$valor=str_replace('.','',$this->input->post('valor'));
+              $vigencia=explode("-", $this->input->post('fecha'));
+              $this->form_validation->set_rules('contratistaid', 'contratista','required|trim|xss_clean|numeric|greater_than[0]');
+              $this->form_validation->set_rules('tipocontratoid', 'Tipo de contrato','required|trim|xss_clean|numeric|greater_than[0]');
+              $this->form_validation->set_rules('fecha', 'Fecha',  'required|trim|xss_clean');  
+              $this->form_validation->set_rules('objeto', 'objeto',  'required|trim|xss_clean');  
+              $this->form_validation->set_rules('numero', 'Número','required|trim|xss_clean|numeric|greater_than[0]');
+              $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');  
 
               if ($this->form_validation->run() == false) {
                   
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);
                             
               } else {                            
-                  
+                 
                   $data = array(
-                        'cntr_nombre' => $this->input->post('nombre'),
-                        'cntr_nit' => $this->input->post('nit'),
-                        'cntr_direccion' => $this->input->post('direccion'),
-                        'cntr_municipioid' => $this->input->post('municipioid'),
-                        'cntr_regimenid' => $this->input->post('regimenid'),
-                        'cntr_tributarioid' => $this->input->post('tributarioid'),
-
-                     );
-                           
-                	if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idregimen) == TRUE) {
+                        'cntr_contratistaid' => $this->input->post('contratistaid'),
+                        'cntr_tipocontratoid' => $this->input->post('tipocontratoid'),
+                        'cntr_fecha_firma' => $this->input->post('fecha'),
+                        'cntr_numero' => $this->input->post('numero'),
+                        'cntr_objeto' => $this->input->post('objeto'),
+                        'cntr_valor' => $this->input->post('valor'),
+                        'cntr_vigencia' => $vigencia[0],
+                     ); 
+                	if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idcontrato) == TRUE) {
 
                       $this->session->set_flashdata('successmessage', 'El contrato se ha editado con éxito');
-                      redirect(base_url().'index.php/contratos/edit/'.$idregimen);
+                      //redirect(base_url().'index.php/contratos/edit/'.$idcontrato);
                       
                 	} else {
                 				  
-                      $this->data['errormessage'] = 'No se pudo registrar el aplilo';
+                      $this->data['errormessage'] = 'No se pudo registrar el contrato';
 
                 	}
               }   
                   $this->data['style_sheets']= array(
-                        'css/chosen.css' => 'screen'
-                        );
-                  $this->data['javascripts']= array(
-                        'js/chosen.jquery.min.js'
-                        );    
+                        'css/chosen.css' => 'screen',
+                        'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen'
+                    );
+              $this->data['javascripts']= array(
+                        'js/chosen.jquery.min.js',
+                        'js/plugins/bootstrap/moment.js',
+                        'js/plugins/bootstrap/bootstrap-datetimepicker.js',
+                        'js/autoNumeric.js'
+                    );
+
                   $this->data['successmessage']=$this->session->flashdata('successmessage');
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                	$this->data['result'] = $this->codegen_model->get('con_contratos','cntr_id','cntr_id = '.$idregimen,1,NULL,true);
-                  $this->data['municipios']  = $this->codegen_model->getMunicipios();
+                	$this->data['result'] = $this->codegen_model->get('con_contratos','cntr_id,cntr_contratistaid,cntr_tipocontratoid,cntr_fecha_firma,cntr_numero,cntr_objeto,cntr_valor','cntr_id = '.$idcontrato,1,NULL,true);
+                  $this->data['tiposcontratos']  = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
                   $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
-                  $this->data['tributarios']  = $this->codegen_model->getSelect('con_tributarios','trib_id,trib_nombre');
                   $this->template->set('title', 'Editar contrato');
                   $this->template->load($this->config->item('admin_template'),'contratos/contratos_edit', $this->data);
                         

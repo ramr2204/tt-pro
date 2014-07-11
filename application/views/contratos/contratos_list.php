@@ -50,7 +50,11 @@ var oTable = $('#tablaq').dataTable( {
 <div class="row"> 
  <div class="col-sm-12">
  <h1>Contratos</h1>
-
+<?php
+  if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/add')) {
+        echo anchor(base_url().'contratos/add','<i class="fa fa-plus"></i> Nuevo contrato ','class="btn btn-large  btn-primary"');
+      }
+  ?>
    <br><br>
  </div>
 </div> 

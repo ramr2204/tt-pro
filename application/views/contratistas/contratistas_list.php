@@ -59,7 +59,7 @@ var oTable = $('#tablaq').dataTable( {
      <th>NIT</th>
      <th>Nombre</th>
      <th>Tipo de régimen</th>
-     <th>Tipo tributario</th>
+     <th>Tipo de contratista</th>
      <th>Municipio</th>
      <th>Departamento</th>
      <th>Dirección</th>
