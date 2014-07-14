@@ -34,7 +34,7 @@
                                     
                                     <div class="form-group">
                                            <label for="cantidad">Cantidad</label>
-                                           <input class="form-control" id="cantidad" type="number" name="cantidad" value="<?php echo set_value('cantidad'); ?>" maxlength="3" min="0" step="0" />
+                                           <input class="form-control" id="cantidad" type="number" name="cantidad" value="<?php echo set_value('cantidad'); ?>" maxlength="3" min="0" step="0" readonly />
                                            <?php echo form_error('cantidad','<span class="text-danger">','</span>'); ?>
                                     </div>
 

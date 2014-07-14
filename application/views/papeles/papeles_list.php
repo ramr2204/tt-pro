@@ -23,16 +23,30 @@ var oTable = $('#tablaq').dataTable( {
 "sServerMethod": "POST",
 "aoColumns": [ 
                       { "sClass": "center"}, /*id 0*/
-                      { "sClass": "item" }, 
-                      { "sClass": "item" }, 
-                      { "sClass": "item" },
+                      { "sClass": "center" }, 
+                      { "sClass": "center" }, 
+                      { "sClass": "center" },
+                      { "sClass": "center" }, 
+                      { "sClass": "center" }, 
                       { "sClass": "item" },
                       { "sClass": "item" },
                       { "sClass": "center","bSortable": false,"bSearchable": false},
                       ],    
 "fnRowCallback":function( nRow, aData, iDataIndex ) {
-            var restante=aData[1]-aData[2];
-            $('td:eq(3)', nRow).html(restante);
+            var cantidad=aData[2]-aData[1]+1;
+            
+            $.ajax({
+               type: "POST",
+               dataType: "html",
+               data: {papelid : aData[0]},
+               url: "<?php echo base_url(); ?>index.php/papeles/contarpapeles",
+               success: function(data) {
+                 var restante=cantidad-data;
+                 $('td:eq(3)', nRow).html(cantidad);
+                 $('td:eq(4)', nRow).html(data);
+                 $('td:eq(5)', nRow).html(restante);
+               }
+             });
           
          },                      
 } );
@@ -57,7 +71,9 @@ var oTable = $('#tablaq').dataTable( {
  <thead>
     <tr>
      <th>Id</th>
-     <th>Cantidad inicial</th>
+     <th>Código inicial</th>
+     <th>Código final</th>
+     <th>Cantidad</th>
      <th>Cantidad utilizada</th>
      <th>Cantidad restante</th>
      <th>Fecha de ingreso</th>

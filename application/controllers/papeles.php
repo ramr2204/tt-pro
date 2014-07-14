@@ -221,7 +221,13 @@ class Papeles extends MY_Controller {
           redirect(base_url().'index.php/users/login');
       }
   }
-    
+  
+   function contarpapeles()
+  {
+     $resultado= $this->codegen_model->countwhere('est_impresiones','impr_papelid = '.$this->input->post('papelid'));
+     echo $resultado->contador;
+
+  }    
  
   function datatable ()
   {
@@ -230,7 +236,7 @@ class Papeles extends MY_Controller {
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/manage') ) { 
               
               $this->load->library('datatables');
-              $this->datatables->select('p.pape_id,p.pape_cantidad,p.pape_imprimidos,p.pape_estado,p.pape_fecha,p.pape_observaciones');
+              $this->datatables->select('p.pape_id,p.pape_codigoinicial,p.pape_codigofinal,p.pape_cantidad,p.pape_imprimidos,p.pape_estado,p.pape_fecha,p.pape_observaciones');
               $this->datatables->from('est_papeles p');
               
 

@@ -61,6 +61,15 @@ class Codegen_model extends CI_Model {
 		return $this->db->count_all($table);
 	}
 
+    function countwhere ($table,$where) {
+         $this->db->select("COUNT(*) AS contador");
+         $this->db->from($table);
+         $this->db->where($where);
+         $query=$this->db->get();  
+         return $query->row();
+    }
+
+
     function max($table, $field, $where='') {
         $this->db->select_max($field);
         if($where){
