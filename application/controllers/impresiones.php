@@ -66,7 +66,7 @@ class Impresiones extends MY_Controller {
               $this->data['successmessage']=$this->session->flashdata('message');  
         		  $this->form_validation->set_rules('tipoanulacion', 'Nombre', 'required|trim|xss_clean|max_length[100]');   
               $this->form_validation->set_rules('observaciones', 'Observaciones', 'trim|xss_clean|max_length[500]');
-              $this->form_validation->set_rules('papelid', 'Consecutivo', 'required|trim|xss_clean|numeric|');
+              $this->form_validation->set_rules('codigopapel', 'Consecutivo', 'required|trim|xss_clean|numeric|');
 
              
 
@@ -86,51 +86,52 @@ class Impresiones extends MY_Controller {
                    } else {
                       $tipoanulacionid=$resultado->tisa_id;
                    }
-                  $result= $this->codegen_model->get('est_impresiones','impr_id',"impr_papelid = '".$this->input->post('papelid')."'",1,NULL,true);
-                  
-                   // $data = array(
-                   //      'impr_codigopapel' => $this->input->post('papelid'),
-                   //      'impr_descripcion' => $this->input->post('descripcion'),
-                   //      'impr_iva' => $this->input->post('iva')
-
-                   //   );
+                    $result= $this->codegen_model->get('est_impresiones','impr_id,impr_facturaid',"impr_codigopapel = '".$this->input->post('codigopapel')."'",1,NULL,true);
 
                   if ($result) {
-                      if ($this->codegen_model->edit('est_impresiones',$data,'impr_id',$result->impr_id) == TRUE) {
+                       $facturas= $this->codegen_model->get('est_facturas','fact_liquidacionid',"fact_id = '".$result->impr_facturaid."'",1,NULL,true);
+                       $liquidaciones= $this->codegen_model->get('est_liquidaciones','liqu_contratoid',"liqu_id = '".$facturas->fact_liquidacionid."'",1,NULL,true);
+                       
+                       $cdata = array(
+                         'cntr_estadolocalid' => 1,
+                      );
+                       $this->codegen_model->edit('con_contratos',$cdata,'cntr_id',$liquidaciones->liqu_contratoid);
+                       $data = array(
+                         'impr_codigopapel' => $this->input->post('codigopapel'),
+                         'impr_observaciones' => $this->input->post('observaciones'),
+                         'impr_tipoanulacionid' => $tipoanulacionid,
+                         'impr_facturaid' => 0,
+                         'impr_estado' => 2,
+                      );
 
+                      if ($this->codegen_model->edit('est_impresiones',$data,'impr_id',$result->impr_id) == TRUE) {
+                          
                           $this->session->set_flashdata('successmessage', 'La anulación se ha creado con éxito');
                           redirect(base_url().'index.php/impresiones');
                       } else {  
-                          $this->data['errormessage'] = 'No se pudo registrar el aplilo';
+                          $this->data['errormessage'] = 'No se pudo registrar la anulación';
                       }
                     
                   } else {
-
+                      $papeles = $this->codegen_model->get('est_papeles','pape_id,pape_codigoinicial,pape_codigofinal','pape_codigoinicial <= '.$this->input->post('codigopapel').' AND pape_codigofinal >= '.$this->input->post('codigopapel'),1,NULL,true);
+                      $data = array(
+                        'impr_codigopapel' => $this->input->post('codigopapel'),
+                        'impr_observaciones' => $this->input->post('observaciones'),
+                        'impr_tipoanulacionid' => $tipoanulacionid,
+                        'impr_estado' => 2,
+                        'impr_fecha' => date('Y-m-d H:i:s',now()),
+                        'impr_papelid' => $papeles->pape_id
+                     );
+                    
+                       
                      if ($this->codegen_model->add('est_impresiones',$data) == TRUE) {
 
                          $this->session->set_flashdata('message', 'La anulación se ha creado con éxito');
                          redirect(base_url().'index.php/impresiones');
                       } else {
-                         $this->data['errormessage'] = 'No se pudo registrar el anulación';
+                         $this->data['errormessage'] = 'No se pudo registrar la anulación';
                       }
                   }
-
-                  $data = array(
-                        'impr_codigopapel' => $this->input->post('papelid'),
-                        'impr_descripcion' => $this->input->post('descripcion'),
-                        'impr_iva' => $this->input->post('iva')
-
-                     );
-                 
-    			        if ($this->codegen_model->add('est_impresiones',$data) == TRUE) {
-
-                      $this->session->set_flashdata('message', 'El anulación se ha creado con éxito');
-                      redirect(base_url().'index.php/impresiones/add');
-    			        } else {
-
-    				          $this->data['errormessage'] = 'No se pudo registrar el anulación';
-
-    			        }
 
     		      }
                 
@@ -268,23 +269,10 @@ class Impresiones extends MY_Controller {
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('impresiones/manage') ) { 
               
               $this->load->library('datatables');
-              $this->datatables->select('i.impr_id,i.impr_codigopapel,i.impr_fecha,f.fact_nombre,i.impr_observaciones');
+              $this->datatables->select('i.impr_id,i.impr_codigopapel,i.impr_fecha,f.fact_nombre,ta.tisa_nombre,i.impr_observaciones,i.impr_estado');
               $this->datatables->from('est_impresiones i');
               $this->datatables->join('est_facturas f', 'f.fact_id = i.impr_facturaid', 'left');
-
-              if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('impresiones/edit')) {
-                  
-                  $this->datatables->add_column('edit', '<div class="btn-toolbar">
-                                                           <div class="btn-group">
-                                                              <a href="'.base_url().'index.php/impresiones/edit/$1" class="btn btn-default btn-xs" title="Editar anulación"><i class="fa fa-pencil-square-o"></i></a>
-                                                           </div>
-                                                         </div>', 'i.impr_id');
-
-              }  else {
-                  
-                  $this->datatables->add_column('edit', '', 'i.impr_id'); 
-              }
-              
+              $this->datatables->join('est_tiposanulaciones ta', 'ta.tisa_id = i.impr_tipoanulacionid', 'left');
               echo $this->datatables->generate();
 
           } else {

@@ -326,17 +326,32 @@ function legalizar()
                $idcontrato=$this->input->post('contratoid');
                $disponible=0;
                $nodisponible=0;
+               
                $x=0;
                $papelid=array();
                $this->data['facturas'] = $this->liquidaciones_model->getfacturas($this->input->post('liquidacionid'));
                foreach ($this->data['facturas'] as $key => $value) {
-                 $max = $this->codegen_model->max('est_impresiones','impr_codigopapel', 'impr_estado <> 0');
+                 $nousado=0;
+                 $max = $this->codegen_model->max('est_impresiones','impr_codigopapel', 'impr_estado = 1');
                  $nuevoingreso=$max['impr_codigopapel']+1;
+                
+                 while ($nousado==0) { //comprueba si ya se está usando el codigo del papel
+                     $comimpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso,1,NULL,true);
+                     
+                     if (!$comimpresiones) {
+                        $nousado=1;
+                     } else {
+                         $nuevoingreso++;
+                         
+                     }
+                     
+                 }
+                 
                  $papeles = $this->codegen_model->get('est_papeles','pape_id,pape_codigoinicial,pape_codigofinal','pape_codigoinicial <= '.$nuevoingreso.' AND pape_codigofinal >= '.$nuevoingreso,1,NULL,true);        
                  if ($papeles) {
-                     $impreciones = $this->codegen_model->get('est_impresiones','impr_id','impr_facturaid = '.$value->fact_id,1,NULL,true);
-                     if ($impreciones) {
-                       //ya se encuentra asignado
+                     $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado','impr_facturaid = '.$value->fact_id,1,NULL,true);
+                     if ($impresiones) { //ya se encuentra asignado
+                      
                      } else {
                         $data = array(
                           'impr_codigopapel' => $nuevoingreso,
@@ -348,8 +363,8 @@ function legalizar()
                           'impr_estado' => '1'
                         );
                          $disponible++;
-                         print_r($data); 
-                         echo'<br>';
+                         // print_r($data); 
+                         //  echo'<br>';
                          $this->codegen_model->add('est_impresiones',$data);
                      }
                       

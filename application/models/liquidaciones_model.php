@@ -46,7 +46,7 @@ class Liquidaciones_model extends CI_Model {
         $this->db->select('f.fact_id,f.fact_codigo, f.fact_nombre, f.fact_porcentaje, f.fact_valor, f.fact_banco, f.fact_cuenta, f.fact_rutacomprobante, pa.pago_valor, pa.pago_fecha, im.impr_codigopapel');
         $this->db->from('est_facturas f');
         $this->db->join('est_pagos pa', 'pa.pago_facturaid = f.fact_id', 'left');
-        $this->db->join('est_impresiones im', 'im.impr_facturaid = f.fact_id', 'left');
+        $this->db->join('est_impresiones im', 'im.impr_facturaid = f.fact_id AND impr_estado=1', 'left');
         $this->db->where('f.fact_liquidacionid',$id);
         $query = $this->db->get();
         return $query->result();
