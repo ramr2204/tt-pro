@@ -263,7 +263,7 @@ switch (ENVIRONMENT)
 	}
 
 	define('VIEWPATH', $view_folder);
-
+    define('EXT', '.php');
 /*
  * --------------------------------------------------------------------
  * LOAD THE BOOTSTRAP FILE

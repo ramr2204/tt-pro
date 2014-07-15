@@ -64,6 +64,10 @@ class Contratos extends MY_Controller {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/add')) {
 
+
+           
+
+
               $this->data['successmessage']=$this->session->flashdata('message');  
               $valor=str_replace('.','',$this->input->post('valor'));
               $vigencia=explode("-", $this->input->post('fecha'));
@@ -231,6 +235,39 @@ class Contratos extends MY_Controller {
           redirect(base_url().'index.php/users/login');
       }
   }
+
+   function webservice()
+  {        
+      if ($this->ion_auth->logged_in()) {
+
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/add')) {
+               
+              $id=3;
+              $this->load->library('rest', array(
+                      'server' => 'http://localhost/restserver/index.php/api/example/user/id/1/format/json',
+                      //'http_user' => 'admin',
+                      //'http_pass' => '1234',
+                      //'http_auth' => 'basic' // or 'digest'
+                  ));
+     
+              $user = $this->rest->get('user', array('id' => $id), 'json');
+     
+              // echo $user->name;
+              echo "<pre>";
+              print_r($user);
+              echo "</pre>";
+
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+
+      } else {
+          redirect(base_url().'index.php/users/login');
+      }
+
+  } 
+
+
   
   function liquidaciones_datatable ()
   {
