@@ -27,6 +27,7 @@ var oTable = $('#tablaq').dataTable( {
                       { "sClass": "center"}, /*id 0*/
                       { "sClass": "center" },  
                       { "sClass": "center" }, 
+                      { "sClass": "item" },
                       { "sClass": "center" }, 
                       { "sClass": "item" },
                       { "sClass": "center" }, 
@@ -35,10 +36,10 @@ var oTable = $('#tablaq').dataTable( {
                       ],    
 "fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
 
-  if (aData[5]==1) {
-   $("td:eq(5)", nRow).html('<i class="fa fa-check-square-o" style="color:green"></i>');
+  if (aData[6]==1) {
+   $("td:eq(6)", nRow).html('<i class="fa fa-check-square-o" style="color:green"></i>');
   } else  {
-   $("td:eq(5)", nRow).html('<i class="fa fa-times-circle-o" style="color:red"></i>');
+   $("td:eq(6)", nRow).html('<i class="fa fa-times-circle-o" style="color:red"></i>');
   }
 
  },                      
@@ -67,6 +68,7 @@ var oTable = $('#tablaq').dataTable( {
      <th>Código del papel</th>
      <th>Fecha</th>
      <th>Estampilla asociada</th>
+     <th>Tipo de anulación</th>
      <th>Observaciones</th>
      <th>estado</th>
    </tr>

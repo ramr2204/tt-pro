@@ -269,10 +269,10 @@ class Impresiones extends MY_Controller {
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('impresiones/manage') ) { 
               
               $this->load->library('datatables');
-              $this->datatables->select('i.impr_id,i.impr_codigopapel,i.impr_fecha,f.fact_nombre,i.impr_observaciones,i.impr_estado');
+              $this->datatables->select('i.impr_id,i.impr_codigopapel,i.impr_fecha,f.fact_nombre,ta.tisa_nombre,i.impr_observaciones,i.impr_estado');
               $this->datatables->from('est_impresiones i');
               $this->datatables->join('est_facturas f', 'f.fact_id = i.impr_facturaid', 'left');
-              
+              $this->datatables->join('est_tiposanulaciones ta', 'ta.tisa_id = i.impr_tipoanulacionid', 'left');
               echo $this->datatables->generate();
 
           } else {
