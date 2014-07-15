@@ -5,7 +5,7 @@
 *   Ruta:              /application/views/impresiones/impresiones_add.php
 *   Descripcion:       permite crear una nueva aplicación
 *   Fecha Creacion:    12/may/2014
-*   @author            Iván Viña <papelidndariovinam@gmail.com>
+*   @author            Iván Viña <codigopapelndariovinam@gmail.com>
 *   @version           2014-05-12
 *
 */
@@ -22,9 +22,9 @@
                              <div class="panel-body">
                               <?php echo form_open(current_url()); ?>
                                     <div class="form-group">
-                                           <label for="papelid">Consecutivo del papel</label>
-                                           <input class="form-control" id="papelid" type="number" name="papelid" value="<?php echo set_value('papelid'); ?>" step="" min="1" />
-                                           <?php echo form_error('papelid','<span class="text-danger">','</span>'); ?>
+                                           <label for="codigopapel">Consecutivo del papel</label>
+                                           <input class="form-control" id="codigopapel" type="number" name="codigopapel" value="<?php echo set_value('codigopapel'); ?>" step="" min="1" />
+                                           <?php echo form_error('codigopapel','<span class="text-danger">','</span>'); ?>
                                     </div>
 
                                     <div class="form-group">
