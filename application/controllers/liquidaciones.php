@@ -90,7 +90,7 @@ class Liquidaciones extends MY_Controller {
       
               $this->data['estampillas'] = $this->liquidaciones_model->getestampillas($contrato->cntr_tipocontratoid);
               $estampillas=$this->data['estampillas'];   
-              $valorsiniva = $contrato->cntr_valor-(($contrato->cntr_valor*$contrato->regi_iva)/100);
+              $valorsiniva = $contrato->cntr_valor/(($contrato->regi_iva/100)+1);
               $totalestampilla= array();
               $valortotal=0;
               foreach ($estampillas as $key => $value) {
