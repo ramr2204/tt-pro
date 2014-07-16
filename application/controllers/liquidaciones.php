@@ -45,7 +45,8 @@ class Liquidaciones extends MY_Controller {
               $this->template->set('title', 'Administrar liquidaciones');
               $this->data['style_sheets']= array(
                             'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen',
-                            'css/plugins/bootstrap/fileinput.css' => 'screen'
+                            'css/plugins/bootstrap/fileinput.css' => 'screen',
+                            'css/plugins/bootstrap/bootstrap-switch.css' => 'screen'
                         );
               $this->data['javascripts']= array(
                         'js/jquery.dataTables.min.js',
@@ -53,7 +54,8 @@ class Liquidaciones extends MY_Controller {
                         'js/jquery.dataTables.defaults.js',
                         'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
                         'js/accounting.min.js',
-                        'js/plugins/bootstrap/fileinput.min.js'
+                        'js/plugins/bootstrap/fileinput.min.js',
+                        'js/plugins/bootstrap/bootstrap-switch.min.js'
                        );
               $resultado = $this->codegen_model->max('con_contratos','cntr_fecha_firma');
               
@@ -265,10 +267,20 @@ class Liquidaciones extends MY_Controller {
 
                   $success=0;
                   for ($i=0; $i < $numeroarchivos; $i++) {
+                      $pago=$this->input->post('pago'.$i);
+                      
                       $idfactura=$this->input->post('facturaid'.$i);
                       $config['file_name']=$idfactura.'_'.date("F_d_Y");
                       $this->upload->initialize($config);
-
+                      if ($pago) {
+                        $datos = array(
+                                 'pago_facturaid' => $idfactura,
+                                 'pago_fecha' => date("Y-m-d H:i:s"),
+                                 'pago_valor' => $pago,
+                                 'pago_metodo' => 'manual',
+                               );
+                        $this->codegen_model->add('est_pagos',$datos);
+                      }
                       
                       
                       $this->form_validation->set_rules('facturaid'.$i, 'factura id '.$i, 'trim|xss_clean|numeric|integer|greater_than[0]'); 
