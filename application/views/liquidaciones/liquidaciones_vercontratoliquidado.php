@@ -95,12 +95,14 @@
                 <div class="bg-info">legalizado: <?php echo $row2->impr_codigopapel; ?> <i class="fa fa-gavel"></i> </div>
           <?php  } ?>
      <?php  } else { ?>
-      <div class="bg-danger">Pagado: <?php echo '$'.number_format($row2->pago_valor, 2, ',', '.'); ?> <i class="fa fa-times"></i> </div> 
+     
+          <input type="checkbox" name="pago<?php echo $x; ?>" value="<?php echo $row2->fact_valor; ?>">
+      
      <?php  } ?>
 
      </td>
 </tr>
-<script>
+<script type="text/javascript">
     $("#file-<?php echo $x; ?>").fileinput({
         
       <?php   if ($row2->fact_rutacomprobante != '') { ?>
@@ -120,8 +122,14 @@
         showRemove: false,
 
     });
-</script>
 
+    $("[name='pago<?php echo $x; ?>']").bootstrapSwitch({
+        offText:'No pago',
+        onText:'Pagado',
+        onColor: 'success',
+        offColor: 'danger'
+    });
+</script>
 <?php $x++; ?>
 <?php } ?>
 <tr>
@@ -150,7 +158,7 @@
          <th colspan="5">
          <div class="pull-right">
         <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar comprobantes</button>
+        <button type="submit" class="btn btn-primary">Guardar cambios</button>
         </div>     
          </th>
      </tr>
@@ -158,18 +166,20 @@
 </table>
 <?php echo form_close();?>
 
-<?php if ($completado AND $todopago) {  ?>
+<?php if ($todopago) {  ?>
+     <?php if ($comprobantes) {  ?>
 <?php echo form_open("liquidaciones/legalizar",'role="form"');?>
  <div class="pull-right">
         <input type="hidden" name="numeroarchivos" value="<?php echo $x; ?>">
         <input type="hidden" name="contratoid" value="<?php echo $result->liqu_contratoid; ?>">
         <input type="hidden" name="liquidacionid" value="<?php echo $result->liqu_id; ?>">
-        <button type="submit" class="btn btn-success">Legalizar</button>
-       
+        <button type="submit" class="btn btn-success">Legalizar</button>      
  </div> 
 <?php echo form_close();?>
+      <?php  }  ?>
  <?php  }  ?>
 </div>
 </div>   
       </div>
+ 
  

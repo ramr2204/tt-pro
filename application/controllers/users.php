@@ -146,12 +146,12 @@ class Users extends MY_Controller {
 		$logout = $this->ion_auth->logout();
 
 		//redirect them to the login page
-		$this->session->set_flashdata('message', $this->ion_auth->messages());
+		$this->session->set_flashdata('successmessage', $this->ion_auth->messages());
 		redirect('users/login', 'refresh');
 	}
 
 	//change password
-	function change_password()
+	function editme()
 	{
 		$this->form_validation->set_rules('old', $this->lang->line('change_password_validation_old_password_label'), 'required');
 		$this->form_validation->set_rules('new', $this->lang->line('change_password_validation_new_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[new_confirm]');
@@ -163,7 +163,7 @@ class Users extends MY_Controller {
 		}
 
 		$user = $this->ion_auth->user()->row();
-
+        $this->data['result']=$user;
 		if ($this->form_validation->run() == false)
 		{
 			//display the form
@@ -474,21 +474,18 @@ class Users extends MY_Controller {
 	//edit a user
 	function edit($id=0)
 	{
-	  if ($this->ion_auth->logged_in())
-		 {
-		  if ($this->ion_auth->is_admin())
-			 {
+	  if ($this->ion_auth->logged_in()) {
+		  
+		  if ($this->ion_auth->is_admin()) {
 			  if ($id==0) 
 			  {
 			  	$id=$this->input->post('id');
 			  }
 			  $this->data['title'] = "Editar usuarios";
-		      //$this->data['message'] =$this->session->flashdata('message');
+		      $this->data['message'] =$this->session->flashdata('message');
 		      $user = $this->ion_auth->user($id)->row();
-		      $this->data['result']=$user; var_dump($this->db->last_query());
+		      $this->data['result']=$user; 
 		      
-		      $groups=$this->ion_auth->groups()->result_array();
-		      $currentGroups = $this->ion_auth->get_users_groups($id)->result();
               //validate form input
               if ($user->email != $this->input->post('email')) 
               {
@@ -497,188 +494,45 @@ class Users extends MY_Controller {
               {
                   $this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'required|valid_email');
               }
-		     
-             // $this->form_validation->set_rules('groups', $this->lang->line('edit_user_validation_groups_label'), 'xss_clean');
-              
-
+		      $this->form_validation->set_rules('perfilid', 'Perfil',  'required|numeric');  
               //update the password if it was posted
 
-			if ($this->input->post('password'))
-			{
-				$this->form_validation->set_rules('password', $this->lang->line('edit_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[password_confirm]');
-				$this->form_validation->set_rules('password_confirm', $this->lang->line('edit_user_validation_password_confirm_label'), 'required');
+			  if ($this->input->post('password'))
+			  {
+				  $this->form_validation->set_rules('password', $this->lang->line('edit_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[password_confirm]');
+				  $this->form_validation->set_rules('password_confirm', $this->lang->line('edit_user_validation_password_confirm_label'), 'required');
 
-				$data['password'] = $this->input->post('password');
-			}
+				  $data['password'] = $this->input->post('password');
+			  }
 
-			if ($this->form_validation->run() === TRUE)
-			{
-				$data = array(
-				'email' => $this->input->post('email')
-			    );
-				$this->ion_auth->update($user->id, $data); 
-                //Update the groups user belongs to
-			    $groupData = $this->input->post('groups');
-
-			    if (isset($groupData) && !empty($groupData)) 
-			    {
-
-				    $this->ion_auth->remove_from_group('', $id);
-
-				    foreach ($groupData as $grp) {
-					$this->ion_auth->add_to_group($grp, $id);
-				    }
-
-			    } 
-				//check to see if we are creating the user
-				//redirect them back to the admin page
-				$this->session->set_flashdata('message', '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>El usuario se ha creado con éxito.</div>');
-				
-				//redirect("users/edit/".$id, 'refresh');
-			} else
-			{
-
-
-
-			}
-               //set the flash data error message if there is one
-			   $this->data['message'] = (validation_errors() ? '<div class="alert alert-dismissable alert-danger"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>'.validation_errors().'</div>' : ''.($this->ion_auth->errors() ? '<div class="alert alert-dismissable alert-danger"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>'.$this->ion_auth->errors().'</div>' : $this->session->flashdata('message')));	
-              //display the edit user form
-		     $this->data['message'] = $this->session->flashdata('message');
-
+			  if ($this->form_validation->run() === TRUE)
+			  {
+				  $data = array(
+				    'email' => $this->input->post('email'),
+                    'perfilid' => $this->input->post('perfilid')
+			      );
+				  $this->ion_auth->update($user->id, $data); 
+				  $this->session->set_flashdata('successmessage', 'El usuario se ha editado con éxito');
+				  redirect("users/edit/".$id, 'refresh');
+			
+			  } 
+              $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage'));
+		      $this->data['successmessage']=$this->session->flashdata('successmessage');
 		      $this->data['csrf'] = $this->_get_csrf_nonce();
-
-		      //set the flash data error message if there is one
-              
-              $this->data['groups'] = $groups;
-		      $this->data['currentGroups'] = $currentGroups;
 		      $this->load->model('codegen_model','',TRUE); 
-			  $this->data['perfiles']  = $this->codegen_model->getSelect('perfiles','idperfil,nombreperfil');
+			  $this->data['perfiles']  = $this->codegen_model->getSelect('adm_perfiles','perf_id,perf_nombre');
 			  $this->template->load($this->config->item('admin_template'),'users/edit_user', $this->data);
              
 
-             }else 
-			 {
+           } else  {
 			  $this->session->set_flashdata('message', '<div class="alert alert-info"><button type="button" class="close" data-dismiss="alert">&times;</button>No tiene permisos para acceder a esta área.</div>');
 			  redirect(base_url().'error_404');
-			 }
-		 } else
-		 {
+		   }
+		 } else {
 			 redirect(base_url().'users/login');
 		 }
 		
 	}
-
-	// create a new group
-	function create_group()
-	{
-		$this->data['title'] = $this->lang->line('create_group_title');
-
-		if (!$this->ion_auth->logged_in() || !$this->ion_auth->is_admin())
-		{
-			redirect('users', 'refresh');
-		}
-
-		//validate form input
-		$this->form_validation->set_rules('group_name', $this->lang->line('create_group_validation_name_label'), 'required|alpha_dash|xss_clean');
-		$this->form_validation->set_rules('description', $this->lang->line('create_group_validation_desc_label'), 'xss_clean');
-
-		if ($this->form_validation->run() == TRUE)
-		{
-			$new_group_id = $this->ion_auth->create_group($this->input->post('group_name'), $this->input->post('description'));
-			if($new_group_id)
-			{
-				// check to see if we are creating the group
-				// redirect them back to the admin page
-				$this->session->set_flashdata('message', $this->ion_auth->messages());
-				redirect("users", 'refresh');
-			}
-		}
-		else
-		{
-			//display the create group form
-			//set the flash data error message if there is one
-			$this->data['message'] = (validation_errors() ? validation_errors() : ($this->ion_auth->errors() ? $this->ion_auth->errors() : $this->session->flashdata('message')));
-
-			$this->data['group_name'] = array(
-				'name'  => 'group_name',
-				'id'    => 'group_name',
-				'type'  => 'text',
-				'value' => $this->form_validation->set_value('group_name'),
-			);
-			$this->data['description'] = array(
-				'name'  => 'description',
-				'id'    => 'description',
-				'type'  => 'text',
-				'value' => $this->form_validation->set_value('description'),
-			);
-
-			$this->template->load($this->config->item('admin_template'),'users/create_group', $this->data);
-		}
-	}
-
-	//edit a group
-	function edit_group($id)
-	{
-		// bail if no group id given
-		if(!$id || empty($id))
-		{
-			redirect('users', 'refresh');
-		}
-
-		$this->data['title'] = $this->lang->line('edit_group_title');
-
-		if (!$this->ion_auth->logged_in() || !$this->ion_auth->is_admin())
-		{
-			redirect('users', 'refresh');
-		}
-
-		$group = $this->ion_auth->group($id)->row();
-
-		//validate form input
-		$this->form_validation->set_rules('group_name', $this->lang->line('edit_group_validation_name_label'), 'required|alpha_dash|xss_clean');
-		$this->form_validation->set_rules('group_description', $this->lang->line('edit_group_validation_desc_label'), 'xss_clean');
-
-		if (isset($_POST) && !empty($_POST))
-		{
-			if ($this->form_validation->run() === TRUE)
-			{
-				$group_update = $this->ion_auth->update_group($id, $_POST['group_name'], $_POST['group_description']);
-
-				if($group_update)
-				{
-					$this->session->set_flashdata('message', $this->lang->line('edit_group_saved'));
-				}
-				else
-				{
-					$this->session->set_flashdata('message', $this->ion_auth->errors());
-				}
-				redirect("users", 'refresh');
-			}
-		}
-
-		//set the flash data error message if there is one
-		$this->data['message'] = (validation_errors() ? validation_errors() : ($this->ion_auth->errors() ? $this->ion_auth->errors() : $this->session->flashdata('message')));
-
-		//pass the user to the view
-		$this->data['group'] = $group;
-
-		$this->data['group_name'] = array(
-			'name'  => 'group_name',
-			'id'    => 'group_name',
-			'type'  => 'text',
-			'value' => $this->form_validation->set_value('group_name', $group->name),
-		);
-		$this->data['group_description'] = array(
-			'name'  => 'group_description',
-			'id'    => 'group_description',
-			'type'  => 'text',
-			'value' => $this->form_validation->set_value('group_description', $group->description),
-		);
-
-		$this->_render_page('users/edit_group', $this->data);
-	}
-
 
 	function _get_csrf_nonce()
 	{
@@ -809,8 +663,9 @@ class Users extends MY_Controller {
         if ($this->ion_auth->is_admin())
            {
             $this->load->library('datatables');
-            $this->datatables->select('u.id,u.email,u.active');
+            $this->datatables->select('u.id,u.email,p.perf_nombre,u.active');
             $this->datatables->from('users u');
+            $this->datatables->join('adm_perfiles p','p.perf_id = u.perfilid','left');
             $this->datatables->add_column('edit', '<div class="btn-toolbar" role="toolbar">
                                                        <div class="btn-group">
                                                         <a href="'.base_url().'users/edit/$1" class="btn btn-default btn-xs" title="Editar datos de usuario"><i class="fa fa-pencil-square-o"></i></a>

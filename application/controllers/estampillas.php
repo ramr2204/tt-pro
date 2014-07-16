@@ -68,17 +68,40 @@ class Estampillas extends MY_Controller {
               $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]|is_unique[est_estampillas.estm_cuenta]');   
               $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[256]');
               $this->form_validation->set_rules('bancoid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
+              
+
+              $path = "uploads/imagenesestampillas/".$idcontrato;
+              if(!is_dir($path)) { //create the folder if it's not already exists
+                  mkdir($path,0777,TRUE);      
+              }
+              $config['upload_path'] = $path;
+              $config['allowed_types'] = 'jpg|jpeg|gif|png';
+              $config['remove_spaces']=TRUE;
+              $config['max_size']    = '2048';
+              //$config['overwrite']    = TRUE;
+              $this->load->library('upload');
+
+
 
               if ($this->form_validation->run() == false) {
 
                   $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
               } else {    
-
+                   
+                   if ($this->upload->do_upload("imagen")) {
+                       $file_data= $this->upload->data();
+                       $ruta =  $path.'/'.$file_data['orig_name'];
+                                                          
+                   } else {
+                       $this->data['errormessage'] =$this->upload->display_errors(); 
+                   } 
+                 
                   $data = array(
                         'estm_nombre' => $this->input->post('nombre'),
                         'estm_cuenta' => $this->input->post('cuenta'),
                         'estm_descripcion' => $this->input->post('descripcion'),
-                        'estm_bancoid' => $this->input->post('bancoid')
+                        'estm_bancoid' => $this->input->post('bancoid'),
+                        'estm_rutaimagen' => $ruta
 
                      );
                  
@@ -95,10 +118,12 @@ class Estampillas extends MY_Controller {
     		      }
               $this->template->set('title', 'Nueva aplicación');
               $this->data['style_sheets']= array(
-                        'css/chosen.css' => 'screen'
+                        'css/chosen.css' => 'screen',
+                        'css/plugins/bootstrap/fileinput.css' => 'screen'
                     );
               $this->data['javascripts']= array(
-                        'js/chosen.jquery.min.js'
+                        'js/chosen.jquery.min.js',
+                        'js/plugins/bootstrap/fileinput.min.js'
                     );  
               $this->template->set('title', 'Nuevo estampilla');
               $this->data['bancos']  = $this->codegen_model->getSelect('par_bancos','banc_id,banc_nombre');

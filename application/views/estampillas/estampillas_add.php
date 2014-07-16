@@ -19,7 +19,7 @@
                            <div class="panel panel-default">
                             <div class="panel-heading"><h1>Crear una nueva estampilla</h1></div>
                              <div class="panel-body">
-                              <?php echo form_open(current_url()); ?>
+                              <?php echo form_open_multipart(current_url()); ?>
 
                                     <div class="form-group">
                                            <label for="nombre">Nombre</label>
@@ -43,14 +43,16 @@
                                            </select>
                                            <?php echo form_error('bancoid','<span class="text-danger">','</span>'); ?>
                                     </div>
-
-
+                                     <div class="form-group">
+                                        <label for="imagen">Imagen</label>
+                                        <input id="file" type="file" class="file" name="imagen" multiple=false>
+                                    </div>
                                     <div class="form-group">
                                            <label for="descripcion">Descripción</label>
                                            <textarea class="form-control" id="descripcion" type="descripcion" name="descripcion" maxlength="500"><?php echo set_value('descripcion'); ?></textarea>
                                            <?php echo form_error('descripcion','<span class="text-danger">','</span>'); ?>
                                     </div>
-
+                                    
                                     <div class="pull-right">
                                      <?php  echo anchor('estampillas', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
                                     <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
@@ -67,13 +69,27 @@
             </div>
       </div>
 
-  <script type="text/javascript">
-    //style selects
-    var config = {
-      '#bancoid'  : {disable_search_threshold: 10}
-    }
-    for (var selector in config) {
-        $(selector).chosen(config[selector]);
-    }
+<script type="text/javascript">
+  //style selects
+  var config = {
+    '#bancoid'  : {disable_search_threshold: 10}
+  }
+  for (var selector in config) {
+      $(selector).chosen(config[selector]);
+  }
 
-  </script>
+</script>
+
+<script type="text/javascript">
+    $("#file").fileinput({
+
+        initialCaption: "",
+        showCaption: false,
+        browseClass: "btn btn-default btn-sm",
+        browseLabel: "Cargar imagen",
+        showUpload: false,
+        showRemove: false,
+
+    });
+
+</script>

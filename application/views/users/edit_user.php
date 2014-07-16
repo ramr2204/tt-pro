@@ -1,7 +1,16 @@
-<?php if( ! defined('BASEPATH') ) exit('No direct script access allowed'); ?>
-<h1><?php echo lang('edit_user_heading');?></h1>
-<div id="infoMessage"><?php if (isset($message)) { echo $message; } ?></div>
+<?php if( ! defined('BASEPATH') ) exit('No direct script access allowed');
 
+/**
+*   Nombre:            admin template
+*   Ruta:              /application/views/users/edit_user.php
+*   Descripcion:       permite editar un usuario
+*   Fecha Creacion:    12/may/2014
+*   @author            Iván Viña <ivandariovinam@gmail.com>
+*   @version           2014-07-16
+*
+*/
+
+ ?>
 <div class="row clearfix">
             <div class="col-md-12 column">
                   <div class="row clearfix">
@@ -9,8 +18,9 @@
                         </div>
                         <div class="col-md-4 column">
                            <div class="panel panel-default">
+                           <div class="panel-heading"><h1>Editar usuario</h1></div>
                              <div class="panel-body">
-                              <?php echo form_open("users/edit",'role="form"');?>
+                              <?php echo form_open(current_url(),'role="form"');?>
                                     <div class="form-group">
                                            <label for="id">Identificación</label>
                                            <input class="form-control" id="id" type="hidden" name="id" value="<?php echo $result->id; ?>"/>
@@ -21,6 +31,24 @@
                                            <input class="form-control" id="email" type="email" name="email" value="<?php echo $result->email; ?>" required="required" />
                                            <?php echo form_error('email','<span class="text-danger">','</span>'); ?>
                                     </div>
+
+                                     <div class="form-group">
+                                           <label for="perfilid">Perfil</label>
+                                           <select class="form-control" id="perfilid" name="perfilid" required="required" >
+                                             <option value="0">Seleccione...</option>
+                                             <?php  foreach($perfiles as $row) { ?>
+                                                 <?php if ($row->perf_id==$result->perfilid) { ?>
+                                                 <option selected value="<?php echo $row->perf_id; ?>" ><?php echo $row->perf_nombre; ?></option>
+                                                 <?php } else { ?>
+                                                 <option value="<?php echo $row->perf_id; ?>"><?php echo $row->perf_nombre; ?></option>
+                                                 <?php } ?>
+
+                                             <?php   } ?>
+                                           </select>
+                                           <?php echo form_error('perfilid','<span class="text-danger">','</span>'); ?>
+                                    </div>
+
+
                                     <p class="help-block">Deje estos campos vacíos si no quiere cambiar la contraseña</p>
                                     <div class="form-group">
                                            <label for="password">Contraseña</label>
@@ -33,9 +61,10 @@
                                            <input class="form-control" id="password_confirm" type="password" name="password_confirm"/>
                                            <?php echo form_error('password_confirm','<span class="text-danger">','</span>'); ?>
                                     </div>
+                                    
                                     <div class="pull-right">
-                                     <?php  echo anchor('users', '<i class="fa fa-times"></i> Cancelar', 'class="btn btn-default"'); ?>
-                                    <button type="" class="btn btn-danger" data-toggle="modal" data-target="#confirm"><i class="fa fa-trash-o"></i> Eliminar</button>
+                                     <?php  echo anchor('users', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
+                                    <a class="btn btn-danger" data-toggle="modal" data-target="#myModal"><i class="fa fa-trash-o"></i> Eliminar</a>
                                     <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
                                     </div>
                                 <?php echo form_close();?>
@@ -50,23 +79,39 @@
             </div>
       </div>
 
-
 <!-- Modal -->
-<div class="modal fade modal-sm" id="confirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content panel-primary">
-      <div class="modal-header panel-heading">
+<?php echo form_open("users/delete",'role="form"');?>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="myModalLabel"><i class="fa fa-exclamation-triangle"></i> Eliminar usuario</h4>
+        <h4 class="modal-title" id="myModalLabel">¿Confirma que quiere eliminar El usuario?</h4>
       </div>
       <div class="modal-body">
+         <input class="form-control" id="id" type="hidden" name="id" value="<?php echo $result->id; ?>"/>
         Si oprime confirmar no podrá recuperar la información de este usuario <br>
         ¿Realmente desea eliminarlo?
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
-        <button type="button" class="btn btn-primary"><i class="fa fa-check"></i> Confirmar</button>
+        <button type="submit" class="btn btn-primary">Confirmar</button>
       </div>
     </div>
   </div>
 </div>
+<?php echo form_close();?>
+
+
+   <script type="text/javascript">
+    //style selects
+    var config = {
+      '#perfilid'  : {disable_search_threshold: 10},
+      '#estadoid'  : {disable_search_threshold: 10}
+    }
+    for (var selector in config) {
+        $(selector).chosen(config[selector]);
+    }
+
+  </script>
