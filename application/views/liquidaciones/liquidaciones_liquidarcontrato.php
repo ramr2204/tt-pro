@@ -18,9 +18,13 @@
       <table class="table table-striped table-bordered " id="tablaq">
  <thead>
     <tr>
-     
-     <th colspan="4" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
-   
+     <th colspan="1" class="text-center small">
+           <img src="<?php echo base_url() ?>images/gobernacion_tolima1.jpg" height="50" width="40" >
+     </th>
+     <th colspan="2" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
+     <th colspan="1" class="text-center small">
+           <img src="<?php echo base_url() ?>images/gobernacion_tolima2.jpg" height="50" width="80" >
+     </th>
    </tr>
  </thead>
  <tbody>
@@ -101,7 +105,9 @@ $cuentas='';
 <tr>
      <td colspan="1"><?php echo $row2->estm_nombre; ?>
      <input type="hidden" name="nombreestampilla<?php echo $x; ?>" value="<?php echo $row2->estm_nombre; ?>">
-
+     <?php if ($row2->estm_rutaimagen) { ?>
+     <img src="<?php echo base_url().$row2->estm_rutaimagen; ?>" height="60" width="60" >
+    <?php } ?>
      </td>
      <td colspan="1" class="text-center"><?php echo $row2->estm_cuenta; ?><br><?php echo $row2->banc_nombre; ?>
      <input type="hidden" name="cuenta<?php echo $x; ?>" value="<?php echo $row2->estm_cuenta; ?>">
@@ -109,8 +115,10 @@ $cuentas='';
      </td>
      <td colspan="1" class="text-center"><?php echo $row2->esti_porcentaje; ?>%
      <input type="hidden" name="porcentaje<?php echo $x; ?>" value="<?php echo $row2->esti_porcentaje; ?>">
+     <input type="hidden" name="rutaimagen<?php echo $x; ?>" value="<?php echo $row2->estm_rutaimagen; ?>">
      </td>
      <td colspan="1" class="text-right"><?php echo '$'.number_format($est_totalestampilla[$row2->estm_id], 2, ',', '.'); ?>
+     <br><?php echo round ( $est_totalestampilla[$row2->estm_id], -2 ) ?>
      <input type="hidden" name="totalestampilla<?php echo $x; ?>" value="<?php echo $est_totalestampilla[$row2->estm_id]; ?>">
      </td>
 </tr>

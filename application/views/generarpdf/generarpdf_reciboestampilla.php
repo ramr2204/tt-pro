@@ -26,13 +26,16 @@
 
 </style>
 
-
       <table class="table table-striped table-bordered " id="tablaq" border="1" cellpadding="1">
  <thead>
     <tr>
-     
-     <th colspan="4" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
-   
+     <th colspan="1" class="text-center small">
+           <img src="<?php echo base_url() ?>images/gobernacion_tolima1.jpg" height="50" width="40" >
+     </th>
+     <th colspan="2" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
+     <th colspan="1" class="text-center small">
+           <img src="<?php echo base_url() ?>images/gobernacion_tolima2.jpg" height="50" width="90" >
+     </th>
    </tr>
  </thead>
  <tbody>
@@ -58,10 +61,10 @@
 </tr>
 <tr>
      <td colspan="1"><strong>Valor del contrato</strong></td>
-     <td colspan="1"><?php echo $result->liqu_valorconiva; ?>
+     <td colspan="1"><?php echo '$'.number_format($result->liqu_valorconiva, 2, ',', '.'); ?>
      </td>
      <td colspan="1"><strong>Valor sin IVA</strong></td>
-     <td colspan="1"><?php echo $result->liqu_valorsiniva; ?>
+     <td colspan="1"><?php echo '$'.number_format($result->liqu_valorsiniva, 2, ',', '.'); ?>
      </td>
 </tr>
 <tr>
@@ -132,9 +135,13 @@
       <table class="table table-striped table-bordered " id="tablaq" border="1">
  <thead>
     <tr>
-     
-     <th colspan="4" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
-   
+     <th colspan="1" class="text-center small">
+           <img src="<?php echo base_url() ?>images/gobernacion_tolima1.jpg" height="50" width="40" >
+     </th>
+     <th colspan="2" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
+     <th colspan="1" class="text-center small">
+           <img src="<?php echo base_url() ?>images/gobernacion_tolima2.jpg" height="50" width="90" >
+     </th>
    </tr>
  </thead>
  <tbody>
@@ -236,9 +243,13 @@
       <table class="table table-striped table-bordered " id="tablaq" border="1">
  <thead>
     <tr>
-     
-     <th colspan="4" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
-   
+     <th colspan="1" class="text-center small">
+           <img src="<?php echo base_url() ?>images/gobernacion_tolima1.jpg" height="50" width="40" >
+     </th>
+     <th colspan="2" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
+     <th colspan="1" class="text-center small">
+           <img src="<?php echo base_url() ?>images/gobernacion_tolima2.jpg" height="50" width="90" >
+     </th>
    </tr>
  </thead>
  <tbody>

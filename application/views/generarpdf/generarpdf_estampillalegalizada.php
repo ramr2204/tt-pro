@@ -21,13 +21,17 @@
 <div class="row"> 
  <div class="col-sm-12">    
    
-    <div class="table-responsive">
+    <div class="table-responsive" border:"0">
       <table class="table table-striped table-bordered " id="tablaq" border="1">
  <thead>
     <tr>
-     
-     <th colspan="4" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
-   
+     <th colspan="1" class="text-center small">
+           <img src="<?php echo base_url() ?>images/gobernacion_tolima1.jpg" height="50" width="40" >
+     </th>
+     <th colspan="2" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
+     <th colspan="1" class="text-center small">
+           <img src="<?php echo base_url() ?>images/gobernacion_tolima2.jpg" height="50" width="80" >
+     </th>
    </tr>
  </thead>
  <tbody>
@@ -45,12 +49,12 @@
 
 </tr>
 <tr>
-     <td colspan="1"><strong>Nombre del contratista</strong></td>
-     <td colspan="3"> <?php echo $estampilla->cont_nombre; ?></td>
+     <td colspan="1" class="text-center"><strong>Nombre del contratista</strong></td>
+     <td colspan="3" class="text-center"> <?php echo $estampilla->cont_nombre; ?></td>
 </tr>
 
  <tr>
-     <td colspan="1"><strong>C.C. o NIT</strong></td>
+     <td colspan="1" class="text-center"><strong>C.C. o NIT</strong></td>
      <td colspan="3"> <?php echo $estampilla->cont_nit; ?>
      </td>
 </tr>
@@ -58,12 +62,17 @@
 
 
 <tr>
-     <td colspan="2">Valor</td>
+     <td colspan="1" rowspan="2" valign="center">
+    <?php if ($estampilla->fact_rutaimagen) { ?>
+     <img src="<?php echo base_url().$estampilla->fact_rutaimagen; ?>" >
+    <?php } ?>
+     </td>
+     <td colspan="1" class="text-center">Valor</td>
       <td colspan="2"> <?php echo '$'.number_format($estampilla->fact_valor, 2, ',', '.'); ?></td>
 </tr>
 
 <tr>
-     <td colspan="4" class="text-right"><tcpdf method="write1DBarcode" params="<?php echo $params; ?>" /></td>
+     <td colspan="3" class="text-right"><tcpdf method="write1DBarcode" params="<?php echo $params; ?>" /></td>
      
 </tr>
  </tbody>     

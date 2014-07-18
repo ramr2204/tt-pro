@@ -236,27 +236,129 @@ class Contratos extends MY_Controller {
       }
   }
 
-   function webservice()
+  function importarcontratos()
   {        
       if ($this->ion_auth->logged_in()) {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/add')) {
-               
-              $id=3;
-              $this->load->library('rest', array(
-                      'server' => 'http://localhost/restserver/index.php/api/example/user/id/1/format/json',
-                      //'http_user' => 'admin',
-                      //'http_pass' => '1234',
-                      //'http_auth' => 'basic' // or 'digest'
-                  ));
-     
-              $user = $this->rest->get('user', array('id' => $id), 'json');
-     
-              // echo $user->name;
-              echo "<pre>";
-              print_r($user);
-              echo "</pre>";
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/getcontratos')) {
 
+              $this->data['successmessage']=$this->session->flashdata('successmessage');  
+              $this->data['errormessage']=$this->session->flashdata('errormessage'); 
+              $this->data['infomessage']=$this->session->flashdata('infomessage'); 
+              $this->form_validation->set_rules('vigencia', 'Vigencia','required|trim|xss_clean|numeric|greater_than[0]');
+     
+
+              if ($this->form_validation->run() == false) {
+
+                  $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
+              } else {    
+
+                  $vigencia=$this->input->post('vigencia');
+
+                  $contratos_nuevos=0;
+                  $contratos_importados=0;
+                  $contratos_falloimpotacion=0;
+                  $contratistas_nuevos=0;
+                  $contratistas_importados=0;
+                  $contratistas_falloimpotacion=0;
+
+                  $this->load->library('rest', array(
+                          'server' => 'http://190.121.133.172:81/siscon/main/modulos/informes/general/contratos.php',
+                          //'http_user' => 'admin',
+                          //'http_pass' => '1234',
+                          //'http_auth' => 'basic' // or 'digest'
+                      ));
+     
+                  $contratos = $this->rest->get('v_contrato', array('v_contrato' => $vigencia), 'json');
+                  foreach ($contratos as $key => $value) {
+                      $contrato=json_decode($value);
+                      if ($contrato) {
+                      
+                          $datos_contrato = $this->codegen_model->get('con_contratos','cntr_id','cntr_numero = '.$contrato->nro_contrato.' AND cntr_vigencia = '.$contrato->a_contrato,1,NULL,true);
+                          $datos_contratista = $this->codegen_model->get('con_contratistas','cont_id','cont_nit = '.$contrato->nit_contratista,1,NULL,true);
+
+
+                          // cargamos contratos nuevos
+                          if ($datos_contrato) {
+                            //el contrato ya se encuentra en la base de datos
+                          } else {
+                              
+                              $contratos_nuevos++;
+                              $data = array(
+                                  'cntr_contratistaid' => $contrato->id_contratista,
+                                  'cntr_tipocontratoid' => $contrato->id_tipo_contrato,
+                                  'cntr_fecha_firma' => $contrato->fecha_firma,
+                                  'cntr_numero' => $contrato->nro_contrato,
+                                  'cntr_objeto' => $contrato->objeto,
+                                  'cntr_valor' => $contrato->valor_contrato,
+                                  'cntr_vigencia' => $contrato->a_contrato,
+                              );
+                              // echo "<pre>"; print_r($data); echo "</pre>";
+                              if ($this->codegen_model->add('con_contratos',$data) == TRUE) {
+                                  $contratos_importados++;     
+                              } else {
+
+                                  $contratos_falloimpotacion=0;
+                              }
+
+                          }
+
+
+                          // cargamos contratistas nuevos
+                          if ($datos_contratista) {
+                            //el contratista ya se encuentra en la base de datos
+                          } else {
+                              
+                              $contratistas_nuevos++;
+                              $datos = array(
+                                  'cont_nit' => $contrato->nit_contratista,
+                                  'cont_nombre' => $contrato->nombre_contratista,
+                                  'cont_regimenid' => $contrato->regimen,
+                                  'cont_direccion' => $contrato->direccion
+                              );
+                              // echo "<pre>"; print_r($data); echo "</pre>";
+                              if ($this->codegen_model->add('con_contratistas',$datos) == TRUE) {
+                                  $contratistas_importados++;     
+                              } else {
+
+                                  $contratistas_falloimpotacion=0;
+                              }
+
+                          }
+                                
+                                  
+        
+                      }
+             
+                  }
+                   if ($contratos_importados>0 || $contratistas_nuevos>0) {
+                       $this->session->set_flashdata('successmessage', 'Se importaron '.$contratos_importados.' contratos y '.$contratistas_importados.' contratistas con éxito');
+                   }
+                   if ($contratos_falloimpotacion>0 || $contratistas_falloimpotacion>0) {
+                     $this->session->set_flashdata('errormessage', 'No se pudo completar la importación de  '.$contratos_falloimpotacion.' contratos y/o '.$contratistas_falloimpotacion.' contratistas');
+                   } 
+                   if ($contratos_nuevos<1 || $contratos_importados<1) {
+                     $this->session->set_flashdata('infomessage', 'No se encontraron nuevos contratos ni nuevos contratistas, la base de datos está actualizada');
+                   } 
+                    redirect(base_url().'index.php/contratos/importarcontratos');
+
+              }
+              $this->template->set('title', 'Nueva aplicación');
+              $this->data['style_sheets']= array(
+                        'css/chosen.css' => 'screen'
+                    );
+              $this->data['javascripts']= array(
+                        'js/chosen.jquery.min.js'
+                    );  
+              $vigencia_actual=date('Y');
+              $vigencias=array();
+              for ($i=0; $i < 10 ; $i++) { 
+                  $vigencias[]=$vigencia_actual-$i;
+              }
+              $this->template->set('title', 'Importación de contratos');
+              $this->data['vigencias']  = $vigencias;
+              $this->template->load($this->config->item('admin_template'),'contratos/contratos_importarcontratos', $this->data);
+             
           } else {
               redirect(base_url().'index.php/error_404');
           }
@@ -265,7 +367,7 @@ class Contratos extends MY_Controller {
           redirect(base_url().'index.php/users/login');
       }
 
-  } 
+  }
 
 
   

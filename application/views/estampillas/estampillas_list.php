@@ -39,7 +39,7 @@ var oTable = $('#tablaq').dataTable( {
 
 <div class="row"> 
  <div class="col-sm-12">    
-  <h1>Contratistas</h1>
+  <h1>Estampillas pro</h1>
 
   <?php
   if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('estampillas/add')) {

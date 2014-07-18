@@ -155,6 +155,7 @@ class Liquidaciones extends MY_Controller {
                        'fact_banco' => $this->input->post('banco'.$i),
                        'fact_cuenta' => $this->input->post('cuenta'.$i),
                        'fact_liquidacionid' => $liquidacionid,
+                       'fact_rutaimagen' => $this->input->post('rutaimagen'.$i),
                        );
                   	   $this->codegen_model->add('est_facturas',$data);
                   }
