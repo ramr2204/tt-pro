@@ -49,16 +49,13 @@ var oTable = $('#tablaq').dataTable( {
   var number= accounting.formatMoney(aData[6], "$", 2, ".", ","); // €4.999,99
   $("td:eq(5)", nRow).html('<div class="">' + number + '</div>');
   if (aData[7]=='Legalizado') {
-   $("td:eq(7)", nRow).html('<a href="#" class="btn btn-default btn-xs terminar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-tags"></i></a>');
+   $("td:eq(7)", nRow).html('<a href="#" class="btn btn-success btn-xs terminar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-tags"></i></a>');
   }
    if (aData[7]=='Liquidado') {
-   $("td:eq(7)", nRow).html('<a href="#" class="btn btn-default btn-xs pagar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-money"></i></a>');
-  }
-  if (aData[7]=='Terminado') {
-   $("td:eq(7)", nRow).html('<a href="#" class="btn btn-default btn-xs ver" title="Ver" id="'+aData[0]+'"><i class="fa fa-eye"></i></a>');
+   $("td:eq(7)", nRow).html('<a href="#" class="btn btn-primary btn-xs pagar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-money"></i></a>');
   }
   if (aData[7]==null) {
-   $("td:eq(7)", nRow).html('<a href="#" class="btn btn-default btn-xs liquidar" title="Liquidar" id="'+aData[0]+'"><i class="fa fa-file-excel-o"></i></a>');
+   $("td:eq(7)", nRow).html('<a href="#" class="btn btn-danger btn-xs liquidar" title="Liquidar" id="'+aData[0]+'"><i class="fa fa-file-excel-o"></i></a>');
   }
 
  },

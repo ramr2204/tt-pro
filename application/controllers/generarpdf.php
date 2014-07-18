@@ -108,7 +108,9 @@ function generar_estampilla()
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
 
               $this->data['estampilla'] = $this->liquidaciones_model->getfactura_legalizada($this->uri->segment(3));
-              //print_r($this->data['estampilla']);
+              // echo "<pre>";
+              // print_r($this->data['estampilla']);
+              //  echo "</pre>";
               $estampilla=$this->data['estampilla'];
               $this->load->library("Pdf");
               $resolution= array(14, 9);
@@ -126,15 +128,15 @@ function generar_estampilla()
               $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
               // set margins
-              $pdf->SetMargins(1, 1, 1);
+              $pdf->SetMargins(0, 0, 0);
               $pdf->SetHeaderMargin(0);
               $pdf->SetFooterMargin(0);
 
               // set auto page breaks
-              $pdf->SetAutoPageBreak(TRUE, 2);
+              $pdf->SetAutoPageBreak(FALSE, 1);
 
               // set image scale factor
-              $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+              //$pdf->setImageScale(100.5);
 
               // set some language-dependent strings (optional)
               if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {

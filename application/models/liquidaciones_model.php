@@ -33,7 +33,7 @@ class Liquidaciones_model extends CI_Model {
     }
 
     function getestampillas($id){
-        $this->db->select('e.estm_id,e.estm_nombre,e.estm_cuenta,b.banc_nombre,et.esti_porcentaje');
+        $this->db->select('e.estm_id,e.estm_nombre,e.estm_cuenta,b.banc_nombre,et.esti_porcentaje,e.estm_rutaimagen');
         $this->db->from('est_estampillas e');
         $this->db->join('par_bancos b', 'b.banc_id = e.estm_bancoid', 'left');
         $this->db->join('est_estampillas_tiposcontratos et', 'et.esti_estampillaid = e.estm_id and et.esti_porcentaje > 0', 'inner');
@@ -43,7 +43,7 @@ class Liquidaciones_model extends CI_Model {
     }
     
     function getfacturas($id){
-        $this->db->select('f.fact_id,f.fact_codigo, f.fact_nombre, f.fact_porcentaje, f.fact_valor, f.fact_banco, f.fact_cuenta, f.fact_rutacomprobante, pa.pago_valor, pa.pago_fecha, im.impr_codigopapel');
+        $this->db->select('f.fact_id,f.fact_codigo, f.fact_nombre, f.fact_porcentaje, f.fact_valor, f.fact_banco, f.fact_cuenta, f.fact_rutacomprobante,f.fact_rutaimagen, pa.pago_valor, pa.pago_fecha, im.impr_codigopapel');
         $this->db->from('est_facturas f');
         $this->db->join('est_pagos pa', 'pa.pago_facturaid = f.fact_id', 'left');
         $this->db->join('est_impresiones im', 'im.impr_facturaid = f.fact_id AND impr_estado=1', 'left');
@@ -58,7 +58,7 @@ class Liquidaciones_model extends CI_Model {
     }
 
     function getfactura_legalizada($id){
-        $this->db->select('f.fact_id,f.fact_codigo, f.fact_nombre, f.fact_porcentaje, f.fact_valor,pa.pago_valor, pa.pago_fecha, im.impr_codigopapel,ct.cont_nombre,ct.cont_nit,co.cntr_numero,co.cntr_vigencia');
+        $this->db->select('f.fact_id,f.fact_codigo, f.fact_nombre, f.fact_porcentaje, f.fact_valor,pa.pago_valor, pa.pago_fecha, im.impr_codigopapel,ct.cont_nombre,ct.cont_nit,co.cntr_numero,co.cntr_vigencia,f.fact_rutaimagen');
         $this->db->from('est_facturas f');
         $this->db->join('est_pagos pa', 'pa.pago_facturaid = f.fact_id', 'left');
         $this->db->join('est_impresiones im', 'im.impr_facturaid = f.fact_id AND im.impr_estado = 1', 'left');

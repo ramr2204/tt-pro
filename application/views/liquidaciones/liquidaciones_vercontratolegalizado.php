@@ -18,9 +18,13 @@
       <table class="table table-striped table-bordered " id="tablaq">
  <thead>
     <tr>
-     
-     <th colspan="5" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
-   
+     <th colspan="1" class="text-center small">
+           <img src="<?php echo base_url() ?>images/gobernacion_tolima1.jpg" height="50" width="40" >
+     </th>
+     <th colspan="3" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
+     <th colspan="1" class="text-center small">
+           <img src="<?php echo base_url() ?>images/gobernacion_tolima2.jpg" height="50" width="80" >
+     </th>
    </tr>
  </thead>
  <tbody>
@@ -76,7 +80,12 @@
 <?php $x=0; ?>
 <?php foreach($facturas as $row2) { ?>
 <tr>
-     <td colspan="1"><?php echo $row2->fact_nombre; ?> </td>
+     <td colspan="1"><?php echo $row2->fact_nombre; ?>
+       <?php if ($row2->fact_rutaimagen) { ?>
+           <img src="<?php echo base_url().$row2->fact_rutaimagen; ?>" height="60" width="60" >
+       <?php } ?>
+
+      </td>
      <td colspan="1" class="text-center"><?php echo $row2->fact_cuenta; ?><br><?php echo $row2->fact_banco; ?></td>
      <td colspan="1" class="text-center"><?php echo $row2->fact_porcentaje; ?>%</td>
      <td colspan="1" class="text-right"><?php echo '$'.number_format($row2->fact_valor, 2, ',', '.'); ?>

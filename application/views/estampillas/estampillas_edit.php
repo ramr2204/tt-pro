@@ -19,7 +19,7 @@
                            <div class="panel panel-default">
                            <div class="panel-heading"><h1>Editar estampilla</h1></div>
                              <div class="panel-body">
-                              <?php echo form_open(current_url(),'role="form"');?>
+                              <?php echo form_open_multipart(current_url(),'role="form"');?>
                                     <div class="form-group">
                                            <label for="id">Id</label>
                                            <input class="form-control" id="id" type="hidden" name="id" value="<?php echo $result->estm_id; ?>"/>
@@ -54,7 +54,10 @@
                                            </select>
                                            <?php echo form_error('bancoid','<span class="text-danger">','</span>'); ?>
                                     </div>
-                                    
+                                    <div class="form-group">
+                                        <label for="imagen">Imagen</label>
+                                        <input id="file" type="file" class="file" name="imagen" multiple=false>
+                                    </div>
                                     <div class="form-group">
                                            <label for="descripcion">Descripción</label>
                                            <textarea class="form-control" id="descripcion" type="descripcion" name="descripcion" maxlength="500"><?php echo $result->estm_descripcion; ?></textarea>
@@ -96,7 +99,7 @@
       <div class="modal-body">
          <input class="form-control" id="id" type="hidden" name="id" value="<?php echo $result->estm_id; ?>"/>
         Si oprime confirmar no podrá recuperar la información de este estampilla <br>
-        ¿Realmente desea eliminarlo?
+        ¿Realmente desea eliminarla?
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
@@ -120,3 +123,19 @@
     }
 
   </script>
+  <script type="text/javascript">
+    $("#file").fileinput({
+      <?php   if ($result->estm_rutaimagen != '') { ?>
+        initialPreview: ["<a href='<?php echo base_url().$result->estm_rutaimagen; ?>' target='_blank'><img src='<?php echo base_url().$result->estm_rutaimagen; ?>' class='file-preview-image' alt='The Moon' title=''></a>"
+],
+        initialCaption: "",
+      <?php } ?>
+        showCaption: false,
+        browseClass: "btn btn-default btn-sm",
+        browseLabel: "Cargar imagen",
+        showUpload: false,
+        showRemove: false,
+
+    });
+
+</script>
