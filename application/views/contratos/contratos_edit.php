@@ -2,11 +2,11 @@
 
 /**
 *   Nombre:            admin template
-*   Ruta:              /application/views/modulos/modulos_list.php
+*   Ruta:              /application/views/contratos/contratos_edit.php
 *   Descripcion:       permite editar un módulo
 *   Fecha Creacion:    12/may/2014
-*   @author           Iván Viña <ivandariovinam@gmail.com>
-*   @version          2014-05-12
+*   @author            Iván Viña <ivandariovinam@gmail.com>
+*   @version           2014-07-18
 *
 */
 
@@ -19,7 +19,7 @@
                         </div>
                         <div class="col-md-8 column">
                            <div class="panel panel-default">
-                           <div class="panel-heading"><h1>Editar contratista</h1></div>
+                           <div class="panel-heading"><h1>Editar contrato</h1></div>
                              <div class="panel-body">
                               <?php echo form_open(current_url(),'role="form"');?>
 

@@ -95,9 +95,11 @@ class Liquidaciones extends MY_Controller {
               $valorsiniva = $contrato->cntr_valor/(($contrato->regi_iva/100)+1);
               $totalestampilla= array();
               $valortotal=0;
+              $parametros=$this->codegen_model->get('adm_parametros','para_redondeo','para_id = 1',1,NULL,true);
               foreach ($estampillas as $key => $value) {
                 
                  $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
+                 $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
                  $valortotal+=$totalestampilla[$value->estm_id];
               }
               $this->data['est_totalestampilla']=$totalestampilla;

@@ -118,7 +118,7 @@ $cuentas='';
      <input type="hidden" name="rutaimagen<?php echo $x; ?>" value="<?php echo $row2->estm_rutaimagen; ?>">
      </td>
      <td colspan="1" class="text-right"><?php echo '$'.number_format($est_totalestampilla[$row2->estm_id], 2, ',', '.'); ?>
-     <br><?php echo round ( $est_totalestampilla[$row2->estm_id], -2 ) ?>
+     <br>
      <input type="hidden" name="totalestampilla<?php echo $x; ?>" value="<?php echo $est_totalestampilla[$row2->estm_id]; ?>">
      </td>
 </tr>

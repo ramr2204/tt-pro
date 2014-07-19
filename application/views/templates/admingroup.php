@@ -8,12 +8,19 @@
 *   @version          2014-07-16
 *
 */
-
-?><!DOCTYPE html>
+?>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-<title><?php echo ( isset( $title ) ) ? $title.'|| Empresa de la ciudad' : WEBSITE_NAME.' || Empresa de la ciudad'; ?></title>
+<META NAME="DC.Language" SCHEME="RFC1766" CONTENT="Spanish">
+<META NAME="AUTHOR" CONTENT="Iván Darío Viña Marulanda">
+<META NAME="REPLY-TO" CONTENT="ivandariovinam@gmail.com">
+<LINK REV="made" href="mailto:ivandariovinam@gmail.com">
+<META NAME="Resource-type" CONTENT="Document">
+<META NAME="DateCreated" CONTENT="Mon, 5 May 2014 08:00:00 GMT-5">
+
+<title><?php echo ( isset( $title ) ) ? $title.'|| Sistema de estampillas pro ' : WEBSITE_NAME.' || Sistema de estampillas pro'; ?></title>
 <?php
     // Add any keywords
     echo ( isset( $keywords ) ) ? meta('keywords', $keywords) : '';
@@ -164,6 +171,7 @@
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">Administración<b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li><a href="<?php echo base_url(); ?>index.php/users">Usuarios</a></li>
+                <li><a href="<?php echo base_url(); ?>index.php/parametros">Parámetros</a></li>
                 <li><a href="<?php echo base_url(); ?>index.php/perfiles">Perfiles</a></li>
                 <li><a href="<?php echo base_url(); ?>index.php/procesos">Procesos</a></li>
                 <li><a href="<?php echo base_url(); ?>index.php/aplicaciones">Aplicaciones</a></li>
