@@ -77,7 +77,56 @@ class Liquidaciones extends MY_Controller {
 
   }
 
+ function liquidartramites()
+  {
+      if ($this->ion_auth->logged_in()){
 
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
+
+              $this->data['successmessage2']=$this->session->flashdata('successmessage');
+              $this->data['errormessage']=$this->session->flashdata('errormessage');
+              $this->data['infomessage']=$this->session->flashdata('infomessage');
+              $this->data['accion']=$this->session->flashdata('accion');
+              if ($this->uri->segment(3)>0){
+                  $this->data['idcontrato']= $this->uri->segment(3);
+               } else {
+                  $this->data['idcontrato']= 0;
+               }
+              //template data
+              $this->template->set('title', 'Administrar liquidaciones');
+              $this->data['style_sheets']= array(
+                            'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen',
+                            'css/plugins/bootstrap/fileinput.css' => 'screen',
+                            'css/plugins/bootstrap/bootstrap-switch.css' => 'screen'
+                        );
+              $this->data['javascripts']= array(
+                        'js/jquery.dataTables.min.js',
+                        'js/plugins/dataTables/dataTables.bootstrap.js',
+                        'js/jquery.dataTables.defaults.js',
+                        'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
+                        'js/accounting.min.js',
+                        'js/plugins/bootstrap/fileinput.min.js',
+                        'js/plugins/bootstrap/bootstrap-switch.min.js'
+                       );
+              $resultado = $this->codegen_model->max('con_contratos','cntr_fecha_firma');
+              
+              foreach ($resultado as $key => $value) {
+                  $aplilo[$key]=$value;
+              }
+              $vigencia_mayor=substr($aplilo['cntr_fecha_firma'], 0, 4);
+              $vigencia_anterior=$vigencia_mayor-1;
+              $this->data['vigencias']= array($vigencia_mayor,$vigencia_anterior);
+              $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_liquidartramites', $this->data);
+              
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+
+      } else {
+              redirect(base_url().'index.php/users/login');
+      }
+
+  }
 
   function liquidarcontrato()
   {        
@@ -473,7 +522,30 @@ function vercontratolegalizado()
   }
 
 
+ function tramites_datatable ()
+  {
+      if ($this->ion_auth->logged_in()) {
+          
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
+              
+              $this->load->library('datatables');
+              $this->datatables->select('c.cntr_id,c.cntr_numero,co.cont_nit,co.cont_nombre,c.cntr_fecha_firma,c.cntr_objeto,c.cntr_valor,el.eslo_nombre');
+              $this->datatables->from('con_contratos c');
+              $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
+              $this->datatables->join('con_estadoslocales el', 'el.eslo_id = c.cntr_estadolocalid', 'left');
+              //$this->datatables->join('est_facturas fa', 'c.cntr_id = fa.fact_contratoid', 'left');
+                  
+                  $this->datatables->add_column('edit', '-');
+              echo $this->datatables->generate();
 
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+               
+      } else{
+              redirect(base_url().'index.php/users/login');
+      }           
+  }
 
 
 
