@@ -1,15 +1,15 @@
 <?php if( ! defined('BASEPATH') ) exit('No direct script access allowed');
 /**
-*   Nombre:            tiposcontratos
-*   Ruta:              /application/controllers/tiposcontratos.php
-*   Descripcion:       controlador de tiposcontratos
+*   Nombre:            tramites
+*   Ruta:              /application/controllers/tramites.php
+*   Descripcion:       controlador de tramites
 *   Fecha Creacion:    20/may/2014
 *   @author            Iván Viña <ivandariovinam@gmail.com>
 *   @version           2014-05-20
 *
 */
 
-class Tiposcontratos extends MY_Controller {
+class Tramites extends MY_Controller {
     
   function __construct() 
   {
@@ -29,13 +29,13 @@ class Tiposcontratos extends MY_Controller {
   {
       if ($this->ion_auth->logged_in()){
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('tiposcontratos/manage')){
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('tramites/manage')){
 
               $this->data['successmessage']=$this->session->flashdata('successmessage');
               $this->data['errormessage']=$this->session->flashdata('errormessage');
               $this->data['infomessage']=$this->session->flashdata('infomessage');
               //template data
-              $this->template->set('title', 'Administrar tipos contratos');
+              $this->template->set('title', 'Administrar trámites');
               $this->data['style_sheets']= array(
                             'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
                         );
@@ -45,7 +45,7 @@ class Tiposcontratos extends MY_Controller {
                         'js/jquery.dataTables.defaults.js'
                        );
             
-              $this->template->load($this->config->item('admin_template'),'tiposcontratos/tiposcontratos_list', $this->data);
+              $this->template->load($this->config->item('admin_template'),'tramites/tramites_list', $this->data);
 
           } else {
               redirect(base_url().'index.php/error_404');
@@ -61,11 +61,11 @@ class Tiposcontratos extends MY_Controller {
   {        
       if ($this->ion_auth->logged_in()) {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('tiposcontratos/add')) {
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('tramites/add')) {
 
               $this->data['successmessage']=$this->session->flashdata('message');  
-        		  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]|is_unique[con_tiposcontratos.tico_nombre]');   
-              $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[500]');
+        		  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[200]|is_unique[est_tramites.tram_nombre]');   
+              $this->form_validation->set_rules('observaciones', 'Descripción', 'trim|xss_clean|max_length[500]');
               $x=1;
               while ( $x  <= $this->input->post('numero')) {
                   $this->form_validation->set_rules('estampillaid'.$x, 'estampillaid', 'trim|xss_clean|max_length[5]|numeric');
@@ -82,38 +82,38 @@ class Tiposcontratos extends MY_Controller {
               } else {    
 
                     $data = array(
-                        'tico_nombre' => $this->input->post('nombre'),
-                        'tico_descripcion' => $this->input->post('descripcion')
+                        'tram_nombre' => $this->input->post('nombre'),
+                        'tram_observaciones' => $this->input->post('observaciones')
 
                      ); 
                     
-    			        if ($this->codegen_model->add('con_tiposcontratos',$data) == TRUE) {
+    			        if ($this->codegen_model->add('est_tramites',$data) == TRUE) {
                       
                       $insertid= $this->db->insert_id();
                       $x=1;
                       while ( $x  <= $this->input->post('numero')) {
                           if ($this->input->post('porcentaje'.$x) > 0) {
                               $data = array(
-                              'esti_estampillaid' => $this->input->post('estampillaid'.$x),
-                              'esti_tipocontratoid' => $insertid,
-                              'esti_porcentaje' => $this->input->post('porcentaje'.$x)
+                              'estr_estampillaid' => $this->input->post('estampillaid'.$x),
+                              'estr_tramiteid' => $insertid,
+                              'estr_porcentaje' => $this->input->post('porcentaje'.$x)
                               );
-                              $this->codegen_model->add('est_estampillas_tiposcontratos',$data);
+                              $this->codegen_model->add('est_estampillas_tramites',$data);
                           }
                           $x++;
                       } 
 
-                      $this->session->set_flashdata('message', 'El tipo de contrato se ha creado con éxito');
-                      redirect(base_url().'index.php/tiposcontratos/add');
+                      $this->session->set_flashdata('message', 'El trámite se ha creado con éxito');
+                      redirect(base_url().'index.php/tramites/add');
     			        } else {
 
-    				          $this->data['errormessage'] = 'No se pudo registrar el tipo de contrato';
+    				          $this->data['errormessage'] = 'No se pudo registrar el trámite';
 
     			        }
 
     		      }
                 
-              $this->template->set('title', 'Nueva tipo de contrato');
+              $this->template->set('title', 'Nuevo trámite');
               $this->data['style_sheets']= array(
                         'css/chosen.css' => 'screen'
                     );
@@ -121,7 +121,7 @@ class Tiposcontratos extends MY_Controller {
                         'js/chosen.jquery.min.js'
                     );
               $this->data['estampillas']  = $this->codegen_model->getSelect('est_estampillas','estm_id,estm_nombre');
-              $this->template->load($this->config->item('admin_template'),'tiposcontratos/tiposcontratos_add', $this->data);
+              $this->template->load($this->config->item('admin_template'),'tramites/tramites_add', $this->data);
              
           } else {
               redirect(base_url().'index.php/error_404');
@@ -138,30 +138,30 @@ class Tiposcontratos extends MY_Controller {
   {    
       if ($this->ion_auth->logged_in()) {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('tiposcontratos/edit')) {  
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('tramites/edit')) {  
 
-              $idtipocontrato = ($this->uri->segment(3)) ? $this->uri->segment(3) : $this->input->post('id') ;
-              if ($idtipocontrato==''){
-                  $this->session->set_flashdata('infomessage', 'Debe elegir un tipo de tipo de contrato para editar');
-                  redirect(base_url().'index.php/tiposcontratos');
+              $idtramite = ($this->uri->segment(3)) ? $this->uri->segment(3) : $this->input->post('id') ;
+              if ($idtramite==''){
+                  $this->session->set_flashdata('infomessage', 'Debe elegir un tipo de trámite para editar');
+                  redirect(base_url().'index.php/tramites');
               }
-              $resultado = $this->codegen_model->get('con_tiposcontratos','tico_nombre','tico_id = '.$idtipocontrato,1,NULL,true);
+              $resultado = $this->codegen_model->get('est_tramites','tram_nombre','tram_id = '.$idtramite,1,NULL,true);
               
               foreach ($resultado as $key => $value) {
                   $aplilo[$key]=$value;
               }
               
-              if ($aplilo['tico_nombre']==$this->input->post('nombre')) {
+              if ($aplilo['tram_nombre']==$this->input->post('nombre')) {
                   
-                  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]');
+                  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[200]');
               
               } else {
 
-                  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]|is_unique[con_tiposcontratos.tico_nombre]');
+                  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[200]|is_unique[est_tramites.tram_nombre]');
               
               }
 
-              $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[500]');
+              $this->form_validation->set_rules('observaciones', 'Descripción', 'trim|xss_clean|max_length[500]');
               $x=1;
               while ( $x  <= $this->input->post('numero')) {
                   $this->form_validation->set_rules('estampillaid'.$x, 'estampillaid', 'trim|xss_clean|max_length[5]|numeric');
@@ -177,11 +177,11 @@ class Tiposcontratos extends MY_Controller {
               } else {                            
                   
                   $data = array(
-                          'tico_nombre' => $this->input->post('nombre'),
-                          'tico_descripcion' => $this->input->post('descripcion')
+                          'tram_nombre' => $this->input->post('nombre'),
+                          'tram_observaciones' => $this->input->post('observaciones')
                    );
                            
-                	if ($this->codegen_model->edit('con_tiposcontratos',$data,'tico_id',$idtipocontrato) == TRUE) {
+                	if ($this->codegen_model->edit('est_tramites',$data,'tram_id',$idtramite) == TRUE) {
 
                 	  $x=1; 
                       while ( $x  <= $this->input->post('numero')) {
@@ -189,41 +189,40 @@ class Tiposcontratos extends MY_Controller {
                           if ($this->input->post('estiid'.$x) > 0) {
                           	  if ($this->input->post('porcentaje'.$x) > 0) {
                                    $data = array(
-                                     'esti_porcentaje' => $this->input->post('porcentaje'.$x)
+                                     'estr_porcentaje' => $this->input->post('porcentaje'.$x)
                                    );
-                                   $this->codegen_model->edit('est_estampillas_tiposcontratos',$data,'esti_id',$this->input->post('estiid'.$x));
+                                   $this->codegen_model->edit('est_estampillas_tramites',$data,'estr_id',$this->input->post('estiid'.$x));
                                } else {
-                               	   $this->codegen_model->delete('est_estampillas_tiposcontratos','esti_id',$this->input->post('estiid'.$x));
+                               	   $this->codegen_model->delete('est_estampillas_tramites','estr_id',$this->input->post('estiid'.$x));
                                }
                           } else {
                                if ($this->input->post('porcentaje'.$x) > 0) {
                                	   $data = array(
-                                     'esti_estampillaid' => $this->input->post('estampillaid'.$x),
-                                     'esti_tipocontratoid' => $idtipocontrato,
-                                     'esti_porcentaje' => $this->input->post('porcentaje'.$x)
+                                     'estr_estampillaid' => $this->input->post('estampillaid'.$x),
+                                     'estr_tramiteid' => $idtramite,
+                                     'estr_porcentaje' => $this->input->post('porcentaje'.$x)
                                    );
-                                   $this->codegen_model->add('est_estampillas_tiposcontratos',$data);
+                                   $this->codegen_model->add('est_estampillas_tramites',$data);
                                }
                           }
                           $x++;
                       } 	
 
-                      $this->session->set_flashdata('successmessage', 'El tipo de contrato se ha editado con éxito');
-                      redirect(base_url().'index.php/tiposcontratos/edit/'.$idtipocontrato);
+                      $this->session->set_flashdata('successmessage', 'El trámite se ha editado con éxito');
+                      redirect(base_url().'index.php/tramites/edit/'.$idtramite);
                       
                 	} else {
                 				  
-                      $this->data['errormessage'] = 'No se pudo registrar el tipo de contrato';
+                      $this->data['errormessage'] = 'No se pudo registrar el trámite';
 
                 	}
               }       
                   $this->data['successmessage']=$this->session->flashdata('successmessage');
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                  $this->data['result'] = $this->codegen_model->get('con_tiposcontratos','tico_id,tico_nombre,tico_descripcion','tico_id = '.$idtipocontrato,1,NULL,true);
-                  $this->template->set('title', 'Editar tipo de contrato');
-                  $this->data['estampillas']  = $this->codegen_model->getSelect('est_estampillas','estm_id,estm_nombre,esti_porcentaje,esti_ordenanzaid,esti_id','','LEFT JOIN est_estampillas_tiposcontratos on estm_id = esti_estampillaid AND esti_tipocontratoid ='.$idtipocontrato);
-                  //echo $this->db->last_query();
-                  $this->template->load($this->config->item('admin_template'),'tiposcontratos/tiposcontratos_edit', $this->data);
+                  $this->data['result'] = $this->codegen_model->get('est_tramites','tram_id,tram_nombre,tram_observaciones','tram_id = '.$idtramite,1,NULL,true);
+                  $this->template->set('title', 'Editar trámite');
+                  $this->data['estampillas']  = $this->codegen_model->getSelect('est_estampillas','estm_id,estm_nombre,estr_porcentaje,estr_ordenanzaid,estr_id','','LEFT JOIN est_estampillas_tramites on estm_id = estr_estampillaid AND estr_tramiteid='.$idtramite);
+                  $this->template->load($this->config->item('admin_template'),'tramites/tramites_edit', $this->data);
                         
           }else {
               redirect(base_url().'index.php/error_404');
@@ -238,21 +237,21 @@ class Tiposcontratos extends MY_Controller {
   {
       if ($this->ion_auth->logged_in()) {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('tiposcontratos/delete')) {  
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('tramites/delete')) {  
               if ($this->input->post('id')==''){
-                  $this->session->set_flashdata('infomessage', 'Debe elegir un tipo de tipo de contrato para eliminar');
-                  redirect(base_url().'index.php/tiposcontratos');
+                  $this->session->set_flashdata('infomessage', 'Debe elegir un tipo de trámite para eliminar');
+                  redirect(base_url().'index.php/tramites');
               }
-              if (!$this->codegen_model->depend('con_contratos','cntr_tipocontratoid',$this->input->post('id'))) {
+              if (!$this->codegen_model->depend('est_contratos','cntr_tramiteid',$this->input->post('id'))) {
 
-                  $this->codegen_model->delete('con_tiposcontratos','tico_id',$this->input->post('id'));
-                  $this->session->set_flashdata('successmessage', 'El tipo de contrato se ha eliminado con éxito');
-                  redirect(base_url().'index.php/tiposcontratos');  
+                  $this->codegen_model->delete('est_tramites','tram_id',$this->input->post('id'));
+                  $this->session->set_flashdata('successmessage', 'El trámite se ha eliminado con éxito');
+                  redirect(base_url().'index.php/tramites');  
 
               } else {
 
-                  $this->session->set_flashdata('errormessage', 'El tipo de contrato se encuentra en uso, no es posible eliminarlo.');
-                  redirect(base_url().'index.php/tiposcontratos/edit/'.$this->input->post('id'));
+                  $this->session->set_flashdata('errormessage', 'El trámite se encuentra en uso, no es posible eliminarlo.');
+                  redirect(base_url().'index.php/tramites/edit/'.$this->input->post('id'));
 
               }
                          
@@ -269,23 +268,23 @@ class Tiposcontratos extends MY_Controller {
   {
       if ($this->ion_auth->logged_in()) {
           
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('tiposcontratos/manage') ) { 
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('tramites/manage') ) { 
               
               $this->load->library('datatables');
-              $this->datatables->select('t.tico_id,t.tico_nombre,t.tico_descripcion');
-              $this->datatables->from('con_tiposcontratos t');
+              $this->datatables->select('t.tram_id,t.tram_nombre,t.tram_observaciones');
+              $this->datatables->from('est_tramites t');
 
-              if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('tiposcontratos/edit')) {
+              if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('tramites/edit')) {
                   
                   $this->datatables->add_column('edit', '<div class="btn-toolbar">
                                                            <div class="btn-group">
-                                                              <a href="'.base_url().'index.php/tiposcontratos/edit/$1" class="btn btn-default btn-xs" title="Editar tipo de contrato"><i class="fa fa-pencil-square-o"></i></a>
+                                                              <a href="'.base_url().'index.php/tramites/edit/$1" class="btn btn-default btn-xs" title="Editar trámite"><i class="fa fa-pencil-square-o"></i></a>
                                                            </div>
-                                                         </div>', 't.tico_id');
+                                                         </div>', 't.tram_id');
 
               }  else {
                   
-                  $this->datatables->add_column('edit', '', 't.tico_id'); 
+                  $this->datatables->add_column('edit', '', 't.tram_id'); 
               }
               
               echo $this->datatables->generate();

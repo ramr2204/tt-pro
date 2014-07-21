@@ -18,11 +18,11 @@
       <table class="table table-striped table-bordered " id="tablaq">
  <thead>
     <tr>
-     <th colspan="1" class="text-center small">
+     <th colspan="1" class="text-center small" width="25%">
            <img src="<?php echo base_url() ?>images/gobernacion_tolima1.jpg" height="50" width="40" >
      </th>
-     <th colspan="2" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
-     <th colspan="1" class="text-center small">
+     <th colspan="2" class="text-center small" width="50%">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
+     <th colspan="1" class="text-center small" width="25%">
            <img src="<?php echo base_url() ?>images/gobernacion_tolima2.jpg" height="50" width="80" >
      </th>
    </tr>
@@ -118,7 +118,7 @@ $cuentas='';
      <input type="hidden" name="rutaimagen<?php echo $x; ?>" value="<?php echo $row2->estm_rutaimagen; ?>">
      </td>
      <td colspan="1" class="text-right"><?php echo '$'.number_format($est_totalestampilla[$row2->estm_id], 2, ',', '.'); ?>
-     <br><?php echo round ( $est_totalestampilla[$row2->estm_id], -2 ) ?>
+     <br>
      <input type="hidden" name="totalestampilla<?php echo $x; ?>" value="<?php echo $est_totalestampilla[$row2->estm_id]; ?>">
      </td>
 </tr>
