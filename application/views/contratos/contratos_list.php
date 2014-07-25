@@ -36,7 +36,7 @@ var oTable = $('#tablaq').dataTable( {
             ],   
 "fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
 
-  $("td:eq(5)", nRow).html('<div>' + aData[5].substr( 0, 30 )+ '...</div>');
+  $("td:eq(5)", nRow).html('<div>' + aData[5].substr( 0, 130 )+ '...</div>');
 
  }             
    });

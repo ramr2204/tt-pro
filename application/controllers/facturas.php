@@ -1,6 +1,6 @@
 <?php
 
-class Facturas extends MY_Controller {
+class Pagos extends MY_Controller {
 		
 		function __construct() {
 				parent::__construct();

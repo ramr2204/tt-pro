@@ -26,36 +26,31 @@ $(document).ready(function() {
 var oTable = $('#tablaq').dataTable( {
 "bProcessing": true,
 "bServerSide": true,
-"sAjaxSource": "<?php echo base_url(); ?>index.php/liquidaciones/liquidaciones_dataTable",
+"sAjaxSource": "<?php echo base_url(); ?>index.php/liquidaciones/tramites_datatable",
 "sServerMethod": "POST",
 "aoColumns": [ 
                       { "sClass": "center","bVisible": false}, /*id 0*/
-                      { "sClass": "center","sWidth": "6%" }, 
                       { "sClass": "center" }, 
                       { "sClass": "item" },
                       { "sClass": "item" },
+                      { "sClass": "item" },
+                      { "sClass": "item" },
                       { "sClass": "item" },  
-                      { "sClass": "money" },
-                      { "sClass": "item",},
                       { "sClass": "center","bSortable": false,"bSearchable": false},
 
                     
             ],   
 "fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
 
-  $("td:eq(4)", nRow).html('<div class="small">' + aData[5].substr( 0, 130 )+ '...</div>');
-
    
-  var number= accounting.formatMoney(aData[6], "$", 2, ".", ","); // €4.999,99
-  $("td:eq(5)", nRow).html('<div class="">' + number + '</div>');
-  if (aData[7]=='Legalizado') {
-   $("td:eq(7)", nRow).html('<a href="#" class="btn btn-success btn-xs terminar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-tags"></i></a>');
+  if (aData[6]=='Legalizado') {
+   $("td:eq(6)", nRow).html('<a href="#" class="btn btn-success btn-xs terminar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-tags"></i></a>');
   }
-   if (aData[7]=='Liquidado') {
-   $("td:eq(7)", nRow).html('<a href="#" class="btn btn-primary btn-xs pagar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-money"></i></a>');
+   if (aData[6]=='Liquidado') {
+   $("td:eq(6)", nRow).html('<a href="#" class="btn btn-primary btn-xs pagar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-money"></i></a>');
   }
-  if (aData[7]==null) {
-   $("td:eq(7)", nRow).html('<a href="#" class="btn btn-danger btn-xs liquidar" title="Liquidar" id="'+aData[0]+'"><i class="fa fa-file-excel-o"></i></a>');
+  if (aData[6]==null) {
+   $("td:eq(6)", nRow).html('<a href="#" class="btn btn-danger btn-xs liquidar" title="Liquidar" id="'+aData[0]+'"><i class="fa fa-file-excel-o"></i></a>');
   }
 
  },
@@ -64,7 +59,7 @@ var oTable = $('#tablaq').dataTable( {
            event.preventDefault();
            var ID = $(this).attr("id");
             $("#idcontrato").val(ID);
-             $('.liquida').load('<?php echo base_url(); ?>index.php/liquidaciones/liquidarcontrato/'+ID,function(result){
+             $('.liquida').load('<?php echo base_url(); ?>index.php/liquidaciones/verliquidartramite/'+ID,function(result){
               $('#myModal').modal({show:true});
              });
          });
@@ -72,7 +67,7 @@ var oTable = $('#tablaq').dataTable( {
            event.preventDefault();
            var ID = $(this).attr("id");
             $("#idcontrato").val(ID);
-             $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/verrecibos/'+ID,function(result){
+             $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramiteliquidado/'+ID,function(result){
               $('#myModal2').modal({show:true});
              });
          });
@@ -80,11 +75,11 @@ var oTable = $('#tablaq').dataTable( {
            event.preventDefault();
            var ID = $(this).attr("id");
             $("#idcontrato").val(ID);
-             $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vercontratolegalizado/'+ID,function(result){
+             $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramitelegalizado/'+ID,function(result){
               $('#myModal3').modal({show:true});
              });
          });
-    }     
+    }      
 
 
 
@@ -152,30 +147,26 @@ var oTable = $('#tablaq').dataTable( {
 </style>
 <div class="row"> 
  <div class="col-sm-12">
- <h1>Contratos</h1>
-
+ <h1>Liquidación de trámites, documentos, certificados.</h1>
    <br><br>
+    <?php
+        echo anchor(base_url().'liquidaciones/addtramite','<i class="fa fa-plus"></i> Nueva liquidación ','class="btn btn-large btn-primary"');
+    ?>
  </div>
 </div> 
 
 <div class="row"> 
 <div class="col-sm-1"></div>
- <div class="col-sm-2">Número:<div align="center" id="buscarnumero"></div></div>
- <div class="col-sm-2">NIT:<div align="center" id="buscarnit"></div></div>
- <div class="col-sm-4">Contratista:<div align="center" id="buscarcontratista"></div></div>
- <div class="col-sm-2">Vigencia:<div align="center" id="buscarano"></div></div>
+ <div class="col-sm-2">Identificación:<div align="center" id="buscarnumero"></div></div>
+ <div class="col-sm-3">Nomnre:<div align="center" id="buscarnit"></div></div>
+ <div class="col-sm-3">Támite:<div align="center" id="buscarcontratista"></div></div>
+ <div class="col-sm-2">Año:<div align="center" id="buscarano"></div></div>
  <div class="col-sm-1"></div>
 </div>
 
 
           
     
-
-
-
-
-
-
 
 <div class="row"> 
  <div class="col-sm-12">    
@@ -185,12 +176,11 @@ var oTable = $('#tablaq').dataTable( {
  <thead>
     <tr>
      <th>Id</th>
-     <th>Número</th>
-     <th>NIT</th>
-     <th>Contratista</th>
-     <th>Fecha</th>
-     <th>Objeto</th>
-     <th>Valor</th>       
+     <th>Identificación</th>
+     <th>Nombre</th>
+     <th>Trámite</th>   
+     <th>Fecha de liquidación</th>
+     <th>Observaciones</th>
      <th>Estado</th>
      <th></th>
    </tr>
@@ -201,12 +191,11 @@ var oTable = $('#tablaq').dataTable( {
      <th></th>
      <th></th>
      <th></th>
-     <th>Todas</th>
      <th></th>
      <th></th>
+     <th></th>
+     <th></th> 
      <th></th>       
-     <th></th>
-     <th></th>
    </tr>
  </tfoot>
 </table>
@@ -214,7 +203,7 @@ var oTable = $('#tablaq').dataTable( {
 </div>   
       </div>
 
-<?php echo form_open("liquidaciones/procesarliquidacion",'role="form"');?>
+<?php echo form_open("liquidaciones/procesarliquidaciontramite",'role="form"');?>
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -273,7 +262,20 @@ var oTable = $('#tablaq').dataTable( {
 <?php echo form_close();?>
 
 
-
+<?php if ($accion=='creado') { ?>
+<script type="text/javascript">
+  
+            var ID = <?php echo $idcontrato; ?>;
+            
+           $('.liquida').load('<?php echo base_url(); ?>index.php/liquidaciones/verliquidartramite/'+ID,function(result){
+            
+            $('#myModal').modal('show');
+          
+        });
+        
+ 
+</script>
+<?php   } ?>
 
 
 <?php if ($accion=='liquidado') { ?>
@@ -281,7 +283,7 @@ var oTable = $('#tablaq').dataTable( {
   
             var ID = <?php echo $idcontrato; ?>;
             
-            $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/verrecibos/'+ID,function(result){
+            $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramiteliquidado/'+ID,function(result){
             
             $('#myModal2').modal('show');
             //alert(ID+'....');
@@ -299,7 +301,7 @@ var oTable = $('#tablaq').dataTable( {
   
             var ID = <?php echo $idcontrato; ?>;
             
-           $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vercontratolegalizado/'+ID,function(result){
+           $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramitelegalizado/'+ID,function(result){
             
             $('#myModal3').modal('show');
           
