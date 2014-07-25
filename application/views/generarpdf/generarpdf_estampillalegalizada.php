@@ -49,7 +49,7 @@
 
 </tr>
 <tr>
-     <td colspan="1" class="text-center"><strong>Nombre del contratista</strong></td>
+     <td colspan="1" class="text-center"><strong>Nombre </strong></td>
      <td colspan="3" class="text-center"> <?php echo $estampilla->cont_nombre; ?></td>
 </tr>
 
