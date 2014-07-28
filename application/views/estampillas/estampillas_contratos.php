@@ -11,75 +11,155 @@
 */
  ?>
 <div class="row clearfix">
+<h1>Editar cobros de la estampilla <?php echo $result->estm_nombre; ?></h1>
             <div class="col-md-12 column">
                   <div class="row clearfix">
-                        <div class="col-md-4 column">
-                        </div>
-                        <div class="col-md-4 column">
+
+                        <div class="col-md-5 column">
                            <div class="panel panel-default">
-                           <div class="panel-heading"><h1>Editar estampilla</h1></div>
+                           <div class="panel-heading"><h1>Tipos de contrato</h1></div>
                              <div class="panel-body">
-                              <?php echo form_open_multipart(current_url(),'role="form"');?>
-                                    <div class="form-group">
-                                           <label for="id">Id</label>
-                                           <input class="form-control" id="id" type="hidden" name="id" value="<?php echo $result->estm_id; ?>"/>
-                                           <p><?php echo $result->estm_id; ?></p>
-                                           <?php echo form_error('id','<span class="text-danger">','</span>'); ?>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                           <label for="nombre">Nombre</label>
-                                           <input class="form-control" id="nombre" type="text" name="nombre" value="<?php echo $result->estm_nombre; ?>" required="required" />
-                                           <?php echo form_error('nombre','<span class="text-danger">','</span>'); ?>
-                                    </div>
+                              <table class="table table-bordered">
+                                      <tr>
+                                         <td class="text-center" width="75%">Tipo de contrato</td>
+                                         <td class="text-center" width="15%">Porcentaje</td>
+                                         <td class="text-center" width="10%">Acción</td>
+                                      </tr>   
+                              <?php foreach($tiposcontratos as $row => $value) { ?>
+                                      <tr>
+                                         <td><?php echo $value; ?></td>
+                                         <td class="text-center"><?php echo $porcentajes[$row]; ?>%</td>
+                                         <td class="text-center"><a class="btn btn-danger btn-sm confirm" data-toggle="modal" data-target="#myModal" id="<?php echo $row; ?>" data="contrato" ><i class="fa fa-trash-o"></i> </a></td>
+                                      </tr>  
+                              <?php  } ?>
+                                        <tr>
+                                         <td class="text-center" colspan="3">Agregar</td>
+                                        </tr> 
+                                        <tr>
+                                         <?php echo form_open('estampillas/agregarcobro','name="form1"');?>
+                                         <td class="">
+                                         <input class="form-control" id="estampillaid" type="hidden" name="estampillaid" value="<?php echo $result->estm_id; ?>"/>  
+                                         <input class="form-control" id="tipocobro" type="hidden" name="tipocobro" value="contrato"/> 
 
-                                    <div class="form-group">
-                                           <label for="cuenta">N. de cuenta</label>
-                                           <input class="form-control" id="cuenta" type="text" name="cuenta" value="<?php echo $result->estm_cuenta; ?>" required="required" />
-                                           <?php echo form_error('cuenta','<span class="text-danger">','</span>'); ?>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                           <label for="bancoid">Banco</label>
-                                           <select class="form-control" id="bancoid" name="bancoid" required="required" >
-                                             <option value="0">Seleccione...</option>
-                                             <?php  foreach($bancos as $row) { ?>
-                                                 <?php if ($row->banc_id==$result->estm_bancoid) { ?>
-                                                 <option selected value="<?php echo $row->banc_id; ?>" ><?php echo $row->banc_nombre; ?></option>
-                                                 <?php } else { ?>
-                                                 <option value="<?php echo $row->banc_id; ?>"><?php echo $row->banc_nombre; ?></option>
-                                                 <?php } ?>
+                                           <div class="form-group">
+                                               <label for="tipocontratoid">Tipo de contrato</label>
+                                               <select class="form-control" id="tipocontratoid" name="tipocontratoid" required="required" >
+                                                 <option value="0">Seleccione...</option>
+                                                 <?php  foreach($selecttiposcontratos as $key => $value) { ?>
+                                                 
+                                                     <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                                            
+                                                <?php   } ?>
+                                               </select>
+                                               <?php echo form_error('tipocontratoid','<span class="text-danger">','</span>'); ?>
+                                           </div>
 
-                                             <?php   } ?>
-                                           </select>
-                                           <?php echo form_error('bancoid','<span class="text-danger">','</span>'); ?>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="imagen">Imagen</label>
-                                        <input id="file" type="file" class="file" name="imagen" multiple=false>
-                                    </div>
-                                    <div class="form-group">
-                                           <label for="descripcion">Descripción</label>
-                                           <textarea class="form-control" id="descripcion" type="descripcion" name="descripcion" maxlength="500"><?php echo $result->estm_descripcion; ?></textarea>
-                                           <?php echo form_error('descripcion','<span class="text-danger">','</span>'); ?>
-                                    </div>
+
+                                         </td>
+                                         <td class="text-center">
+                                            <div class="form-group">
+                                               <label for="porcentaje">Porcentaje</label>
+                                               <input class="form-control" id="porcentaje" type="number" name="porcentaje" value="0" required="required" step="0.1" min="0" />
+                                               <?php echo form_error('porcentaje','<span class="text-danger">','</span>'); ?>
+                                           </div>
+                                         </td>
+                                         <td class="text-center"><button type="submit" class="btn btn-success btn-sm"><i class="fa fa-floppy-o"></i></button></td>
+                                      </tr> 
+                                      <?php echo form_close();?>
+                              </table>
                                       
                                     <div class="pull-right">
                                      <?php  echo anchor('estampillas', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
-                                     
-                                     <?php if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('estampillas/delete')) { ?>
-                                      <a class="btn btn-danger" data-toggle="modal" data-target="#myModal"><i class="fa fa-trash-o"></i> Eliminar</a>
-                                     <?php } ?>
-
-                                    <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
+                                    
                                     </div>
-                                <?php echo form_close();?>
                               
                               </div>
                              </div>
-       
+                          
                         </div>
-                        <div class="col-md-4 column">
+
+
+
+
+
+
+
+
+                        <div class="col-md-7 column">
+                          <div class="panel panel-default">
+                           <div class="panel-heading"><h1>Trámites</h1></div>
+                             <div class="panel-body">
+
+
+                               <table class="table table-bordered">
+                                      <tr>
+                                         <td class="text-center" width="75%">Trámite</td>
+                                         <td class="text-center" width="15%">Porcentaje</td>
+                                         <td class="text-center" width="10%">Acción</td>
+                                      </tr>   
+                              <?php foreach($tramites as $row => $value) { ?>
+                                      <tr>
+                                         <td><?php echo $value; ?></td>
+                                         <td class="text-center"><?php echo $porcentajest[$row]; ?>%</td>
+                                         <td class="text-center"><a class="btn btn-danger btn-sm confirm" data-toggle="modal" data-target="#myModal" id="<?php echo $row; ?>" data="tramite" ><i class="fa fa-trash-o"></i> </a></td>
+                                      </tr>  
+                              <?php  } ?>
+                                        <tr>
+                                         <td class="text-center" colspan="3">Agregar</td>
+                                        </tr> 
+
+                                        <tr>
+                                        <?php echo form_open('estampillas/agregarcobro','name="form2"');?>
+                                         <td class="">
+                                           
+                                          <input class="form-control" id="estampillaid" type="hidden" name="estampillaid" value="<?php echo $result->estm_id; ?>"/>  
+                                          <input class="form-control" id="tipocobro" type="hidden" name="tipocobro" value="tramite"/> 
+
+                                           <div class="form-group">
+                                               <label for="tramiteid">Tipo de trámite</label>
+                                               <select class="form-control" id="tramiteid" name="tramiteid" required="required" >
+                                                 <option value="0">Seleccione...</option>
+                                                 <?php  foreach($selecttramites as $key => $value) { ?>
+                                                 
+                                                     <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                                            
+                                                <?php   } ?>
+                                               </select>
+                                               <?php echo form_error('tramiteid','<span class="text-danger">','</span>'); ?>
+                                           </div>
+
+
+                                         </td>
+                                         <td class="text-center">
+                                            <div class="form-group">
+                                               <label for="porcentaje">Porcentaje</label>
+                                               <input class="form-control" id="porcentaje" type="number" name="porcentaje" value="0" required="required" step="0.1" min="0" />
+                                               <?php echo form_error('porcentaje','<span class="text-danger">','</span>'); ?>
+                                           </div>
+                                         </td>
+                                          <td class="text-center"><button type="submit" class="btn btn-success btn-sm"><i class="fa fa-floppy-o"></i></button></td>
+                                         
+                                      </tr>
+                                     <?php echo form_close();?>
+                              </table>
+                              
+
+
+
+
+                              
+                                   
+
+                                    
+                                      
+                                    <div class="pull-right">
+                                     <?php  echo anchor('estampillas', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
+                                    
+                                    </div>
+                                
+                              
+                              </div>
+                             </div>
                         </div>
                   </div> 
             </div>
@@ -87,7 +167,7 @@
 
 <?php if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('estampillas/delete')) { ?>
 <!-- Modal -->
-<?php echo form_open("estampillas/delete",'role="form"');?>
+<?php echo form_open("estampillas/eliminarcobro",'role="form"');?>
 
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -97,9 +177,11 @@
         <h4 class="modal-title" id="myModalLabel">¿Confirma que quiere eliminar EL estampilla?</h4>
       </div>
       <div class="modal-body">
-         <input class="form-control" id="id" type="hidden" name="id" value="<?php echo $result->estm_id; ?>"/>
-        Si oprime confirmar no podrá recuperar la información de este estampilla <br>
-        ¿Realmente desea eliminarla?
+         <input class="form-control" id="id" type="hidden" name="id" value=""/>
+         <input class="form-control" id="tipo" type="hidden" name="tipo" value=""/>
+         <input class="form-control" id="estampillaid" type="hidden" name="estampillaid" value="<?php echo $result->estm_id; ?>"/>
+        Si oprime confirmar no podrá recuperar la información de este cobro  <br>
+        ¿Realmente desea eliminarlo?
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
@@ -115,8 +197,8 @@
     //style selects
     var config = {
       '#municipioid'  : {disable_search_threshold: 10},
-      '#bancoid'  : {disable_search_threshold: 10},
-      '#tributarioid'  : {disable_search_threshold: 10}
+      '#tipocontratoid'  : {disable_search_threshold: 10},
+      '#tramiteid'  : {disable_search_threshold: 10}
     }
     for (var selector in config) {
         $(selector).chosen(config[selector]);
@@ -124,18 +206,11 @@
 
   </script>
   <script type="text/javascript">
-    $("#file").fileinput({
-      <?php   if ($result->estm_rutaimagen != '') { ?>
-        initialPreview: ["<a href='<?php echo base_url().$result->estm_rutaimagen; ?>' target='_blank'><img src='<?php echo base_url().$result->estm_rutaimagen; ?>' class='file-preview-image' alt='The Moon' title=''></a>"
-],
-        initialCaption: "",
-      <?php } ?>
-        showCaption: false,
-        browseClass: "btn btn-default btn-sm",
-        browseLabel: "Cargar imagen",
-        showUpload: false,
-        showRemove: false,
-
-    });
+    $('.confirm').click(function() {
+      var id = $(this).attr('id');
+      var tipo = $(this).attr('data');
+      $('#id').val(id);
+      $('#tipo').val(tipo);
+});
 
 </script>

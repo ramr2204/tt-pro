@@ -94,9 +94,9 @@ class Tiposcontratos extends MY_Controller {
                       while ( $x  <= $this->input->post('numero')) {
                           if ($this->input->post('porcentaje'.$x) > 0) {
                               $data = array(
-                              'esti_estampillaid' => $this->input->post('estampillaid'.$x),
-                              'esti_tipocontratoid' => $insertid,
-                              'esti_porcentaje' => $this->input->post('porcentaje'.$x)
+                                'esti_estampillaid' => $this->input->post('estampillaid'.$x),
+                                'esti_tipocontratoid' => $insertid,
+                                'esti_porcentaje' => $this->input->post('porcentaje'.$x)
                               );
                               $this->codegen_model->add('est_estampillas_tiposcontratos',$data);
                           }

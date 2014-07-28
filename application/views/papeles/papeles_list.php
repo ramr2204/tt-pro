@@ -30,7 +30,6 @@ var oTable = $('#tablaq').dataTable( {
                       { "sClass": "center" }, 
                       { "sClass": "item" },
                       { "sClass": "item" },
-                      { "sClass": "center","bSortable": false,"bSearchable": false},
                       ],    
 "fnRowCallback":function( nRow, aData, iDataIndex ) {
             var cantidad=aData[2]-aData[1]+1;
@@ -78,7 +77,7 @@ var oTable = $('#tablaq').dataTable( {
      <th>Cantidad restante</th>
      <th>Fecha de ingreso</th>
      <th>observaciones</th>
-     <th></th>
+
    </tr>
  </thead>
  <tbody></tbody>     

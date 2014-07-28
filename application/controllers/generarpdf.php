@@ -1,7 +1,7 @@
 <?php if( ! defined('BASEPATH') ) exit('No direct script access allowed');
 /**
 *   Nombre:            contratos
-*   Ruta:              /application/controllers/contratos.php
+*   Ruta:              /application/controllers/generarpdf.php
 *   Descripcion:       controlador de contratos
 *   Fecha Creacion:    20/may/2014
 *   @author            Iván Viña <ivandariovinam@gmail.com>
