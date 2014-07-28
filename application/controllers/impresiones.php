@@ -76,10 +76,10 @@ class Impresiones extends MY_Controller {
               } else {    
 
                    $resultado = $this->codegen_model->get('est_tiposanulaciones','tisa_id',"tisa_nombre = '".$this->input->post('tipoanulacion')."'",1,NULL,true);
-                   if (!$resultado){
+                   if (!$resultado->tisa_id>0){
 
                       $datos = array(
-                        'tisa_nombre' => $this->input->post('nombre')
+                        'tisa_nombre' => $this->input->post('tipoanulacion')
                      );
                       $this->codegen_model->add('est_tiposanulaciones',$datos); 
                       $tipoanulacionid=$this->db->insert_id();
