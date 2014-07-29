@@ -108,7 +108,7 @@ $config['forgot_password_expiration'] = 0;                   // The number of mi
  | 	  'file' = Use the default CI config or use from a config file
  | 	  array  = Manually set your email config settings
  */
-$config['use_ci_email'] = FALSE; // Send Email using the builtin CI email class, if false it will return the code and the identity
+$config['use_ci_email'] = TRUE; // Send Email using the builtin CI email class, if false it will return the code and the identity
 $config['email_config'] = array(
 	'mailtype' => 'html',
 );
@@ -120,7 +120,7 @@ $config['email_config'] = array(
  | Folder where email templates are stored.
  | Default: auth/
  */
-$config['email_templates'] = 'auth/email/';
+$config['email_templates'] = 'users/email/';
 
 /*
  | -------------------------------------------------------------------------
