@@ -49,6 +49,7 @@ class Users extends MY_Controller {
                         'js/plugins/dataTables/dataTables.bootstrap.js',
                         'js/jquery.dataTables.defaults.js'
                        );
+               $this->data['successmessage']=$this->session->flashdata('successmessage');
                $this->data['message']=$this->session->flashdata('message');
 			$this->template->load($this->config->item('admin_template'),'users/index', $this->data);
 		}
@@ -255,7 +256,8 @@ class Users extends MY_Controller {
 			{
 				//if there were no errors
 				$this->session->set_flashdata('message', $this->ion_auth->messages());
-				redirect("users/login", 'refresh'); //we should display a confirmation page here instead of the login page
+				//redirect("users/login", 'refresh'); //we should display a confirmation page here instead of the login page
+				
 			}
 			else
 			{
@@ -528,6 +530,32 @@ class Users extends MY_Controller {
 		 }
 		
 	}
+     
+
+  function delete()
+  {
+      if ($this->ion_auth->logged_in()) {
+
+          if ($this->ion_auth->is_admin()) {  
+              if ($this->input->post('id')==''){
+                  $this->session->set_flashdata('infomessage', 'Debe elegir un usuario para eliminar');
+                  redirect(base_url().'index.php/estampillas');
+              }
+
+                  $this->ion_auth->delete_user($this->input->post('id'));
+                  $this->session->set_flashdata('successmessage', 'El usuario se ha eliminado con éxito');
+                  redirect(base_url().'index.php/users');  
+
+                         
+          } else {
+              redirect(base_url().'index.php/error_404');       
+          } 
+      } else {
+          redirect(base_url().'index.php/users/login');
+      }
+  }
+
+
 
 	function _get_csrf_nonce()
 	{
