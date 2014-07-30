@@ -1,22 +1,42 @@
-<h1><?php echo lang('reset_password_heading');?></h1>
+<?php if( ! defined('BASEPATH') ) exit('No direct script access allowed'); ?>
 
-<div id="infoMessage"><?php echo $message;?></div>
+<div class="row clearfix">
+            <div class="col-md-12 column">
+                  <div class="row clearfix">
+                        <div class="col-md-3 column">
+                        </div>
+                        <div class="col-md-6 column">
+                           <div class="panel panel-default">
+                            <div class="panel-heading"><h1><?php echo lang('reset_password_heading');?></h1></div>
+                             <div class="panel-body">
+                             
+                              <?php echo form_open('auth/reset_password/' . $code);?>
 
-<?php echo form_open('auth/reset_password/' . $code);?>
+                                    <div class="form-group">
+                                           <label for="new_password">Nueva contraseña</label>
+                                           <input class="form-control" id="new_password" type="password" name="new_password" value="" required="required" maxlength="128" />
+                                           <?php echo form_error('new_password','<span class="text-danger">','</span>'); ?>
+                                    </div>
 
-	<p>
-		<label for="new_password"><?php echo sprintf(lang('reset_password_new_password_label'), $min_password_length);?></label> <br />
-		<?php echo form_input($new_password);?>
-	</p>
+                                    <div class="form-group">
+                                           <label for="new_confirm">Confirmar contraseña</label>
+                                           <input class="form-control" id="new_confirm" type="password" name="new_confirm" value="" required="required" maxlength="128" />
+                                           <?php echo form_error('new_confirm','<span class="text-danger">','</span>'); ?>
+                                    </div>
 
-	<p>
-		<?php echo lang('reset_password_new_password_confirm_label', 'new_password_confirm');?> <br />
-		<?php echo form_input($new_password_confirm);?>
-	</p>
+                                    <?php echo form_input($user_id);?>
+	                                <?php echo form_hidden($csrf); ?>
 
-	<?php echo form_input($user_id);?>
-	<?php echo form_hidden($csrf); ?>
-
-	<p><?php echo form_submit('submit', lang('reset_password_submit_btn'));?></p>
-
-<?php echo form_close();?>
+                                    <div class="pull-right">
+                                    <button type="submit" class="btn btn-primary btn-primary2 "><i class="fa fa-share"></i> Ingresar</button>
+                                    </div>
+                                <?php echo form_close();?>
+                              </div>
+                             </div>
+       
+                        </div>
+                        <div class="col-md-3 column">
+                        </div>
+                  </div> 
+            </div>
+      </div>

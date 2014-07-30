@@ -104,14 +104,14 @@ class Users extends MY_Controller {
 			{
 				//if the login is successful
 				//redirect them back to the home page
-				$this->session->set_flashdata('message', $this->ion_auth->messages());
+				$this->session->set_flashdata('successmessage', $this->ion_auth->messages());
 				redirect(base_url().'liquidaciones/liquidar', 'refresh');
 			}
 			else
 			{
 				//if the login was un-successful
 				//redirect them back to the login page
-				$this->session->set_flashdata('message', $this->ion_auth->errors());
+				$this->session->set_flashdata('errormessage', $this->ion_auth->errors());
 				redirect('users/login', 'refresh'); //use redirects instead of loading views for compatibility with MY_Controller libraries
 			}
 		}
@@ -119,20 +119,8 @@ class Users extends MY_Controller {
 		{
 			//the user is not logging in so display the login page
 			//set the flash data error message if there is one
-			$this->data['message'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('message');
-
-			$this->data['identity'] = array('name' => 'identity',
-              'id' => 'identity',
-              'type' => 'email',
-              'class' => 'form-control',
-              'placeholder' => 'Email',
-              'value' => $this->form_validation->set_value('identity'),
-            );
-            $this->data['password'] = array('name' => 'password',
-              'id' => 'password',
-              'class' => 'form-control',
-              'type' => 'password',
-            );
+			$this->data['errormessage'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('errormessage');
+            $this->data['successmessage'] = $this->session->flashdata('successmessage');
             $this->template->load($this->config->item('admin_template'),'users/login', $this->data);
 			
 		}
@@ -221,10 +209,6 @@ class Users extends MY_Controller {
 		$this->form_validation->set_rules('email', $this->lang->line('forgot_password_validation_email_label'), 'required');
 		if ($this->form_validation->run() == false)
 		{
-			//setup the input
-			$this->data['email'] = array('name' => 'email',
-				'id' => 'email',
-			);
 
 			if ( $this->config->item('identity', 'ion_auth') == 'username' ){
 				$this->data['identity_label'] = $this->lang->line('forgot_password_username_identity_label');
@@ -235,7 +219,8 @@ class Users extends MY_Controller {
 			}
 
 			//set any errors and display the form
-			$this->data['message'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('message');
+			$this->data['errormessage'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('errormessage');
+			$this->data['successmessage'] = $this->session->flashdata('successmessage');
 			$this->template->load($this->config->item('admin_template'),'users/forgot_password', $this->data);
 
 		}
@@ -245,8 +230,8 @@ class Users extends MY_Controller {
             $identity = $this->ion_auth->where('email', strtolower($this->input->post('email')))->users()->row();
             if(empty($identity)) {
                 $this->ion_auth->set_message('forgot_password_email_not_found');
-                $this->session->set_flashdata('message', $this->ion_auth->messages());
-                redirect("users/forgot_password", 'refresh');
+                $this->session->set_flashdata('errormessage', $this->ion_auth->messages());
+                //redirect("users/forgot_password", 'refresh');
             }
             
 			//run the forgotten password method to email an activation code to the user
@@ -255,14 +240,14 @@ class Users extends MY_Controller {
 			if ($forgotten)
 			{
 				//if there were no errors
-				$this->session->set_flashdata('message', $this->ion_auth->messages());
+				$this->session->set_flashdata('succesemessage', $this->ion_auth->messages());
 				//redirect("users/login", 'refresh'); //we should display a confirmation page here instead of the login page
-				
+
 			}
 			else
 			{
-				$this->session->set_flashdata('message', $this->ion_auth->errors());
-				redirect("users/forgot_password", 'refresh');
+				$this->session->set_flashdata('errormessage', $this->ion_auth->errors());
+				//redirect("users/forgot_password", 'refresh');
 			}
 		}
 	}

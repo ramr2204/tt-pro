@@ -21,7 +21,7 @@ $lang['is_natural'] 		= 'El campo %s debe contener solo numeros positivos.';
 $lang['is_natural_no_zero'] = 'El campo %s debe contener un numero mayor que cero.';
 $lang['decimal']			= "El Campo %s debe contener un numero decimal.";
 $lang['less_than']			= "EL campo %s debe contener un numero menor a %s.";
-$lang['greater_than']		= "El campo %s debe cotener un numero mayos a %s.";
+$lang['greater_than']		= "El campo %s debe cotener un numero mayor a %s.";
 $lang['is_unique']			= "Ya existe un campo con este valor. Elija otro."; //no esta en los demas idiomas
 $lang['blank']				= "No puede dejar el campo en blanco";
 
