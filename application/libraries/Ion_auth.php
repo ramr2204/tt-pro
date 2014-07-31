@@ -166,19 +166,18 @@ class Ion_auth
 					$this->email->to($user->email);
 					$this->email->subject($this->config->item('site_title', 'ion_auth') . ' - ' . $this->lang->line('email_forgotten_password_subject'));
 					$this->email->message($message);
-					$this->email->send();
-                   echo $this->email->print_debugger();
-					// if ($this->email->send())
-					// {
-					// 	$this->set_message('forgot_password_successful'); 
+                    //echo $this->email->print_debugger();
+					if ($this->email->send())
+					{
+						$this->set_message('forgot_password_successful'); 
 				
-					// 	return TRUE;
-					// }
-					// else
-					// {
-					// 	$this->set_error('forgot_password_unsuccessful');
-					// 	return FALSE;
-					// }
+						return TRUE;
+					}
+					else
+					{
+						$this->set_error('forgot_password_unsuccessful');
+						return FALSE;
+					}
 				}
 			}
 			else

@@ -231,7 +231,7 @@ class Users extends MY_Controller {
             if(empty($identity)) {
                 $this->ion_auth->set_message('forgot_password_email_not_found');
                 $this->session->set_flashdata('errormessage', $this->ion_auth->messages());
-                //redirect("users/forgot_password", 'refresh');
+                redirect("users/forgot_password", 'refresh');
             }
             
 			//run the forgotten password method to email an activation code to the user
@@ -240,14 +240,14 @@ class Users extends MY_Controller {
 			if ($forgotten)
 			{
 				//if there were no errors
-				$this->session->set_flashdata('succesemessage', $this->ion_auth->messages());
-				//redirect("users/login", 'refresh'); //we should display a confirmation page here instead of the login page
+				$this->session->set_flashdata('successmessage', $this->ion_auth->messages());
+				redirect("users/login", 'refresh'); //we should display a confirmation page here instead of the login page
 
 			}
 			else
 			{
 				$this->session->set_flashdata('errormessage', $this->ion_auth->errors());
-				//redirect("users/forgot_password", 'refresh');
+				redirect("users/forgot_password", 'refresh');
 			}
 		}
 	}
