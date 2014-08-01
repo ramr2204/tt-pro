@@ -10,7 +10,7 @@
                             <div class="panel-heading"><h1><?php echo lang('reset_password_heading');?></h1></div>
                              <div class="panel-body">
                              
-                              <?php echo form_open('auth/reset_password/' . $code);?>
+                              <?php echo form_open('users/reset_password/' . $code);?>
 
                                     <div class="form-group">
                                            <label for="new_password">Nueva contraseña</label>
