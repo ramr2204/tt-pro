@@ -257,7 +257,7 @@ class Users extends MY_Controller {
 	{
 		if (!$code)
 		{
-			show_error_404();
+			redirect(base_url().'index.php/error_404');
 		}
 
 		$user = $this->ion_auth->forgotten_password_check($code);
@@ -266,29 +266,18 @@ class Users extends MY_Controller {
 		{
 			//if the code is valid then display the password reset form
 
-			$this->form_validation->set_rules('new', $this->lang->line('reset_password_validation_new_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[new_confirm]');
+			$this->form_validation->set_rules('new_password', $this->lang->line('reset_password_validation_new_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[new_confirm]');
 			$this->form_validation->set_rules('new_confirm', $this->lang->line('reset_password_validation_new_password_confirm_label'), 'required');
-
+          
 			if ($this->form_validation->run() == false)
 			{
 				//display the form
-
+                  
 				//set the flash data error message if there is one
-				$this->data['message'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('message');
-
+				$this->data['errormessage'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('errormessage');
+                $this->data['successmessage'] =  $this->session->flashdata('successmessage');
 				$this->data['min_password_length'] = $this->config->item('min_password_length', 'ion_auth');
-				$this->data['new_password'] = array(
-					'name' => 'new',
-					'id'   => 'new',
-				'type' => 'password',
-					'pattern' => '^.{'.$this->data['min_password_length'].'}.*$',
-				);
-				$this->data['new_password_confirm'] = array(
-					'name' => 'new_confirm',
-					'id'   => 'new_confirm',
-					'type' => 'password',
-					'pattern' => '^.{'.$this->data['min_password_length'].'}.*$',
-				);
+				
 				$this->data['user_id'] = array(
 					'name'  => 'user_id',
 					'id'    => 'user_id',
@@ -314,19 +303,20 @@ class Users extends MY_Controller {
 				else
 				{
 					// finally change the password
+
 					$identity = $user->{$this->config->item('identity', 'ion_auth')};
 
-					$change = $this->ion_auth->reset_password($identity, $this->input->post('new'));
-
+					$change = $this->ion_auth->reset_password($identity, $this->input->post('new_password'));
+                       
 					if ($change)
 					{
 						//if the password was successfully changed
-						$this->session->set_flashdata('message', $this->ion_auth->messages());
+						$this->session->set_flashdata('successmessage', $this->ion_auth->messages());
 						$this->logout();
 					}
 					else
 					{
-						$this->session->set_flashdata('message', $this->ion_auth->errors());
+						$this->session->set_flashdata('errormessage', $this->ion_auth->errors());
 						redirect('users/reset_password/' . $code, 'refresh');
 					}
 				}
@@ -335,7 +325,7 @@ class Users extends MY_Controller {
 		else
 		{
 			//if the code is invalid then send them back to the forgot password page
-			$this->session->set_flashdata('message', $this->ion_auth->errors());
+			$this->session->set_flashdata('errormessage', $this->ion_auth->errors());
 			redirect("users/forgot_password", 'refresh');
 		}
 	}
@@ -361,7 +351,7 @@ class Users extends MY_Controller {
                	  }
              }else 
 			 {
-			  $this->session->set_flashdata('message', '<div class="alert alert-info"><button type="button" class="close" data-dismiss="alert">&times;</button>No tiene permisos para acceder a esta área.</div>');
+			  
 			  redirect(base_url().'error_404');
 			 }
 		 }else
@@ -412,30 +402,41 @@ class Users extends MY_Controller {
 		  if ($this->ion_auth->is_admin())
 			 {
 			  $this->data['title'] = "Crear usuario";	
-		      $this->form_validation->set_rules('id', $this->lang->line('create_user_validation_id_label'), 'required|xss_clean');
+		      $this->form_validation->set_rules('id', $this->lang->line('create_user_validation_id_label'), 'required|xss_clean|numeric|greater_than[0]|is_unique[users.id]');
 		      $this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'required|valid_email|is_unique[users.email]');
 		      $this->form_validation->set_rules('password', $this->lang->line('create_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[password_confirm]');
 		      $this->form_validation->set_rules('password_confirm', $this->lang->line('create_user_validation_password_confirm_label'), 'required');
-
+              $this->form_validation->set_rules('perfilid', 'Perfil',  'required|numeric|greater_than[0]'); 
 			  if ($this->form_validation->run() == false)
 				 {
-				  $this->data['message'] = (validation_errors() ? '<div class="alert alert-dismissable alert-danger"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>'.validation_errors().'</div>' : $this->session->flashdata('message'));
-
+				  $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage'));
+                  $this->data['successmessage'] = $this->session->flashdata('successmessage');
 				 } else
 				 {
-				  $username = $this->input->post('id');
+				  $username = $this->input->post('id'); //este id será el identificador de la tabla usuarios, no se usa nombre de usuario
 			      $email    = strtolower($this->input->post('email'));
 			      $password = $this->input->post('password');
-                  $additional_data = array();
+                  $additional_data = array('perfilid' => $this->input->post('perfilid'));
 
 				  if ($this->ion_auth->register($username, $password, $email, $additional_data))
 					 {
-					   $this->session->set_flashdata('message', '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>El usuario se ha creado con éxito.</div>');
+					   $usuarioid = $this->db->insert_id();
+                       $perfiles_menus  = $this->codegen_model->getSelect('adm_perfiles_menus','peme_menuid','WHERE peme_perfilid ='.$this->input->post('perfilid'));
+                       foreach ($perfiles_menus as $key => $value) {
+                           $data = array(
+                              'usme_usuarioid' => $usuarioid,
+                              'usme_menuid' => $value->peme_menuid,
+                           );
+                 
+    			           $this->codegen_model->add('adm_usuarios_menus',$data);
+                       }
+
+					   $this->session->set_flashdata('successmessage', 'El usuario se ha creado con éxito');
 					   redirect(base_url().'users/create_user');
 					 } else
 					 {
 					   //set the flash data error message if there is one
-			           $this->data['message'] = (validation_errors() ? '<div class="alert alert-dismissable alert-danger"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>'.validation_errors().'</div>' : '<div class="alert alert-dismissable alert-danger"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>'.($this->ion_auth->errors() ? $this->ion_auth->errors().'</div>' : $this->session->flashdata('message')));	
+			           $this->data['errormessage'] = (validation_errors() ? validation_errors() : ($this->ion_auth->errors() ? $this->ion_auth->errors() : $this->session->flashdata('errormessage')));	
 
 					 }
 				  }
@@ -444,7 +445,6 @@ class Users extends MY_Controller {
 				 $this->template->load($this->config->item('admin_template'),'users/create_user', $this->data);
 			 }else 
 			 {
-			  $this->session->set_flashdata('message', '<div class="alert alert-info"><button type="button" class="close" data-dismiss="alert">&times;</button>No tiene permisos para acceder a esta área.</div>');
 			  redirect(base_url().'error_404');
 			 }
 		 } else
@@ -476,6 +476,7 @@ class Users extends MY_Controller {
               {
                   $this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'required|valid_email');
               }
+              
 		      $this->form_validation->set_rules('perfilid', 'Perfil',  'required|numeric');  
               //update the password if it was posted
 
@@ -483,7 +484,7 @@ class Users extends MY_Controller {
 			  {
 				  $this->form_validation->set_rules('password', $this->lang->line('edit_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[password_confirm]');
 				  $this->form_validation->set_rules('password_confirm', $this->lang->line('edit_user_validation_password_confirm_label'), 'required');
-
+                  $this->form_validation->set_rules('perfilid', 'Perfil',  'required|numeric|greater_than[0]'); 
 				  $data['password'] = $this->input->post('password');
 			  }
 
@@ -493,7 +494,23 @@ class Users extends MY_Controller {
 				    'email' => $this->input->post('email'),
                     'perfilid' => $this->input->post('perfilid')
 			      );
+
 				  $this->ion_auth->update($user->id, $data); 
+				  
+				  if ($user->perfilid != $this->input->post('perfilid')) { //si cambia de perfil borramos permisos anteriores y agregamos los nuevos
+
+                      $this->codegen_model->delete('adm_usuarios_menus','usme_usuarioid',$user->id);
+				  	  $perfiles_menus  = $this->codegen_model->getSelect('adm_perfiles_menus','peme_menuid','WHERE peme_perfilid ='.$this->input->post('perfilid'));
+                      foreach ($perfiles_menus as $key => $value) {
+                          $data = array(
+                              'usme_usuarioid' => $user->id,
+                              'usme_menuid' => $value->peme_menuid
+                          );
+                 
+    			         $this->codegen_model->add('adm_usuarios_menus',$data);
+
+                      } 
+				  }
 				  $this->session->set_flashdata('successmessage', 'El usuario se ha editado con éxito');
 				  redirect("users/edit/".$id, 'refresh');
 			
@@ -528,6 +545,7 @@ class Users extends MY_Controller {
               }
 
                   $this->ion_auth->delete_user($this->input->post('id'));
+                  $this->codegen_model->delete('adm_usuarios_menus','usme_usuarioid',$this->input->post('id'));
                   $this->session->set_flashdata('successmessage', 'El usuario se ha eliminado con éxito');
                   redirect(base_url().'index.php/users');  
 

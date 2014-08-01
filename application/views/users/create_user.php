@@ -35,8 +35,7 @@
                                     <div class="form-group">
                                            <label for="perfilid">Perfil</label>
                                            <select class="form-control" id="perfilid" name="perfilid" required="required" >
-                                             <option value="0">Seleccione...</option>
-                                             <option value="1">Administrador</option>
+                                             <option value="">Seleccione...</option>
                                              <?php  foreach($perfiles as $row) { ?>
                                              <option value="<?php echo $row->perf_id; ?>"><?php echo $row->perf_nombre; ?></option>
                                              <?php   } ?>
