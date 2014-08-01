@@ -112,8 +112,8 @@ var oTable = $('#tablaq').dataTable( {
                                     {    
                                          sSelector: "#buscarano", 
                                          type:"select" ,
-                                         values : <?php echo $a; ?>,
-                                         selected: <?php echo $vigencias[0]; ?>
+                                         values : <?php echo $a; ?>
+                                         
                                     },
                                     null,
                                     null,
@@ -201,7 +201,7 @@ var oTable = $('#tablaq').dataTable( {
      <th></th>
      <th></th>
      <th></th>
-     <th>Todas</th>
+     <th></th>
      <th></th>
      <th></th>
      <th></th>       
