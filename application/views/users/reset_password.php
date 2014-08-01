@@ -28,7 +28,7 @@
 	                                <?php echo form_hidden($csrf); ?>
 
                                     <div class="pull-right">
-                                    <button type="submit" class="btn btn-primary btn-primary2 "><i class="fa fa-share"></i> Ingresar</button>
+                                    <button type="submit" class="btn btn-primary btn-primary2 "><i class="fa fa-check-square-o"></i> Aceptar</button>
                                     </div>
                                 <?php echo form_close();?>
                               </div>

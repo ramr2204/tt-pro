@@ -257,7 +257,7 @@ class Users extends MY_Controller {
 	{
 		if (!$code)
 		{
-			show_error_404();
+			redirect(base_url().'index.php/error_404');
 		}
 
 		$user = $this->ion_auth->forgotten_password_check($code);
@@ -266,29 +266,18 @@ class Users extends MY_Controller {
 		{
 			//if the code is valid then display the password reset form
 
-			$this->form_validation->set_rules('new', $this->lang->line('reset_password_validation_new_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[new_confirm]');
+			$this->form_validation->set_rules('new_password', $this->lang->line('reset_password_validation_new_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[new_confirm]');
 			$this->form_validation->set_rules('new_confirm', $this->lang->line('reset_password_validation_new_password_confirm_label'), 'required');
-
+          
 			if ($this->form_validation->run() == false)
 			{
 				//display the form
-
+                  
 				//set the flash data error message if there is one
-				$this->data['message'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('message');
-
+				$this->data['errormessage'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('errormessage');
+                $this->data['successmessage'] =  $this->session->flashdata('successmessage');
 				$this->data['min_password_length'] = $this->config->item('min_password_length', 'ion_auth');
-				$this->data['new_password'] = array(
-					'name' => 'new',
-					'id'   => 'new',
-				'type' => 'password',
-					'pattern' => '^.{'.$this->data['min_password_length'].'}.*$',
-				);
-				$this->data['new_password_confirm'] = array(
-					'name' => 'new_confirm',
-					'id'   => 'new_confirm',
-					'type' => 'password',
-					'pattern' => '^.{'.$this->data['min_password_length'].'}.*$',
-				);
+				
 				$this->data['user_id'] = array(
 					'name'  => 'user_id',
 					'id'    => 'user_id',
@@ -314,19 +303,20 @@ class Users extends MY_Controller {
 				else
 				{
 					// finally change the password
+
 					$identity = $user->{$this->config->item('identity', 'ion_auth')};
 
-					$change = $this->ion_auth->reset_password($identity, $this->input->post('new'));
-
+					$change = $this->ion_auth->reset_password($identity, $this->input->post('new_password'));
+                       
 					if ($change)
 					{
 						//if the password was successfully changed
-						$this->session->set_flashdata('message', $this->ion_auth->messages());
+						$this->session->set_flashdata('successmessage', $this->ion_auth->messages());
 						$this->logout();
 					}
 					else
 					{
-						$this->session->set_flashdata('message', $this->ion_auth->errors());
+						$this->session->set_flashdata('errormessage', $this->ion_auth->errors());
 						redirect('users/reset_password/' . $code, 'refresh');
 					}
 				}
@@ -335,7 +325,7 @@ class Users extends MY_Controller {
 		else
 		{
 			//if the code is invalid then send them back to the forgot password page
-			$this->session->set_flashdata('message', $this->ion_auth->errors());
+			$this->session->set_flashdata('errormessage', $this->ion_auth->errors());
 			redirect("users/forgot_password", 'refresh');
 		}
 	}
@@ -361,7 +351,7 @@ class Users extends MY_Controller {
                	  }
              }else 
 			 {
-			  $this->session->set_flashdata('message', '<div class="alert alert-info"><button type="button" class="close" data-dismiss="alert">&times;</button>No tiene permisos para acceder a esta área.</div>');
+			  
 			  redirect(base_url().'error_404');
 			 }
 		 }else
