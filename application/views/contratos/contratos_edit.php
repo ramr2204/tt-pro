@@ -135,7 +135,7 @@
 
 <?php if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/delete')) { ?>
 <!-- Modal -->
-<?php echo form_open("contratistas/delete",'role="form"');?>
+<?php echo form_open("contratos/delete",'role="form"');?>
 
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">

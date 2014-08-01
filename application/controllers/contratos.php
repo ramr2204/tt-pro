@@ -215,18 +215,18 @@ class Contratos extends MY_Controller {
                   $this->session->set_flashdata('infomessage', 'Debe elegir un contrato para eliminar');
                   redirect(base_url().'index.php/contratos');
               }
-              if (!$this->codegen_model->depend('con_contratos','cntr_contratoid',$this->input->post('id'))) {
+              // if (!$this->codegen_model->depend('con_contratos','cntr_contratoid',$this->input->post('id'))) {
 
                   $this->codegen_model->delete('con_contratos','cntr_id',$this->input->post('id'));
                   $this->session->set_flashdata('successmessage', 'El contrato se ha eliminado con éxito');
                   redirect(base_url().'index.php/contratos');  
 
-              } else {
+              // } else {
 
-                  $this->session->set_flashdata('errormessage', 'El contrato se encuentra en uso, no es posible eliminarlo.');
-                  redirect(base_url().'index.php/contratos/edit/'.$this->input->post('id'));
+              //     $this->session->set_flashdata('errormessage', 'El contrato se encuentra en uso, no es posible eliminarlo.');
+              //     redirect(base_url().'index.php/contratos/edit/'.$this->input->post('id'));
 
-              }
+              // }
                          
           } else {
               redirect(base_url().'index.php/error_404');       
