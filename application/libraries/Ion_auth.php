@@ -452,15 +452,8 @@ class Ion_auth
 		$this->ion_auth_model->trigger_events('is_admin');
 
 		$admin_group = $this->config->item('admin_group', 'ion_auth');
-		$user = $this->ion_auth->user()->row();
-	
-        if ($user->perfilid==1) {
-        	return true;
-        } else {
-        	return false;
-        }
 
-		//return $this->in_group($admin_group, $id);
+		return $this->in_group($admin_group, $id);
 	}
 
 
