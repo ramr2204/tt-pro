@@ -1,12 +1,14 @@
 <?php
-class Codegen_model extends CI_Model {
+class Codegen_model extends CI_Model 
+{
 
     function __construct() {
         parent::__construct();
     }
 
     
-    function get($table,$fields,$where='',$perpage=0,$start=0,$one=false,$array='array',$join=''){
+    function get($table,$fields,$where='',$perpage=0,$start=0,$one=false,$array='array',$join='')
+    {
         
         $this->db->select($fields);
         $this->db->from($table);
@@ -23,7 +25,9 @@ class Codegen_model extends CI_Model {
         return $result;
     }
     
-    function add($table,$data){
+    function add($table,$data)
+    {
+        $this->addlog($table,'INSERT',0,$data);
         $this->db->insert($table, $data);         
         if ($this->db->affected_rows() == '1')
 		{
@@ -33,7 +37,9 @@ class Codegen_model extends CI_Model {
 		return FALSE;       
     }
     
-    function edit($table,$data,$fieldID,$ID){
+    function edit($table,$data,$fieldID,$ID)
+    {
+        $this->addlog($table,'UPDATE',$ID,$data);
         $this->db->where($fieldID,$ID);
         $this->db->update($table, $data);
 
@@ -45,8 +51,10 @@ class Codegen_model extends CI_Model {
 		return FALSE;       
     }
     
-    function delete($table,$fieldID,$ID){
-        $this->db->where($fieldID,$ID);
+    function delete($table,$fieldID,$ID)
+    {
+       $this->addlog($table,'DELETE',$ID);
+       $this->db->where($fieldID,$ID);
         $this->db->delete($table);
         if ($this->db->affected_rows() == '1')
 		{
@@ -57,11 +65,13 @@ class Codegen_model extends CI_Model {
     }   
 
 	
-	function count($table){
+	function count($table)
+    {
 		return $this->db->count_all($table);
 	}
 
-    function countwhere ($table,$where) {
+    function countwhere ($table,$where) 
+    {
          $this->db->select("COUNT(*) AS contador");
          $this->db->from($table);
          $this->db->where($where);
@@ -70,7 +80,8 @@ class Codegen_model extends CI_Model {
     }
 
 
-    function max($table, $field, $where='') {
+    function max($table, $field, $where='')
+     {
         $this->db->select_max($field);
         if($where){
         $this->db->where($where);
@@ -82,17 +93,20 @@ class Codegen_model extends CI_Model {
            return FALSE;
     }
 
-    function getSelect($table,$fields,$where='',$join=''){
+    function getSelect($table,$fields,$where='',$join='')
+    {
         $query = $this->db->query("SELECT ".$fields."  FROM ".$table." ".$join." ".$where." ");
         return $query->result();
     }
 
-    function getMunicipios(){
+    function getMunicipios()
+    {
         $query = $this->db->query("SELECT m.muni_id,m.muni_nombre,d.depa_nombre FROM par_municipios m  LEFT JOIN par_departamentos d ON d.depa_id=m.muni_departamentoid");
         return $query->result();
     }
 
-    function depend($table,$field,$ID){
+    function depend($table,$field,$ID)
+    {
         $this->db->where($field, $ID);
         $this->db->from($table);
         
@@ -106,4 +120,55 @@ class Codegen_model extends CI_Model {
        
 
     }
+
+    function addlog($tabla,$accion,$id,$valores=array())
+    {
+
+    $fields = $this->db->field_data($tabla);
+    $nombreid=$fields[0]->name;
+    $field_list='';
+    if ($id==0) { 
+           $database = $this->db->database; 
+           $query = $this->db->query("SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE  TABLE_NAME = '$tabla' AND TABLE_SCHEMA = '$database'");
+           $result=$query->row();
+           $id=$result->AUTO_INCREMENT;
+           $datos_anteriores='';
+    } else {
+        if ($accion=='UPDATE') {
+            foreach ($valores as $key => $value) {
+                echo $field_list.=$key.',';   
+            }
+            $field_list = substr($field_list, 0, - 1);
+        } else {
+            $field_list='*';
+        }
+        
+        
+        $query = $this->db->query("SELECT ".$field_list."  FROM ".$tabla." WHERE ".$nombreid." = ".$id." LIMIT 1");
+        $datos_anteriores=json_encode($result=$query->row());
+    }
+      $datos_nuevos=json_encode($valores);  
+
+       $datos = array(  'loga_fecha' => date('Y-m-d H:i:s',now()),
+                        'loga_tabla' => $tabla,
+                        'logacodigonombre' => $nombreid,
+                        'loga_codigoid' => $id,
+                        'loga_valoresanteriores' => $datos_anteriores,
+                        'loga_valoresnuevos' => $datos_nuevos,
+                        'loga_accion' =>  $accion,
+                        'loga_ip' => $this->input->ip_address(),
+                        'loga_usuarioid' => $this->ion_auth->get_user_id()
+                     );
+
+
+
+        $this->db->insert('adm_logactividades', $datos);         
+        if ($this->db->affected_rows() == '1')
+        {
+            return TRUE;
+        }
+        
+        return FALSE;       
+    }
+
 }
