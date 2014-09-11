@@ -14,7 +14,7 @@
 | path to your installation.
 |
 */
-$config['base_url']	= 'http://localhost/codeigniter';//localhost/CodeIgniter
+$config['base_url']	= 'http://localhost:6666/estampillas';//localhost/CodeIgniter
 $config['template'] = 'templates/main.php';
 $config['admin_template'] = 'templates/admingroup.php';
 /*

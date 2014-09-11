@@ -93,23 +93,25 @@ class Liquidaciones_model extends CI_Model {
     }
 
     function getfactura_legalizada($id, $doc=FALSE){
-        $this->db->select('f.fact_id,f.fact_codigo, f.fact_nombre, f.fact_porcentaje, f.fact_valor,pa.pago_valor, pa.pago_fecha, im.impr_codigopapel,ct.cont_nombre,ct.cont_nit,co.cntr_numero,co.cntr_vigencia,f.fact_rutaimagen');
+        $this->db->select('co.cntr_id,li.liqu_contratoid,f.fact_id,f.fact_codigo, f.fact_nombre, f.fact_porcentaje, f.fact_valor,pa.pago_valor, pa.pago_fecha, im.impr_codigopapel,ct.cont_nombre,ct.cont_nit,co.cntr_numero,co.cntr_vigencia,f.fact_rutaimagen');
         $this->db->from('est_facturas f');
         $this->db->join('est_pagos pa', 'pa.pago_facturaid = f.fact_id', 'left');
         $this->db->join('est_impresiones im', 'im.impr_facturaid = f.fact_id AND im.impr_estado = 1', 'left');
         $this->db->join('est_liquidaciones li', 'li.liqu_id = f.fact_liquidacionid', 'left');
         $this->db->join('con_contratos co', 'co.cntr_id = li.liqu_contratoid', 'left');
         $this->db->join('est_liquidartramites tr', 'tr.litr_id = li.liqu_tramiteid', 'left');
-        if (!$doc) {
-            $this->db->join('con_contratistas ct', 'ct.cont_id = co.cntr_contratistaid', 'left');
-        } else {
-            $this->db->join('con_contratistas ct', 'ct.cont_id = tr.litr_contratistaid', 'left');
-        }
-        
+
+        // if (!$doc) {
+        //     $this->db->join('con_contratistas ct', 'ct.cont_id = co.cntr_contratistaid', 'left');
+        // } else {
+        //     $this->db->join('con_contratistas ct', 'ct.cont_id = tr.litr_contratistaid', 'left');
+        // }
+        $this->db->join('con_contratistas ct', 'ct.cont_id = co.cntr_contratistaid', 'left');
         
         $this->db->where('f.fact_id',$id);
        // $this->db->where('f.fact_id',$id);
         $query = $this->db->get();
+        //  echo  $this->db->last_query();
         return $query->row();
     }
 

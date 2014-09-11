@@ -50,13 +50,16 @@
 </tr>
 <tr>
      <td colspan="1" class="text-center"><strong>Nombre </strong></td>
-     <td colspan="3" class="text-center"> <?php echo $estampilla->cont_nombre; ?></td>
+     <td colspan="1" class="text-center"> <?php echo $estampilla->cont_nombre; ?></td>
+      <td colspan="1" class="text-center"><strong>C.C. o NIT</strong></td>
+     <td colspan="1"> <?php echo $estampilla->cont_nit; ?></td>
 </tr>
 
  <tr>
-     <td colspan="1" class="text-center"><strong>C.C. o NIT</strong></td>
-     <td colspan="3"> <?php echo $estampilla->cont_nit; ?>
-     </td>
+     <td colspan="1" class="text-center"><strong>No. de contrato </strong></td>
+     <td colspan="1" class="text-center"> <?php echo $estampilla->cntr_numero; ?></td>
+      <td colspan="1" class="text-center"><strong>Vigencia</strong></td>
+     <td colspan="1"> <?php echo $estampilla->cntr_vigencia; ?></td>
 </tr>
 
 
