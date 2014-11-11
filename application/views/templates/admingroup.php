@@ -56,6 +56,7 @@
     // jQuery  always loaded
     echo script_tag( 'js/jquery-1.10.2.js' ) . "\n";
     echo script_tag( 'js/bootstrap.min.js' ) . "\n";
+    echo script_tag( 'js/applicationEvents.js' ) . "\n";
 
     
     // Add any additional javascript
@@ -75,7 +76,7 @@
 </head>
 
 <body> 
-
+asdfasdf
 <?php if (!$this->ion_auth->logged_in()) { ?>
 
 <header class="cabecera">

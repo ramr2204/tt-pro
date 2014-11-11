@@ -18,7 +18,7 @@
     // Add a robots exclusion
     echo ( isset( $no_robots ) ) ? meta('robots', 'index,follow') : '';
 ?>
-<?php
+<?php 
     // Always add the main stylesheet
    echo link_tag( array( 'href' => 'css/favicon.ico', 'media' => 'screen', 'rel' => 'shortcut icon' ) ) . "\n";
     echo link_tag( array( 'href' => 'css/bootstrap.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
