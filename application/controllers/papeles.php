@@ -227,7 +227,14 @@ class Papeles extends MY_Controller {
      $resultado= $this->codegen_model->countwhere('est_impresiones','impr_papelid = '.$this->input->post('papelid'));
      echo $resultado->contador;
 
-  }    
+  } 
+
+  function extraerUsuarios()
+     {
+       $fragmento=$this->input->post('piece');
+       $fragmento.="aja";
+       echo $fragmento;
+     }   
  
   function datatable ()
   {

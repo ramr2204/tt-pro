@@ -20,5 +20,24 @@ $(window).ready(inicial);
 
 function inicial () 
 {
-	alert("begining a new domashnie");
+	$('#responsable').keyup(solicitarUsuarios);
+}
+
+
+function solicitarUsuarios () {
+	
+	var base_url=$('#base').val();
+	var fragmento=$('#responsable').val();
+
+	$.ajax({
+               type: "POST",
+               dataType: "html",
+               data: {piece : fragmento},
+               url: base_url+"index.php/papeles/extraerUsuarios",
+               success: function(data) {
+    			    alert(data);             
+               }
+             });
+
+	
 }

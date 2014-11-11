@@ -76,7 +76,7 @@
 </head>
 
 <body> 
-asdfasdf
+<input id="base" type="hidden" value="<?php echo base_url(); ?>">
 <?php if (!$this->ion_auth->logged_in()) { ?>
 
 <header class="cabecera">
