@@ -24,6 +24,10 @@ function inicial ()
 }
 
 
+
+ //función que realiza el autocompletar
+ //para el nombre del encargado de la papelería
+
 function solicitarUsuarios () {
 	
 	var base_url=$('#base').val();
@@ -31,13 +35,21 @@ function solicitarUsuarios () {
 
 	$.ajax({
                type: "POST",
-               dataType: "html",
+               dataType: "json",
                data: {piece : fragmento},
-               url: base_url+"index.php/papeles/extraerUsuarios",
+               url: base_url+"index.php/users/extraerUsuarios",
                success: function(data) {
-    			    alert(data);             
+
+    			     var fuenteBusqueda = [];
+    			     for (var i = 0; i < data.nombre.length; i++) 
+    			     {
+    			     	fuenteBusqueda[i]=data.nombre[i];
+    			     }
+    			     
+    			     $( "#responsable" ).autocomplete({
+    				  source: fuenteBusqueda
+    				 });
                }
              });
-
 	
 }

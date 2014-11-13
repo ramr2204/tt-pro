@@ -705,5 +705,21 @@ class Users extends MY_Controller {
               redirect(base_url().'index.php/users/login');
             }           
     }
+    
 
+    //Funcion que carga el arreglo de opciones para autocompletar
+    //en la busqueda de usuarios para asignar papeleria
+    function extraerUsuarios()
+     {
+       $fragmento = $this->input->post('piece');
+       $resultado = $this->codegen_model->getLike('users',"first_name, last_name, username",'concat(first_name, last_name)',$fragmento);
+       
+       foreach ($resultado->result_array() as $value) 
+       {
+          $vector_usuarios['id'][]=$value['username'];
+          $vector_usuarios['nombre'][]=$value['first_name'].' '.$value['last_name'];
+       }
+    
+       echo json_encode($vector_usuarios);
+     }  
 }

@@ -58,7 +58,7 @@ class Papeles extends MY_Controller {
   }
 	
   function add()
-  {        
+  {  
       if ($this->ion_auth->logged_in()) {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/add')) {
@@ -227,14 +227,7 @@ class Papeles extends MY_Controller {
      $resultado= $this->codegen_model->countwhere('est_impresiones','impr_papelid = '.$this->input->post('papelid'));
      echo $resultado->contador;
 
-  } 
-
-  function extraerUsuarios()
-     {
-       $fragmento=$this->input->post('piece');
-       $fragmento.="aja";
-       echo $fragmento;
-     }   
+  }  
  
   function datatable ()
   {

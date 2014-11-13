@@ -24,6 +24,18 @@ class Codegen_model extends CI_Model
         $result =  !$one  ? $query->result($array) : $query->row() ;
         return $result;
     }
+
+    //Funcion que extrae coincidencias de una tabla según
+    //una cadena especificada
+    function getLike($table,$fields,$like='',$match='')
+    {
+        
+        $this->db->select($fields);
+        $this->db->from($table);
+        $this->db->like($like, $match);        
+        $query = $this->db->get();
+        return $query;
+    }
     
     function add($table,$data)
     {
