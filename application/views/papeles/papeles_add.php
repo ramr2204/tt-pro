@@ -22,7 +22,7 @@
                               <?php echo form_open(current_url()); ?>
                                     <div class="form-group">
                                            <label for="responsablePapel">Nombre Responsable</label>
-                                           <input class="form-control" id="responsable" type="text" name="responsablePapel" placeholder="Nombre" required/>
+                                           <input class="form-control" id="responsable" type="text" name="responsablePapel" placeholder="Nombre" required autocomplete="off"/>
                                            <?php echo form_error('codigoinicial','<span class="text-danger">','</span>'); ?>
                                     </div>
 

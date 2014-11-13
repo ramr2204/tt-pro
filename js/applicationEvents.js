@@ -17,10 +17,18 @@
 
 $(window).ready(inicial);
 
+//variable global que guarda el total de los
+//usuarios hallados en el autocomplete
+//actual
+var usuariosActual=[];
+usuariosActual['nombre']=[];
+usuariosActual['id']=[];
+
 
 function inicial () 
 {
 	$('#responsable').keyup(solicitarUsuarios);
+	$('#responsable').focusout(cargarId);
 }
 
 
@@ -44,12 +52,34 @@ function solicitarUsuarios () {
     			     for (var i = 0; i < data.nombre.length; i++) 
     			     {
     			     	fuenteBusqueda[i]=data.nombre[i];
+    			     	usuariosActual['nombre'][i]=data.nombre[i];
+    			     	usuariosActual['id'][i]=data.idd[i];
     			     }
     			     
     			     $( "#responsable" ).autocomplete({
     				  source: fuenteBusqueda
-    				 });
+    				 });   			    
                }
              });
 	
+}
+
+
+//Funcion que establece el numero de documento
+//del usuario al que se le asignarán la papeleria
+function cargarId () 
+{
+	 var valorActual=$('#responsable').val();
+     var documento;
+
+     for (var i = 0; i < usuariosActual['nombre'].length; i++) 
+     {  
+    	 if(valorActual==usuariosActual['nombre'][i])
+    	 {
+    		 documento=usuariosActual['id'][i];
+    	 }
+
+     }
+
+     $('#docuResponsable').val(documento);
 }

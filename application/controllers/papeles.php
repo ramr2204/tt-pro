@@ -95,10 +95,12 @@ class Papeles extends MY_Controller {
     		      }
               $this->template->set('title', 'Nueva aplicación');
               $this->data['style_sheets']= array(
-                        'css/chosen.css' => 'screen'
+                        'css/chosen.css' => 'screen',
+                        'css/jquery-ui.css' => 'screen'
                     );
               $this->data['javascripts']= array(
-                        'js/chosen.jquery.min.js'
+                        'js/chosen.jquery.min.js',
+                        'js/jquery-ui.js'
                     );  
               $this->template->set('title', 'Nuevo estampilla');
               $this->data['maxcodigofinal']  = $this->codegen_model->max('est_papeles','pape_codigofinal');

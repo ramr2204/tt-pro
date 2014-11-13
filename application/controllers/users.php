@@ -716,7 +716,7 @@ class Users extends MY_Controller {
        
        foreach ($resultado->result_array() as $value) 
        {
-          $vector_usuarios['id'][]=$value['username'];
+          $vector_usuarios['idd'][]=$value['username'];
           $vector_usuarios['nombre'][]=$value['first_name'].' '.$value['last_name'];
        }
     
