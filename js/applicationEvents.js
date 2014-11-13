@@ -29,6 +29,7 @@ function inicial ()
 {
 	$('#responsable').keyup(solicitarUsuarios);
 	$('#responsable').focusout(cargarId);
+	$('#codigoinicial').focusout(solicitarCodigos);
 }
 
 
@@ -36,10 +37,10 @@ function inicial ()
  //función que realiza el autocompletar
  //para el nombre del encargado de la papelería
 
-function solicitarUsuarios () {
+function solicitarUsuarios (e) {
 	
 	var base_url=$('#base').val();
-	var fragmento=$('#responsable').val();
+	var fragmento=$(this).val();
 
 	$.ajax({
                type: "POST",
@@ -67,9 +68,9 @@ function solicitarUsuarios () {
 
 //Funcion que establece el numero de documento
 //del usuario al que se le asignarán la papeleria
-function cargarId () 
+function cargarId (e) 
 {
-	 var valorActual=$('#responsable').val();
+	 var valorActual=$(this).val();
      var documento;
 
      for (var i = 0; i < usuariosActual['nombre'].length; i++) 
@@ -82,4 +83,36 @@ function cargarId ()
      }
 
      $('#docuResponsable').val(documento);
+}
+
+
+//función que realiza la conexión asincronica
+//para la relación de codigos de la papelería
+
+function solicitarCodigos (e) {
+	
+	var base_url=$('#base').val();
+	var codigoPapel=$(this).val();
+
+	$.ajax({
+               type: "POST",
+               dataType: "json",
+               data: {codPaper : codigoPapel},
+               url: base_url+"index.php/users/extraerUsuarios",
+               success: function(data) {
+
+    			     var fuenteBusqueda = [];
+    			     for (var i = 0; i < data.nombre.length; i++) 
+    			     {
+    			     	fuenteBusqueda[i]=data.nombre[i];
+    			     	usuariosActual['nombre'][i]=data.nombre[i];
+    			     	usuariosActual['id'][i]=data.idd[i];
+    			     }
+    			     
+    			     $( "#responsable" ).autocomplete({
+    				  source: fuenteBusqueda
+    				 });   			    
+               }
+             });
+	
 }

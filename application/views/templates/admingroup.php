@@ -35,6 +35,8 @@
      echo link_tag( array( 'href' => 'css/favicon.ico', 'media' => 'screen', 'rel' => 'shortcut icon' ) ) . "\n";
      echo link_tag( array( 'href' => 'css/bootstrap.min.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
      echo link_tag( array( 'href' => 'css/sb-admin.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
+     echo link_tag( array( 'href' => 'css/estampillas.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
+
      //echo link_tag( array( 'href' => 'css/font-awesome.min.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n"; 
      ?> 
      <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
