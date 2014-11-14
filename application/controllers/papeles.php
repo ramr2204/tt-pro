@@ -58,16 +58,27 @@ class Papeles extends MY_Controller {
   }
 	
   function add()
-  {  
+  {   $idLiquidador = 3;
+     $tabla='est_papeles';
+     $campos="est_papeles.pape_codigoinicial, est_papeles.pape_codigofinal";
+     $estructuraWhere='where users.id = '.$idLiquidador;
+     $estructuraJoin='inner join users on est_papeles.pape_usuario=users.id';
+     $estructuraGroup='group by est_papeles.codigoinicial';
+
+     $resultado = $this->codegen_model->getSelect($tabla,$campos,$estructuraWhere,$estructuraJoin,$estructuraGroup);
+       
+     print_r($resultado);exit();/*
       if ($this->ion_auth->logged_in()) {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/add')) {
 
               $this->data['successmessage']=$this->session->flashdata('message');  
-        		  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
-              $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]|is_unique[est_papeles.pape_cuenta]');   
-              $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[256]');
-              $this->form_validation->set_rules('bancoid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
+        		  $this->form_validation->set_rules('codigoinicial', 'Código Inicial', 'required|xss_clean|max_length[7]|is_unique[est_papeles.pape_codigoinicial]');
+              $this->form_validation->set_rules('codigofinal', 'Código Final', 'required|xss_clean|max_length[7]|is_unique[est_papeles.pape_codigofinal]');   
+              $this->form_validation->set_rules('observaciones', 'Observaciones', 'xss_clean|max_length[480]');
+              $this->form_validation->set_rules('documentoRespPapel', 'Documento Responsable',  'required|numeric');
+              $this->form_validation->set_rules('cantidad', 'Cantidad Papeleria',  'required|numeric|is_natural_no_zero');
+              
 
               if ($this->form_validation->run() == false) {
 
@@ -75,20 +86,30 @@ class Papeles extends MY_Controller {
               } else {    
 
                   $data = array(
-                        'pape_nombre' => $this->input->post('nombre'),
-                        'pape_cuenta' => $this->input->post('cuenta'),
-                        'pape_descripcion' => $this->input->post('descripcion'),
-                        'pape_bancoid' => $this->input->post('bancoid')
+                        'pape_usuario' => $this->input->post('documentoRespPapel'),
+                        'pape_codigoinicial' => $this->input->post('codigoinicial'),
+                        'pape_codigofinal' => $this->input->post('codigofinal'),
+                        'pape_observaciones' => $this->input->post('observaciones'),      
+                        'pape_cantidad' => $this->input->post('cantidad'),
+                        'pape_fecha' => date('Y-m-d H:i:s'),
+                        'pape_estado'=> 1,
+                        'pape_imprimidos'=> 0
 
                      );
                  
     			        if ($this->codegen_model->add('est_papeles',$data) == TRUE) {
 
-                      $this->session->set_flashdata('message', 'El estampilla se ha creado con éxito');
+                      $this->session->set_flashdata('message', 'Se ha asignado la Papeleria correspondiente al rango '
+                          .$this->input->post('codigoinicial')
+                          .'-'.$this->input->post('codigofinal')
+                          .' al usuario '
+                          .$this->input->post('responsablePapel')
+                          .' con éxito ');
+
                       redirect(base_url().'index.php/papeles/add');
     			        } else {
 
-    				          $this->data['errormessage'] = 'No se pudo registrar el estampilla';
+    				          $this->data['errormessage'] = 'No se pudo registrar la Papeleria';
 
     			        }
 
@@ -102,7 +123,7 @@ class Papeles extends MY_Controller {
                         'js/chosen.jquery.min.js',
                         'js/jquery-ui.js'
                     );  
-              $this->template->set('title', 'Nuevo estampilla');
+              $this->template->set('title', 'Agregar Papeleria');
               $this->data['maxcodigofinal']  = $this->codegen_model->max('est_papeles','pape_codigofinal');
               $this->template->load($this->config->item('admin_template'),'papeles/papeles_add', $this->data);
              
@@ -113,7 +134,7 @@ class Papeles extends MY_Controller {
       } else {
           redirect(base_url().'index.php/users/login');
       }
-
+*/
   }	
 
 
@@ -265,4 +286,22 @@ class Papeles extends MY_Controller {
               redirect(base_url().'index.php/users/login');
       }           
   }
+
+
+  //Funcion que el contenido de la columna de rangos
+  //de papeleria asignada a cada usuario
+  function extraerRangosPapel()
+    {
+     $idLiquidador = $this->input->post('idLiquidador');
+     $tabla='est_papeles';
+     $campos="est_papeles.pape_codigoinicial, est_papeles.pape_codigofinal";
+     $estructuraWhere='users.id = '.$idLiquidador;
+     $estructuraJoin='inner join users on est_papeles.pape_usuario=usuario.id';
+     $estructuraGroup='group by est_papeles.codigoinicial';
+
+     $resultado = $this->codegen_model->getSelect($tabla,$campos,$estructuraWhere,$estructuraJoin,$estructuraGroup);
+       
+     print_r($resultado);exit();
+    }  
+
 }

@@ -14,19 +14,42 @@ var oTable = $('#tablaq').dataTable( {
                       { "sClass": "center","sWidth": "5%" }, /*id 0*/
                       { "sClass": "item" }, 
                       { "sClass": "item" }, 
+                      { "sClass": "item" }, 
                       { "sClass": "item","sWidth": "5%" }, 
                       { "sClass": "center","bSortable": false,"bSearchable": false,"sWidth": "5%" },
 
                     
                       ],
  "fnRowCallback":function( nRow, aData, iDataIndex ) {
-          if ( aData[3] ==1 )
+          if ( aData[4] ==1 )
             {
-               $('td:eq(3)', nRow).html( '<a href="<?php echo base_url(); ?>users/deactivate/'+aData[0]+'" class="btn btn-default btn-xs" title="Desactivar"><i class="fa fa-unlock" style="color:green"></i> </a>' );  
+               $('td:eq(4)', nRow).html( '<a href="<?php echo base_url(); ?>users/deactivate/'+aData[0]+'" class="btn btn-default btn-xs" title="Desactivar"><i class="fa fa-unlock" style="color:green"></i> </a>' );  
             }else
             {
-              $('td:eq(3)', nRow).html( '<a href="<?php echo base_url(); ?>users/activate/'+aData[0]+'" class="btn btn-default btn-xs"" title="Activar"><i class="fa fa-lock" style="color:red"></i></a>' );  
+              $('td:eq(4)', nRow).html( '<a href="<?php echo base_url(); ?>users/activate/'+aData[0]+'" class="btn btn-default btn-xs"" title="Activar"><i class="fa fa-lock" style="color:red"></i></a>' );  
             }
+
+          if ( aData[2] =='Administrador' )
+          {
+              $('td:eq(3)', nRow).html( '<b>No Aplica</b>' );  
+
+           //realiza una consulta a la bd y extrae
+           //los rangos de papeleria que tiene asignado
+           //el usuario para mostrarlo en la columna   
+          }else if(aData[2] =='Liquidador')
+              {
+
+                  $.ajax({
+                       type: "POST",
+                       dataType: "html",
+                       data: {idLiquidador : aData[0]},
+                       url: base_url+"index.php/papeles/extraerRangosPapel",
+                       success: function(data) {
+
+                           $('td:eq(3)', nRow).html( data );
+                       }
+                     });
+              }
          },                          
 
 } );
@@ -48,7 +71,8 @@ var oTable = $('#tablaq').dataTable( {
     <tr>
      <th>Identificación</th>
      <th>Email</th> 
-     <th>perfil</th>  
+     <th>Perfil</th>  
+     <th>Papeleria Asignada</th>
      <th>Estado</th> 
      <th>Acciones</th>
    </tr>

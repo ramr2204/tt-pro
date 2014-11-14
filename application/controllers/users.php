@@ -689,9 +689,10 @@ class Users extends MY_Controller {
         if ($this->ion_auth->is_admin())
            {
             $this->load->library('datatables');
-            $this->datatables->select('u.id,u.email,p.perf_nombre,u.active');
+            $this->datatables->select('u.id,u.email,p.perf_nombre,pa.pape_codigofinal,u.active');
             $this->datatables->from('users u');
             $this->datatables->join('adm_perfiles p','p.perf_id = u.perfilid','left');
+            $this->datatables->join('est_papeles pa','pa.pape_usuario = u.id','left');
             $this->datatables->add_column('edit', '<div class="btn-toolbar" role="toolbar">
                                                        <div class="btn-group">
                                                         <a href="'.base_url().'users/edit/$1" class="btn btn-default btn-xs" title="Editar datos de usuario"><i class="fa fa-pencil-square-o"></i></a>
@@ -712,11 +713,12 @@ class Users extends MY_Controller {
     function extraerUsuarios()
      {
        $fragmento = $this->input->post('piece');
-       $resultado = $this->codegen_model->getLike('users',"first_name, last_name, username",'concat(first_name, last_name)',$fragmento);
+       $where = ['perfilid ='=>'4'];
+       $resultado = $this->codegen_model->getLike('users',"users.first_name, users.last_name, users.id",'concat(first_name, last_name)',$fragmento,$where);
        
        foreach ($resultado->result_array() as $value) 
        {
-          $vector_usuarios['idd'][]=$value['username'];
+          $vector_usuarios['idd'][]=$value['id'];
           $vector_usuarios['nombre'][]=$value['first_name'].' '.$value['last_name'];
        }
     
