@@ -45,8 +45,9 @@ var oTable = $('#tablaq').dataTable( {
                        data: {idLiquidador : aData[0]},
                        url: "<?php echo base_url(); ?>"+"index.php/papeles/extraerRangosPapel",
                        success: function(data) {
-
-                           $('td:eq(3)', nRow).html( data );
+                                                   
+                                    $('td:eq(3)', nRow).html( data );
+                               
                        }
                      });
               }

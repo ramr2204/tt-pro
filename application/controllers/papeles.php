@@ -74,37 +74,75 @@ class Papeles extends MY_Controller {
               if ($this->form_validation->run() == false) {
 
                   $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
-              } else {    
+              } else 
+                {
 
-                  $data = array(
-                        'pape_usuario' => $this->input->post('documentoRespPapel'),
-                        'pape_codigoinicial' => $this->input->post('codigoinicial'),
-                        'pape_codigofinal' => $this->input->post('codigofinal'),
-                        'pape_observaciones' => $this->input->post('observaciones'),      
-                        'pape_cantidad' => $this->input->post('cantidad'),
-                        'pape_fecha' => date('Y-m-d H:i:s'),
-                        'pape_estado'=> 1,
-                        'pape_imprimidos'=> 0
+                      //Valida si alguno de los codigos de papeleria
+                      //ingresados se encuentra dentro por lo menos
+                      //uno de los rangos asignados actualmente
 
-                     );
+                      $codigoUp=(int)$this->input->post('codigofinal');
+                      $codigoDown=(int)$this->input->post('codigoinicial');
+
+                      $cadenaErrorPapelEnRango='null';
+
+                      $campo='pape_codigoinicial, pape_codigofinal';
+                      $rangos=$this->codegen_model->getSelect('est_papeles',$campo);
+
+                      foreach ($rangos as $value) 
+                      {
+                          $up=(int)$value->pape_codigofinal;
+                          $down=(int)$value->pape_codigoinicial;
+
+                          if($codigoDown<=$up && $codigoDown>=$down)
+                          {
+                               $cadenaErrorPapelEnRango='El codigo de papel Inicial -'.$codigoDown
+                                   .'- ya fue asignado. ';
+                          }
+
+                          if ($codigoUp<=$up && $codigoUp>=$down) 
+                          {
+                              $cadenaErrorPapelEnRango.='El codigo de papel Final -'.$codigoUp
+                                .'- ya fue asignado.';
+                          }
+                      }//echo count($cadenaErrorPapelEnRango);echo $cadenaErrorPapelEnRango;exit();
+
+                      if(count($cadenaErrorPapelEnRango)!='null')
+                      {
+                          $this->data['errormessage'] = $cadenaErrorPapelEnRango; 
+                          
+                      }else
+                          {
+                               $data = array(
+                                      'pape_usuario' => $this->input->post('documentoRespPapel'),
+                                      'pape_codigoinicial' => $this->input->post('codigoinicial'),
+                                      'pape_codigofinal' => $this->input->post('codigofinal'),
+                                      'pape_observaciones' => $this->input->post('observaciones'),      
+                                      'pape_cantidad' => $this->input->post('cantidad'),
+                                      'pape_fecha' => date('Y-m-d H:i:s'),
+                                      'pape_estado'=> 1,
+                                      'pape_imprimidos'=> 0
+
+                                   );
                  
-    			        if ($this->codegen_model->add('est_papeles',$data) == TRUE) {
+                                if ($this->codegen_model->add('est_papeles',$data) == TRUE) {
 
-                      $this->session->set_flashdata('message', 'Se ha asignado la Papeleria correspondiente al rango '
-                          .$this->input->post('codigoinicial')
-                          .'-'.$this->input->post('codigofinal')
-                          .' al usuario '
-                          .$this->input->post('responsablePapel')
-                          .' con éxito ');
+                                    $this->session->set_flashdata('message', 'Se ha asignado la Papeleria correspondiente al rango '
+                                        .$this->input->post('codigoinicial')
+                                        .'-'.$this->input->post('codigofinal')
+                                        .' al usuario '
+                                        .$this->input->post('responsablePapel')
+                                        .' con éxito ');
 
-                      redirect(base_url().'index.php/papeles/add');
-    			        } else {
+                                    redirect(base_url().'index.php/papeles/add');
+                                } else {
 
-    				          $this->data['errormessage'] = 'No se pudo registrar la Papeleria';
+                                    $this->data['errormessage'] = 'No se pudo registrar la Papeleria';
 
-    			        }
+                                } 
+                          }
 
-    		      }
+    		         }
               $this->template->set('title', 'Nueva aplicación');
               $this->data['style_sheets']= array(
                         'css/chosen.css' => 'screen',
@@ -292,6 +330,7 @@ class Papeles extends MY_Controller {
      $resultado = $this->codegen_model->getSelect($tabla,$campos,$estructuraWhere,'',$estructuraGroup);
 
      $cadenaPapeles='';
+
      foreach ($resultado as $value) 
      {
        $cadenaPapeles.=$value->pape_codigoinicial.' - '.$value->pape_codigofinal.' | ';
