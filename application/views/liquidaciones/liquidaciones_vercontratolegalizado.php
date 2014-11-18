@@ -102,7 +102,25 @@
      <div class="bg-success">Código: <?php echo $row2->fact_codigo; ?> <i class="fa fa-check"></i> </div> 
      <?php if ($row2->impr_codigopapel>0) { ?>
                 <div class="bg-info">legalizado: <?php echo $row2->impr_codigopapel; ?> <i class="fa fa-gavel"></i> </div>
-                <?php echo anchor(base_url().'generarpdf/generar_estampilla/'.$row2->fact_id,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large  btn-default" target="_blank"'); ?>
+
+                <?php //verifica si el perfil del usuario logueado es 
+                      //de liquidador para permitir o denegar la orden 
+                      //de impresion de estampillas   
+              
+                      $usuarioLogueado=$this->ion_auth->user()->row();
+
+                      if ($usuarioLogueado->perfilid==4){ ?>  
+
+                      <?php echo anchor(base_url().'generarpdf/generar_estampilla/'.$row2->fact_id,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large  btn-default" target="_blank"'); ?>
+                
+
+                <?php  }else
+                           { ?>
+
+                            <a href="#" class="btn btn-large  btn-default" disabled><i class="fa fa-print"></i>Imprimir estampilla</a>
+
+                   <?php   } ?>
+
           <?php  } ?>
      <?php  } else { ?>
       <div class="bg-danger">Pagado: <?php echo '$'.number_format($row2->pago_valor, 2, ',', '.'); ?> <i class="fa fa-times"></i> </div> 

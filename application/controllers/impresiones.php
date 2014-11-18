@@ -76,6 +76,9 @@ class Impresiones extends MY_Controller {
               } else {    
 
                    $resultado = $this->codegen_model->get('est_tiposanulaciones','tisa_id',"tisa_nombre = '".$this->input->post('tipoanulacion')."'",1,NULL,true);
+
+                   //si no se encuentra creado el tipo de anulación
+                   //en esta sección se crea en la bd
                    if (!$resultado->tisa_id>0){
 
                       $datos = array(
@@ -83,9 +86,14 @@ class Impresiones extends MY_Controller {
                      );
                       $this->codegen_model->add('est_tiposanulaciones',$datos); 
                       $tipoanulacionid=$this->db->insert_id();
+                  //////////////////////////////////////////////////
                    } else {
                       $tipoanulacionid=$resultado->tisa_id;
                    }
+
+                   //Verifica si el codigo de papel a eliminar esta asignado a un
+                   //contrato en caso de estarlo realiza las operaciones necesarias
+                   //para actualizar el estado del contrato y el estado de la impresion
                     $result= $this->codegen_model->get('est_impresiones','impr_id,impr_facturaid',"impr_codigopapel = '".$this->input->post('codigopapel')."'",1,NULL,true);
 
                   if ($result) {
@@ -96,6 +104,9 @@ class Impresiones extends MY_Controller {
                          'cntr_estadolocalid' => 1,
                       );
                        $this->codegen_model->edit('con_contratos',$cdata,'cntr_id',$liquidaciones->liqu_contratoid);
+
+                       //Sobre escribe el id de la factura que se habia generado con ese papel
+                       //por cero (0) y actualiza el estado de impresión a 2
                        $data = array(
                          'impr_codigopapel' => $this->input->post('codigopapel'),
                          'impr_observaciones' => $this->input->post('observaciones'),
@@ -113,6 +124,9 @@ class Impresiones extends MY_Controller {
                       }
                     
                   } else {
+
+                      //En caso de no existir una factura ni contrato asignado al papel que se
+                      //va a anular se crea solamente la anulación con el codigo del papel respectivo
                       $papeles = $this->codegen_model->get('est_papeles','pape_id,pape_codigoinicial,pape_codigofinal','pape_codigoinicial <= '.$this->input->post('codigopapel').' AND pape_codigofinal >= '.$this->input->post('codigopapel'),1,NULL,true);
                       $data = array(
                         'impr_codigopapel' => $this->input->post('codigopapel'),

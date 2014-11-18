@@ -183,58 +183,57 @@ class Generarpdf extends CI_controller {
           } 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
 
-              $this->data['estampilla'] = $this->liquidaciones_model->getfactura_legalizada($this->uri->segment(3),$doc=TRUE);
-              // echo "<pre>";
-              // print_r($this->data['estampilla']);
-              //  echo "</pre>";
-              $estampilla=$this->data['estampilla'];
-              $this->load->library("Pdf");
-              $resolution= array(14, 9);
-              $pdf = new PDF(PDF_PAGE_ORIENTATION,'mm',array(92,141), true, 'UTF-8', false);
+                  $this->data['estampilla'] = $this->liquidaciones_model->getfactura_legalizada($this->uri->segment(3),$doc=TRUE);
+              
+                  $estampilla=$this->data['estampilla'];
+                  $this->load->library("Pdf");
+                  $resolution= array(14, 9);
+                  $pdf = new PDF(PDF_PAGE_ORIENTATION,'mm',array(92,141), true, 'UTF-8', false);
 
 
-              // set document information
-              $pdf->SetCreator(PDF_CREATOR);
-              $pdf->SetAuthor('turrisystem');
-              $pdf->SetTitle('Liquidación de estampillas');
-              $pdf->SetSubject('Gobernación del Tolima');
-              $pdf->SetKeywords('estampillas,gobernación');
-              $pdf->SetPrintHeader(false);
-              $pdf->SetPrintFooter(false);
-              // set default monospaced font
-              $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+                  // set document information
+                  $pdf->SetCreator(PDF_CREATOR);
+                  $pdf->SetAuthor('turrisystem');
+                  $pdf->SetTitle('Liquidación de estampillas');
+                  $pdf->SetSubject('Gobernación del Tolima');
+                  $pdf->SetKeywords('estampillas,gobernación');
+                  $pdf->SetPrintHeader(false);
+                  $pdf->SetPrintFooter(false);
+                  // set default monospaced font
+                  $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
-              // set margins
-              $pdf->setPageUnit('mm');
-              $pdf->SetMargins(16, 2.5, 4.9, true);
+                  // set margins
+                  $pdf->setPageUnit('mm');
+                  $pdf->SetMargins(16, 2.5, 4.9, true);
       
-              // set auto page breaks
-              $pdf->SetAutoPageBreak(FALSE, 1);
+                  // set auto page breaks
+                  $pdf->SetAutoPageBreak(FALSE, 1);
 
-              // set image scale factor
-              //$pdf->setImageScale(100.5);
+                  // set image scale factor
+                  //$pdf->setImageScale(100.5);
 
-              // set some language-dependent strings (optional)
-              if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-                  require_once(dirname(__FILE__).'/lang/eng.php');
-                  $pdf->setLanguageArray($l);
-              }
+                  // set some language-dependent strings (optional)
+                  if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+                      require_once(dirname(__FILE__).'/lang/eng.php');
+                      $pdf->setLanguageArray($l);
+                  }
                
-// ---------------------------------------------------------
+                  // ---------------------------------------------------------
             
-               // set font
-                $pdf->SetFont('times', '', 8);
-                $pdf->AddPage('L',array(90,140));
-                $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array('(415)7709998009530'.chr(247).'(8020)7341711081'.chr(247).'(390y)000000760000'.chr(247).'(96', 'C128', '', '', 80, 17, 0.4, array('position'=>'C','align' => 'C', 'border-top'=>true, 'padding'=>2,'margin-top'=>2, 'fgcolor'=>array(0,0,0), 'bgcolor'=>'', 'text'=>false, 'font'=>'helvetica', 'fontsize'=>6, 'stretchtext'=>4), 'N'));
-                $html = $this->load->view('generarpdf/generarpdf_estampillalegalizada', $this->data, TRUE);  
+                  // set font
+                   $pdf->SetFont('times', '', 8);
+                   $pdf->AddPage('L',array(90,140));
+                   $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array('(415)7709998009530'.chr(247).'(8020)7341711081'.chr(247).'(390y)000000760000'.chr(247).'(96', 'C128', '', '', 80, 17, 0.4, array('position'=>'C','align' => 'C', 'border-top'=>true, 'padding'=>2,'margin-top'=>2, 'fgcolor'=>array(0,0,0), 'bgcolor'=>'', 'text'=>false, 'font'=>'helvetica', 'fontsize'=>6, 'stretchtext'=>4), 'N'));
+                   $html = $this->load->view('generarpdf/generarpdf_estampillalegalizada', $this->data, TRUE);  
                 
-                $pdf->writeHTML($html, true, false, true, false, '');
+                   $pdf->writeHTML($html, true, false, true, false, '');
            
 
-               // ---------------------------------------------------------
+                  // ---------------------------------------------------------
 
-               //Close and output PDF document
-               $pdf->Output('estampilla_'.$estampilla->impr_codigopapel.'.pdf', 'I');         
+                  //Close and output PDF document
+                  $pdf->Output('estampilla_'.$estampilla->impr_codigopapel.'.pdf', 'I'); 
+              
 
           } else {
               redirect(base_url().'index.php/error_404');
