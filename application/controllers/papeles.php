@@ -58,16 +58,7 @@ class Papeles extends MY_Controller {
   }
 	
   function add()
-  {   $idLiquidador = 3;
-     $tabla='est_papeles';
-     $campos="est_papeles.pape_codigoinicial, est_papeles.pape_codigofinal";
-     $estructuraWhere='where users.id = '.$idLiquidador;
-     $estructuraJoin='inner join users on est_papeles.pape_usuario=users.id';
-     $estructuraGroup='group by est_papeles.codigoinicial';
-
-     $resultado = $this->codegen_model->getSelect($tabla,$campos,$estructuraWhere,$estructuraJoin,$estructuraGroup);
-       
-     print_r($resultado);exit();/*
+  {  
       if ($this->ion_auth->logged_in()) {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/add')) {
@@ -134,7 +125,7 @@ class Papeles extends MY_Controller {
       } else {
           redirect(base_url().'index.php/users/login');
       }
-*/
+
   }	
 
 
@@ -294,14 +285,20 @@ class Papeles extends MY_Controller {
     {
      $idLiquidador = $this->input->post('idLiquidador');
      $tabla='est_papeles';
-     $campos="est_papeles.pape_codigoinicial, est_papeles.pape_codigofinal";
-     $estructuraWhere='users.id = '.$idLiquidador;
-     $estructuraJoin='inner join users on est_papeles.pape_usuario=usuario.id';
-     $estructuraGroup='group by est_papeles.codigoinicial';
+     $campos="pape_codigoinicial, pape_codigofinal";
+     $estructuraWhere='where pape_usuario = '.$idLiquidador;
+     $estructuraGroup='group by pape_codigoinicial';
 
-     $resultado = $this->codegen_model->getSelect($tabla,$campos,$estructuraWhere,$estructuraJoin,$estructuraGroup);
-       
-     print_r($resultado);exit();
+     $resultado = $this->codegen_model->getSelect($tabla,$campos,$estructuraWhere,'',$estructuraGroup);
+
+     $cadenaPapeles='';
+     foreach ($resultado as $value) 
+     {
+       $cadenaPapeles.=$value->pape_codigoinicial.' - '.$value->pape_codigofinal.' | ';
+     }
+
+     echo $cadenaPapeles;
+
     }  
 
 }

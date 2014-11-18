@@ -43,7 +43,7 @@ var oTable = $('#tablaq').dataTable( {
                        type: "POST",
                        dataType: "html",
                        data: {idLiquidador : aData[0]},
-                       url: base_url+"index.php/papeles/extraerRangosPapel",
+                       url: "<?php echo base_url(); ?>"+"index.php/papeles/extraerRangosPapel",
                        success: function(data) {
 
                            $('td:eq(3)', nRow).html( data );
