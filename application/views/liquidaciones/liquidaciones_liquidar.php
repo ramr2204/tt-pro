@@ -82,6 +82,15 @@ var oTable = $('#tablaq').dataTable( {
             $("#idcontrato").val(ID);
              $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vercontratolegalizado/'+ID,function(result){
               $('#myModal3').modal({show:true});
+
+              $('.confirmar_impresion').click(function(event) {
+    
+                  if(!confirm('Esta seguro de generar la impresión? Recuerde que será modificado el consecutivo de la papeleria asignada a ud'))
+                  {
+                    event.preventDefault();
+                  }
+
+              });
              });
          });
     }     
@@ -308,3 +317,5 @@ var oTable = $('#tablaq').dataTable( {
  
 </script>
 <?php   } ?>
+
+

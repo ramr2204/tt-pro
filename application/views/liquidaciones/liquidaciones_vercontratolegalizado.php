@@ -9,7 +9,9 @@
 *   @version          2014-05-20
 *
 */
+
 ?>
+
 
 <div class="row"> 
  <div class="col-sm-12">    
@@ -111,7 +113,7 @@
 
                       if ($usuarioLogueado->perfilid==4){ ?>  
 
-                      <?php echo anchor(base_url().'generarpdf/generar_estampilla/'.$row2->fact_id,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large  btn-default" target="_blank"'); ?>
+                      <?php echo anchor(base_url().'generarpdf/generar_estampilla/'.$row2->fact_id,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large btn-default confirmar_impresion" target="_blank"'); ?>
                 
 
                 <?php  }else
@@ -140,4 +142,6 @@
 </div>
 </div>   
       </div>
+ 
+
  

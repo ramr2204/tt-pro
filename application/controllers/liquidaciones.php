@@ -55,7 +55,8 @@ class Liquidaciones extends MY_Controller {
                         'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
                         'js/accounting.min.js',
                         'js/plugins/bootstrap/fileinput.min.js',
-                        'js/plugins/bootstrap/bootstrap-switch.min.js'
+                        'js/plugins/bootstrap/bootstrap-switch.min.js',
+                        'js/applicationEvents.js'
                        );
               $resultado = $this->codegen_model->max('con_contratos','cntr_fecha_firma');
               
