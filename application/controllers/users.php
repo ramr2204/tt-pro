@@ -689,10 +689,9 @@ class Users extends MY_Controller {
         if ($this->ion_auth->is_admin())
            {
             $this->load->library('datatables');
-            $this->datatables->select('u.id,u.email,p.perf_nombre,pa.pape_codigofinal,u.active');
+            $this->datatables->select('u.id,u.email,p.perf_nombre,u.active');
             $this->datatables->from('users u');
             $this->datatables->join('adm_perfiles p','p.perf_id = u.perfilid','left');
-            $this->datatables->join('est_papeles pa','pa.pape_usuario = u.id','left');
             $this->datatables->add_column('edit', '<div class="btn-toolbar" role="toolbar">
                                                        <div class="btn-group">
                                                         <a href="'.base_url().'users/edit/$1" class="btn btn-default btn-xs" title="Editar datos de usuario"><i class="fa fa-pencil-square-o"></i></a>

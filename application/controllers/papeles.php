@@ -288,8 +288,12 @@ class Papeles extends MY_Controller {
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/manage') ) { 
               
               $this->load->library('datatables');
-              $this->datatables->select('p.pape_id,p.pape_codigoinicial,p.pape_codigofinal,p.pape_cantidad,p.pape_imprimidos,p.pape_estado,p.pape_fecha,p.pape_observaciones');
+              $this->datatables->select('p.pape_id,concat(u.first_name," ",u.last_name)'
+                                        .' as nombre ,p.pape_codigoinicial,p.pape_codigofinal,'
+                                        .'p.pape_cantidad,p.pape_imprimidos,p.pape_estado,'
+                                        .'p.pape_fecha,p.pape_observaciones', false);
               $this->datatables->from('est_papeles p');
+              $this->datatables->join('users u','u.id = p.pape_usuario','left');
               
 
               if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/edit')) {

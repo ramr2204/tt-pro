@@ -24,6 +24,7 @@ var oTable = $('#tablaq').dataTable( {
 "aoColumns": [ 
                       { "sClass": "center"}, /*id 0*/
                       { "sClass": "center" }, 
+                      { "sClass": "left" }, 
                       { "sClass": "center" }, 
                       { "sClass": "center" },
                       { "sClass": "center" }, 
@@ -32,7 +33,7 @@ var oTable = $('#tablaq').dataTable( {
                       { "sClass": "item" },
                       ],    
 "fnRowCallback":function( nRow, aData, iDataIndex ) {
-            var cantidad=aData[2]-aData[1]+1;
+            var cantidad=aData[3]-aData[2];
             
             $.ajax({
                type: "POST",
@@ -41,9 +42,8 @@ var oTable = $('#tablaq').dataTable( {
                url: "<?php echo base_url(); ?>index.php/papeles/contarpapeles",
                success: function(data) {
                  var restante=cantidad-data;
-                 $('td:eq(3)', nRow).html(cantidad);
-                 $('td:eq(4)', nRow).html(data);
-                 $('td:eq(5)', nRow).html(restante);
+                 $('td:eq(5)', nRow).html(data);
+                 $('td:eq(6)', nRow).html(restante);
                }
              });
           
@@ -70,6 +70,7 @@ var oTable = $('#tablaq').dataTable( {
  <thead>
     <tr>
      <th>Id</th>
+     <th>Responsable</th>
      <th>Código inicial</th>
      <th>Código final</th>
      <th>Cantidad</th>
