@@ -941,15 +941,7 @@ function verliquidartramite()
 
 
   function liquidaciones_datatable ()
-  { $nuevoingreso=341;
-    $usuarioLogueado=$this->ion_auth->user(3)->row();    
-    $papeles = $this->codegen_model->get('est_papeles','pape_id'
-                     .',pape_codigoinicial,pape_codigofinal',
-                     'pape_codigoinicial <= '.$nuevoingreso
-                     .' AND pape_codigofinal >='
-                     .$nuevoingreso
-                     .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true); 
-                     print_r($papeles);exit(); /*
+  { 
       if ($this->ion_auth->logged_in()) {
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
@@ -968,7 +960,7 @@ function verliquidartramite()
                
       } else{
               redirect(base_url().'index.php/users/login');
-      }         */  
+      }        
   }
 
 
