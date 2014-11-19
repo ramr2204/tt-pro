@@ -98,12 +98,18 @@ class Codegen_model extends CI_Model
     }
 
 
-    function max($table, $field, $where='')
+    function max($table, $field, $where='', $tablaJoin='', $equivalentesJoin='')
      {
         $this->db->select_max($field);
         if($where){
         $this->db->where($where);
         }
+
+        if($tablaJoin and $equivalentesJoin)
+        {
+            $this->db->join($tablaJoin, $equivalentesJoin);
+        }
+
         $query = $this->db->get($table);
         if ($query->num_rows() > 0) {
            return $query->row_array(); //return the row as an associative array

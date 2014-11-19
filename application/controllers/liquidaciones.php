@@ -435,15 +435,28 @@ function legalizar()
                $x=0;
                $papelid=array();
                $this->data['facturas'] = $this->liquidaciones_model->getfacturas($this->input->post('liquidacionid'));
+
+               //extrae el usuario logueado para comparar
+               //su inventario de papeleria
+               $usuarioLogueado=$this->ion_auth->user()->row();
+
                foreach ($this->data['facturas'] as $key => $value) {
                  $nousado=0;
-                 $max = $this->codegen_model->max('est_impresiones','impr_codigopapel', 'impr_estado = 1');
+
+                 
+                 //extrae el ultimo codigo de papeleria resgistrado
+                 //para el liquidador autenticado
+                 $tablaJoin='est_papeles';
+                 $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
+                 $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
+
+                 $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);
                  $nuevoingreso=$max['impr_codigopapel']+1;
                 
                  while ($nousado==0) { //comprueba si ya se está usando el codigo del papel
-                     $comimpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso,1,NULL,true);
+                     $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso,1,NULL,true);
                      
-                     if (!$comimpresiones) {
+                     if (!$combrobacionImpresiones) {
                         $nousado=1;
                      } else {
                          $nuevoingreso++;
@@ -452,7 +465,20 @@ function legalizar()
                      
                  }
                  
-                 $papeles = $this->codegen_model->get('est_papeles','pape_id,pape_codigoinicial,pape_codigofinal','pape_codigoinicial <= '.$nuevoingreso.' AND pape_codigofinal >= '.$nuevoingreso,1,NULL,true);        
+                 //extrae los posibles rangos de papeleria asignados
+                 //al usuario que se encuentra logueado que debe ser
+                 //un liquidador
+
+                 $papeles = $this->codegen_model->get('est_papeles','pape_id'
+                     .',pape_codigoinicial,pape_codigofinal',
+                     'pape_codigoinicial <= '.$nuevoingreso
+                     .' AND pape_codigofinal >='
+                     .$nuevoingreso
+                     .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true);        
+
+                 //verifica que exista un rango de papeleria asignado
+                 //al liquidador en el que se encuentre el posible
+                 //codigo a registrar
                  if ($papeles) {
                      $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado','impr_facturaid = '.$value->fact_id,1,NULL,true);
                      if ($impresiones) { //ya se encuentra asignado
@@ -566,7 +592,6 @@ function vercontratolegalizado()
               $this->data['numerocomprobantes'] =$numerocomprobantes;
               $this->data['ncomprobantescargados'] =$ncomprobantescargados;
               $this->template->set('title', 'Contrato liquidado');
-              //$this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_vercontratoliquidado', $this->data);
               $this->load->view('liquidaciones/liquidaciones_vercontratolegalizado', $this->data); 
           } else {
               redirect(base_url().'index.php/error_404');
@@ -916,7 +941,15 @@ function verliquidartramite()
 
 
   function liquidaciones_datatable ()
-  {
+  { $nuevoingreso=341;
+    $usuarioLogueado=$this->ion_auth->user(3)->row();    
+    $papeles = $this->codegen_model->get('est_papeles','pape_id'
+                     .',pape_codigoinicial,pape_codigofinal',
+                     'pape_codigoinicial <= '.$nuevoingreso
+                     .' AND pape_codigofinal >='
+                     .$nuevoingreso
+                     .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true); 
+                     print_r($papeles);exit(); /*
       if ($this->ion_auth->logged_in()) {
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
@@ -935,7 +968,7 @@ function verliquidartramite()
                
       } else{
               redirect(base_url().'index.php/users/login');
-      }           
+      }         */  
   }
 
 
