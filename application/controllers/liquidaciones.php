@@ -141,7 +141,8 @@ class Liquidaciones extends MY_Controller {
               $contrato = $this->data['result'];
       
               $this->data['estampillas'] = $this->liquidaciones_model->getestampillas($contrato->cntr_tipocontratoid);
-              $estampillas=$this->data['estampillas'];   
+              $estampillas=$this->data['estampillas'];  
+              //echo json_encode($estampillas) ;exit();
               $valorsiniva = $contrato->cntr_valor/(($contrato->regi_iva/100)+1);
               $totalestampilla= array();
               $valortotal=0;
@@ -212,7 +213,7 @@ class Liquidaciones extends MY_Controller {
                   	   $this->codegen_model->add('est_facturas',$data);
                   }
 
-                  //print_r($data);
+                 
                   $data = array(
                    'cntr_estadolocalid' => 1,
                    );
@@ -221,7 +222,7 @@ class Liquidaciones extends MY_Controller {
                       $this->session->set_flashdata('successmessage', 'La liquidación se realizó con éxito');
                       $this->session->set_flashdata('accion', 'liquidado');
                       redirect(base_url().'index.php/liquidaciones/liquidar/'.$idcontrato);
-                     // echo $this->db->last_query();
+                
                   }
               }
                 
