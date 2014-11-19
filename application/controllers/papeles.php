@@ -105,9 +105,9 @@ class Papeles extends MY_Controller {
                               $cadenaErrorPapelEnRango.='El codigo de papel Final -'.$codigoUp
                                 .'- ya fue asignado.';
                           }
-                      }//echo count($cadenaErrorPapelEnRango);echo $cadenaErrorPapelEnRango;exit();
+                      }
 
-                      if(count($cadenaErrorPapelEnRango)!='null')
+                      if($cadenaErrorPapelEnRango!='null')
                       {
                           $this->data['errormessage'] = $cadenaErrorPapelEnRango; 
                           
