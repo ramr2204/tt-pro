@@ -248,16 +248,34 @@ class Liquidaciones extends MY_Controller {
               $this->data['result'] = $this->liquidaciones_model->getrecibos($idcontrato);
               $liquidacion = $this->data['result'];
               $this->data['facturas'] = $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
+
+
+              //$todopago variable bandera indica si la totalidad de facturas 
+              //no se han pagado
               $todopago=0;
               $numerocomprobantes=0;
               $ncomprobantescargados=0;
               $totalpagado=0;
+              //vector $comprobantecargado
+              //almacena la relacion indice->valor
+              //tal que ==>    (id factura)->(true)
+              //si no se ha cargado comprobante para
+              //esa factura.   (id factura)->(false)
+              //si ya se cargó comprobante
               $comprobantecargado=array();
               $facturapagada=array();
               $facturas=$this->data['facturas']; 
+
+              //Itera por las filas de informacion de las facturas
+              //creadas para cada estampilla asignada al contrato
               foreach ($facturas as $key => $value) {
                   $totalpagado += $value->pago_valor;
                   $numerocomprobantes++;  
+
+                  //si el valor en la tabla pagos es mayor o igual
+                  //al valor de la factura de la estampilla
+                  //se asigna al vector $facturapagada el indice 
+                  //del id de la factura y el valor true
                  if ($value->pago_valor >= $value->fact_valor) {
                      $facturapagada[$value->fact_id]=true;
                  } else {
@@ -272,7 +290,7 @@ class Liquidaciones extends MY_Controller {
                    $ncomprobantescargados++;
                  }
               }
-             // print_r($facturapagada);
+             
               $this->data['comprobantecargado'] = $comprobantecargado;
               $this->data['facturapagada'] =$facturapagada;
               $this->data['comprobantes'] = ($numerocomprobantes==$ncomprobantescargados) ? true : false ;
@@ -282,7 +300,6 @@ class Liquidaciones extends MY_Controller {
               $this->data['numerocomprobantes'] =$numerocomprobantes;
               $this->data['ncomprobantescargados'] =$ncomprobantescargados;
               $this->template->set('title', 'Contrato liquidado');
-              //$this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_vercontratoliquidado', $this->data);
               $this->load->view('liquidaciones/liquidaciones_vercontratoliquidado', $this->data); 
           } else {
               redirect(base_url().'index.php/error_404');
@@ -374,7 +391,7 @@ class Liquidaciones extends MY_Controller {
                   $this->data['errormessage'] = 'Datos incorrectos'.$this->input->post('contratoid').' ---- '.$numeroarchivos;
               }
               if ($success > 0) {
-                $this->session->set_flashdata('successmessage', 'E con éxito'); 
+                $this->session->set_flashdata('successmessage', 'Se Cargó con éxito'); 
 
               } else {
                 $this->session->set_flashdata('errormessage', '<strong>Error!</strong> '.$this->data['errormessage'] );
@@ -451,8 +468,6 @@ function legalizar()
                           'impr_estado' => '1'
                         );
                          $disponible++;
-                         // print_r($data); 
-                         //  echo'<br>';
                          $this->codegen_model->add('est_impresiones',$data);
                      }
                       
@@ -541,7 +556,7 @@ function vercontratolegalizado()
                    $ncomprobantescargados++;
                  }
               }
-             // print_r($facturapagada);
+             
               $this->data['comprobantecargado'] = $comprobantecargado;
               $this->data['facturapagada'] =$facturapagada;
               $this->data['comprobantes'] = ($numerocomprobantes==$ncomprobantescargados) ? true : false ;
@@ -911,7 +926,6 @@ function verliquidartramite()
               $this->datatables->from('con_contratos c');
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
               $this->datatables->join('con_estadoslocales el', 'el.eslo_id = c.cntr_estadolocalid', 'left');
-              //$this->datatables->join('est_facturas fa', 'c.cntr_id = fa.fact_contratoid', 'left');
               $this->datatables->add_column('edit', '-');
               echo $this->datatables->generate();
 

@@ -293,7 +293,7 @@ var oTable = $('#tablaq').dataTable( {
             $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/verrecibos/'+ID,function(result){
             
             $('#myModal2').modal('show');
-            //alert(ID+'....');
+            
         });
         
  
