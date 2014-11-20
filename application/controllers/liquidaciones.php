@@ -525,7 +525,7 @@ function legalizar()
                         } 
                     $x++;    
                 } 
-                
+
                if ($nodisponible==0) {
                    if ($this->input->post('contratoid')) {
                        $data = array(
@@ -965,11 +965,7 @@ function verliquidartramite()
 
 
   function liquidaciones_datatable ()
-  { $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado','impr_facturaid = 1131',1,NULL,true);
-  
-                     if (!$impresiones) { 
-                      echo "nuay";
-                     } else {print_r($impresiones);}exit();/*
+  { 
       if ($this->ion_auth->logged_in()) {
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
@@ -988,7 +984,7 @@ function verliquidartramite()
                
       } else{
               redirect(base_url().'index.php/users/login');
-      }        */
+      }        
   }
 
 
