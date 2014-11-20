@@ -440,68 +440,92 @@ function legalizar()
                //su inventario de papeleria
                $usuarioLogueado=$this->ion_auth->user()->row();
 
-               foreach ($this->data['facturas'] as $key => $value) {
-                 $nousado=0;
+               foreach ($this->data['facturas'] as $key => $value) 
+               {
+                    $nousado=0;
 
                  
-                 //extrae el ultimo codigo de papeleria resgistrado
-                 //para el liquidador autenticado
-                 $tablaJoin='est_papeles';
-                 $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
-                 $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
+                    //extrae el ultimo codigo de papeleria resgistrado
+                    //para el liquidador autenticado
+                    $tablaJoin='est_papeles';
+                    $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
+                    $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
 
-                 $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);
-                 $nuevoingreso=$max['impr_codigopapel']+1;
+                    $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);
+                    $nuevoingreso=$max['impr_codigopapel']+1;
+
+                    //extrae los posibles rangos de papeleria asignados
+                    //al usuario que se encuentra logueado que debe ser
+                    //un liquidador
+
+                    $papeles = $this->codegen_model->get('est_papeles','pape_id'
+                        .',pape_codigoinicial,pape_codigofinal',
+                        'pape_codigoinicial <= '.$nuevoingreso
+                        .' AND pape_codigofinal >='
+                        .$nuevoingreso
+                        .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true);  
+
+
+                    //verifica que exista un rango de papeleria asignado
+                    //al liquidador en el que se encuentre el posible
+                    //codigo a registrar
+                    if ($papeles) 
+                    {
                 
-                 while ($nousado==0) { //comprueba si ya se está usando el codigo del papel
-                     $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso,1,NULL,true);
+                        //comprueba si ya se está usando el codigo del papel
+                        while ($nousado==0) 
+                        { 
+                            $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso,1,NULL,true);
                      
-                     if (!$combrobacionImpresiones) {
-                        $nousado=1;
-                     } else {
-                         $nuevoingreso++;
-                         
-                     }
-                     
-                 }
-                 
-                 //extrae los posibles rangos de papeleria asignados
-                 //al usuario que se encuentra logueado que debe ser
-                 //un liquidador
-
-                 $papeles = $this->codegen_model->get('est_papeles','pape_id'
-                     .',pape_codigoinicial,pape_codigofinal',
-                     'pape_codigoinicial <= '.$nuevoingreso
-                     .' AND pape_codigofinal >='
-                     .$nuevoingreso
-                     .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true);        
-
-                 //verifica que exista un rango de papeleria asignado
-                 //al liquidador en el que se encuentre el posible
-                 //codigo a registrar
-                 if ($papeles) {
-                     $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado','impr_facturaid = '.$value->fact_id,1,NULL,true);
-                     if ($impresiones) { //ya se encuentra asignado
+                            if (!$combrobacionImpresiones) {
+                                $nousado=1;
+                            } else 
+                                {
+                                    $nuevoingreso++;
+                                }
+                        }
+                       
+                        //verifica si no se encuentra asignada papeleria
+                        //a esa factura en la tabla de impresiones
+                        //para crear el registro de la impresion
+                        $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado','impr_facturaid = '.$value->fact_id,1,NULL,true);
+                        if (!$impresiones) 
+                        { 
                       
-                     } else {
-                        $data = array(
-                          'impr_codigopapel' => $nuevoingreso,
-                          'impr_papelid' => $papeles->pape_id,
-                          'impr_facturaid' => $value->fact_id,
-                          'impr_observaciones' => 'Correcta',
-                          'impr_fecha' => date('Y-m-d H:i:s',now()),
-                          'impr_codigo' => $codigo,
-                          'impr_estado' => '1'
-                        );
-                         $disponible++;
-                         $this->codegen_model->add('est_impresiones',$data);
-                     }
+                            $data = array(
+                              'impr_codigopapel' => $nuevoingreso,
+                              'impr_papelid' => $papeles->pape_id,
+                              'impr_facturaid' => $value->fact_id,
+                              'impr_observaciones' => 'Correcta',
+                              'impr_fecha' => date('Y-m-d H:i:s',now()),
+                              'impr_codigo' => $codigo,
+                              'impr_estado' => '1'
+                            );
+
+                            //extrae la cantidad actual impresa para el rango
+                            //de papeleria de donde se sacará el consecutivo
+                            //luego aumenta ese valor y lo actualiza en la bd
+                             $cantidadImpresa = $this->codegen_model->getSelect('est_papeles','pape_imprimidos',
+                                  'pape_usuario = '.$usuarioLogueado->id
+                                  .' AND pape_id = '.$papeles->pape_id);
+
+                             $cantidadNeta=(int)$cantidadImpresa['pape_imprimidos'];
+
+                            $this->codegen_model->edit('est_papeles',
+                                 ['pape_imprimidos'=>$cantidadNeta+1],
+                                 'pape_id', $papeles->pape_id);
+
+                            $disponible++;
+                            $this->codegen_model->add('est_impresiones',$data);
+                        }
                       
-                 } else {
-                    $nodisponible++;
-                 } 
-                 $x++;    
-               } 
+                    } else 
+                        {
+                            $nodisponible++;
+                        } 
+                    $x++;    
+                } 
+                
                if ($nodisponible==0) {
                    if ($this->input->post('contratoid')) {
                        $data = array(
@@ -941,7 +965,11 @@ function verliquidartramite()
 
 
   function liquidaciones_datatable ()
-  { 
+  { $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado','impr_facturaid = 1131',1,NULL,true);
+  
+                     if (!$impresiones) { 
+                      echo "nuay";
+                     } else {print_r($impresiones);}exit();/*
       if ($this->ion_auth->logged_in()) {
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
@@ -960,7 +988,7 @@ function verliquidartramite()
                
       } else{
               redirect(base_url().'index.php/users/login');
-      }        
+      }        */
   }
 
 
