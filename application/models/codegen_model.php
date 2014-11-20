@@ -117,6 +117,28 @@ class Codegen_model extends CI_Model
            return FALSE;
     }
 
+
+    function min($table, $field, $where='', $tablaJoin='', $equivalentesJoin='')
+     {
+        $this->db->select_min($field);
+        if($where){
+        $this->db->where($where);
+        }
+
+        if($tablaJoin and $equivalentesJoin)
+        {
+            $this->db->join($tablaJoin, $equivalentesJoin);
+        }
+
+        $query = $this->db->get($table);
+        if ($query->num_rows() > 0) {
+           return $query->row_array(); //return the row as an associative array
+        }
+           return FALSE;
+    }
+
+
+
     function getSelect($table,$fields,$where='',$join='', $group='')
     {
         $query = $this->db->query("SELECT ".$fields."  FROM ".$table." ".$join." ".$where." ".$group);

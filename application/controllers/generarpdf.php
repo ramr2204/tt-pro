@@ -187,7 +187,7 @@ class Generarpdf extends CI_controller {
               
                   $estampilla=$this->data['estampilla'];
 
-                  print_r($estampilla);exit();
+                  
                   $this->load->library("Pdf");
                   $resolution= array(14, 9);
                   $pdf = new PDF(PDF_PAGE_ORIENTATION,'mm',array(92,141), true, 'UTF-8', false);
