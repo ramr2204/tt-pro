@@ -418,146 +418,45 @@ class Liquidaciones extends MY_Controller {
 
 function legalizar()
   {        
-      if ($this->ion_auth->logged_in()) {
+      if ($this->ion_auth->logged_in()) 
+      {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
-               $codigo='00000000';
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) 
+          {
                
-               if ($this->input->post('contratoid')) {
-                   $id=$this->input->post('contratoid');
-               }
-               if ($this->input->post('tramiteid')) {
-                   $id=$this->input->post('tramiteid');
-               }
-               $disponible=0;
-               $nodisponible=0;
-               
-               $x=0;
-               $papelid=array();
-               $this->data['facturas'] = $this->liquidaciones_model->getfacturas($this->input->post('liquidacionid'));
-
-               //extrae el usuario logueado para comparar
-               //su inventario de papeleria
-               $usuarioLogueado=$this->ion_auth->user()->row();
-
-               foreach ($this->data['facturas'] as $key => $value) 
+               //realiza el proceso de actualización
+               //dependiendo del tipo de documento
+               //para el que se generó el evento
+               if ($this->input->post('contratoid')) 
                {
-                    $nousado=0;
+                   $id=$this->input->post('contratoid');
 
-                 
-                    //extrae el ultimo codigo de papeleria resgistrado
-                    //para el liquidador autenticado
-                    $tablaJoin='est_papeles';
-                    $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
-                    $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
-
-                    $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);
-                    $nuevoingreso=$max['impr_codigopapel']+1;
-
-                    //extrae los posibles rangos de papeleria asignados
-                    //al usuario que se encuentra logueado que debe ser
-                    //un liquidador
-
-                    $papeles = $this->codegen_model->get('est_papeles','pape_id'
-                        .',pape_codigoinicial,pape_codigofinal',
-                        'pape_codigoinicial <= '.$nuevoingreso
-                        .' AND pape_codigofinal >='
-                        .$nuevoingreso
-                        .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true);  
-
-
-                    //verifica que exista un rango de papeleria asignado
-                    //al liquidador en el que se encuentre el posible
-                    //codigo a registrar
-                    if ($papeles) 
-                    {
-                
-                        //comprueba si ya se está usando el codigo del papel
-                        while ($nousado==0) 
-                        { 
-                            $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso,1,NULL,true);
-                     
-                            if (!$combrobacionImpresiones) {
-                                $nousado=1;
-                            } else 
-                                {
-                                    $nuevoingreso++;
-                                }
-                        }
-                       
-                        //verifica si no se encuentra asignada papeleria
-                        //a esa factura en la tabla de impresiones
-                        //para crear el registro de la impresion
-                        $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado','impr_facturaid = '.$value->fact_id,1,NULL,true);
-                        if (!$impresiones) 
-                        { 
-                      
-                            $data = array(
-                              'impr_codigopapel' => $nuevoingreso,
-                              'impr_papelid' => $papeles->pape_id,
-                              'impr_facturaid' => $value->fact_id,
-                              'impr_observaciones' => 'Correcta',
-                              'impr_fecha' => date('Y-m-d H:i:s',now()),
-                              'impr_codigo' => $codigo,
-                              'impr_estado' => '1'
-                            );
-
-                            //extrae la cantidad actual impresa para el rango
-                            //de papeleria de donde se sacará el consecutivo
-                            //luego aumenta ese valor y lo actualiza en la bd
-                             $cantidadImpresa = $this->codegen_model->getSelect('est_papeles','pape_imprimidos',
-                                  'pape_usuario = '.$usuarioLogueado->id
-                                  .' AND pape_id = '.$papeles->pape_id);
-
-                             $cantidadNeta=(int)$cantidadImpresa['pape_imprimidos'];
-
-                            $this->codegen_model->edit('est_papeles',
-                                 ['pape_imprimidos'=>$cantidadNeta+1],
-                                 'pape_id', $papeles->pape_id);
-
-                            $disponible++;
-                            $this->codegen_model->add('est_impresiones',$data);
-                        }
-                      
-                    } else 
-                        {
-                            $nodisponible++;
-                        } 
-                    $x++;    
-                } 
-
-               if ($nodisponible==0) {
-                   if ($this->input->post('contratoid')) {
-                       $data = array(
-                        'cntr_estadolocalid' => 2,
-                       );
-                       if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$id) == TRUE) {
-                           $this->session->set_flashdata('accion', 'legalizado');
-                           $this->session->set_flashdata('successmessage', 'La legalización se realizó con éxito');
-                       }
+                   $data = array(
+                   'cntr_estadolocalid' => 2,
+                   );
+                   if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$id) == TRUE) {
+                       $this->session->set_flashdata('accion', 'legalizado');
+                       $this->session->set_flashdata('successmessage', 'La legalización se realizó con éxito');
                    }
-                   if ($this->input->post('tramiteid')) {
-                       $data = array(
-                        'litr_estadolocalid' => 2,
-                       );
-                       if ($this->codegen_model->edit('est_liquidartramites',$data,'litr_id',$id) == TRUE) {
-                           $this->session->set_flashdata('accion', 'legalizado');
-                           $this->session->set_flashdata('successmessage', 'La legalización se realizó con éxito');
-                       }
-                   }
-                   
-                  
-               } else {
 
-                   $this->session->set_flashdata('errormessage', 'no hay suficientes hojas de estampilla en el inventario para imprimir');
-                   $this->session->set_flashdata('accion', 'liquidado');
+                   redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
                }
-               if ($this->input->post('contratoid')) {
-               redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
+
+               if ($this->input->post('tramiteid')) 
+               {
+                   $id=$this->input->post('tramiteid');
+
+                   $data = array(
+                   'litr_estadolocalid' => 2,
+                   );
+                   if ($this->codegen_model->edit('est_liquidartramites',$data,'litr_id',$id) == TRUE) {
+                       $this->session->set_flashdata('accion', 'legalizado');
+                       $this->session->set_flashdata('successmessage', 'La legalización se realizó con éxito');
+                   }
+
+                   redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
                }
-               if ($this->input->post('tramiteid')) {
-               redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
-               }
+
                 
           } else {
               redirect(base_url().'index.php/error_404');

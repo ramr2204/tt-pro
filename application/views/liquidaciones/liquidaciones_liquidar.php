@@ -85,7 +85,8 @@ var oTable = $('#tablaq').dataTable( {
 
               $('.confirmar_impresion').click(function(event) {
     
-                  if(!confirm('Esta seguro de generar la impresión? Recuerde que será modificado el consecutivo de la papeleria asignada a ud'))
+                  if(!confirm('Esta seguro de generar la impresión?'
+                        +' Recuerde que será modificado el consecutivo de la papeleria asignada a usted!'))
                   {
                     event.preventDefault();
                   }
