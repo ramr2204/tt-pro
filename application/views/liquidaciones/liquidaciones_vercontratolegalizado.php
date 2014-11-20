@@ -113,7 +113,7 @@
 
                       if ($usuarioLogueado->perfilid==4){ ?>  
 
-                      <?php echo anchor(base_url().'impresiones/procesarConsecutivos/'.$row2->fact_id,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large btn-default confirmar_impresion"'); ?>
+                      <?php echo anchor(base_url().'liquidaciones/procesarConsecutivos/'.$row2->fact_id,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large btn-default confirmar_impresion"'); ?>
                 
 
                 <?php  }else
