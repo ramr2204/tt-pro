@@ -102,8 +102,8 @@
      </div>
      <?php if ($facturapagada[$row2->fact_id]) {  ?>      
      <div class="bg-success">Código: <?php echo $row2->fact_codigo; ?> <i class="fa fa-check"></i> </div> 
-     <?php if ($row2->impr_codigopapel>0) { ?>
-                <div class="bg-info">legalizado: <?php echo $row2->impr_codigopapel; ?> <i class="fa fa-gavel"></i> </div>
+    
+                <div class="bg-info">legalizado: <?php  ?> <i class="fa fa-gavel"></i> </div>
 
                 <?php //verifica si el perfil del usuario logueado es 
                       //de liquidador para permitir o denegar la orden 
@@ -113,7 +113,7 @@
 
                       if ($usuarioLogueado->perfilid==4){ ?>  
 
-                      <?php echo anchor(base_url().'liquidaciones/procesarConsecutivos/'.$row2->fact_id,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large btn-default confirmar_impresion"'); ?>
+                      <?php echo anchor(base_url().'liquidaciones/procesarConsecutivos/'.$row2->fact_id,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large btn-default confirmar_impresion" target="_blank"'); ?>
                 
 
                 <?php  }else
@@ -123,7 +123,7 @@
 
                    <?php   } ?>
 
-          <?php  } ?>
+          
      <?php  } else { ?>
       <div class="bg-danger">Pagado: <?php echo '$'.number_format($row2->pago_valor, 2, ',', '.'); ?> <i class="fa fa-times"></i> </div> 
      <?php  } ?>

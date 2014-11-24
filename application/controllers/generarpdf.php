@@ -178,10 +178,17 @@ class Generarpdf extends CI_controller {
  function generar_estampilla()
   {
       if ($this->ion_auth->logged_in()){
+
           if ($this->uri->segment(3)==''){
                redirect(base_url().'index.php/error_404');
           } 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
+
+
+          //verifica que el usuario que llama el metodo
+          //tenga perfil de liquidador
+          $usuarioLogueado=$this->ion_auth->user()->row();
+
+          if ($usuarioLogueado->perfilid==4){
 
                   $this->data['estampilla'] = $this->liquidaciones_model->getfactura_legalizada($this->uri->segment(3),$doc=TRUE);
               

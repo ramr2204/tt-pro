@@ -998,7 +998,7 @@ function verliquidartramite()
                                     //de papeleria de donde se sacará el consecutivo
                                     //luego aumenta ese valor y lo actualiza en la bd
                                     $cantidadImpresa = $this->codegen_model->getSelect('est_papeles','pape_imprimidos',
-                                    'pape_usuario = '.$usuarioLogueado->id
+                                    'where pape_usuario = '.$usuarioLogueado->id
                                     .' AND pape_id = '.$papeles->pape_id);
                                     
                                     $cantidadNeta=(int)$cantidadImpresa['pape_imprimidos'];
@@ -1008,6 +1008,9 @@ function verliquidartramite()
                                     'pape_id', $papeles->pape_id);
                                 
                                     $this->codegen_model->add('est_impresiones',$data);
+
+                                    redirect(base_url().'index.php/generarpdf/generar_estampilla/176'); 
+
                                 }else
                                     {
                                         $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Ya se ha impreso la Factura No.'.$ObjetoFactura[0]->fact_id.' !');
