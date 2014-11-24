@@ -917,7 +917,7 @@ function verliquidartramite()
 
                            $ObjetoFactura = $this->liquidaciones_model->getfacturaIndividual($idFactura);
 
-
+    
                            //extrae el ultimo codigo de papeleria resgistrado
                            //en las impresiones para el liquidador autenticado
                            $tablaJoin='est_papeles';
@@ -954,7 +954,7 @@ function verliquidartramite()
                            .$nuevoingreso
                            .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true);
 
-print_r($papeles);exit();
+
                            //verifica que exista un rango de papeleria asignado
                            //al liquidador en el que se encuentre el posible
                            //codigo a registrar
@@ -976,7 +976,7 @@ print_r($papeles);exit();
                                        $nuevoingreso++;
                                        }
                                 }
-    
+
                                 //verifica si no se encuentra asignada papeleria
                                 //a esa factura en la tabla de impresiones
                                 //para crear el registro de la impresion
@@ -1008,7 +1008,11 @@ print_r($papeles);exit();
                                     'pape_id', $papeles->pape_id);
                                 
                                     $this->codegen_model->add('est_impresiones',$data);
-                                }
+                                }else
+                                    {
+                                        $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Ya se ha impreso la Factura No.'.$ObjetoFactura[0]->fact_id.' !');
+                                        redirect(base_url().'index.php/liquidaciones/liquidar'); 
+                                    }
                                 
                             } else
                                 {
