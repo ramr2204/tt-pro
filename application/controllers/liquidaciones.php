@@ -895,7 +895,7 @@ function verliquidartramite()
           //verifica que el usuario que llama el metodo
           //tenga perfil de liquidador
           $usuarioLogueado=$this->ion_auth->user()->row();
-  
+
           if ($usuarioLogueado->perfilid==4)
           {
               $validacionPapeleriaAsignada = $this->codegen_model->getSelect('est_papeles',
@@ -904,7 +904,6 @@ function verliquidartramite()
               
               if($validacionPapeleriaAsignada)
               {
-print_r($validacionPapeleriaAsignada);exit();
 
                   if ($this->uri->segment(3)=='')
                   {
@@ -913,12 +912,12 @@ print_r($validacionPapeleriaAsignada);exit();
                   } else 
                        {
                            $idFactura = $this->uri->segment(3);
-echo $idFactura;
+
                            $codigo='00000000';
 
                            $ObjetoFactura = $this->liquidaciones_model->getfacturaIndividual($idFactura);
 
-print_r($usuarioLogueado);
+
                            //extrae el ultimo codigo de papeleria resgistrado
                            //en las impresiones para el liquidador autenticado
                            $tablaJoin='est_papeles';
@@ -943,7 +942,6 @@ print_r($usuarioLogueado);
                                      $nuevoingreso = (int)$primerCodigo['pape_codigoinicial'];
                                }
                        
-print_r($max);echo($nuevoingreso);
 
                            //extrae los posibles rangos de papeleria asignados
                            //al usuario que se encuentra logueado que debe ser
@@ -1014,7 +1012,7 @@ print_r($papeles);exit();
                                 
                             } else
                                 {
-                                    $this->data['errormessage'] = 'No hay papeleria disponible para realizar esta impresión';
+                                    $this->session->set_flashdata('errormessage', '<strong>Error!</strong> No hay papeleria disponible para realizar esta impresión!');
                                     redirect(base_url().'index.php/liquidaciones/liquidar'); 
                                 }
 
@@ -1023,7 +1021,7 @@ print_r($papeles);exit();
 
               }else
                 {
-                     $this->data['errormessage'] = 'No se puede imprimir, usted no tiene asignada papeleria!';
+                     $this->session->set_flashdata('errormessage', '<strong>Error!</strong> No se puede imprimir, usted no tiene asignada papeleria!');
                      redirect(base_url().'index.php/liquidaciones/liquidar');  
                 }
 
