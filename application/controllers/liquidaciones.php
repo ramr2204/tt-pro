@@ -142,7 +142,7 @@ class Liquidaciones extends MY_Controller {
       
               $this->data['estampillas'] = $this->liquidaciones_model->getestampillas($contrato->cntr_tipocontratoid);
               $estampillas=$this->data['estampillas'];  
-              //echo json_encode($estampillas) ;exit();
+
               $valorsiniva = $contrato->cntr_valor/(($contrato->regi_iva/100)+1);
               $totalestampilla= array();
               $valortotal=0;
@@ -208,6 +208,7 @@ class Liquidaciones extends MY_Controller {
                        'fact_banco' => $this->input->post('banco'.$i),
                        'fact_cuenta' => $this->input->post('cuenta'.$i),
                        'fact_liquidacionid' => $liquidacionid,
+                       'fact_estampillaid' => $this->input->post('idestampilla'.$i),
                        'fact_rutaimagen' => $this->input->post('rutaimagen'.$i),
                        );
                   	   $this->codegen_model->add('est_facturas',$data);

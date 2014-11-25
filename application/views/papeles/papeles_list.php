@@ -33,7 +33,7 @@ var oTable = $('#tablaq').dataTable( {
                       { "sClass": "item" },
                       ],    
 "fnRowCallback":function( nRow, aData, iDataIndex ) {
-            var cantidad=aData[3]-aData[2];
+            var cantidad=aData[4];
             
             $.ajax({
                type: "POST",
