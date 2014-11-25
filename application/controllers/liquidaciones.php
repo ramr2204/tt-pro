@@ -990,7 +990,7 @@ function verliquidartramite()
                                 //verifica si no se encuentra asignada papeleria
                                 //a esa factura en la tabla de impresiones
                                 //para crear el registro de la impresion
-                                $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado','impr_facturaid = '.$ObjetoFactura[0]->fact_id,1,NULL,true);
+                                $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado,impr_codigopapel','impr_facturaid = '.$ObjetoFactura[0]->fact_id,1,NULL,true);
                                 if (!$impresiones)
                                 {
     
@@ -1023,13 +1023,13 @@ function verliquidartramite()
 
                                 }else
                                     {
-                                        $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Ya se ha impreso la Factura No.'.$ObjetoFactura[0]->fact_id.' !');
+                                        $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Ya se ha impreso la Estampilla No.'.$impresiones->impr_codigopapel.' !');
                                         redirect(base_url().'index.php/liquidaciones/liquidar'); 
                                     }
                                 
                             } else
                                 {
-                                    $this->session->set_flashdata('errormessage', '<strong>Error!</strong> No hay papeleria disponible para realizar esta impresión!');
+                                    $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Usted no tiene papeleria disponible para realizar esta impresión!');
                                     redirect(base_url().'index.php/liquidaciones/liquidar'); 
                                 }
 
