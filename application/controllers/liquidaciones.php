@@ -383,7 +383,7 @@ class Liquidaciones extends MY_Controller {
                                );
                               if ($this->codegen_model->edit('est_facturas',$data,'fact_id',$idfactura) == TRUE) {
                                   $success++;
-                                  $referenciaCargados.=' Comprobante de la factura : '.$idfactura.' archivo -> '.$file_data['client_name'].' |';
+                                  $referenciaCargados.=' Comprobante: '.$this->input->post('facturaNombre'.$i).': archivo -> '.$file_data['client_name'].' ||';
                                     
                               } else {
                                    $this->data['errormessage'] .= '<br>No se pudo registrar el comprobante'.$i;
