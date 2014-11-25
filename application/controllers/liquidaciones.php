@@ -32,7 +32,7 @@ class Liquidaciones extends MY_Controller {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
 
-              $this->data['successmessage2']=$this->session->flashdata('successmessage');
+              $this->data['successmessage']=$this->session->flashdata('successmessage');
               $this->data['errormessage']=$this->session->flashdata('errormessage');
               $this->data['infomessage']=$this->session->flashdata('infomessage');
               $this->data['accion']=$this->session->flashdata('accion');
@@ -347,7 +347,7 @@ class Liquidaciones extends MY_Controller {
                   $config['allowed_types'] = 'jpg|jpeg|gif|png';
                   $config['remove_spaces']=TRUE;
                   $config['max_size']    = '2048';
-                  //$config['overwrite']    = TRUE;
+                  $config['overwrite']    = TRUE;
                   $this->load->library('upload');
 
 
