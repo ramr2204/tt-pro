@@ -84,8 +84,10 @@ var oTable = $('#tablaq').dataTable( {
               $('#myModal3').modal({show:true});
 
               $('.confirmar_impresion').click(function(event) {
-    
-                  if(!confirm('Esta seguro de generar la impresión?'
+                  
+                  var siguienteEstampilla = $('#siguienteEstampilla').val();
+                  if(!confirm('SIGUIENTE ESTAMPIILLA A IMPRIMIRSE => No. '+siguienteEstampilla+'\n\n'
+                        +'Esta seguro de generar la impresión?'
                         +' Recuerde que será modificado el consecutivo de la papeleria asignada a usted!'))
                   {
                     event.preventDefault();

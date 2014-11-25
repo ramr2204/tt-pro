@@ -79,6 +79,7 @@
      <td colspan="1" class="text-center"><strong>Valor</strong></td>
      <td colspan="1" class="text-center"><strong>Procesos</strong></td>
 </tr>
+<input type="hidden" id="siguienteEstampilla" value="<?= $proximaImpresion?>" >
 <?php $x=0; ?>
 <?php foreach($facturas as $row2) { ?>
 <tr>
