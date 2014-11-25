@@ -321,6 +321,9 @@ class Liquidaciones extends MY_Controller {
               $this->data['successmessage']=$this->session->flashdata('message');
               $this->data['errormessage']=''; 
               $this->form_validation->set_rules('numeroarchivos', 'numero archivos', 'trim|xss_clean|numeric|integer|greater_than[0]');
+
+              //Validaciones para el id ya sea de tramite o contrato
+              //elije el nombre de carpeta y el id
               if ($this->input->post('contratoid')) {
                   $this->form_validation->set_rules('contratoid', 'contrato id', 'trim|xss_clean|numeric|integer|greater_than[0]');
                   $carpeta='facturas';
@@ -332,6 +335,7 @@ class Liquidaciones extends MY_Controller {
                   $carpeta='facturas_tramites';
                   $id=$this->input->post('tramiteid');
               }
+
               $numeroarchivos=$this->input->post('numeroarchivos');
               
               if ($id >0 && $numeroarchivos > 0 ) {
@@ -348,6 +352,7 @@ class Liquidaciones extends MY_Controller {
 
 
                   $success=0;
+                  $referenciaCargados='';
                   for ($i=0; $i < $numeroarchivos; $i++) {
                       $pago=$this->input->post('pago'.$i);
                       
@@ -377,7 +382,8 @@ class Liquidaciones extends MY_Controller {
                                  'fact_fechacomprobante' => date("Y-m-d H:i:s")
                                );
                               if ($this->codegen_model->edit('est_facturas',$data,'fact_id',$idfactura) == TRUE) {
-                                  $success++; 
+                                  $success++;
+                                  $referenciaCargados.=' Comprobante de la factura : '.$idfactura.' archivo -> '.$file_data['client_name'].' |';
                                     
                               } else {
                                    $this->data['errormessage'] .= '<br>No se pudo registrar el comprobante'.$i;
@@ -387,17 +393,20 @@ class Liquidaciones extends MY_Controller {
                           }  
                       }
 
-                  }
+                  }echo "trackeo..."; echo $referenciaCargados; exit();
               } else {
                   $this->data['errormessage'] = 'Datos incorrectos'.$this->input->post('contratoid').' ---- '.$numeroarchivos;
               }
               if ($success > 0) {
-                $this->session->set_flashdata('successmessage', 'Se Cargó con éxito'); 
+                $this->session->set_flashdata('successmessage', 'Se Cargó con éxito'.$referenciaCargados); 
 
               } else {
                 $this->session->set_flashdata('errormessage', '<strong>Error!</strong> '.$this->data['errormessage'] );
               }
               $this->session->set_flashdata('accion', 'liquidado');
+
+              //Dependiendo del tipo de liquidacion redirecciona
+              //a la ruta respectiva
               if ($this->input->post('contratoid')) {
                   redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);    
               }
