@@ -487,6 +487,25 @@ function vercontratolegalizado()
                redirect(base_url().'index.php/error_404');
           }    
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
+              
+          //verifica que el usuario que llama el metodo
+          //tenga perfil de liquidador para cargar
+          //el proximo codigo de estampilla fisica a imprimir  
+          $usuarioLogueado=$this->ion_auth->user()->row();
+
+          if ($usuarioLogueado->perfilid==4)
+          {
+               //extrae el ultimo codigo de papeleria resgistrado
+               //en las impresiones para el liquidador autenticado
+               $tablaJoin='est_papeles';
+               $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
+               $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
+
+               $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);
+               $this->data['proximaImpresion'] = ((int)$max['impr_codigopapel'])+1;
+
+          }            
+          
               $idcontrato=$this->uri->segment(3);
               $this->data['result'] = $this->liquidaciones_model->getrecibos($idcontrato);
               $liquidacion = $this->data['result'];
