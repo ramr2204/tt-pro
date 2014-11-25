@@ -393,7 +393,7 @@ class Liquidaciones extends MY_Controller {
                           }  
                       }
 
-                  }echo "trackeo..."; echo $referenciaCargados; exit();
+                  }
               } else {
                   $this->data['errormessage'] = 'Datos incorrectos'.$this->input->post('contratoid').' ---- '.$numeroarchivos;
               }
