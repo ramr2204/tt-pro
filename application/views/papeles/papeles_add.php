@@ -74,6 +74,6 @@
   <script type="text/javascript">
     $("#codigofinal").change(function(){
         var cantidad= $("#codigofinal").val() - $("#codigoinicial").val();
-        $("#cantidad").val(cantidad);
+        $("#cantidad").val(cantidad+1);
     });
   </script>

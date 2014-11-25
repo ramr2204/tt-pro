@@ -1000,16 +1000,16 @@ function verliquidartramite()
                                     $cantidadImpresa = $this->codegen_model->getSelect('est_papeles','pape_imprimidos',
                                     'where pape_usuario = '.$usuarioLogueado->id
                                     .' AND pape_id = '.$papeles->pape_id);
-                                    
-                                    $cantidadNeta=(int)$cantidadImpresa['pape_imprimidos'];
+                                 
+                                    $cantidadNeta=(int)$cantidadImpresa[0]->pape_imprimidos;
                                                             
                                     $this->codegen_model->edit('est_papeles',
                                     ['pape_imprimidos'=>$cantidadNeta+1],
                                     'pape_id', $papeles->pape_id);
-                                
+                              
                                     $this->codegen_model->add('est_impresiones',$data);
 
-                                    redirect(base_url().'index.php/generarpdf/generar_estampilla/176'); 
+                                    redirect(base_url().'index.php/generarpdf/generar_estampilla/'.$idFactura); 
 
                                 }else
                                     {
