@@ -96,14 +96,7 @@ class Impresiones extends MY_Controller {
                    //para actualizar el estado del contrato y el estado de la impresion
                     $result= $this->codegen_model->get('est_impresiones','impr_id,impr_facturaid',"impr_codigopapel = '".$this->input->post('codigopapel')."'",1,NULL,true);
 
-                  if ($result) {
-                       $facturas= $this->codegen_model->get('est_facturas','fact_liquidacionid',"fact_id = '".$result->impr_facturaid."'",1,NULL,true);
-                       $liquidaciones= $this->codegen_model->get('est_liquidaciones','liqu_contratoid',"liqu_id = '".$facturas->fact_liquidacionid."'",1,NULL,true);
-                       
-                       $cdata = array(
-                         'cntr_estadolocalid' => 1,
-                      );
-                       $this->codegen_model->edit('con_contratos',$cdata,'cntr_id',$liquidaciones->liqu_contratoid);
+                  if ($result) {                                                                    
 
                        //Sobre escribe el id de la factura que se habia generado con ese papel
                        //por cero (0) y actualiza el estado de impresión a 2
