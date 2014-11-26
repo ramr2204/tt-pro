@@ -140,8 +140,8 @@ class Liquidaciones extends MY_Controller {
               $this->data['result'] = $this->liquidaciones_model->get($idcontrato);
               $contrato = $this->data['result'];
    
-              $this->data['estampillas'] = $this->liquidaciones_model->getestampillas($contrato->cntr_tipocontratoid);
-              $estampillas=$this->data['estampillas'];  
+              $estampillas = $this->liquidaciones_model->getestampillas($contrato->cntr_tipocontratoid);  
+              $this->data['estampillas'] = [];
 
               //Formatea el resultado del calculo de valor sin iva
               //para que redondee por decimales y centenares
@@ -153,13 +153,45 @@ class Liquidaciones extends MY_Controller {
               $sinIvaRedondeoCentenas = round($sinIvaRedondeoDecimales, -2);
 
               $valortotal=0;
-              $parametros=$this->codegen_model->get('adm_parametros','para_redondeo','para_id = 1',1,NULL,true);
+              $parametros=$this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo','para_id = 1',1,NULL,true);
+              
               foreach ($estampillas as $key => $value) {
                 
-                 $totalestampilla[$value->estm_id] = (($sinIvaRedondeoCentenas*$value->esti_porcentaje)/100);
-                 $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
-                 $valortotal+=$totalestampilla[$value->estm_id];
+                 //Realiza la validación para los contratos de tipo
+                 //consultoria o consesión y que el valor del contrato
+                 //sea >= 10 SMMLV para aplicar la estampilla pro grandeza de colombia                
+
+                if($value->estm_id == 8)
+                {
+                    if($contrato->cntr_tipocontratoid==9 || $contrato->cntr_tipocontratoid==7)
+                    {
+                         $valor10SMMLV = $parametros->para_salariominimo * 10;
+
+                         if($contrato->cntr_valor >= $valor10SMMLV)
+                         {
+                              $totalestampilla[$value->estm_id] = (($sinIvaRedondeoCentenas*$value->esti_porcentaje)/100);
+                              $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
+                              $valortotal+=$totalestampilla[$value->estm_id]; 
+                              array_push($this->data['estampillas'], $value);
+                         }
+                    }else
+                        {
+                             $totalestampilla[$value->estm_id] = (($sinIvaRedondeoCentenas*$value->esti_porcentaje)/100);
+                             $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
+                             $valortotal+=$totalestampilla[$value->estm_id];
+                             array_push($this->data['estampillas'], $value);  
+                        }
+                }else
+                    {
+                         $totalestampilla[$value->estm_id] = (($sinIvaRedondeoCentenas*$value->esti_porcentaje)/100);
+                         $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
+                         $valortotal+=$totalestampilla[$value->estm_id]; 
+
+                         array_push($this->data['estampillas'], $value);
+                    }    
+                 
               }
+
               $this->data['est_totalestampilla']=$totalestampilla;
               $this->data['cnrt_valorsiniva']=$sinIvaRedondeoCentenas;
               $this->data['est_valortotal']=$valortotal;
