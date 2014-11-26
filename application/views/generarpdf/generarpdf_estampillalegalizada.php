@@ -208,17 +208,35 @@
                 </tr>
 
                 <tr>
-                    <td class="row-8" colspan="4"><tcpdf method="write1DBarcode" params="<?php echo $params; ?>"/></td>
+                    <td class="row-8" colspan="4" style="height: 16mm; width: 94mm; border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;">
+
+                    <tcpdf method="write1DBarcode" params="<?php echo $params; ?>"/>
+                    </td>
                 </tr>
 
                 <tr>
-                    <td class="col-2 row-9 text-center" colspan="3" >
+                    <td class="col-2 row-9 text-center" colspan="3" style="height: 15mm; width: 81.5mm; border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;
+                        font-size:7;">
+
                         <small> "Unidos por la grandeza del Tolima"<br>
                         Edificio de la Gobernación del Tolima, Carrera 3 Calles 10 y 11, Piso 9<br>
                         Teléfonos (8) 2611111 Exts. 209 - 305<br>
                         dcontratos@outlook.com</small>
                     </td>
-                    <td class="row-9 text-center" colspan="2">Numero X</td>
+
+                    <td class="row-9 text-center" colspan="2" style="height: 15mm; width: 38.5mm; border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;">
+
+                        Numero X
+                    </td>
                 </tr>   
             </table>
         
