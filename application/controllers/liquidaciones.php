@@ -143,14 +143,31 @@ class Liquidaciones extends MY_Controller {
               $estampillas = $this->liquidaciones_model->getestampillas($contrato->cntr_tipocontratoid);  
               $this->data['estampillas'] = [];
 
-              //Formatea el resultado del calculo de valor sin iva
-              //para que redondee por decimales y centenares
-              //ej valorsiniva=204519396.55172 ->decimales -> 204519397 ->centenas ->204519400
 
-              $valorsiniva = (float)$contrato->cntr_valor/(((float)$contrato->regi_iva/100)+1);
+              //valida el valor del porcentaje según el regimen
+              //del contratista para realizar un calcúlo acertado
+
+              if($contrato->regi_iva > 0)
+              {
+                  $valorsiniva = (float)$contrato->cntr_valor/(((float)$contrato->regi_iva/100)+1);
+
+                  //Formatea el resultado del calculo de valor sin iva
+                  //para que redondee por decimales y centenares
+                  //ej valorsiniva=204519396.55172 ->decimales -> 204519397 ->centenas ->204519400
+                  $sinIvaRedondeoDecimales = round($valorsiniva);
+                  $sinIvaRedondeoCentenas = round($sinIvaRedondeoDecimales, -2);  
+                  unset($valorsiniva);
+                  $valorsiniva = $sinIvaRedondeoCentenas;
+              }else
+                  {
+                       $valorsiniva = (float)$contrato->cntr_valor;
+                  }
+              
+
+              //arreglo que guarda los distintos valores
+              //de liquidacion de las estampillas    
               $totalestampilla= array(); 
-              $sinIvaRedondeoDecimales = round($valorsiniva);
-              $sinIvaRedondeoCentenas = round($sinIvaRedondeoDecimales, -2);
+
 
               $valortotal=0;
               $parametros=$this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo','para_id = 1',1,NULL,true);
@@ -169,21 +186,21 @@ class Liquidaciones extends MY_Controller {
 
                          if($contrato->cntr_valor >= $valor10SMMLV)
                          {
-                              $totalestampilla[$value->estm_id] = (($sinIvaRedondeoCentenas*$value->esti_porcentaje)/100);
+                              $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
                               $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
                               $valortotal+=$totalestampilla[$value->estm_id]; 
                               array_push($this->data['estampillas'], $value);
                          }
                     }else
                         {
-                             $totalestampilla[$value->estm_id] = (($sinIvaRedondeoCentenas*$value->esti_porcentaje)/100);
+                             $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
                              $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
                              $valortotal+=$totalestampilla[$value->estm_id];
                              array_push($this->data['estampillas'], $value);  
                         }
                 }else
                     {
-                         $totalestampilla[$value->estm_id] = (($sinIvaRedondeoCentenas*$value->esti_porcentaje)/100);
+                         $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
                          $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
                          $valortotal+=$totalestampilla[$value->estm_id]; 
 
@@ -193,7 +210,7 @@ class Liquidaciones extends MY_Controller {
               }
 
               $this->data['est_totalestampilla']=$totalestampilla;
-              $this->data['cnrt_valorsiniva']=$sinIvaRedondeoCentenas;
+              $this->data['cnrt_valorsiniva']=$valorsiniva;
               $this->data['est_valortotal']=$valortotal;
               $this->template->set('title', 'Editar contrato');
               $this->load->view('liquidaciones/liquidaciones_liquidarcontrato', $this->data); 
