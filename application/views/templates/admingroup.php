@@ -234,7 +234,7 @@
           
           if ($warnigmessage)
             {
-              echo '<div class="alert alert-dismissable alert-warnig"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>'. $warnigmessage.'</div>';
+              echo '<div class="alert alert-dismissable alert-warning"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>'. $warnigmessage.'</div>';
             }
          }  
        if (isset($primarymessage)) {

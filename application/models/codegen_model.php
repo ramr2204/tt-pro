@@ -182,7 +182,7 @@ class Codegen_model extends CI_Model
     } else {
         if ($accion=='UPDATE') {
             foreach ($valores as $key => $value) {
-                echo $field_list.=$key.',';   
+                $field_list.=$key.',';   
             }
             $field_list = substr($field_list, 0, - 1);
         } else {
