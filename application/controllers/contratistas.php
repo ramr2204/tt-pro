@@ -137,7 +137,7 @@ class Contratistas extends MY_Controller {
               foreach ($resultado as $key => $value) {
                   $aplilo[$key]=$value;
               }
-              
+             
               if ($aplilo['cont_nit']==$this->input->post('nit')) {
                   
                   $this->form_validation->set_rules('nit', 'NIT', 'required|trim|xss_clean|max_length[100]');
@@ -188,7 +188,7 @@ class Contratistas extends MY_Controller {
                         );    
                   $this->data['successmessage']=$this->session->flashdata('successmessage');
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                	$this->data['result'] = $this->codegen_model->get('con_contratistas','cont_id,cont_nombre,cont_nit,cont_direccion,cont_municipioid,cont_regimenid,cont_tributarioid','cont_id = '.$idregimen,1,NULL,true);
+                	$this->data['result'] = $this->codegen_model->get('con_contratistas','cont_id,cont_nombre,cont_nit,cont_direccion,cont_municipioid,cont_regimenid,cont_tributarioid, cont_tipocontratistaid','cont_id = '.$idregimen,1,NULL,true);
                   $this->data['municipios']  = $this->codegen_model->getMunicipios();
                   $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
                   $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
