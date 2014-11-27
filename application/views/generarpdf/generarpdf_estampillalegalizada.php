@@ -134,7 +134,8 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:7;"><?php echo $estampilla->cont_nombre; ?></td>
+                        font-size:7;
+                        text-align: center;"><?php echo $estampilla->cont_nombre; ?></td>
 
                     <td style="height: 5mm; width: 13mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
