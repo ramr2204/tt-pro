@@ -133,7 +133,7 @@ class Contratistas extends MY_Controller {
                   redirect(base_url().'index.php/contratistas');
               }
               $resultado = $this->codegen_model->get('con_contratistas','cont_nit','cont_id = '.$idregimen,1,NULL,true);
-              
+       
               foreach ($resultado as $key => $value) {
                   $aplilo[$key]=$value;
               }
@@ -213,7 +213,7 @@ class Contratistas extends MY_Controller {
                   $this->session->set_flashdata('infomessage', 'Debe elegir un contratista para eliminar');
                   redirect(base_url().'index.php/contratistas');
               }
-              if (!$this->codegen_model->depend('con_contratos','cont_contratoid',$this->input->post('id'))) {
+              if (!$this->codegen_model->depend('con_contratos','cntr_contratistaid',$this->input->post('id'))) {
 
                   $this->codegen_model->delete('con_contratistas','cont_id',$this->input->post('id'));
                   $this->session->set_flashdata('successmessage', 'El contratista se ha eliminado con éxito');
