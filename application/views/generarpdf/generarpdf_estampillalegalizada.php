@@ -80,7 +80,7 @@
                     <td rowspan="4" style="height: 31mm; width: 26mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><?php if ($estampilla->fact_rutaimagen) { ?><img src="<?php echo base_url().$estampilla->fact_rutaimagen; ?>" ><?php } ?></td>
+                        border-bottom: 0.5px solid black;"><?php if ($estampilla->fact_rutaimagen) { ?><img src="<?php echo base_url().$estampilla->fact_rutaimagen; ?>" style="height: 27mm; width: 24mm;"><?php } ?></td>
 
                     <td style="height: 5mm; width: 31.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
