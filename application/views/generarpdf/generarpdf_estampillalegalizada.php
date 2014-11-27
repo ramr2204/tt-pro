@@ -61,7 +61,7 @@
                     <td colspan="4" style="height: 9mm; width: 94mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"></td>
+                        border-bottom: 0.5px solid black;"><br><br>  <?php echo $estampilla->cont_nombre; ?></td>
                 </tr>
 
                 <tr>
@@ -73,7 +73,7 @@
                     <td colspan="4" style="height: 5mm; width: 94mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><?php echo $estampilla->cont_nit; ?></td>
+                        border-bottom: 0.5px solid black;">  <?php echo $estampilla->cont_nit; ?></td>
                 </tr>
 
                 <tr>
@@ -86,18 +86,19 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:7;">Número Contrato</td>
+                        font-size:7;"> Número Contrato</td>
 
                     <td class="text-center" style="height: 5mm; width: 24mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;">Numero X</td>
+                        border-bottom: 0.5px solid black;"><?= $estampilla->cntr_numero; ?></td>
 
                     <td style="height: 5mm; width: 13mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:7;">Vigencia</td>
+                        font-size:7;
+                        text-align: center;">Vigencia</td>
 
                     <td class="text-center" style="height: 5mm; width: 25.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
@@ -110,12 +111,16 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:7;">Valor contrato Sin IVA</td>
+                        font-size:7;"> Valor contrato Sin IVA</td>
 
-                    <td colspan="3" style="height: 5mm; width: 62.5mm; border-top: 0.5px solid black;
-                        border-right: 0.5px solid black;
+                    <td colspan="2" style="height: 5mm; width: 24mm; border-top: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;">$</td>
+                        border-bottom: 0.5px solid black;">  $</td>
+
+                    <td colspan="2" style="height: 5mm; width: 38.5mm; border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-bottom: 0.5px solid black;
+                        text-align: right;"><?= number_format($estampilla->liqu_valorsiniva,2, ',', '.'); ?></td>
                 </tr>
 
                 <tr>
@@ -123,7 +128,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:7;">Nombre Estampilla PRO</td>
+                        font-size:7;"> Nombre Estampilla PRO</td>
 
                     <td style="height: 5mm; width: 24mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
@@ -135,13 +140,14 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:7;">Valor</td>
+                        font-size:7;
+                        text-align: center;">Valor</td>
 
                     <td style="height: 5mm; width: 25.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:7;">$ <?php echo number_format($estampilla->fact_valor, 2, ',', '.'); ?></td>
+                        text-align: right;">$  <?php echo number_format($estampilla->fact_valor, 2, ',', '.'); ?></td>
                 </tr>
 
                 <tr>
@@ -161,7 +167,7 @@
                     <td class="text-center" colspan="2" style="height: 15mm; width: 38.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><br><br>Numero X</td>
+                        border-bottom: 0.5px solid black;"></td>
                 </tr>   
             </table>
         
