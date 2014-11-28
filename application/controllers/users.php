@@ -404,6 +404,9 @@ class Users extends MY_Controller {
 			  $this->data['title'] = "Crear usuario";	
 		      $this->form_validation->set_rules('id', $this->lang->line('create_user_validation_id_label'), 'required|xss_clean|numeric|greater_than[0]|is_unique[users.id]');
 		      $this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'required|valid_email|is_unique[users.email]');
+		      $this->form_validation->set_rules('telefono', $this->lang->line('create_user_validation_telefono_label'), 'required|numeric');
+		      $this->form_validation->set_rules('apellidos', $this->lang->line('create_user_validation_apellidos_label'), 'required|min_length[4]|max_length[40]');
+		      $this->form_validation->set_rules('nombres', $this->lang->line('create_user_validation_nombres_label'), 'required|min_length[4]|max_length[40]');
 		      $this->form_validation->set_rules('password', $this->lang->line('create_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[password_confirm]');
 		      $this->form_validation->set_rules('password_confirm', $this->lang->line('create_user_validation_password_confirm_label'), 'required');
               $this->form_validation->set_rules('perfilid', 'Perfil',  'required|numeric|greater_than[0]'); 
@@ -416,7 +419,11 @@ class Users extends MY_Controller {
 				  $username = $this->input->post('id'); //este id será el identificador de la tabla usuarios, no se usa nombre de usuario
 			      $email    = strtolower($this->input->post('email'));
 			      $password = $this->input->post('password');
-                  $additional_data = array('perfilid' => $this->input->post('perfilid'));
+                  $additional_data = array('perfilid' => $this->input->post('perfilid'),                  	
+                      'first_name'=> $this->input->post('nombres'),
+                      'last_name'=> $this->input->post('apellidos'),
+                      'phone'=> $this->input->post('telefono'),
+                      'id'=> $this->input->post('id'));                  
 
 				  if ($this->ion_auth->register($username, $password, $email, $additional_data))
 					 {
@@ -485,6 +492,9 @@ class Users extends MY_Controller {
 				  $this->form_validation->set_rules('password', $this->lang->line('edit_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[password_confirm]');
 				  $this->form_validation->set_rules('password_confirm', $this->lang->line('edit_user_validation_password_confirm_label'), 'required');
                   $this->form_validation->set_rules('perfilid', 'Perfil',  'required|numeric|greater_than[0]'); 
+                  $this->form_validation->set_rules('telefono', $this->lang->line('create_user_validation_telefono_label'), 'required|numeric');
+		          $this->form_validation->set_rules('apellidos', $this->lang->line('create_user_validation_apellidos_label'), 'required|min_length[4]|max_length[40]');
+    		      $this->form_validation->set_rules('nombres', $this->lang->line('create_user_validation_nombres_label'), 'required|min_length[4]|max_length[40]');
 				  $data['password'] = $this->input->post('password');
 			  }
 
@@ -492,7 +502,10 @@ class Users extends MY_Controller {
 			  {
 				  $data = array(
 				    'email' => $this->input->post('email'),
-                    'perfilid' => $this->input->post('perfilid')
+                    'perfilid' => $this->input->post('perfilid'),
+                    'phone'=> $this->input->post('telefono'),
+                    'last_name'=> $this->input->post('apellidos'),
+                    'first_name'=> $this->input->post('nombres')
 			      );
 
 				  $this->ion_auth->update($user->id, $data); 
