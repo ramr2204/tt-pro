@@ -27,9 +27,11 @@ usuariosActual['id']=[];
 
 function inicial () 
 {
+  //Eventos Ingresar Papeleria
 	$('#responsable').keyup(solicitarUsuarios);
 	$('#responsable').focusout(cargarId);
 	$('#codigoinicial').focusout(solicitarCodigos);
+
 }
 
 
@@ -116,7 +118,6 @@ function solicitarCodigos (e) {
              });
 	
 }
-
 
 
 

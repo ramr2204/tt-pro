@@ -20,8 +20,9 @@
                            <div class="panel panel-default">
                             <div class="panel-heading"><h1>Cargar un Nuevo Archivo de Pagos</h1></div>
                              <div class="panel-body">
-                              <?php echo form_open_multipart(current_url()); ?>
+                              <?php echo form_open_multipart('pagos/doadd', array('id' => 'cargarTxtPagos')); ?>
 
+                              
                                     <div class="form-group">
                                         <label for="archivo">Formato (txt)</label>
                                         <input id="file" type="file" class="file" name="archivo" multiple=false>

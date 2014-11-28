@@ -103,11 +103,11 @@ class Estampillas extends MY_Controller {
                  
                        if ($this->codegen_model->add('est_estampillas',$data) == TRUE) {
 
-                           $this->session->set_flashdata('message', 'El estampilla se ha creado con éxito');
+                           $this->session->set_flashdata('message', 'La estampilla se ha creado con éxito');
                            redirect(base_url().'index.php/estampillas/add');
                        } else {
 
-                           $this->data['errormessage'] = 'No se pudo registrar el estampilla';
+                           $this->data['errormessage'] = 'No se pudo registrar la estampilla';
 
                        }
                                                           
@@ -150,7 +150,7 @@ class Estampillas extends MY_Controller {
 
               $idestampilla = ($this->uri->segment(3)) ? $this->uri->segment(3) : $this->input->post('id') ;
               if ($idestampilla==''){
-                  $this->session->set_flashdata('infomessage', 'Debe elegir un estampilla para editar');
+                  $this->session->set_flashdata('infomessage', 'Debe elegir una estampilla para editar');
                   redirect(base_url().'index.php/estampillas');
               }
               $resultado = $this->codegen_model->get('est_estampillas','estm_cuenta','estm_id = '.$idestampilla,1,NULL,true);
