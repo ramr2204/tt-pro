@@ -295,20 +295,6 @@ class Papeles extends MY_Controller {
               $this->datatables->from('est_papeles p');
               $this->datatables->join('users u','u.id = p.pape_usuario','left');
               
-
-              if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/edit')) {
-                  
-                  // $this->datatables->add_column('edit', '<div class="btn-toolbar">
-                  //                                          <div class="btn-group">
-                  //                                             <a href="'.base_url().'index.php/papeles/edit/$1" class="btn btn-default btn-xs" title="Editar estampilla"><i class="fa fa-pencil-square-o"></i></a>
-                  //                                          </div>
-                  //                                        </div>', 'p.pape_id');
-
-              }  else {
-                  
-                  // $this->datatables->add_column('edit', '', 'p.pape_id'); 
-              }
-              
               echo $this->datatables->generate();
 
           } else {

@@ -24,7 +24,7 @@ var oTable = $('#tablaq').dataTable( {
 "aoColumns": [ 
                       { "sClass": "center"}, /*id 0*/
                       { "sClass": "center" }, 
-                      { "sClass": "left" }, 
+                      { "sClass": "center" }, 
                       { "sClass": "center" }, 
                       { "sClass": "center" },
                       { "sClass": "center" }, 

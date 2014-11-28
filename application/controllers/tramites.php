@@ -65,7 +65,7 @@ class Tramites extends MY_Controller {
 
               $this->data['successmessage']=$this->session->flashdata('message');  
         		  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[200]|is_unique[est_tramites.tram_nombre]');   
-              $this->form_validation->set_rules('observaciones', 'Descripción', 'trim|xss_clean|max_length[500]');
+              $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[500]');
               $x=1;
               while ( $x  <= $this->input->post('numero')) {
                   $this->form_validation->set_rules('estampillaid'.$x, 'estampillaid', 'trim|xss_clean|max_length[5]|numeric');
@@ -83,7 +83,7 @@ class Tramites extends MY_Controller {
 
                     $data = array(
                         'tram_nombre' => $this->input->post('nombre'),
-                        'tram_observaciones' => $this->input->post('observaciones')
+                        'tram_observaciones' => $this->input->post('descripcion')
 
                      ); 
                     
@@ -242,18 +242,10 @@ class Tramites extends MY_Controller {
                   $this->session->set_flashdata('infomessage', 'Debe elegir un tipo de trámite para eliminar');
                   redirect(base_url().'index.php/tramites');
               }
-              if (!$this->codegen_model->depend('est_contratos','cntr_tramiteid',$this->input->post('id'))) {
 
                   $this->codegen_model->delete('est_tramites','tram_id',$this->input->post('id'));
                   $this->session->set_flashdata('successmessage', 'El trámite se ha eliminado con éxito');
-                  redirect(base_url().'index.php/tramites');  
-
-              } else {
-
-                  $this->session->set_flashdata('errormessage', 'El trámite se encuentra en uso, no es posible eliminarlo.');
-                  redirect(base_url().'index.php/tramites/edit/'.$this->input->post('id'));
-
-              }
+                  redirect(base_url().'index.php/tramites');     
                          
           } else {
               redirect(base_url().'index.php/error_404');       
