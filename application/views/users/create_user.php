@@ -5,22 +5,36 @@
 <div class="row clearfix">
             <div class="col-md-12 column">
                   <div class="row clearfix">
-                        <div class="col-md-4 column">
-                        </div>
-                        <div class="col-md-4 column">
-                           <div class="panel panel-default">
-                             <div class="panel-body">
-                              <?php echo form_open("users/create_user",'role="form"');?>
-                                    <div class="form-group">
-                                           <label for="id">Identificación</label>
-                                           <input class="form-control" id="id" type="text" name="id" value="<?php echo set_value('id'); ?>" required="required" />
-                                           <?php echo form_error('id','<span class="text-danger">','</span>'); ?>
-                                    </div>
-                                    <div class="form-group">
-                                           <label for="email">Email</label>
-                                           <input class="form-control" id="email" type="email" name="email" value="<?php echo set_value('email'); ?>" required="required" />
-                                           <?php echo form_error('email','<span class="text-danger">','</span>'); ?>
-                                    </div>
+
+                        <div class="col-md-8 col-md-offset-2">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div class="col-md-5">
+                           
+                                  <fieldset>
+                                    <?php echo form_open("users/create_user",'role="form"');?>
+                                         <legend>Datos Personales</legend>
+                                         <div class="form-group">
+                                                 <label for="id">Identificación</label>
+                                                 <input class="form-control" id="id" type="text" name="id" value="<?php echo set_value('id'); ?>" required="required" />
+                                                 <?php echo form_error('id','<span class="text-danger">','</span>'); ?>
+                                         </div>
+                                         <div class="form-group">
+                                                <label for="id">Apellidos</label>
+                                                 <input class="form-control" id="apellidos" type="text" name="apellidos" value="<?php echo set_value('apellidos'); ?>" required="required" />
+                                                <?php echo form_error('apellidos','<span class="text-danger">','</span>'); ?>
+                                         </div>
+                                          <div class="form-group">
+                                                 <label for="id">Nombres</label>
+                                                 <input class="form-control" id="nombres" type="text" name="nombres" value="<?php echo set_value('nombres'); ?>" required="required" />
+                                                 <?php echo form_error('nombres','<span class="text-danger">','</span>'); ?>
+                                          </div>
+                                    </fieldset>                             
+                                </div>
+
+                              <div class="col-md-5 col-md-offset-1">                           
+                              <fieldset>
+                                    <legend>Seguridad</legend>
                                     <div class="form-group">
                                            <label for="password">Contraseña</label>
                                            <input class="form-control" id="password" type="password" name="password" required="required" />
@@ -42,21 +56,41 @@
                                            </select>
                                            <?php echo form_error('perfilid','<span class="text-danger">','</span>'); ?>
                                     </div>
+                              </fieldset>                                                                        
+                              </div>                            
 
+                            <fieldset>
+                            <div class="col-md-12">                                                                                  
+                                    <legend>Contacto</legend>
+                            </div>
 
-                                    <div class="pull-right">
-                                     <?php  echo anchor('users', '<i class="fa fa-times"></i> Cancelar', 'class="btn btn-default"'); ?>
-                                    <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
+                            <div class="col-md-5">                                      
+                                    <div class="form-group">
+                                           <label for="email">Telefono</label>
+                                           <input class="form-control" id="telefono" type="number" name="telefono" value="<?php echo set_value('telefono'); ?>" required="required" />
+                                           <?php echo form_error('telefono','<span class="text-danger">','</span>'); ?>
                                     </div>
-                                <?php echo form_close();?>
-                              
-                              </div>
-                             </div>
-       
-                        </div>
-                        <div class="col-md-4 column">
-                        </div>
-                  </div> 
+                            </div>
+
+                            <div class="col-md-5 col-md-offset-1">
+                                    <div class="form-group">
+                                           <label for="email">Email</label>
+                                           <input class="form-control" id="email" type="email" name="email" value="<?php echo set_value('email'); ?>" required="required" />
+                                           <?php echo form_error('email','<span class="text-danger">','</span>'); ?>
+                                    </div>
+                            </div>
+                            </fieldset>
+                                                        
+                            <div class="col-md-12">
+                                       <?php  echo anchor('users', '<i class="fa fa-times"></i> Cancelar', 'class="btn btn-default"'); ?>
+                                      <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
+                            </div>
+                            <?php echo form_close();?>
+                          </div>
+                        </div> 
+                    </div>
+                                                                              
+                </div> 
             </div>
       </div>
 
