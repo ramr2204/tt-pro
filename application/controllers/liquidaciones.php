@@ -558,12 +558,25 @@ function vercontratolegalizado()
                $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
 
                $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);
-               $this->data['proximaImpresion'] = ((int)$max['impr_codigopapel'])+1;
+               
+               //verifica si ya habia asignado por lo menos
+               //un consecutivo a una impresion
+               //de lo contrario elige el primer codigo
 
-          }else
-              {
-                   $this->data['proximaImpresion'] = 'no tiene';                 
-              }            
+               if((int)$max['impr_codigopapel']>0)
+               {
+                                $nuevoingreso=$max['impr_codigopapel']+1;
+               }else
+                   {
+                         //extrae el primer codigo de papeleria resgistrado
+                         //en los rangos de papel asginado al liquidador autenticado
+                         $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
+                         $primerCodigo = $this->codegen_model->min('est_papeles','pape_codigoinicial',$where);
+                         $nuevoingreso = (int)$primerCodigo['pape_codigoinicial'];
+                   }
+                   
+                $this->data['proximaImpresion'] = $nuevoingreso;   
+          }          
           
               $idcontrato=$this->uri->segment(3);
               $this->data['result'] = $this->liquidaciones_model->getrecibos($idcontrato);
@@ -696,7 +709,7 @@ function verliquidartramite()
                       $this->session->set_flashdata('successmessage', 'La liquidación se realizó con éxito');
                       $this->session->set_flashdata('accion', 'liquidado');
                       redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$idtramite);
-                     // echo $this->db->last_query();
+                
                   }
               }
                 
@@ -745,7 +758,7 @@ function verliquidartramite()
                    $ncomprobantescargados++;
                  }
               }
-             // print_r($facturapagada);
+    
               $this->data['comprobantecargado'] = $comprobantecargado;
               $this->data['facturapagada'] =$facturapagada;
               $this->data['comprobantes'] = ($numerocomprobantes==$ncomprobantescargados) ? true : false ;
@@ -755,7 +768,7 @@ function verliquidartramite()
               $this->data['numerocomprobantes'] =$numerocomprobantes;
               $this->data['ncomprobantescargados'] =$ncomprobantescargados;
               $this->template->set('title', 'Contrato liquidado');
-              //$this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_vercontratoliquidado', $this->data);
+              
               $this->load->view('liquidaciones/liquidaciones_vertramiteliquidado', $this->data); 
           } else {
               redirect(base_url().'index.php/error_404');
@@ -804,7 +817,7 @@ function verliquidartramite()
                    $ncomprobantescargados++;
                  }
               }
-             // print_r($facturapagada);
+         
               $this->data['comprobantecargado'] = $comprobantecargado;
               $this->data['facturapagada'] =$facturapagada;
               $this->data['comprobantes'] = ($numerocomprobantes==$ncomprobantescargados) ? true : false ;
@@ -814,7 +827,7 @@ function verliquidartramite()
               $this->data['numerocomprobantes'] =$numerocomprobantes;
               $this->data['ncomprobantescargados'] =$ncomprobantescargados;
               $this->template->set('title', 'Contrato liquidado');
-              //$this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_vercontratoliquidado', $this->data);
+              
               $this->load->view('liquidaciones/liquidaciones_vertramitelegalizado', $this->data); 
           } else {
               redirect(base_url().'index.php/error_404');
