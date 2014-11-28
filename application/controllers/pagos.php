@@ -72,12 +72,21 @@ class Pagos extends MY_Controller {
                $config['max_size']    = '2048';
                $config['overwrite']    = TRUE;
 
+               //inicializa la variable de información
+               $info='';
+
                $this->load->library('upload');
                $this->upload->initialize($config);
+
                if ($this->upload->do_upload("archivo")) {
+
                    $file_data= $this->upload->data();
                    $success=0;
                    $error=0;
+                   //lleva la cuenta de los pagos registrados
+                   //para renderizar o no el mensaje de exito
+                   $controlCantidad=0;
+                   
                    $path2 = $path."/".$file_data['raw_name'].".txt";
                    $string = file_get_contents($path2);
                    $file = fopen($path2,"r");
@@ -85,13 +94,8 @@ class Pagos extends MY_Controller {
                        $linea = fgets($file);
                        $explode = explode(',', $linea);
 
-                       echo '<pre>';
-                       print_r($explode);
-                       echo '</pre>';
                        $resultado = $this->codegen_model->get('est_pagos','pago_id','pago_facturaid = '."'$explode[0]'",1,NULL,true);
-                       if ($resultado) {
-                               
-                       } else {
+                       if (!$resultado) {                               
                            $data = array(
                               'pago_facturaid' => $explode[0],
                               'pago_fecha' => $explode[1],
@@ -106,27 +110,40 @@ class Pagos extends MY_Controller {
                            } else {
                                $error++;
                            }
-                       }
+                       }else 
+                           {
+                                $info .= '<br>El pago de la factura No. '.$explode[0]. 'ya fue registrado.';
+                           }
 
                    }
 
                    fclose($file);               
-                   $this->session->set_flashdata('infomessage', 'Se cargaron '.$success.' con éxito y '.$error. 'con errores');
-                   redirect(base_url().'index.php/pagos/add');
+                   $this->data['successmessage'] = 'Se cargaron '.$success.' pagos con éxito y '.$error. 'con errores';
+                   
 
                } else {
-                 $this->data['errormessage'] =$this->upload->display_errors(); 
+                 //$this->data['errormessage'] =$this->upload->display_errors(); 
                }  
-
-              $data = array(
-                    'banc_nombre' => $this->input->post('nombre'),
-                    'banc_descripcion' => $this->input->post('descripcion')
-
-                 );
                  
-    			    
+              //carga el mensaje de información si existe
+               if($info != '')
+               {
+                   $this->data['infomessage'] = $info; 
+               }
+              
+              //carga las librerias para los estilos
+              //y funcionalidad del boton de carga de 
+              //archivos
 
-                
+              $this->data['style_sheets']= array(
+                        'css/chosen.css' => 'screen',
+                        'css/plugins/bootstrap/fileinput.css' => 'screen'
+                    );
+              $this->data['javascripts']= array(
+                        'js/chosen.jquery.min.js',
+                        'js/plugins/bootstrap/fileinput.min.js'
+                    );    
+              
               $this->template->set('title', 'Cargar archivo de pagos');
               $this->template->load($this->config->item('admin_template'),'pagos/pagos_add', $this->data);
              
