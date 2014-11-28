@@ -22,9 +22,7 @@
                              <div class="panel-body">
                                 
 
-                              <?php echo form_open(current_url()); ?>
-                                  
-                                     
+                              <?php echo form_open(current_url()); ?>                                                                       
                                      
                                        <input class="form-control" id="encontrado" type="hidden" name="encontrado" value="0"/>
                                        <div class="col-md-4 column">
@@ -72,7 +70,7 @@
 
 
                                     <div class="pull-right">
-                                     <?php  echo anchor('contratistas', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
+                                     <?php  echo anchor('liquidaciones/liquidartramites', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
                                     <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
                                     </div>
                                 <?php echo form_close();?>

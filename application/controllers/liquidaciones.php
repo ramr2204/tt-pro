@@ -636,25 +636,27 @@ function verliquidartramite()
               $idliquidacion=$this->uri->segment(3);
               
               $this->data['result'] = $this->liquidaciones_model->getliquidartramite($idliquidacion);
-              $contrato = $this->data['result'];
+              $tramite = $this->data['result'];
               $parametros=$this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo','para_id = 1',1,NULL,true);
               $this->data['estampillas'] = $this->liquidaciones_model->getestampillastramites($this->data['result']->litr_tramiteid);
 
               $estampillas=$this->data['estampillas'];   
-              $valorsiniva = $parametros->para_salariominimo;
+              //calcula el SMDLV
+              $salarioMinimoDiario = round((float)$parametros->para_salariominimo/30,0);
+
               $totalestampilla= array();
               $valortotal=0;
               
               foreach ($estampillas as $key => $value) {
                 
-                 $totalestampilla[$value->estm_id] = (($valorsiniva*$value->estr_porcentaje)/100);
+                 $totalestampilla[$value->estm_id] = (($salarioMinimoDiario*$value->estr_porcentaje)/100);
                  $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
                  $valortotal+=$totalestampilla[$value->estm_id];
               }
               $this->data['est_totalestampilla']=$totalestampilla;
-              $this->data['cnrt_valorsiniva']=$valorsiniva;
+              $this->data['cnrt_valorsiniva']=$salarioMinimoDiario;
               $this->data['est_valortotal']=$valortotal;
-              $this->template->set('title', 'Editar contrato');
+              $this->template->set('title', 'Liquidar Tramite');
               $this->load->view('liquidaciones/liquidaciones_verliquidartramite', $this->data); 
              
           } else {
