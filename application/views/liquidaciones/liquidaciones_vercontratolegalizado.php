@@ -79,7 +79,12 @@
      <td colspan="1" class="text-center"><strong>Valor</strong></td>
      <td colspan="1" class="text-center"><strong>Procesos</strong></td>
 </tr>
+
+<?php //para usuarios con perfil de liquidador
+      if($proximaImpresion){ ?>
 <input type="hidden" id="siguienteEstampilla" value="<?= $proximaImpresion; ?>" >
+<?php } ?>
+
 <?php $x=0; ?>
 <?php foreach($facturas as $row2) { ?>
 <tr>
