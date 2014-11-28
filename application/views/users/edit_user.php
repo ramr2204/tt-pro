@@ -17,9 +17,9 @@
 
                       <div class="col-md-8 col-md-offset-2">
                         <div class="panel panel-default">
+                            <div class="panel-heading"><h1>Editar Usuario</h1></div> 
                             <div class="panel-body">
-                                <div class="col-md-5">
-                           
+                                <div class="col-md-5">                               
                                   <fieldset>
                                     <?php echo form_open(current_url(),'role="form"');?>
                                          <legend>Datos Personales</legend>

@@ -1,5 +1,4 @@
 <?php if( ! defined('BASEPATH') ) exit('No direct script access allowed'); ?>
-<h1><?php echo lang('create_user_heading');?></h1>
 <div id="infoMessage"><?php if (isset($message)) { echo $message; } ?></div>
 
 <div class="row clearfix">
@@ -8,6 +7,7 @@
 
                         <div class="col-md-8 col-md-offset-2">
                         <div class="panel panel-default">
+                            <div class="panel-heading"><h1><?php echo lang('create_user_heading');?></h1></div>
                             <div class="panel-body">
                                 <div class="col-md-5">
                            
