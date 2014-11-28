@@ -560,7 +560,10 @@ function vercontratolegalizado()
                $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);
                $this->data['proximaImpresion'] = ((int)$max['impr_codigopapel'])+1;
 
-          }            
+          }else
+              {
+                   $this->data['proximaImpresion'] = 'no tiene';                 
+              }            
           
               $idcontrato=$this->uri->segment(3);
               $this->data['result'] = $this->liquidaciones_model->getrecibos($idcontrato);
