@@ -28,8 +28,8 @@ usuariosActual['id']=[];
 function inicial () 
 {
   //Eventos Ingresar Papeleria
-	$('#responsable').keyup(solicitarUsuarios);
-	$('#responsable').focusout(cargarId);
+	$('.responsable').keyup(solicitarUsuarios);
+	$('.responsable').focusout(cargarId);
 	$('#codigoinicial').focusout(solicitarCodigos);
 
 }
@@ -59,7 +59,7 @@ function solicitarUsuarios (e) {
     			     	usuariosActual['id'][i]=data.idd[i];
     			     }
     			     
-    			     $( "#responsable" ).autocomplete({
+    			     $( ".responsable" ).autocomplete({
     				  source: fuenteBusqueda
     				 });   			    
                }

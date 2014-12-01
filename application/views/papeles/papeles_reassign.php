@@ -2,11 +2,11 @@
 
 /**
 *   Nombre:            admin template
-*   Ruta:              /application/views/papeles/papeles_add.php
-*   Descripcion:       permite crear una nueva estampilla
+*   Ruta:              /application/views/papeles/reassign.php
+*   Descripcion:       permite reasignar un rango de estampillas de un liquidador a otro
 *   Fecha Creacion:    12/may/2014
-*   @author            Iván Viña <ivandariovinam@gmail.com>
-*   @version           2014-05-12
+*   @author            Mike Ortiz <engineermikeortiz@gmail.com>
+*   @version           2014-12-01
 *
 */ 
 ?>
@@ -17,19 +17,32 @@
                         </div>
                         <div class="col-md-4 column">
                            <div class="panel panel-default">
-                            <div class="panel-heading"><h1>Ingreso de papelería para estampillas</h1></div>
+                            <div class="panel-heading"><h1>Reasignación de  papelería para estampillas</h1></div>
                              <div class="panel-body">
-                              <?php echo form_open(current_url()); ?>
+                              <?php echo form_open('papeles_postReassign'); ?>
                                     <div class="form-group">
-                                           <label for="responsablePapel">Nombre Responsable</label>
-                                           <input class="form-control responsable" id="responsable" type="text" name="responsablePapel" placeholder="Nombre" required autocomplete="off"/>
-                                           <?php echo form_error('responsablePapel','<span class="text-danger">','</span>'); ?>
+                                           <label for="oldResponsablePapel">Nombre Responsable Actual</label>
+                                           <input class="form-control" id="oldResponsable" type="text" name="oldResponsablePapel" placeholder="Nombre" required autocomplete="off"/>
+                                           <?php echo form_error('oldResponsablePapel','<span class="text-danger">','</span>'); ?>
                                     </div>
 
                                     <div class="form-group">
-                                           <label for="documentoRespPapel">Documento</label>
-                                           <input class="form-control" id="docuResponsable" type="text" name="documentoRespPapel" placeholder="Documento" readonly />
+                                           <label for="docuOldResponsable">Documento</label>
+                                           <input class="form-control" id="docuOldResponsable" type="text" name="docuOldResponsable" placeholder="Documento" readonly />
                                     </div>
+
+                                    <div class="form-group">
+                                           <label for="newResponsablePapel">Nombre Nuevo Responsable</label>
+                                           <input class="form-control" id="newResponsable" type="text" name="newResponsablePapel" placeholder="Nombre" required autocomplete="off"/>
+                                           <?php echo form_error('newResponsablePapel','<span class="text-danger">','</span>'); ?>
+                                    </div>
+
+                                    <div class="form-group">
+                                           <label for="docuNewResponsable">Documento</label>
+                                           <input class="form-control" id="docuNewResponsable" type="text" name="docuNewResponsable" placeholder="Documento" readonly />
+                                    </div>
+
+                                   
 
                                     <div class="form-group">
                                            <label for="codigoinicial">Código inicial</label>

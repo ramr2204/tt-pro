@@ -307,7 +307,7 @@ class Papeles extends MY_Controller {
   }
 
 
-  //Funcion que el contenido de la columna de rangos
+  //Funcion renderiza que el contenido de la columna de rangos
   //de papeleria asignada a cada usuario
   function extraerRangosPapel()
     {
@@ -328,6 +328,32 @@ class Papeles extends MY_Controller {
 
      echo $cadenaPapeles;
 
-    }  
+    }
+
+
+
+  //Función que renderiza la interfaz de re-asignación
+  //de papeleria fisica de estampillas
+
+  function getReassign() 
+  {
+       if ($this->ion_auth->logged_in()) {
+          
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/getReassign') ) { 
+              
+              $this->data['successmessage']=$this->session->flashdata('successmessage');
+              $this->data['errormessage']=$this->session->flashdata('errormessage');
+              $this->data['infomessage']=$this->session->flashdata('infomessage');
+            
+              $this->template->load($this->config->item('admin_template'),'papeles/papeles_reassign', $this->data);                            
+
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+               
+      } else{
+              redirect(base_url().'index.php/users/login');
+      }   
+  }
 
 }
