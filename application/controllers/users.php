@@ -142,6 +142,9 @@ class Users extends MY_Controller {
 	//change password
 	function editme()
 	{
+		if (!$this->ion_auth->logged_in()) {
+			redirect('users/login', 'refresh');
+		}
 
         $user = $this->ion_auth->user()->row();
 	    $this->data['result']=$user;   
@@ -162,10 +165,12 @@ class Users extends MY_Controller {
 		     $this->form_validation->set_rules('password_confirm', $this->lang->line('edit_user_validation_password_confirm_label'), 'required');
 
 		     $data['password'] = $this->input->post('password');
-	    }
-		if (!$this->ion_auth->logged_in()) {
-			redirect('users/login', 'refresh');
-		}
+	    }		
+
+		//valida la información personal
+		$this->form_validation->set_rules('telefono', $this->lang->line('create_user_validation_telefono_label'), 'required|numeric');
+		$this->form_validation->set_rules('apellidos', $this->lang->line('create_user_validation_apellidos_label'), 'required|min_length[4]|max_length[40]');
+        $this->form_validation->set_rules('nombres', $this->lang->line('create_user_validation_nombres_label'), 'required|min_length[4]|max_length[40]');
 
 		if ($this->form_validation->run() == false) {
 			//display the form
@@ -179,7 +184,10 @@ class Users extends MY_Controller {
 			$identity = $this->session->userdata($this->config->item('identity', 'ion_auth'));
             
             $data = array(
-				    'email' => $this->input->post('email')
+				    'email' => $this->input->post('email'),
+				    'first_name' => $this->input->post('nombres'),
+				    'last_name' => $this->input->post('apellidos'),
+				    'phone' => $this->input->post('telefono')
 			      );
 				  $this->ion_auth->update($user->id, $data); 
 				  $this->session->set_flashdata('successmessage', 'Ha editado sus datos con éxito');
