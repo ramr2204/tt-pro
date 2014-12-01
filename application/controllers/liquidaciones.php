@@ -89,9 +89,9 @@ class Liquidaciones extends MY_Controller {
               $this->data['infomessage']=$this->session->flashdata('infomessage');
               $this->data['accion']=$this->session->flashdata('accion');
               if ($this->uri->segment(3)>0){
-                  $this->data['idcontrato']= $this->uri->segment(3);
+                  $this->data['idtramite']= $this->uri->segment(3);
                } else {
-                  $this->data['idcontrato']= 0;
+                  $this->data['idtramite']= 0;
                }
               //template data
               $this->template->set('title', 'Administrar liquidaciones');
@@ -109,14 +109,7 @@ class Liquidaciones extends MY_Controller {
                         'js/plugins/bootstrap/fileinput.min.js',
                         'js/plugins/bootstrap/bootstrap-switch.min.js'
                        );
-              $resultado = $this->codegen_model->max('con_contratos','cntr_fecha_firma');
-              
-              foreach ($resultado as $key => $value) {
-                  $aplilo[$key]=$value;
-              }
-              $vigencia_mayor=substr($aplilo['cntr_fecha_firma'], 0, 4);
-              $vigencia_anterior=$vigencia_mayor-1;
-              $this->data['vigencias']= array($vigencia_mayor,$vigencia_anterior);
+             
               $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_liquidartramites', $this->data);
               
           } else {
@@ -626,6 +619,7 @@ function vercontratolegalizado()
       }
 
   }
+
 function verliquidartramite()
   {        
       if ($this->ion_auth->logged_in()) {
@@ -860,7 +854,8 @@ function verliquidartramite()
 
                   $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
               } else {    
-                  if ($this->input->post('encontrado')>0) {
+
+                 /* if ($this->input->post('encontrado')>0) {
                       $contratista= $this->codegen_model->get('con_contratistas','cont_id','cont_nit = '.$this->input->post('documento'),1,NULL,true);
                       $contratistaid= $contratista->cont_id;
                   } else {
@@ -870,13 +865,14 @@ function verliquidartramite()
                       );
                       $this->codegen_model->add('con_contratistas',$datos);
                       $contratistaid=$this->db->insert_id();
-                  }
+                  }*/
                   
 
 
                   $data = array(
                         'litr_tramiteid' => $this->input->post('tramiteid'),
-                        'litr_contratistaid' => $contratistaid,
+                        'litr_tramitadorid' => $this->input->post('documento'),
+                        'litr_tramitadornombre' => $this->input->post('nombre'),
                         'litr_fechaliquidacion' => date("Y-m-d H:i:s"),
                         'litr_estadolocalid' => 0,
                         'litr_observaciones' => $this->input->post('observaciones')
@@ -943,9 +939,8 @@ function verliquidartramite()
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
               
               $this->load->library('datatables');
-              $this->datatables->select('l.litr_id,co.cont_nit,co.cont_nombre,tr.tram_nombre,l.litr_fechaliquidacion,l.litr_observaciones,el.eslo_nombre');
-              $this->datatables->from('est_liquidartramites l');
-              $this->datatables->join('con_contratistas co', 'co.cont_id = l.litr_contratistaid', 'left');
+              $this->datatables->select('l.litr_id,l.litr_tramitadorid,l.litr_tramitadornombre,tr.tram_nombre,l.litr_fechaliquidacion,l.litr_observaciones,el.eslo_nombre');
+              $this->datatables->from('est_liquidartramites l');              
               $this->datatables->join('est_tramites tr', 'tr.tram_id = l.litr_tramiteid', 'left');
               $this->datatables->join('con_estadoslocales el', 'el.eslo_id = l.litr_estadolocalid', 'left');
               $this->datatables->add_column('edit', '-');

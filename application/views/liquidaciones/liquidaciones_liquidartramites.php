@@ -11,14 +11,7 @@
 */
 
 ?>
-<?php 
-    $a= "[";
-    foreach ($vigencias as $key => $value) {
-      $a.='"'.$value.'", ';
-    }
-    $a=substr($a, 0, -2);
-    $a.= "]";
-?>
+
 <script type="text/javascript" language="javascript" charset="utf-8">
 //generación de la tabla mediante json
 $(document).ready(function() {
@@ -104,12 +97,7 @@ var oTable = $('#tablaq').dataTable( {
                                          bSmart: false
 
                                     },
-                                    {    
-                                         sSelector: "#buscarano", 
-                                         type:"select" ,
-                                         values : <?php echo $a; ?>,
-                                         selected: <?php echo $vigencias[0]; ?>
-                                    },
+                                    null,
                                     null,
                                     null,
                                     null,
@@ -154,13 +142,12 @@ var oTable = $('#tablaq').dataTable( {
     ?>
  </div>
 </div> 
-
+<br>
 <div class="row"> 
 <div class="col-sm-1"></div>
  <div class="col-sm-2">Identificación:<div align="center" id="buscarnumero"></div></div>
- <div class="col-sm-3">Nomnre:<div align="center" id="buscarnit"></div></div>
- <div class="col-sm-3">Támite:<div align="center" id="buscarcontratista"></div></div>
- <div class="col-sm-2">Año:<div align="center" id="buscarano"></div></div>
+ <div class="col-sm-3">Nombre:<div align="center" id="buscarnit"></div></div>
+ <div class="col-sm-3">Trámite:<div align="center" id="buscarcontratista"></div></div>
  <div class="col-sm-1"></div>
 </div>
 
