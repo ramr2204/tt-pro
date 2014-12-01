@@ -287,7 +287,7 @@ var oTable = $('#tablaq').dataTable( {
             $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramiteliquidado/'+ID,function(result){
             
             $('#myModal2').modal('show');
-            //alert(ID+'....');
+            
         });
         
  
@@ -303,7 +303,7 @@ var oTable = $('#tablaq').dataTable( {
             var ID = <?php echo $idtramite; ?>;
             
            $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramitelegalizado/'+ID,function(result){
-  var siguienteEstampilla = $('#siguienteEstampilla').val();alert(siguienteEstampilla);          
+  var siguienteEstampilla = $('#siguienteEstampilla').val();          
             $('#myModal3').modal('show');
 
         });
