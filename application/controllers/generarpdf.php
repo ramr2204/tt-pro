@@ -190,7 +190,23 @@ class Generarpdf extends CI_controller {
 
           if ($usuarioLogueado->perfilid==4){
 
-                  $this->data['estampilla'] = $this->liquidaciones_model->getfactura_legalizada($this->uri->segment(3),$doc=TRUE);
+                  //Valida si la estampilla se generará para un contrato
+                  //o para un trámite
+     
+                  $verificacionTramite = $this->codegen_model->get('est_liquidaciones l','liqu_tipocontrato'
+                       ,'f.fact_liquidacionid = '.$this->uri->segment(3), 1, null, true, ''
+                       ,'est_facturas f', 'f.fact_liquidacionid = l.liqu_id');
+
+                  if($verificacionTramite->liqu_tipocontrato == 'Tramite')
+                  {
+                       $this->data['estampilla'] = $this->liquidaciones_model->getfactura_legalizada_tramite($this->uri->segment(3),$doc=TRUE); 
+
+                  }else
+                      {
+                           $this->data['estampilla'] = $this->liquidaciones_model->getfactura_legalizada($this->uri->segment(3),$doc=TRUE); 
+                      }
+
+                  
               
                   $estampilla=$this->data['estampilla'];
 

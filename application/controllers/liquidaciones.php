@@ -678,6 +678,7 @@ function verliquidartramite()
                    'liqu_valorsiniva' => $this->input->post('valorsiniva'),
                    'liqu_totalestampilla' => $this->input->post('totalestampillas'),
                    'liqu_valortotal' => $this->input->post('valortotal'),
+                   'liqu_tipocontrato' => 'Tramite',
                    'liqu_codigo' => $codigo
 
                  );
@@ -692,6 +693,7 @@ function verliquidartramite()
                        'fact_banco' => $this->input->post('banco'.$i),
                        'fact_cuenta' => $this->input->post('cuenta'.$i),
                        'fact_liquidacionid' => $liquidacionid,
+                       'fact_estampillaid' => $this->input->post('idestampilla'.$i),
                        'fact_rutaimagen' => $this->input->post('rutaimagen'.$i),
                        );
                        $this->codegen_model->add('est_facturas',$data);

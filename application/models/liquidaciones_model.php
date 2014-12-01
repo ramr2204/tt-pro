@@ -100,9 +100,9 @@ class Liquidaciones_model extends CI_Model {
         $this->db->join('con_contratistas ct', 'ct.cont_id = co.cntr_contratistaid', 'left');
         
         $this->db->where('f.fact_id',$id);
-       // $this->db->where('f.fact_id',$id);
+       
         $query = $this->db->get();
-        //  echo  $this->db->last_query();
+        
         return $query->row();
     }
 

@@ -88,6 +88,7 @@ $cuentas='';
 <tr>
      <td colspan="1"><?php echo $row2->estm_nombre; ?>
      <input type="hidden" name="nombreestampilla<?php echo $x; ?>" value="<?php echo $row2->estm_nombre; ?>">
+     <input type="hidden" name="idestampilla<?php echo $x; ?>" value="<?php echo $row2->estm_id; ?>">
      <?php if ($row2->estm_rutaimagen) { ?>
      <img src="<?php echo base_url().$row2->estm_rutaimagen; ?>" height="60" width="60" >
     <?php } ?>

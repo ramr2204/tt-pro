@@ -7,7 +7,7 @@ class Codegen_model extends CI_Model
     }
 
     
-    function get($table,$fields,$where='',$perpage=0,$start=0,$one=false,$array='array',$join='')
+    function get($table,$fields,$where='',$perpage=0,$start=0,$one=false,$array='array',$tablaJoin='', $condicionJoin='')
     {
         
         $this->db->select($fields);
@@ -16,8 +16,8 @@ class Codegen_model extends CI_Model
         if($where){
         $this->db->where($where);
         }
-        if($join){
-        $this->db->join($join);
+        if($tablaJoin){
+        $this->db->join($tablaJoin, $condicionJoin);
         }
         $query = $this->db->get();
         
