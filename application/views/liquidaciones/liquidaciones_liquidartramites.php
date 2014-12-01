@@ -51,7 +51,7 @@ var oTable = $('#tablaq').dataTable( {
       $(".liquidar").on('click', function(event) {
            event.preventDefault();
            var ID = $(this).attr("id");
-            $("#idcontrato").val(ID);
+            $("#idtramite").val(ID);
              $('.liquida').load('<?php echo base_url(); ?>index.php/liquidaciones/verliquidartramite/'+ID,function(result){
               $('#myModal').modal({show:true});
              });
@@ -59,7 +59,7 @@ var oTable = $('#tablaq').dataTable( {
        $(".pagar").on('click', function(event) {
            event.preventDefault();
            var ID = $(this).attr("id");
-            $("#idcontrato").val(ID);
+            $("#idtramite").val(ID);
              $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramiteliquidado/'+ID,function(result){
               $('#myModal2').modal({show:true});
              });
@@ -67,9 +67,23 @@ var oTable = $('#tablaq').dataTable( {
       $(".terminar").on('click', function(event) {
            event.preventDefault();
            var ID = $(this).attr("id");
-            $("#idcontrato").val(ID);
+            $("#idtramite").val(ID);
              $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramitelegalizado/'+ID,function(result){
               $('#myModal3').modal({show:true});
+
+                $('.confirmar_impresion').click(function(event) {
+                  
+                  var siguienteEstampilla = $('#siguienteEstampilla').val();
+                  if(!confirm('SIGUIENTE ESTAMPIILLA A IMPRIMIRSE => No. '+siguienteEstampilla+'\n\n'
+                        +'Esta seguro de generar la impresión?'
+                        +' Recuerde que será modificado el consecutivo de la papeleria asignada a usted!'))
+                  {
+                    event.preventDefault();
+                  }
+
+              });
+          
+
              });
          });
     }      
@@ -194,7 +208,7 @@ var oTable = $('#tablaq').dataTable( {
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-    <input class="form-control" id="idcontrato" type="hidden" name="idcontrato" value=""/>
+    <input class="form-control" id="idtramite" type="hidden" name="idtramite" value=""/>
       <div class="modal-body liquida">
          
       </div>
@@ -236,7 +250,7 @@ var oTable = $('#tablaq').dataTable( {
 <div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <input class="form-control" id="idcontrato" type="hidden" name="idcontrato" value=""/>
+      <input class="form-control" id="idtramite" type="hidden" name="idtramite" value=""/>
       <div class="modal-body termina">
          
       </div>
@@ -252,7 +266,7 @@ var oTable = $('#tablaq').dataTable( {
 <?php if ($accion=='creado') { ?>
 <script type="text/javascript">
   
-            var ID = <?php echo $idcontrato; ?>;
+            var ID = <?php echo $idtramite; ?>;
             
            $('.liquida').load('<?php echo base_url(); ?>index.php/liquidaciones/verliquidartramite/'+ID,function(result){
             
@@ -268,7 +282,7 @@ var oTable = $('#tablaq').dataTable( {
 <?php if ($accion=='liquidado') { ?>
 <script type="text/javascript">
   
-            var ID = <?php echo $idcontrato; ?>;
+            var ID = <?php echo $idtramite; ?>;
             
             $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramiteliquidado/'+ID,function(result){
             
@@ -286,12 +300,12 @@ var oTable = $('#tablaq').dataTable( {
 <?php if ($accion=='legalizado') { ?>
 <script type="text/javascript">
   
-            var ID = <?php echo $idcontrato; ?>;
+            var ID = <?php echo $idtramite; ?>;
             
            $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramitelegalizado/'+ID,function(result){
-            
+  var siguienteEstampilla = $('#siguienteEstampilla').val();alert(siguienteEstampilla);          
             $('#myModal3').modal('show');
-          
+
         });
         
  

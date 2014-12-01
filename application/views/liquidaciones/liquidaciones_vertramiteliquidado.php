@@ -47,7 +47,7 @@
 </tr>
 
 <tr>
-     <td colspan="2"><strong>Salario mínimo</strong></td>
+     <td colspan="2"><strong>Salario mínimo diario</strong></td>
      <td colspan="3"><?php echo '$'.number_format($result->liqu_valorsiniva, 2, ',', '.'); ?></td>
 </tr>
 

@@ -84,7 +84,7 @@ class Liquidaciones extends MY_Controller {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
 
-              $this->data['successmessage2']=$this->session->flashdata('successmessage');
+              $this->data['successmessage']=$this->session->flashdata('successmessage');
               $this->data['errormessage']=$this->session->flashdata('errormessage');
               $this->data['infomessage']=$this->session->flashdata('infomessage');
               $this->data['accion']=$this->session->flashdata('accion');
@@ -670,11 +670,11 @@ function verliquidartramite()
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
                $codigo='00000000';
-               $idtramite=$this->input->post('idcontrato');
+               $idtramite=$this->input->post('idtramite');
               $data = array(
-                   'liqu_tramiteid' => $this->input->post('idcontrato'),
-                   'liqu_nombrecontratista' => $this->input->post('nombrecontratista'),
-                   'liqu_nit' => $this->input->post('nit'),
+                   'liqu_tramiteid' => $this->input->post('idtramite'),
+                   'liqu_nombrecontratista' => $this->input->post('nombretramitador'),
+                   'liqu_nit' => $this->input->post('idtramitador'),
                    'liqu_valorsiniva' => $this->input->post('valorsiniva'),
                    'liqu_totalestampilla' => $this->input->post('totalestampillas'),
                    'liqu_valortotal' => $this->input->post('valortotal'),
@@ -727,8 +727,8 @@ function verliquidartramite()
                redirect(base_url().'index.php/error_404');
           }    
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
-              $idcontrato=$this->uri->segment(3);
-              $this->data['result'] = $this->liquidaciones_model->getrecibostramites($idcontrato);
+              $idtramite=$this->uri->segment(3);
+              $this->data['result'] = $this->liquidaciones_model->getrecibostramites($idtramite);
               $liquidacion = $this->data['result'];
               $this->data['facturas'] = $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
               $todopago=0;
@@ -764,7 +764,7 @@ function verliquidartramite()
               $this->data['totalpagado'] =$totalpagado;
               $this->data['numerocomprobantes'] =$numerocomprobantes;
               $this->data['ncomprobantescargados'] =$ncomprobantescargados;
-              $this->template->set('title', 'Contrato liquidado');
+              $this->template->set('title', 'Tramite liquidado');
               
               $this->load->view('liquidaciones/liquidaciones_vertramiteliquidado', $this->data); 
           } else {
@@ -786,6 +786,41 @@ function verliquidartramite()
                redirect(base_url().'index.php/error_404');
           }    
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
+
+          //verifica que el usuario que llama el metodo
+          //tenga perfil de liquidador para cargar
+          //el proximo codigo de estampilla fisica a imprimir  
+          $usuarioLogueado=$this->ion_auth->user()->row();
+
+          if ($usuarioLogueado->perfilid==4)
+          {
+               //extrae el ultimo codigo de papeleria resgistrado
+               //en las impresiones para el liquidador autenticado
+               $tablaJoin='est_papeles';
+               $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
+               $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
+
+               $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);
+               
+               //verifica si ya habia asignado por lo menos
+               //un consecutivo a una impresion
+               //de lo contrario elige el primer codigo
+
+               if((int)$max['impr_codigopapel']>0)
+               {
+                                $nuevoingreso=$max['impr_codigopapel']+1;
+               }else
+                   {
+                         //extrae el primer codigo de papeleria resgistrado
+                         //en los rangos de papel asginado al liquidador autenticado
+                         $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
+                         $primerCodigo = $this->codegen_model->min('est_papeles','pape_codigoinicial',$where);
+                         $nuevoingreso = (int)$primerCodigo['pape_codigoinicial'];
+                   }
+                   
+                $this->data['proximaImpresion'] = $nuevoingreso;   
+          }     
+
               $idtramite=$this->uri->segment(3);
               $this->data['result'] = $this->liquidaciones_model->getrecibostramites($idtramite);
               $liquidacion = $this->data['result'];

@@ -81,7 +81,7 @@
 </tr>
 
 <?php //para usuarios con perfil de liquidador
-      if($proximaImpresion){ ?>
+      if(isset($proximaImpresion)){ ?>
 <input type="hidden" id="siguienteEstampilla" value="<?= $proximaImpresion; ?>" >
 <?php } ?>
 

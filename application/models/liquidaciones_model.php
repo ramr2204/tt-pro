@@ -46,8 +46,7 @@ class Liquidaciones_model extends CI_Model {
     function getrecibostramites($id){
         $this->db->select('liqu_id, liqu_codigo,liqu_nombreestampilla,liqu_nombrecontratista,liqu_tipocontratista,liqu_nit, liqu_numero,liqu_vigencia,liqu_valorsiniva,liqu_valorconiva,liqu_valortotal,liqu_tipocontrato,liqu_regimen,liqu_cuentas,liqu_porcentajes,liqu_contratoid,liqu_tramiteid');
         $this->db->from('est_liquidaciones li');
-        $this->db->where('li.liqu_tramiteid',$id);
-        //$this->db->from('con_contratos c');
+        $this->db->where('li.liqu_tramiteid',$id);        
   
         $query = $this->db->get();
         

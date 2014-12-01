@@ -28,7 +28,7 @@
                                        <div class="col-md-4 column">
                                           <div class="form-group">
                                             <label for="documento">Documento</label>
-                                                <input class="form-control" id="documento" type="text" name="documento" value="<?php echo set_value('documento'); ?>" required="required" maxlength="200" />
+                                                <input class="form-control" id="documento" type="number" name="documento" value="<?php echo set_value('documento'); ?>" required="required" maxlength="200" />
                                               
                                             <?php echo form_error('documento','<span class="text-danger">','</span>'); ?>
                                           </div>

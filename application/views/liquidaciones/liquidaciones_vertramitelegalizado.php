@@ -68,6 +68,12 @@
      <td colspan="1" class="text-center"><strong>Valor</strong></td>
      <td colspan="1" class="text-center"><strong>Procesos</strong></td>
 </tr>
+
+<?php //para usuarios con perfil de liquidador
+      if(isset($proximaImpresion)){ ?>
+<input type="hidden" id="siguienteEstampilla" value="<?= $proximaImpresion; ?>" >
+<?php } ?>
+
 <?php $x=0; ?>
 <?php foreach($facturas as $row2) { ?>
 <tr>
@@ -91,10 +97,41 @@
      </div>
      <?php if ($facturapagada[$row2->fact_id]) {  ?>      
      <div class="bg-success">Código: <?php echo $row2->fact_codigo; ?> <i class="fa fa-check"></i> </div> 
-     <?php if ($row2->impr_codigopapel>0) { ?>
-                <div class="bg-info">legalizado: <?php echo $row2->impr_codigopapel; ?> <i class="fa fa-gavel"></i> </div>
-                <?php echo anchor(base_url().'generarpdf/generar_estampilla/'.$row2->fact_id,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large  btn-default" target="_blank"'); ?>
-          <?php  } ?>
+     <div class="bg-info">legalizado: <?php  ?> <i class="fa fa-gavel"></i> </div>
+
+                <?php //verifica si el perfil del usuario logueado es 
+                      //de liquidador para permitir o denegar la orden 
+                      //de impresion de estampillas   
+              
+                      $usuarioLogueado=$this->ion_auth->user()->row();
+
+                      if ($usuarioLogueado->perfilid==4)
+                      { 
+                          //Verifica si hay registrado un estado de impresion
+                          //y si es 2 (anulado) para habilitar el boton                         
+                          if($row2->impr_estado)
+                          {
+                              if($row2->impr_estado == 2)
+                              { 
+                                  echo anchor(base_url().'liquidaciones/procesarConsecutivos/'.$row2->fact_id,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large btn-default confirmar_impresion" target="_blank"');
+
+                              }else{ ?>
+                                     <a href="#" class="btn btn-large  btn-default" disabled><i class="fa fa-print"></i>Imprimir estampilla</a>    
+                     <?php         }  
+                          }else{ //si no hay registrado un estado de impresion es porque no se ha impreso
+                                 //entonces se habilita el boton
+                                    echo anchor(base_url().'liquidaciones/procesarConsecutivos/'.$row2->fact_id,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large btn-default confirmar_impresion" target="_blank"'); 
+                                }
+
+                      }else
+                           { ?>
+
+                            <a href="#" class="btn btn-large  btn-default" disabled><i class="fa fa-print"></i>Imprimir estampilla</a>
+
+                   <?php   } ?>
+     
+
+
      <?php  } else { ?>
       <div class="bg-danger">Pagado: <?php echo '$'.number_format($row2->pago_valor, 2, ',', '.'); ?> <i class="fa fa-times"></i> </div> 
      <?php  } ?>
