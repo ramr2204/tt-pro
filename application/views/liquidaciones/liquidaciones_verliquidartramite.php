@@ -37,15 +37,15 @@
      <td colspan="4"></td>
 </tr>
 <tr>
-     <td colspan="1"><strong>Nombre del contratista</strong></td>
-     <td colspan="3"><?php echo $result->cont_nombre; ?>
+     <td colspan="1"><strong>Nombre del Tramitador</strong></td>
+     <td colspan="3"><?php echo $result->litr_tramitadornombre; ?>
      <input type="hidden" name="nombrecontratista" value="<?php echo $result->cont_nombre; ?>">
      </td>
 </tr>
 
  <tr>
-     <td colspan="1"><strong>C.C. o NIT</strong></td>
-     <td colspan="3"><?php echo $result->cont_nit; ?>
+     <td colspan="1"><strong>Número de documento</strong></td>
+     <td colspan="3"><?php echo $result->litr_tramitadorid; ?>
      <input type="hidden" name="nit" value="<?php echo $result->cont_nit; ?>">
      </td>
 </tr>

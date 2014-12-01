@@ -22,9 +22,8 @@ class Liquidaciones_model extends CI_Model {
     }
 
     function getliquidartramite($id){
-        $this->db->select('l.litr_id,co.cont_nit,co.cont_nombre,l.litr_fechaliquidacion,l.litr_tramiteid,tr.tram_nombre');
+        $this->db->select('l.litr_id,l.litr_tramitadorid,l.litr_tramitadornombre,l.litr_fechaliquidacion,l.litr_tramiteid,tr.tram_nombre');
         $this->db->from('est_liquidartramites l');
-        $this->db->join('con_contratistas co', 'co.cont_id = l.litr_contratistaid', 'left');
         $this->db->join('est_tramites tr', 'tr.tram_id = l.litr_tramiteid', 'left');
         $this->db->where('l.litr_id',$id);
         $query = $this->db->get();

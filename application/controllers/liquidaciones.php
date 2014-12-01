@@ -635,6 +635,7 @@ function verliquidartramite()
               $this->data['estampillas'] = $this->liquidaciones_model->getestampillastramites($this->data['result']->litr_tramiteid);
 
               $estampillas=$this->data['estampillas'];   
+
               //calcula el SMDLV
               $salarioMinimoDiario = round((float)$parametros->para_salariominimo/30,0);
 
@@ -854,20 +855,7 @@ function verliquidartramite()
 
                   $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
               } else {    
-
-                 /* if ($this->input->post('encontrado')>0) {
-                      $contratista= $this->codegen_model->get('con_contratistas','cont_id','cont_nit = '.$this->input->post('documento'),1,NULL,true);
-                      $contratistaid= $contratista->cont_id;
-                  } else {
-                      $datos = array(
-                        'cont_nit' => $this->input->post('documento'),
-                        'cont_nombre' => $this->input->post('nombre')
-                      );
-                      $this->codegen_model->add('con_contratistas',$datos);
-                      $contratistaid=$this->db->insert_id();
-                  }*/
-                  
-
+                                   
 
                   $data = array(
                         'litr_tramiteid' => $this->input->post('tramiteid'),
@@ -916,9 +904,9 @@ function verliquidartramite()
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
             
-              $contratista= $this->codegen_model->get('con_contratistas','cont_id,cont_nombre','cont_nit = '.$this->input->post('documento'),1,NULL,true);
-              if ($contratista) {
-                 echo $contratista->cont_nombre;
+              $tramitador= $this->codegen_model->get('est_liquidartramites','litr_tramitadorid,litr_tramitadornombre','litr_tramitadorid = '.$this->input->post('documento'),1,NULL,true);
+              if ($tramitador) {
+                 echo $tramitador->litr_tramitadornombre;
               } else {
                 echo 0;
               }

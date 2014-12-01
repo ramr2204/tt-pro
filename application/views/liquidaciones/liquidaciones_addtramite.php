@@ -108,6 +108,7 @@
                 $('#encontrado').val(0);  
                 $('#nombre').val(nombre);
             } else {
+                $('#nombre').attr('readonly', 'readonly');
                 $('#nombre').val(msg);
                 $('#encontrado').val(1); 
             }
