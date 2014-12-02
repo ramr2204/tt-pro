@@ -381,14 +381,14 @@ class Papeles extends MY_Controller {
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/getReassign') ) {
 
-              $idLiquidador = $this->input->post('idLiquidador');
+              $idLiquidador = 1110111111;
 
               //extrae los posibles rangos de papeleria asignados
               //al usuario que se encuentra logueado que debe ser
               //un liquidador
                    
               $tabla='est_papeles';
-              $campos="pape_codigoinicial, pape_codigofinal";
+              $campos="pape_codigoinicial, pape_codigofinal, pape_id";
               $estructuraWhere='where pape_usuario = '.$idLiquidador;
               $estructuraGroup='group by pape_codigoinicial';
 
@@ -399,15 +399,51 @@ class Papeles extends MY_Controller {
               {                
 
                    if(count($papeles)>1)
-                   {
-                       /* $codigosReasignar = ['varios' => true];
+                   {print_r($papeles);
+                        $codigosReasignar = ['varios' => true];
 
                         foreach ($papeles as $value) 
                         {
                             $codigoinicial = (int)$value->pape_codigoinicial;
                             $codigofinal = (int)$value->pape_codigofinal;
-                        }
-*/
+
+                            //extrae el maximo codigo impreso registrado del rango  
+                            //para establecer el codigo menor de ese rango                           
+                            $tablaJoin='est_papeles';
+                            $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
+                            $where='est_papeles.pape_usuario ='.$idLiquidador.' AND est_papeles.pape_id = '.$value->pape_id;
+
+                            $maxImpreso = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);
+
+                            if((int)$maxImpreso['impr_codigopapel']>0)
+                            {
+                                $limiteInferior = $maxImpreso['impr_codigopapel']+1;
+
+                               //valida que el limite inferior encontrado no sea igual al ultimo
+                               //codigo asignado al liquidador
+
+                               if($limiteInferior != $codigofinal)
+                               {
+                                    $limiteSuperior = $codigofinal;
+                               }else
+                                    {
+                                         //se establece el limite superior como cero
+                                         //para identificar que no tiene papeleria
+                                         //disponible para reasignar
+                                         $limiteSuperior = 0;
+                                    }   
+
+                            }else
+                                {
+                                    $limiteInferior = $codigoinicial;
+                                    $limiteSuperior = $codigofinal; 
+                                }
+
+                            $codigosReasignar['limiteInferior'][] = $limiteInferior;
+                            $codigosReasignar['limiteSuperior'][] = $limiteSuperior;
+print_r($maxImpreso);print_r($codigosReasignar);exit();
+                        }print_r($codigosReasignar);exit();
+
                    }else
                        {           
                            //extrae el primer codigo de papeleria resgistrado
