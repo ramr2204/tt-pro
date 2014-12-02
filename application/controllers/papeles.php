@@ -311,6 +311,8 @@ class Papeles extends MY_Controller {
   //de papeleria asignada a cada usuario
   function extraerRangosPapel()
     {
+
+    if ($this->ion_auth->logged_in()) { 
      $idLiquidador = $this->input->post('idLiquidador');
      $tabla='est_papeles';
      $campos="pape_codigoinicial, pape_codigofinal";
@@ -327,6 +329,10 @@ class Papeles extends MY_Controller {
      }
 
      echo $cadenaPapeles;
+
+     } else{
+              redirect(base_url().'index.php/users/login');
+           }  
 
     }
 
@@ -362,5 +368,107 @@ class Papeles extends MY_Controller {
               redirect(base_url().'index.php/users/login');
       }   
   }
+
+
+
+  //Función que extrae el rango disponible del liquidador
+  //al que se le retirará papeleria y se reasignará a 
+  //otro
+
+  function extraerPapeleriaAsignada()
+  {
+      if ($this->ion_auth->logged_in()) {
+          
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/getReassign') ) {
+
+              $idLiquidador = $this->input->post('idLiquidador');
+
+              //extrae los posibles rangos de papeleria asignados
+              //al usuario que se encuentra logueado que debe ser
+              //un liquidador
+                   
+              $papeles = $this->codegen_model->get('est_papeles','pape_id'
+              .',pape_codigoinicial,pape_codigofinal',              
+              'pape_usuario = '.$idLiquidador,1,NULL,true);
+
+              //verifica que tenga asignada papeleria para reasignar
+              if($papeles)
+              {                
+
+                   //extrae el primer codigo de papeleria resgistrado
+                   //en los rangos de papel asginado al liquidador 
+                   $where='est_papeles.pape_usuario ='.$idLiquidador;
+                   $primerCodigo = $this->codegen_model->min('est_papeles','pape_codigoinicial',$where);
+                   $codigoinicial = (int)$primerCodigo['pape_codigoinicial'];
+
+                   //extrae el ultimo codigo de papeleria resgistrado
+                   //en los rangos de papel asginado al liquidador 
+                   $where='est_papeles.pape_usuario ='.$idLiquidador;
+                   $ultimoCodigo = $this->codegen_model->max('est_papeles','pape_codigofinal',$where);
+                   $codigofinal = (int)$ultimoCodigo['pape_codigofinal'];
+
+
+                   //extrae el ultimo codigo de papeleria resgistrado
+                   //en las impresiones para el liquidador 
+                   $tablaJoin='est_papeles';
+                   $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
+                   $where='est_papeles.pape_usuario ='.$idLiquidador;
+
+                   $maxImpreso = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);
+
+                   //verifica si ya habia asignado por lo menos
+                   //un consecutivo a una impresion
+                   //de lo contrario elige el primer y ultimo
+                   //codigo de la papeleria
+
+                   if((int)$maxImpreso['impr_codigopapel']>0)
+                   {
+                        $limiteInferior = $maxImpreso['impr_codigopapel']+1;
+
+                        //valida que el limite inferior encontrado no sea igual al ultimo
+                        //codigo asignado al liquidador
+
+                        if($limiteInferior != $codigofinal)
+                        {
+                             $limiteSuperior = $codigofinal;
+                        }else
+                             {
+                                  //se establece el limite superior como cero
+                                  //para identificar que no tiene papeleria
+                                  //disponible para reasignar
+                                  $limiteSuperior = 0;
+                             }
+
+                    }else
+                        {
+                            $limiteInferior = $codigoinicial;
+                            $limiteSuperior = $codigofinal;
+                        }  
+
+                    if($limiteSuperior > 0)
+                    {
+                        $codigosReasignar = ['limiteInferior' => $limiteInferior, 'limiteSuperior' => $limiteSuperior]; 
+                    }else
+                        {
+                          $codigosReasignar = [];
+                        }
+                    
+              }else
+                  {
+                       $codigosReasignar = [];
+                  }
+
+              echo json_encode($codigosReasignar);
+          
+          } else {
+                     redirect(base_url().'index.php/error_404');
+                 }
+               
+      } else{
+                redirect(base_url().'index.php/users/login');
+            }   
+
+  }
+
 
 }

@@ -23,10 +23,13 @@ $(window).ready(inicial);
 var usuariosActual=[];
 usuariosActual['nombre']=[];
 usuariosActual['id']=[];
+var base_url;
 
 
 function inicial () 
 {
+  base_url=$('#base').val();
+
   //Eventos Ingresar Papeleria
 	$('.responsable').keyup(solicitarUsuarios);
 	$('.responsable').focusout(cargarId);
@@ -40,8 +43,7 @@ function inicial ()
  //para el nombre del encargado de la papelería
 
 function solicitarUsuarios (e) {
-	
-	var base_url=$('#base').val();
+		
 	var fragmento=$(this).val();
 
 	$.ajax({
@@ -73,6 +75,7 @@ function solicitarUsuarios (e) {
 //y tambien a quien se reasignará
 function cargarId (e) 
 {
+
 	 var valorActual=$(this).val();
      var documento;
 
@@ -92,6 +95,34 @@ function cargarId (e)
               break;
 
           case 'oldResponsable' : $('#docuOldResponsable').val(documento);
+                                  //solicita la extracción de los codigos
+                                  //de papeleria asignada al liquidador
+                                  //que entrega
+                                  $.ajax({
+                                      type: "POST",
+                                      dataType: "json",
+                                      data: {idLiquidador : documento},
+                                      url: base_url+"index.php/papeles/extraerPapeleriaAsignada",
+                                      success: function(data) {
+
+                                      if(jQuery.isEmptyObject(data))
+                                      {
+                                           $('#err').innerHTML('alert alert-dismissable alert-danger">'
+                                               +'<button type="button" class="close" data-dismiss="alert"'
+                                               +'aria-hidden="true">×</button>El liquidador no tiene'
+                                               +' papelería para reasignar</div>');
+                                           $('#err').show(300);
+                                      }else
+                                          {
+                                            $('#codigoinicial').val(data.limiteInferior);
+                                            $('#codigofinal').val(data.limiteSuperior);
+                                            var cantidad = parseInt(data.limiteSuperior)-parseInt(data.limiteInferior);
+                                            $('#cantidad').val(cantidad+1);
+                                          }  
+                                      
+                                      }
+                                  });
+
               break;
 
           case 'newResponsable' : $('#docuNewResponsable').val(documento);

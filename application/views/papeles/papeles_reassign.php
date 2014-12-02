@@ -42,16 +42,16 @@
                                            <input class="form-control" id="docuNewResponsable" type="text" name="docuNewResponsable" placeholder="Documento" readonly />
                                     </div>
 
-                                   
+                                    <div id="err" style="display:none;"></div>
 
                                     <div class="form-group">
                                            <label for="codigoinicial">Código inicial</label>
-                                           <input class="form-control" id="codigoinicial" type="number" name="codigoinicial" value="<?php echo $maxcodigofinal['pape_codigofinal']+1; ?>" maxlength="3" min="0" step="0" />
+                                           <input class="form-control" id="codigoinicial" type="number" name="codigoinicial" value="<?php echo set_value('codigoinicial'); ?>" maxlength="3" min="0" step="0" readonly />
                                            <?php echo form_error('codigoinicial','<span class="text-danger">','</span>'); ?>
                                     </div>
                                     <div class="form-group">
                                            <label for="codigofinal">Código final</label>
-                                           <input class="form-control" id="codigofinal" type="number" name="codigofinal" value="<?php echo $maxcodigofinal['pape_codigofinal']+2; ?>" maxlength="3" min="0" step="0" />
+                                           <input class="form-control" id="codigofinal" type="number" name="codigofinal" value="<?php echo set_value('codigofinal'); ?>" maxlength="3" min="0" step="0" />
                                            <?php echo form_error('codigofinal','<span class="text-danger">','</span>'); ?>
                                     </div>
                                     
