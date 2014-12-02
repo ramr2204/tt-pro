@@ -120,22 +120,46 @@ function cargarId (e)
                                                +'<button type="button" class="close" data-dismiss="alert"'
                                                +'aria-hidden="true">×</button>El liquidador no tiene'
                                                +' papelería para reasignar</div>');
-                                           $('#err').show(300);                                           
-                                      }else
-                                          { //valida si hay papeleria para reasignar
-                                            //si hay desbloquea los otros campos
-                                            $('#newResponsable').removeAttr('readonly');
-                                            $('#codigofinal').removeAttr('readonly');
-                                            $('#codigoinicial').removeAttr('readonly');
-                                            $('#cantidad').removeAttr('readonly');
-                                            $('#observaciones').removeAttr('readonly');
-                                            $('#btn_save').removeAttr('disabled');
+                                           $('#err').show(300);  
 
-                                            $('#codigoinicial').val(data.limiteInferior);
-                                            $('#codigofinal').val(data.limiteSuperior);
-                                            var cantidad = parseInt(data.limiteSuperior)-parseInt(data.limiteInferior);
-                                            $('#cantidad').val(cantidad+1);
-                                          }  
+                                      }else if(data.hasOwnProperty('varios'))
+                                          { 
+                                               var cadenaRangos='';
+
+                                               for (var i = 0; i < data.limiteInferior.length; i++) 
+                                               {
+                                                    cadenaRangos += '<option value="'+data.limiteInferior[i]+'">'
+                                                        +data.limiteInferior[i]+'-'+data.limiteInferior[i]+'</option>';
+                                               }
+                                               
+
+                                               $('#rangos').html('Elija uno de los Rangos disponibles para reasignación'
+                                                    +'<br>'
+                                                    +'<select id="rangoAsignacion" class="form-control" required>'                                                    
+                                                    +cadenaRangos
+                                                    +'</select>');
+
+                                               $('#myModal').modal('show');
+                                               
+
+
+                                          }else
+                                              {
+                                                //valida si hay papeleria para reasignar
+                                                //si hay desbloquea los otros campos
+                                                $('#newResponsable').removeAttr('readonly');
+                                                $('#codigofinal').removeAttr('readonly');
+                                                $('#codigoinicial').removeAttr('readonly');
+                                                $('#cantidad').removeAttr('readonly');
+                                                $('#observaciones').removeAttr('readonly');
+                                                $('#btn_save').removeAttr('disabled');
+                                                $('#err').hide();
+
+                                                $('#codigoinicial').val(data.limiteInferior);
+                                                $('#codigofinal').val(data.limiteSuperior);
+                                                var cantidad = parseInt(data.limiteSuperior)-parseInt(data.limiteInferior);
+                                                $('#cantidad').val(cantidad+1);
+                                              }  
                                       
                                       }
                                   });

@@ -399,7 +399,7 @@ class Papeles extends MY_Controller {
               {                
 
                    if(count($papeles)>1)
-                   {   echo "sd";
+                   {   
 
                         foreach ($papeles as $value) 
                         {
@@ -469,7 +469,7 @@ class Papeles extends MY_Controller {
               }else
                  {
                        $codigosReasignar = [];
-                  }
+                 }
 
               echo json_encode($codigosReasignar);
           
