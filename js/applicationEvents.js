@@ -35,6 +35,9 @@ function inicial ()
 	$('.responsable').focusout(cargarId);
 	$('#codigoinicial').focusout(solicitarCodigos);
 
+  //Eventos Reasignar Papeleria
+  $('#btn-confirmarReassign').click(establecerDatosElegidos);
+
 }
 
 
@@ -106,13 +109,12 @@ function cargarId (e)
                                       success: function(data) {
 
                                       if(jQuery.isEmptyObject(data))
-                                      {    //valida si hay papeleria para reasignar
+                                      {    
+                                           //valida si hay papeleria para reasignar
                                            //si no bloquea los otros campos
-                                           $('#newResponsable').val('').attr('readonly','readonly');
-                                           $('#codigofinal').val('').attr('readonly','readonly');
-                                           $('#codigoinicial').val('').attr('readonly','readonly');
-                                           $('#cantidad').val('').attr('readonly','readonly');
-                                           $('#observaciones').val('').attr('readonly','readonly');
+                                           $('#newResponsable').val('').attr('disabled','disabled');
+                                           $('#codigofinal').val('').attr('disabled','disabled');                                          
+                                           $('#observaciones').val('').attr('disabled','disabled');
                                            $('#docuNewResponsable').val('');
                                            $('#btn_save').attr('disabled','disabled');
                                            
@@ -123,13 +125,29 @@ function cargarId (e)
                                            $('#err').show(300);  
 
                                       }else if(data.hasOwnProperty('varios'))
-                                          { 
+                                          {    
+                                               //valida si hay papeleria para reasignar
+                                               //si no bloquea los otros campos
+                                               $('#newResponsable').val('').attr('disabled','disabled');
+                                               $('#codigofinal').val('').attr('disabled','disabled');                                         
+                                               $('#observaciones').val('').attr('disabled','disabled');
+                                               $('#docuNewResponsable').val('');
+                                               $('#btn_save').attr('disabled','disabled'); 
+
                                                var cadenaRangos='';
 
                                                for (var i = 0; i < data.limiteInferior.length; i++) 
-                                               {
-                                                    cadenaRangos += '<option value="'+data.limiteInferior[i]+'">'
-                                                        +data.limiteInferior[i]+'-'+data.limiteInferior[i]+'</option>';
+                                               {    
+                                                    if(data.limiteInferior[i] < data.limiteSuperior[i])
+                                                    {
+                                                        cadenaRangos += '<option value="'+data.limiteInferior[i]+'-'+data.limiteSuperior[i]+'">'
+                                                            +data.limiteInferior[i]+'-'+data.limiteSuperior[i]+'</option>';     
+                                                    }else
+                                                        {
+                                                             cadenaRangos += '<option value="'+data.limiteInferior[i]+'">'
+                                                                 +data.limiteInferior[i]+'</option>';   
+                                                        }
+                                                    
                                                }
                                                
 
@@ -137,26 +155,32 @@ function cargarId (e)
                                                     +'<br>'
                                                     +'<select id="rangoAsignacion" class="form-control" required>'                                                    
                                                     +cadenaRangos
-                                                    +'</select>');
-
+                                                    +'</select>');                                               
                                                $('#myModal').modal('show');
                                                
 
-
                                           }else
                                               {
-                                                //valida si hay papeleria para reasignar
-                                                //si hay desbloquea los otros campos
-                                                $('#newResponsable').removeAttr('readonly');
-                                                $('#codigofinal').removeAttr('readonly');
-                                                $('#codigoinicial').removeAttr('readonly');
-                                                $('#cantidad').removeAttr('readonly');
-                                                $('#observaciones').removeAttr('readonly');
+                                                //valida si hay papeleria para reasignar,
+                                                //si hay, desbloquea los otros campos
+                                                $('#newResponsable').removeAttr('disabled');
+                                                $('#codigofinal').removeAttr('disabled');                                                                                           
+                                                $('#observaciones').removeAttr('disabled');
                                                 $('#btn_save').removeAttr('disabled');
                                                 $('#err').hide();
 
-                                                $('#codigoinicial').val(data.limiteInferior);
-                                                $('#codigofinal').val(data.limiteSuperior);
+                                                //Valida si los limites son el mismo valor
+                                                //para solo llenar el codigo inicial
+                                                if(data.limiteInferior < data.limiteSuperior)
+                                                {
+                                                    $('#codigoinicial').val(data.limiteInferior);
+                                                    $('#codigofinal').val(data.limiteSuperior);
+                                                    
+                                                }else
+                                                    {
+                                                        $('#codigoinicial').val(data.limiteInferior);
+                                                        $('#codigofinal').val('').attr('disabled','disabled');                                                        
+                                                    }
                                                 var cantidad = parseInt(data.limiteSuperior)-parseInt(data.limiteInferior);
                                                 $('#cantidad').val(cantidad+1);
                                               }  
@@ -202,6 +226,39 @@ function solicitarCodigos (e) {
                }
              });
 	
+}
+
+//Función de apoyo que llena los campos de la interfaz
+//de re-asignación de papeleria luego de elegido
+//un rango
+function establecerDatosElegidos (e) 
+{   
+    $('#newResponsable').removeAttr('disabled');
+    $('#codigofinal').removeAttr('disabled');                                               
+    $('#observaciones').removeAttr('disabled');
+    $('#btn_save').removeAttr('disabled');
+    $('#err').hide();
+
+    //Divide el rango para asignarlo a los campos
+    //en la vista
+    var rango = $('#rangoAsignacion').val();
+    var limites = rango.split('-');
+
+
+    //Valida si los limites son el mismo valor
+    //para solo llenar el codigo inicial
+    if(parseInt(limites[0]) < parseInt(limites[1]))
+    {
+        $('#codigoinicial').val(limites[0]);
+        $('#codigofinal').val(limites[1]);  
+    }else
+        {
+            $('#codigoinicial').val(limites[0]);
+            $('#codigofinal').val('').attr('disabled','disabled');
+        }
+    
+    var cantidad = parseInt(limites[1])-parseInt(limites[0]);
+    $('#cantidad').val(parseInt(cantidad)+1);
 }
 
 

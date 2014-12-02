@@ -103,7 +103,7 @@
          
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Confirmar</button>        
+        <button id="btn-confirmarReassign" type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Confirmar</button>        
       </div>
     </div>
   </div>

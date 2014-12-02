@@ -435,7 +435,18 @@ class Papeles extends MY_Controller {
                         if(!isset($codigosReasignar))
                         {
                              $codigosReasignar = [] ;
-                        }
+                        }else
+                            {
+                                 //si solo uno de los rangos que tiene asignados
+                                 //el liquidador esta disponible envia objeto
+                                 //especifico para que no se renderice la modal
+                                 if(count($codigosReasignar['limiteInferior'])==1)
+                                 {
+                                      $codReasignar = ['limiteInferior' => $codigosReasignar['limiteInferior'][0], 'limiteSuperior' => $codigosReasignar['limiteSuperior'][0]]; 
+                                      unset($codigosReasignar);
+                                      $codigosReasignar = $codReasignar;
+                                 } 
+                            }                                                                        
 
                    }else
                        {           
