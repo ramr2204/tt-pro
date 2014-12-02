@@ -25,7 +25,7 @@
                     <td class="text-center" style="height: 19mm; width: 26mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><img id="logo_gobernacion" src="<?php echo base_url() ?>images/gobernacion_tolima1.jpg" style="height: 16mm; width: 22mm;"></td>
+                        border-bottom: 0.5px solid black;"><img id="logo_gobernacion" src="<?php echo base_url() ?>images/gobernacion_tolima1.jpg" style="height: 15mm; width: 20mm;"></td>
 
                     <td class="text-center" id="leyenda_encabezado" colspan="3" style="height: 19mm; width: 68mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
@@ -48,7 +48,7 @@
                     <td class="text-center" colspan="3" style="height: 5mm; width: 62.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><?php echo $estampilla->cntr_numero; ?></td>
+                        border-bottom: 0.5px solid black;">T-45698712345</td>
                 </tr>
 
                 <tr>
@@ -134,8 +134,8 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:7;
-                        text-align: center;"><?php echo $estampilla->cont_nombre; ?></td>
+                        font-size:6;
+                        text-align: center;"><?php echo $estampilla->fact_nombre; ?></td>
 
                     <td style="height: 5mm; width: 13mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
@@ -168,7 +168,8 @@
                     <td class="text-center" colspan="2" style="height: 15mm; width: 38.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"></td>
+                        border-bottom: 0.5px solid black;
+                        color: red;"><br><br>0000001</td>
                 </tr>   
             </table>
         
