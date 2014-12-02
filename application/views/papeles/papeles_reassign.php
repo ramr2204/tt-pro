@@ -19,7 +19,7 @@
                            <div class="panel panel-default">
                             <div class="panel-heading"><h1>Reasignación de  papelería para estampillas</h1></div>
                              <div class="panel-body">
-                              <?php echo form_open('papeles_postReassign'); ?>
+                              <?php echo form_open('papeles/postReassign'); ?>
                                     <div class="form-group">
                                            <label for="oldResponsablePapel">Nombre Responsable Actual</label>
                                            <input class="form-control responsable" id="oldResponsable" type="text" name="oldResponsablePapel" placeholder="Nombre" required autocomplete="off"/>
@@ -103,7 +103,7 @@
          
       </div>
       <div class="modal-footer">
-        <button id="btn-confirmarReassign" type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Confirmar</button>        
+        <button id="btn-confirmarReassign" type="button" class="btn btn-primary" data-dismiss="modal">Confirmar</button>        
       </div>
     </div>
   </div>

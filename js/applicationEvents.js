@@ -251,14 +251,18 @@ function establecerDatosElegidos (e)
     {
         $('#codigoinicial').val(limites[0]);
         $('#codigofinal').val(limites[1]);  
+
+        var cantidad = parseInt(limites[1])-parseInt(limites[0]);
+        $('#cantidad').val(parseInt(cantidad)+1);
+
     }else
         {
             $('#codigoinicial').val(limites[0]);
             $('#codigofinal').val('').attr('disabled','disabled');
+            $('#cantidad').val('1');
         }
     
-    var cantidad = parseInt(limites[1])-parseInt(limites[0]);
-    $('#cantidad').val(parseInt(cantidad)+1);
+    
 }
 
 

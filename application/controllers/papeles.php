@@ -78,7 +78,7 @@ class Papeles extends MY_Controller {
                 {
 
                       //Valida si alguno de los codigos de papeleria
-                      //ingresados se encuentra dentro por lo menos
+                      //ingresados se encuentra dentro de, por lo menos
                       //uno de los rangos asignados actualmente
 
                       $codigoUp=(int)$this->input->post('codigofinal');
@@ -370,6 +370,85 @@ class Papeles extends MY_Controller {
   }
 
 
+  //Función que modifica el inventario de papeleria fisica de estampillas
+  //según re-asignación
+
+  function postReassign() 
+  {
+       if ($this->ion_auth->logged_in()) {
+          
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/getReassign') ) {
+              
+              $this->data['successmessage']=$this->session->flashdata('message');  
+              $this->form_validation->set_rules('codigoinicial', 'Código Inicial', 'required|xss_clean|max_length[7]');
+              $this->form_validation->set_rules('codigofinal', 'Código Final', 'required|xss_clean|max_length[7]');   
+              $this->form_validation->set_rules('observaciones', 'Observaciones', 'xss_clean|max_length[480]');
+              $this->form_validation->set_rules('docuOldResponsable', 'Documento Responsable Actual',  'required|numeric');
+              $this->form_validation->set_rules('docuNewResponsable', 'Documento Nuevo Responsable',  'required|numeric');
+              $this->form_validation->set_rules('cantidad', 'Cantidad Papeleria',  'required|numeric|is_natural_no_zero'); 
+
+
+              if ($this->form_validation->run() == false) {
+
+                  $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
+              } else 
+                {
+
+                      //valida si los responsables son la misma persona
+                      if($this->input->post('docuOldResponsable')==$this->input->post('docuNewResponsable'))
+                      {
+                           $this->session->set_flashdata('errormessage','Los liquidadores suministrados deben ser distintos!');
+                           redirect(base_url().'index.php/papeles/getReassign');
+                      }
+
+
+                      //Valida si alguno de los codigos de papeleria
+                      //ingresados se encuentra dentro de, por lo menos
+                      //uno de los rangos asignados actualmente
+
+                      $codigoUp=(int)$this->input->post('codigofinal');
+                      $codigoDown=(int)$this->input->post('codigoinicial');
+
+                      $cadenaErrorPapelEnRango='null';
+
+                      $campo='pape_codigoinicial, pape_codigofinal';
+                      $rangos=$this->codegen_model->getSelect('est_papeles',$campo);
+
+                      foreach ($rangos as $value) 
+                      {
+                          $up=(int)$value->pape_codigofinal;
+                          $down=(int)$value->pape_codigoinicial;
+
+                          if($codigoDown<=$up && $codigoDown>=$down)
+                          {
+                               $cadenaErrorPapelEnRango='El codigo de papel Inicial -'.$codigoDown
+                                   .'- ya fue asignado. ';
+                          }
+
+                          if ($codigoUp<=$up && $codigoUp>=$down) 
+                          {
+                              $cadenaErrorPapelEnRango.='El codigo de papel Final -'.$codigoUp
+                                .'- ya fue asignado.';
+                          }
+                      }
+                }
+
+
+
+
+
+
+
+
+
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+               
+      } else{
+              redirect(base_url().'index.php/users/login');
+      }    
+  } 
 
   //Función que extrae el rango disponible del liquidador
   //al que se le retirará papeleria y se reasignará a 
