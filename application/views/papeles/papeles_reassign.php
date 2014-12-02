@@ -22,7 +22,7 @@
                               <?php echo form_open('papeles_postReassign'); ?>
                                     <div class="form-group">
                                            <label for="oldResponsablePapel">Nombre Responsable Actual</label>
-                                           <input class="form-control" id="oldResponsable" type="text" name="oldResponsablePapel" placeholder="Nombre" required autocomplete="off"/>
+                                           <input class="form-control responsable" id="oldResponsable" type="text" name="oldResponsablePapel" placeholder="Nombre" required autocomplete="off"/>
                                            <?php echo form_error('oldResponsablePapel','<span class="text-danger">','</span>'); ?>
                                     </div>
 
@@ -33,7 +33,7 @@
 
                                     <div class="form-group">
                                            <label for="newResponsablePapel">Nombre Nuevo Responsable</label>
-                                           <input class="form-control" id="newResponsable" type="text" name="newResponsablePapel" placeholder="Nombre" required autocomplete="off"/>
+                                           <input class="form-control responsable" id="newResponsable" type="text" name="newResponsablePapel" placeholder="Nombre" required autocomplete="off"/>
                                            <?php echo form_error('newResponsablePapel','<span class="text-danger">','</span>'); ?>
                                     </div>
 

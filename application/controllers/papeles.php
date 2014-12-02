@@ -344,7 +344,14 @@ class Papeles extends MY_Controller {
               $this->data['successmessage']=$this->session->flashdata('successmessage');
               $this->data['errormessage']=$this->session->flashdata('errormessage');
               $this->data['infomessage']=$this->session->flashdata('infomessage');
-            
+              
+              $this->template->set('title', 'Reasignar papeleria');
+              $this->data['style_sheets']= array(
+                        'css/jquery-ui.css' => 'screen'
+                    );
+              $this->data['javascripts']= array(                        
+                        'js/jquery-ui.js'
+                    );  
               $this->template->load($this->config->item('admin_template'),'papeles/papeles_reassign', $this->data);                            
 
           } else {

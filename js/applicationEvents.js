@@ -70,6 +70,7 @@ function solicitarUsuarios (e) {
 
 //Funcion que establece el numero de documento
 //del usuario al que se le asignarán la papeleria
+//y tambien a quien se reasignará
 function cargarId (e) 
 {
 	 var valorActual=$(this).val();
@@ -84,7 +85,19 @@ function cargarId (e)
 
      }
 
-     $('#docuResponsable').val(documento);
+     var parent = $(this).attr('id');
+     switch(parent)
+     {
+          case 'responsable' : $('#docuResponsable').val(documento);
+              break;
+
+          case 'oldResponsable' : $('#docuOldResponsable').val(documento);
+              break;
+
+          case 'newResponsable' : $('#docuNewResponsable').val(documento);
+              break;
+     }
+     
 }
 
 
