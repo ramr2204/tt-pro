@@ -70,7 +70,7 @@
 
                                     <div class="pull-right">
                                      <?php  echo anchor('papeles', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
-                                    <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
+                                    <button id="btn_save" type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
                                     </div>
                                 <?php echo form_close();?>
                               

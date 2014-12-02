@@ -106,14 +106,31 @@ function cargarId (e)
                                       success: function(data) {
 
                                       if(jQuery.isEmptyObject(data))
-                                      {
-                                           $('#err').innerHTML('alert alert-dismissable alert-danger">'
+                                      {    //valida si hay papeleria para reasignar
+                                           //si no bloquea los otros campos
+                                           $('#newResponsable').val('').attr('readonly','readonly');
+                                           $('#codigofinal').val('').attr('readonly','readonly');
+                                           $('#codigoinicial').val('').attr('readonly','readonly');
+                                           $('#cantidad').val('').attr('readonly','readonly');
+                                           $('#observaciones').val('').attr('readonly','readonly');
+                                           $('#docuNewResponsable').val('');
+                                           $('#btn_save').attr('disabled','disabled');
+                                           
+                                           $('#err').html('<div class="alert alert-dismissable alert-danger">'
                                                +'<button type="button" class="close" data-dismiss="alert"'
                                                +'aria-hidden="true">×</button>El liquidador no tiene'
                                                +' papelería para reasignar</div>');
-                                           $('#err').show(300);
+                                           $('#err').show(300);                                           
                                       }else
-                                          {
+                                          { //valida si hay papeleria para reasignar
+                                            //si hay desbloquea los otros campos
+                                            $('#newResponsable').removeAttr('readonly');
+                                            $('#codigofinal').removeAttr('readonly');
+                                            $('#codigoinicial').removeAttr('readonly');
+                                            $('#cantidad').removeAttr('readonly');
+                                            $('#observaciones').removeAttr('readonly');
+                                            $('#btn_save').removeAttr('disabled');
+
                                             $('#codigoinicial').val(data.limiteInferior);
                                             $('#codigofinal').val(data.limiteSuperior);
                                             var cantidad = parseInt(data.limiteSuperior)-parseInt(data.limiteInferior);
