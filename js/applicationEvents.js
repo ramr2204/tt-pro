@@ -164,7 +164,8 @@ function cargarId (e)
                                                 //valida si hay papeleria para reasignar,
                                                 //si hay, desbloquea los otros campos
                                                 $('#newResponsable').removeAttr('disabled');
-                                                $('#codigofinal').removeAttr('disabled');                                                                                           
+                                                $('#codigofinal').removeAttr('disabled');  
+                                                $('#codigofinal').removeAttr('readonly');                                                                                         
                                                 $('#observaciones').removeAttr('disabled');
                                                 $('#btn_save').removeAttr('disabled');
                                                 $('#err').hide();
@@ -179,7 +180,7 @@ function cargarId (e)
                                                 }else
                                                     {
                                                         $('#codigoinicial').val(data.limiteInferior);
-                                                        $('#codigofinal').val('').attr('disabled','disabled');                                                        
+                                                        $('#codigofinal').val(data.limiteSuperior).attr('readonly','readonly');                                                        
                                                     }
                                                 //registra el ultimo valor del rango asignable
                                                 //para validación    
@@ -238,7 +239,8 @@ function solicitarCodigos (e) {
 function establecerDatosElegidos (e) 
 {   
     $('#newResponsable').removeAttr('disabled');
-    $('#codigofinal').removeAttr('disabled');                                               
+    $('#codigofinal').removeAttr('disabled');   
+    $('#codigofinal').removeAttr('readonly');                                            
     $('#observaciones').removeAttr('disabled');
     $('#btn_save').removeAttr('disabled');
     $('#err').hide();
@@ -250,7 +252,7 @@ function establecerDatosElegidos (e)
 
 
     //Valida si los limites son el mismo valor
-    //para solo llenar el codigo inicial
+    //para inabilitar el codigo final
     if(parseInt(limites[0]) < parseInt(limites[1]))
     {
         $('#codigoinicial').val(limites[0]);
@@ -262,7 +264,7 @@ function establecerDatosElegidos (e)
     }else
         {
             $('#codigoinicial').val(limites[0]);
-            $('#codigofinal').val('').attr('disabled','disabled');
+            $('#codigofinal').val(limites[1]).attr('readonly','readonly');
             $('#cantidad').val('1');
         }
 
