@@ -1049,6 +1049,19 @@ function verliquidartramite()
 
                            $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);
 
+                           //extrae el ultimo codigo de papeleria asignado al
+                           //liquidador para verificar que el ultimo impreso
+                           //no sea el ultimo asignado                           
+                           $where='pape_usuario ='.$usuarioLogueado->id;
+
+                           $maxAsignado = $this->codegen_model->max('est_papeles','pape_codigofinal',$where);
+
+                           if((int)$max['impr_codigopapel'] >= (int)$maxAsignado['pape_codigofinal'])
+                           {
+                                $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Usted no tiene papeleria disponible para realizar esta impresión!');
+                                redirect(base_url().'index.php/liquidaciones/liquidar'); 
+                           }
+
                            //verifica si ya habia asignado por lo menos
                            //un consecutivo a una impresion
                            //de lo contrario elige el primer codigo
