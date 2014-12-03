@@ -417,43 +417,14 @@ class Papeles extends MY_Controller {
                            $this->session->set_flashdata('errormessage','El codigo final suministrado no se encuentra en el rango re-asignable!');
                            redirect(base_url().'index.php/papeles/getReassign');
                       }
+                      
 
-
-                      //valida si se suministra un rango de codigos o un solo codigo
-                      if($this->input->post('codigofinal') > $this->input->post('codigoinicial'))
-                      {
-
-                           //extrae la cantidad actual para el rango
-                           //de papeleria de donde se sacarán los codigos
-                           //luego diminuye ese valor y lo actualiza en la bd
-                           //para el liquidador que entrega
-                           $cantidadImpresa = $this->codegen_model->getSelect('est_papeles','pape_cantidad'
-                           .',pape_codigoinicial,pape_codigofinal',
-                           'where pape_usuario = '.$this->input->post('docuOldResponsable')
-                           .' AND pape_id = '.$this->input->post('idRango'));
-                                 
-                           $cantidadNeta=(int)$cantidadImpresa[0]->pape_cantidad;
-                           
-                           //valida si se re-asignarán todos los codigos
-                           //disponibles de ese rango
-                           if($cantidadNeta == (int)$this->input->post('cantidad'))
-                           {                                                               
-                                //valida si los codigos a re-asignar son iguales a los
-                                //codigos del rango, entonces se borrará
-                                //el registro para el liquidador que entrega
-                                if($cantidadImpresa[0]->pape_codigoinicial == $this->input->post('codigoinicial') && $cantidadImpresa[0]->pape_codigofinal == $this->input->post('codigofinal'))
-                                {                                     
-                                     $this->codegen_model->delete('est_papeles', 'pape_id', $this->input->post('idRango'));
-                                }                                
-                                                
-                           }else
-                                {
-                                    $cantidadRestante = $cantidadNeta-(int)$this->input->post('cantidad');
-                                    $this->codegen_model->edit('est_papeles',
-                                    ['pape_cantidad'=>$cantidadRestante, 
-                                    'pape_codigofinal'=>(int)$this->input->post('codigoinicial')-1],
-                                    'pape_id', $this->input->post('idRango')); 
-                                }
+                           //actualiza los datos en el registro de rango del responsable que entrega 
+                           $this->actualizacionRangosReasignados($this->input->post('docuOldResponsable'), 
+                               $this->input->post('idRango'), 
+                               $this->input->post('cantidad'), 
+                               $this->input->post('codigoinicial'), 
+                               $this->input->post('codigofinal'));                            
 
                             $data = array(
                                       'pape_usuario' => $this->input->post('docuNewResponsable'),
@@ -467,7 +438,8 @@ class Papeles extends MY_Controller {
 
                                    );
 
-                            if ($this->codegen_model->add('est_papeles',$data) == TRUE) {
+                            if ($this->codegen_model->add('est_papeles',$data) == TRUE) 
+                            {
 
                                     $this->session->set_flashdata('message', 'Se ha re-asignado la Papeleria correspondiente al rango '
                                         .$this->input->post('codigoinicial')
@@ -477,12 +449,11 @@ class Papeles extends MY_Controller {
                                         .' con éxito ');
 
                                     redirect(base_url().'index.php/papeles/add');
-                                }  else 
-                                     {
-                                          $this->session->set_flashdata('errormessage','No se pudo re-asignar la Papeleria!');
-                                          redirect(base_url().'index.php/papeles/getReassign');                                  
-                                     } 
-                      }
+                            }  else 
+                                  {
+                                      $this->session->set_flashdata('errormessage','No se pudo re-asignar la Papeleria!');
+                                      redirect(base_url().'index.php/papeles/getReassign');                                  
+                                  }                       
                       
                 }
 
@@ -505,6 +476,61 @@ class Papeles extends MY_Controller {
               redirect(base_url().'index.php/users/login');
       }    
   } 
+
+
+
+  //Función de apoyo que determina si se re-asigna el rango de papeleria
+  //original o si solo se re-asigna una sección del rango
+
+  function actualizacionRangosReasignados($docuOldResponsable='', $idRango='', $cantidad='', $codigoinicial='', $codigofinal='')
+  {
+      if ($this->ion_auth->logged_in()) {
+          
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/getReassign') ) { 
+
+            //extrae la cantidad actual para el rango
+            //de papeleria de donde se sacarán los codigos
+            //luego diminuye ese valor y lo actualiza en la bd
+            //para el liquidador que entrega
+            $cantidadImpresa = $this->codegen_model->getSelect('est_papeles','pape_cantidad'
+            .',pape_codigoinicial,pape_codigofinal',
+            'where pape_usuario = '.$docuOldResponsable
+            .' AND pape_id = '.$idRango);
+                                 
+            $cantidadNeta=(int)$cantidadImpresa[0]->pape_cantidad;
+                           
+            //valida si se re-asignarán todos los codigos
+            //disponibles de ese rango
+           if($cantidadNeta == (int)$cantidad)
+            {                                                               
+                //valida si los codigos a re-asignar son iguales a los
+                //codigos del rango, entonces se borrará
+                //el registro para el liquidador que entrega
+                if($cantidadImpresa[0]->pape_codigoinicial == $codigoinicial && $cantidadImpresa[0]->pape_codigofinal == $codigofinal)
+                {                                     
+                     $this->codegen_model->delete('est_papeles', 'pape_id', $idRango));
+                }                                
+                                                
+           }else
+                {
+                    $cantidadRestante = $cantidadNeta-(int)$cantidad;
+                    $this->codegen_model->edit('est_papeles',
+                    ['pape_cantidad'=>$cantidadRestante, 
+                    'pape_codigofinal'=>(int)$codigoinicial-1],
+                    'pape_id', $idRango)); 
+                }
+
+
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+               
+      } else{
+              redirect(base_url().'index.php/users/login');
+      }  
+  }
+
+
 
   //Función que extrae el rango disponible del liquidador
   //al que se le retirará papeleria y se reasignará a 
