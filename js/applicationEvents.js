@@ -261,16 +261,21 @@ function establecerDatosElegidos (e)
         var cantidad = parseInt(limites[1])-parseInt(limites[0]);
         $('#cantidad').val(parseInt(cantidad)+1);
 
+        //registra el ultimo valor del rango asignable
+        //para validación    
+        $('#ultimo').val(limites[1]);
+
     }else
         {
             $('#codigoinicial').val(limites[0]);
-            $('#codigofinal').val(limites[1]).attr('readonly','readonly');
+            $('#codigofinal').val(limites[0]).attr('readonly','readonly');
             $('#cantidad').val('1');
+            //registra el ultimo valor del rango asignable
+            //para validación    
+            $('#ultimo').val(limites[0]);
         }
 
-    //registra el ultimo valor del rango asignable
-    //para validación    
-    $('#ultimo').val(data.limiteSuperior);
+    
     
     
 }
