@@ -139,9 +139,9 @@ class Codegen_model extends CI_Model
 
 
 
-    function getSelect($table,$fields,$where='',$join='', $group='')
+    function getSelect($table,$fields,$where='',$join='', $group='', $orderBy='')
     {
-        $query = $this->db->query("SELECT ".$fields."  FROM ".$table." ".$join." ".$where." ".$group);
+        $query = $this->db->query("SELECT ".$fields."  FROM ".$table." ".$join." ".$where." ".$group." ".$orderBy);
         return $query->result();
     }
 

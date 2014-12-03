@@ -621,7 +621,8 @@ function vercontratolegalizado()
                    
                        $papelesAsignados = $this->codegen_model->getSelect('est_papeles','pape_id'
                        .',pape_codigoinicial,pape_codigofinal',                                    
-                       ' where pape_usuario = '.$usuarioLogueado->id);
+                       ' where pape_usuario = '.$usuarioLogueado->id, '', '',
+                       'order by pape_codigoinicial');
 
                        foreach ($papelesAsignados as $value) 
                        {
@@ -659,7 +660,7 @@ function vercontratolegalizado()
                             }
                         }
                   }
-                  
+
                 $this->data['proximaImpresion'] = $nuevoingreso;   
           }          
           
@@ -1256,7 +1257,8 @@ function verliquidartramite()
                    
                                     $papelesAsignados = $this->codegen_model->getSelect('est_papeles','pape_id'
                                     .',pape_codigoinicial,pape_codigofinal',                                    
-                                    ' where pape_usuario = '.$usuarioLogueado->id);
+                                    ' where pape_usuario = '.$usuarioLogueado->id, '', '',
+                                    'order by pape_codigoinicial');
 
                                     foreach ($papelesAsignados as $value) 
                                     {
