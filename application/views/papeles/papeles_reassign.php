@@ -27,6 +27,7 @@
                                     </div>
 
                                     <input type="hidden" id="ultimo" name="ultimo">
+                                    <input type="hidden" id="idRango" name="idRango">
 
                                     <div class="form-group">
                                            <label for="docuOldResponsable">Documento</label>

@@ -140,7 +140,8 @@ function cargarId (e)
                                                {    
                                                     if(data.limiteInferior[i] < data.limiteSuperior[i])
                                                     {
-                                                        cadenaRangos += '<option value="'+data.limiteInferior[i]+'-'+data.limiteSuperior[i]+'">'
+                                                        cadenaRangos += '<option value="'+data.limiteInferior[i]
+                                                            +'-'+data.limiteSuperior[i]+'-'+data.idRango[i]+'">'
                                                             +data.limiteInferior[i]+'-'+data.limiteSuperior[i]+'</option>';     
                                                     }else
                                                         {
@@ -183,8 +184,10 @@ function cargarId (e)
                                                         $('#codigofinal').val(data.limiteSuperior).attr('readonly','readonly');                                                        
                                                     }
                                                 //registra el ultimo valor del rango asignable
-                                                //para validación    
+                                                //para validación y establece el id del rango
+                                                //para el backend   
                                                 $('#ultimo').val(data.limiteSuperior);
+                                                $('#idRango').val(data.idRango);
 
                                                 var cantidad = parseInt(data.limiteSuperior)-parseInt(data.limiteInferior);
                                                 $('#cantidad').val(cantidad+1);
@@ -262,17 +265,22 @@ function establecerDatosElegidos (e)
         $('#cantidad').val(parseInt(cantidad)+1);
 
         //registra el ultimo valor del rango asignable
-        //para validación    
+        //para validación y establece el id del rango
+        //para el backend   
         $('#ultimo').val(limites[1]);
-
+        $('#idRango').val(limites[2]);   
+        
     }else
         {
             $('#codigoinicial').val(limites[0]);
             $('#codigofinal').val(limites[0]).attr('readonly','readonly');
             $('#cantidad').val('1');
+            
             //registra el ultimo valor del rango asignable
-            //para validación    
+            //para validación y establece el id del rango
+            //para el backend   
             $('#ultimo').val(limites[0]);
+            $('#idRango').val(limites[2]);
         }
 
     

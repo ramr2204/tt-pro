@@ -418,6 +418,71 @@ class Papeles extends MY_Controller {
                            redirect(base_url().'index.php/papeles/getReassign');
                       }
 
+
+                      //valida si se suministra un rango de codigos o un solo codigo
+                      if($this->input->post('codigofinal') > $this->input->post('codigoinicial'))
+                      {
+
+                           //extrae la cantidad actual para el rango
+                           //de papeleria de donde se sacarán los codigos
+                           //luego diminuye ese valor y lo actualiza en la bd
+                           //para el liquidador que entrega
+                           $cantidadImpresa = $this->codegen_model->getSelect('est_papeles','pape_cantidad'
+                           .',pape_codigoinicial,pape_codigofinal',
+                           'where pape_usuario = '.$this->input->post('docuOldResponsable')
+                           .' AND pape_id = '.$this->input->post('idRango'));
+                                 
+                           $cantidadNeta=(int)$cantidadImpresa[0]->pape_cantidad;
+                           
+                           //valida si se re-asignarán todos los codigos
+                           //disponibles de ese rango
+                           if($cantidadNeta == (int)$this->input->post('cantidad'))
+                           {                                                               
+                                //valida si los codigos a re-asignar son iguales a los
+                                //codigos del rango, entonces se borrará
+                                //el registro para el liquidador que entrega
+                                if($cantidadImpresa[0]->pape_codigoinicial == $this->input->post('codigoinicial') && $cantidadImpresa[0]->pape_codigofinal == $this->input->post('codigofinal'))
+                                {                                     
+                                     $this->codegen_model->delete('est_papeles', 'pape_id', $this->input->post('idRango'));
+                                }                                
+                                                
+                           }else
+                                {
+                                    $cantidadRestante = $cantidadNeta-(int)$this->input->post('cantidad');
+                                    $this->codegen_model->edit('est_papeles',
+                                    ['pape_cantidad'=>$cantidadRestante, 
+                                    'pape_codigofinal'=>(int)$this->input->post('codigoinicial')-1],
+                                    'pape_id', $this->input->post('idRango')); 
+                                }
+
+                            $data = array(
+                                      'pape_usuario' => $this->input->post('docuNewResponsable'),
+                                      'pape_codigoinicial' => $this->input->post('codigoinicial'),
+                                      'pape_codigofinal' => $this->input->post('codigofinal'),
+                                      'pape_observaciones' => $this->input->post('observaciones'),      
+                                      'pape_cantidad' => $this->input->post('cantidad'),
+                                      'pape_fecha' => date('Y-m-d H:i:s'),
+                                      'pape_estado'=> 1,
+                                      'pape_imprimidos'=> 0
+
+                                   );
+
+                            if ($this->codegen_model->add('est_papeles',$data) == TRUE) {
+
+                                    $this->session->set_flashdata('message', 'Se ha re-asignado la Papeleria correspondiente al rango '
+                                        .$this->input->post('codigoinicial')
+                                        .'-'.$this->input->post('codigofinal')
+                                        .' al usuario '
+                                        .$this->input->post('newResponsablePapel')
+                                        .' con éxito ');
+
+                                    redirect(base_url().'index.php/papeles/add');
+                                }  else 
+                                     {
+                                          $this->session->set_flashdata('errormessage','No se pudo re-asignar la Papeleria!');
+                                          redirect(base_url().'index.php/papeles/getReassign');                                  
+                                     } 
+                      }
                       
                 }
 
@@ -516,6 +581,7 @@ class Papeles extends MY_Controller {
                             {
                                 $codigosReasignar['limiteInferior'][] = $limites[0];
                                 $codigosReasignar['limiteSuperior'][] = $limites[1];
+                                $codigosReasignar['idRango'][] = $value->pape_id;
                                 $codigosReasignar['varios'] = true;
                             }
                             
@@ -534,7 +600,7 @@ class Papeles extends MY_Controller {
                                  //especifico para que no se renderice la modal
                                  if(count($codigosReasignar['limiteInferior'])==1)
                                  {
-                                      $codReasignar = ['limiteInferior' => $codigosReasignar['limiteInferior'][0], 'limiteSuperior' => $codigosReasignar['limiteSuperior'][0]]; 
+                                      $codReasignar = ['limiteInferior' => $codigosReasignar['limiteInferior'][0], 'limiteSuperior' => $codigosReasignar['limiteSuperior'][0], 'idRango' => $codigosReasignar['idRango'][0]]; 
                                       unset($codigosReasignar);
                                       $codigosReasignar = $codReasignar;
                                  } 
@@ -562,7 +628,7 @@ class Papeles extends MY_Controller {
 
                             if($limites[1] > 0)
                             {
-                                $codigosReasignar = ['limiteInferior' => $limites[0], 'limiteSuperior' => $limites[1]]; 
+                                $codigosReasignar = ['limiteInferior' => $limites[0], 'limiteSuperior' => $limites[1], 'idRango' => $papeles[0]->pape_id]; 
                             }else
                               {
                                   $codigosReasignar = [];
