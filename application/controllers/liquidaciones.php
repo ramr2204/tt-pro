@@ -1214,7 +1214,9 @@ function verliquidartramite()
                                 $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado,impr_codigopapel','impr_facturaid = '.$ObjetoFactura[0]->fact_id,1,NULL,true);
                                 if (!$impresiones)
                                 {
-    
+                                    
+                                    $codificacion = $ObjetoFactura[0]->fact_estampillaid.'-'.;
+
                                     $data = array(
                                     'impr_codigopapel' => $nuevoingreso,
                                     'impr_papelid' => $papeles->pape_id,
@@ -1222,6 +1224,7 @@ function verliquidartramite()
                                     'impr_observaciones' => 'Correcta',
                                     'impr_fecha' => date('Y-m-d H:i:s',now()),
                                     'impr_codigo' => $codigo,
+                                    'impr_estampillaid' => $codificacion,
                                     'impr_estado' => '1'
                                     );
     
