@@ -26,6 +26,8 @@
                                            <?php echo form_error('oldResponsablePapel','<span class="text-danger">','</span>'); ?>
                                     </div>
 
+                                    <input type="hidden" id="ultimo" name="ultimo">
+
                                     <div class="form-group">
                                            <label for="docuOldResponsable">Documento</label>
                                            <input class="form-control" id="docuOldResponsable" type="text" name="docuOldResponsable" placeholder="Documento" readonly />

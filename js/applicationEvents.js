@@ -174,13 +174,17 @@ function cargarId (e)
                                                 if(data.limiteInferior < data.limiteSuperior)
                                                 {
                                                     $('#codigoinicial').val(data.limiteInferior);
-                                                    $('#codigofinal').val(data.limiteSuperior);
-                                                    
+                                                    $('#codigofinal').val(data.limiteSuperior);                                                    
+
                                                 }else
                                                     {
                                                         $('#codigoinicial').val(data.limiteInferior);
                                                         $('#codigofinal').val('').attr('disabled','disabled');                                                        
                                                     }
+                                                //registra el ultimo valor del rango asignable
+                                                //para validación    
+                                                $('#ultimo').val(data.limiteSuperior);
+
                                                 var cantidad = parseInt(data.limiteSuperior)-parseInt(data.limiteInferior);
                                                 $('#cantidad').val(cantidad+1);
                                               }  
@@ -261,6 +265,10 @@ function establecerDatosElegidos (e)
             $('#codigofinal').val('').attr('disabled','disabled');
             $('#cantidad').val('1');
         }
+
+    //registra el ultimo valor del rango asignable
+    //para validación    
+    $('#ultimo').val(data.limiteSuperior);
     
     
 }

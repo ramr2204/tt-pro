@@ -394,51 +394,42 @@ class Papeles extends MY_Controller {
               } else 
                 {
 
+                      //verifica que el liquidador que entrega tenga papeleria asignada o 
+                      //disponible para reasignar
+                      $verificacionDisponibilidad = $this->validarDisponibilidadCodigos($this->input->post('docuOldResponsable')); 
+                      if(!$verificacionDisponibilidad)
+                      {  
+                           $this->session->set_flashdata('errormessage','El Responsable Actual no tiene papeleria para re-asignación!');
+                           redirect(base_url().'index.php/papeles/getReassign'); 
+                      } 
+
+
                       //valida si los responsables son la misma persona
-                      if($this->input->post('docuOldResponsable')==$this->input->post('docuNewResponsable'))
+                      if($this->input->post('docuOldResponsable') == $this->input->post('docuNewResponsable'))
                       {
                            $this->session->set_flashdata('errormessage','Los liquidadores suministrados deben ser distintos!');
                            redirect(base_url().'index.php/papeles/getReassign');
                       }
 
-
-                      //Valida si alguno de los codigos de papeleria
-                      //ingresados se encuentra dentro de, por lo menos
-                      //uno de los rangos asignados actualmente
-
-                      $codigoUp=(int)$this->input->post('codigofinal');
-                      $codigoDown=(int)$this->input->post('codigoinicial');
-
-                      $cadenaErrorPapelEnRango='null';
-
-                      $campo='pape_codigoinicial, pape_codigofinal';
-                      $rangos=$this->codegen_model->getSelect('est_papeles',$campo);
-
-                      foreach ($rangos as $value) 
+                      //valida si el codigo final es valido
+                      if($this->input->post('codigofinal') > $this->input->post('ultimo'))
                       {
-                          $up=(int)$value->pape_codigofinal;
-                          $down=(int)$value->pape_codigoinicial;
-
-                          if($codigoDown<=$up && $codigoDown>=$down)
-                          {
-                               $cadenaErrorPapelEnRango='El codigo de papel Inicial -'.$codigoDown
-                                   .'- ya fue asignado. ';
-                          }
-
-                          if ($codigoUp<=$up && $codigoUp>=$down) 
-                          {
-                              $cadenaErrorPapelEnRango.='El codigo de papel Final -'.$codigoUp
-                                .'- ya fue asignado.';
-                          }
+                           $this->session->set_flashdata('errormessage','El codigo final suministrado no se encuentra en el rango re-asignable!');
+                           redirect(base_url().'index.php/papeles/getReassign');
                       }
+
+                      
                 }
 
 
-
-
-
-
-
+              $this->template->set('title', 'Reasignar papeleria');
+              $this->data['style_sheets']= array(
+                        'css/jquery-ui.css' => 'screen'
+                    );
+              $this->data['javascripts']= array(                        
+                        'js/jquery-ui.js'
+                    );  
+              $this->template->load($this->config->item('admin_template'),'papeles/papeles_reassign', $this->data);                            
 
 
           } else {
@@ -461,6 +452,28 @@ class Papeles extends MY_Controller {
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/getReassign') ) {
 
               $idLiquidador = $this->input->post('idLiquidador');////2222222222;//1110111111;//
+
+              $codigosReasignar = $this->validarDisponibilidadCodigos($idLiquidador);
+
+              echo json_encode($codigosReasignar);
+          
+          } else {
+                     redirect(base_url().'index.php/error_404');
+                 }
+               
+      } else{
+                redirect(base_url().'index.php/users/login');
+            }   
+
+  }
+
+  
+
+  function validarDisponibilidadCodigos($idLiquidador='')
+  {
+        if ($this->ion_auth->logged_in()) {
+          
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/getReassign') ) { 
 
               //extrae los posibles rangos de papeleria asignados
               //al usuario que se encuentra logueado que debe ser
@@ -561,19 +574,19 @@ class Papeles extends MY_Controller {
                        $codigosReasignar = [];
                  }
 
-              echo json_encode($codigosReasignar);
-          
+              return $codigosReasignar;   
+
           } else {
-                     redirect(base_url().'index.php/error_404');
-                 }
+              redirect(base_url().'index.php/error_404');
+          }
                
       } else{
-                redirect(base_url().'index.php/users/login');
-            }   
-
+              redirect(base_url().'index.php/users/login');
+      }   
+    
   }
 
-  
+
 
   //Función de apoyo que determina los limites del rango
   function validarCodigoMaximo($maxQuery, $codigoinicial, $codigofinal)
