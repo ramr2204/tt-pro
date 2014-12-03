@@ -145,8 +145,9 @@ function cargarId (e)
                                                             +data.limiteInferior[i]+'-'+data.limiteSuperior[i]+'</option>';     
                                                     }else
                                                         {
-                                                             cadenaRangos += '<option value="'+data.limiteInferior[i]+'">'
-                                                                 +data.limiteInferior[i]+'</option>';   
+                                                             cadenaRangos += '<option value="'+data.limiteInferior[i]
+                                                            +'-'+data.limiteSuperior[i]+'-'+data.idRango[i]+'">'
+                                                            +data.limiteInferior[i]+'</option>';   
                                                         }
                                                     
                                                }
@@ -273,17 +274,15 @@ function establecerDatosElegidos (e)
     }else
         {
             $('#codigoinicial').val(limites[0]);
-            $('#codigofinal').val(limites[0]).attr('readonly','readonly');
+            $('#codigofinal').val(limites[1]).attr('readonly','readonly');
             $('#cantidad').val('1');
-            
+
             //registra el ultimo valor del rango asignable
             //para validación y establece el id del rango
             //para el backend   
-            $('#ultimo').val(limites[0]);
+            $('#ultimo').val(limites[1]);
             $('#idRango').val(limites[2]);
         }
-
-    
     
     
 }

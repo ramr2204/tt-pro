@@ -438,17 +438,19 @@ class Papeles extends MY_Controller {
 
                                    );
 
+                            
+
                             if ($this->codegen_model->add('est_papeles',$data) == TRUE) 
                             {
 
-                                    $this->session->set_flashdata('message', 'Se ha re-asignado la Papeleria correspondiente al rango '
+                                    $this->session->set_flashdata('successmessage', 'Se ha re-asignado la Papeleria correspondiente al rango '
                                         .$this->input->post('codigoinicial')
                                         .'-'.$this->input->post('codigofinal')
                                         .' al usuario '
                                         .$this->input->post('newResponsablePapel')
                                         .' con éxito ');
 
-                                    redirect(base_url().'index.php/papeles/add');
+                                    redirect(base_url().'index.php/papeles/getReassign');
                             }  else 
                                   {
                                       $this->session->set_flashdata('errormessage','No se pudo re-asignar la Papeleria!');
@@ -508,7 +510,7 @@ class Papeles extends MY_Controller {
                 //el registro para el liquidador que entrega
                 if($cantidadImpresa[0]->pape_codigoinicial == $codigoinicial && $cantidadImpresa[0]->pape_codigofinal == $codigofinal)
                 {                                     
-                     $this->codegen_model->delete('est_papeles', 'pape_id', $idRango));
+                     $this->codegen_model->delete('est_papeles', 'pape_id', $idRango);
                 }                                
                                                 
            }else
@@ -517,7 +519,7 @@ class Papeles extends MY_Controller {
                     $this->codegen_model->edit('est_papeles',
                     ['pape_cantidad'=>$cantidadRestante, 
                     'pape_codigofinal'=>(int)$codigoinicial-1],
-                    'pape_id', $idRango)); 
+                    'pape_id', $idRango); 
                 }
 
 
@@ -542,7 +544,7 @@ class Papeles extends MY_Controller {
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/getReassign') ) {
 
-              $idLiquidador = $this->input->post('idLiquidador');////2222222222;//1110111111;//
+              $idLiquidador = $this->input->post('idLiquidador');//2222222222;////1110111111;//
 
               $codigosReasignar = $this->validarDisponibilidadCodigos($idLiquidador);
 
