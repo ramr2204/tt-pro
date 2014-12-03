@@ -211,6 +211,11 @@ class Generarpdf extends CI_controller {
               
                   $estampilla=$this->data['estampilla'];
 
+                  //aqui se configura la carpeta contenedora
+                  //del repositorio para cargar la ruta absoluta
+                  $this->data['rep'] = 'estampillas_mike';
+
+
                   
                   $this->load->library("Pdf");
                   $resolution= array(14, 9);
@@ -249,7 +254,7 @@ class Generarpdf extends CI_controller {
                   // set font
                    $pdf->SetFont('times', '', 8);
                    $pdf->AddPage('L',array(92,141));
-                   $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array('(415)7709998009530'.chr(247).'(8020)7341711081'.chr(247).'(390y)000000760000'.chr(247).'(96', 'C128', '', '', 84.5, 14.5, 0.4, array('position'=>'C', 'padding'=>0.5, 'fgcolor'=>array(0,0,0), 'bgcolor'=>'', 'text'=>false, 'font'=>'helvetica', 'fontsize'=>6, 'stretchtext'=>4), 'M'));
+                   $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array('(415)7709998009530'.chr(247).'(8020)7341711081'.chr(247).'(390y)000000760000'.chr(247).'(96', 'C128', '', '', 35, 14.5, 0.4, array('position'=>'C', 'padding'=>0.5, 'fgcolor'=>array(0,0,0), 'bgcolor'=>'', 'text'=>false, 'font'=>'helvetica', 'fontsize'=>6, 'stretchtext'=>4), 'M'));
                    $html = $this->load->view('generarpdf/generarpdf_estampillalegalizada', $this->data, TRUE);  
                 
                    $pdf->writeHTML($html, true, false, true, false, '');

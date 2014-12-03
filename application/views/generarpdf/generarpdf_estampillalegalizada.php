@@ -25,7 +25,7 @@
                     <td class="text-center" style="height: 19mm; width: 26mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><img id="logo_gobernacion" src="<?php echo $_SERVER['DOCUMENT_ROOT']; ?>estampillas_mike/images/gobernacion_tolima1.jpg" style="height: 15mm; width: 20mm;"></td>
+                        border-bottom: 0.5px solid black;"><img id="logo_gobernacion" src="<?php echo $_SERVER['DOCUMENT_ROOT'].'/'.$rep; ?>/images/gobernacion_tolima1.jpg" style="height: 15mm; width: 20mm;"></td>
 
                     <td class="text-center" id="leyenda_encabezado" colspan="3" style="height: 19mm; width: 68mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
@@ -36,7 +36,7 @@
                     <td style="height: 19mm; width: 26mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><br><br><img id="logo_gobernador" src="<?php echo $_SERVER['DOCUMENT_ROOT']; ?>estampillas_mike/images/gobernacion_tolima2.jpg" style="height: 13mm; width: 25mm;" ></td>
+                        border-bottom: 0.5px solid black;"><br><br><img id="logo_gobernador" src="<?php echo $_SERVER['DOCUMENT_ROOT'].'/'.$rep; ?>/images/gobernacion_tolima2.jpg" style="height: 13mm; width: 25mm;" ></td>
                 </tr>
  
                 <tr>
@@ -77,10 +77,10 @@
                 </tr>
 
                 <tr>
-                    <td rowspan="4" class="text-center" style="height: 31mm; width: 26mm; border-top: 0.5px solid black;
+                    <td rowspan="5" class="text-center" style="height: 31mm; width: 26mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><br><br><?php if ($estampilla->fact_rutaimagen) { ?><img src="<?php echo $_SERVER['DOCUMENT_ROOT'].'/estampillas_mike/'.$estampilla->fact_rutaimagen; ?>" style="height: 26mm; width: 24mm;"><?php } ?></td>
+                        border-bottom: 0.5px solid black;"><br><br><?php if ($estampilla->fact_rutaimagen) { ?><img src="<?php echo $_SERVER['DOCUMENT_ROOT'].'/'.$rep.'/'.$estampilla->fact_rutaimagen; ?>" style="height: 26mm; width: 24mm;"><?php } ?></td>
 
                     <td style="height: 5mm; width: 31.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
@@ -152,11 +152,41 @@
                 </tr>
 
                 <tr>
-                    <td colspan="4" style="height: 16mm; width: 94mm; border-top: 0.5px solid black;
+                    <td style="height: 8mm; width: 31.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><tcpdf method="write1DBarcode" params="<?php echo $params; ?>"/></td>
+                        border-bottom: 0.5px solid black;
+                        font-size:7;"><br><br> Fecha Pago</td>
+
+                    <td style="height: 8mm; width: 24mm; border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;
+                        font-size:6;
+                        text-align: center;"><?php echo $estampilla->pago_fecha; ?></td>
+
+                    <td rowspan="2" colspan="2" style="height: 16mm; width: 38.5mm; border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;
+                        text-align: center;"><br><br>QR</td>
                 </tr>
+
+                <tr>
+                    <td style="height: 8mm; width: 31.5mm; border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;
+                        font-size:7;"><br><br> Fecha Impresión</td>
+
+                    <td style="height: 8mm; width: 24mm; border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;
+                        font-size:6;
+                        text-align: center;"><?php echo date('Y-m-d',strtotime($estampilla->impr_fecha)); ?></td>                    
+                </tr>
+
 
                 <tr>
                     <td class="text-center" colspan="3" style="height: 15mm; width: 81.5mm; border-top: 0.5px solid black;
