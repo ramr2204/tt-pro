@@ -550,24 +550,116 @@ function vercontratolegalizado()
                $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
                $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
 
-               $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);
-               
+               $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);                          
+
                //verifica si ya habia asignado por lo menos
                //un consecutivo a una impresion
                //de lo contrario elige el primer codigo
 
-               if((int)$max['impr_codigopapel']>0)
-               {
-                                $nuevoingreso=$max['impr_codigopapel']+1;
-               }else
-                   {
-                         //extrae el primer codigo de papeleria resgistrado
-                         //en los rangos de papel asginado al liquidador autenticado
-                         $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
-                         $primerCodigo = $this->codegen_model->min('est_papeles','pape_codigoinicial',$where);
-                         $nuevoingreso = (int)$primerCodigo['pape_codigoinicial'];
-                   }
+              if((int)$max['impr_codigopapel']>0)
+              {
+                   //extrae el ultimo codigo de papeleria asignado al
+                   //liquidador para verificar que el ultimo impreso
+                   //no sea el ultimo asignado                           
+                   $where='pape_usuario ='.$usuarioLogueado->id;
+
+                   $maxAsignado = $this->codegen_model->max('est_papeles','pape_codigofinal',$where);                                
+
+                   $nuevoingreso=$max['impr_codigopapel']+1;
+
+              }else
+                  {
+                        //extrae el primer codigo de papeleria resgistrado
+                        //en los rangos de papel asginado al liquidador autenticado
+                        $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
+                        $primerCodigo = $this->codegen_model->min('est_papeles','pape_codigoinicial',$where);
+                        $nuevoingreso = (int)$primerCodigo['pape_codigoinicial'];
+                  }
+                       
+
+              //extrae los posibles rangos de papeleria asignados
+              //al usuario que se encuentra logueado que debe ser
+              //un liquidador, en los que pueda estar el nuevo 
+              //codigo a asignar
                    
+              $papeles = $this->codegen_model->get('est_papeles','pape_id'
+              .',pape_codigoinicial,pape_codigofinal',
+              'pape_codigoinicial <= '.$nuevoingreso
+              .' AND pape_codigofinal >='
+              .$nuevoingreso
+              .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true);
+
+
+              //verifica que exista un rango de papeleria asignado
+              //al liquidador en el que se encuentre el posible
+               //codigo a registrar
+              if ($papeles)
+              {
+                           
+                  //comprueba si ya se está usando el codigo del papel
+                  $nousado=0;
+
+                  while ($nousado==0)
+                  {
+                      $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso,1,NULL,true);
+
+                         if (!$combrobacionImpresiones) 
+                         {
+                             $nousado=1;
+                         } else
+                             {
+                             $nuevoingreso++;
+                             }
+                      }                                
+                                
+              } else
+                  {   
+
+                       //extrae los posibles rangos de papeleria asignados
+                       //al usuario que se encuentra logueado que debe ser
+                       //un liquidador
+                   
+                       $papelesAsignados = $this->codegen_model->getSelect('est_papeles','pape_id'
+                       .',pape_codigoinicial,pape_codigofinal',                                    
+                       ' where pape_usuario = '.$usuarioLogueado->id);
+
+                       foreach ($papelesAsignados as $value) 
+                       {
+                            if($nuevoingreso < (int)$value->pape_codigoinicial)
+                            {
+                                 $nuevoingreso = (int)$value->pape_codigoinicial;
+
+
+                                 //comprueba si ya se está usando el codigo del papel
+                                 //en alguna impresión y ademas que no se salga del rango
+                                 //si sale del rango va y compara con el rango siguiente
+                                 $nousado=0;
+
+                                 while ($nousado==0 && $nuevoingreso <= (int)$value->pape_codigofinal)
+                                 {
+                                     $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso,1,NULL,true);
+    
+                                     if (!$combrobacionImpresiones) 
+                                     {
+                                         $nousado=1;
+                                     } else
+                                         {
+                                         $nuevoingreso++;
+                                         }                                                  
+                                 }
+
+                                  //valida si ya se encontró un codigo para asignar
+                                  //y rompe el ciclo foreach
+                                  if($nousado == 1)
+                                  {
+                                     $idRangoCodigo = $value->pape_id;
+                                     break;
+                                  }
+
+                            }
+                        }
+                  }
+                  
                 $this->data['proximaImpresion'] = $nuevoingreso;   
           }          
           
