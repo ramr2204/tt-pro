@@ -14,7 +14,7 @@
 | path to your installation.
 |
 */
-$config['base_url']	= 'http://192.168.77.25:60080/estampillas_mike';//localhost/CodeIgniter
+$config['base_url']	= '';//localhost/CodeIgniter
 $config['template'] = 'templates/main.php';
 $config['admin_template'] = 'templates/admingroup.php';
 /*
