@@ -314,6 +314,18 @@ var oTable = $('#tablaq').dataTable( {
            $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vercontratolegalizado/'+ID,function(result){
             
             $('#myModal3').modal('show');
+
+            $('.confirmar_impresion').click(function(event) {
+                  
+                  var siguienteEstampilla = $('#siguienteEstampilla').val();
+                  if(!confirm('SIGUIENTE ESTAMPIILLA A IMPRIMIRSE => No. '+siguienteEstampilla+'\n\n'
+                        +'Esta seguro de generar la impresión?'
+                        +' Recuerde que será modificado el consecutivo de la papeleria asignada a usted!'))
+                  {
+                    event.preventDefault();
+                  }
+
+              });
           
         });
         

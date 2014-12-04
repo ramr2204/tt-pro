@@ -364,9 +364,11 @@ class Liquidaciones extends MY_Controller {
 
   function cargar_comprobante()
   {
-      if ($this->ion_auth->logged_in()) {
+      if ($this->ion_auth->logged_in()) 
+      {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) 
+            {
               $this->data['successmessage']=$this->session->flashdata('message');
               $this->data['errormessage']=''; 
               $this->form_validation->set_rules('numeroarchivos', 'numero archivos', 'trim|xss_clean|numeric|integer|greater_than[0]');
@@ -1113,7 +1115,7 @@ function verliquidartramite()
           $usuarioLogueado=$this->ion_auth->user()->row();
 
           if ($usuarioLogueado->perfilid==4)
-          {
+          {echo "trackeo";exit();
               $validacionPapeleriaAsignada = $this->codegen_model->getSelect('est_papeles',
                   'pape_codigoinicial, pape_codigofinal', ' where pape_usuario = '.$usuarioLogueado->id);
 
