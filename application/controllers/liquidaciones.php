@@ -1133,7 +1133,7 @@ function verliquidartramite()
 
                            $ObjetoFactura = $this->liquidaciones_model->getfacturaIndividual($idFactura);
 
-    
+ 
                            //extrae el ultimo codigo de papeleria resgistrado
                            //en las impresiones para el liquidador autenticado
                            $tablaJoin='est_papeles';
@@ -1215,7 +1215,7 @@ function verliquidartramite()
                                 if (!$impresiones)
                                 {
                                     
-                                    $codificacion = $ObjetoFactura[0]->fact_estampillaid.'-'.;
+                                    $codificacion = $this->generadorIdEstampilla($ObjetoFactura[0]->fact_estampillaid, $ObjetoFactura[0]->liqu_nit);
 
                                     $data = array(
                                     'impr_codigopapel' => $nuevoingreso,
@@ -1308,7 +1308,8 @@ function verliquidartramite()
                                          $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado,impr_codigopapel','impr_facturaid = '.$ObjetoFactura[0]->fact_id,1,NULL,true);
                                          if (!$impresiones)
                                          {
-    
+                                              $codificacion = $this->generadorIdEstampilla($ObjetoFactura[0]->fact_estampillaid, $ObjetoFactura[0]->liqu_nit);
+
                                               $data = array(
                                               'impr_codigopapel' => $nuevoingreso,
                                               'impr_papelid' => $idRangoCodigo,
@@ -1316,6 +1317,7 @@ function verliquidartramite()
                                               'impr_observaciones' => 'Correcta',
                                               'impr_fecha' => date('Y-m-d H:i:s',now()),
                                               'impr_codigo' => $codigo,
+                                              'impr_estampillaid' => $codificacion,
                                               'impr_estado' => '1'
                                               );
     
@@ -1367,6 +1369,34 @@ function verliquidartramite()
         }
 
 
+  }
+
+  
+   
+  //Funcion que genera el codigo que identifica la estampilla impresa
+  function generadorIdEstampilla($tipoEstampilla, $nit)
+  {
+        if ($this->ion_auth->logged_in()) {
+
+            //verifica que el usuario que llama el metodo
+            //tenga perfil de liquidador
+            $usuarioLogueado=$this->ion_auth->user()->row();
+
+            if ($usuarioLogueado->perfilid==4)
+            { 
+                 mt_srand(strtotime(date('H:i:s')));
+                 $alea = mt_rand();               
+                 $codificado = $tipoEstampilla.'-'.substr($nit, -5).date('d').date('m').date('y').substr($alea, -4);
+                 
+                 return $codificado;              
+
+            } else {
+                redirect(base_url().'index.php/error_404');
+            }
+               
+      } else{
+              redirect(base_url().'index.php/users/login');
+      }        
   }
 
 

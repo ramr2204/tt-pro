@@ -48,7 +48,7 @@
                     <td class="text-center" colspan="3" style="height: 5mm; width: 62.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;">T-45698712345</td>
+                        border-bottom: 0.5px solid black;"><?php echo $estampilla->impr_estampillaid; ?></td>
                 </tr>
 
                 <tr>
