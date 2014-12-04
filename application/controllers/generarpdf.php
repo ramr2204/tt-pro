@@ -77,7 +77,7 @@ class Generarpdf extends CI_controller {
                
                //aqui se configura la carpeta contenedora
                //del repositorio para cargar la ruta absoluta
-               $this->data['rep'] = 'estampillas';    
+               $this->data['rep'] = 'estampillas-pro';    
                
                foreach ($this->data['facturas'] as $key => $value) { 
                 $pdf->AddPage();
@@ -155,7 +155,7 @@ class Generarpdf extends CI_controller {
 
                //aqui se configura la carpeta contenedora
                //del repositorio para cargar la ruta absoluta
-               $this->data['rep'] = 'estampillas';
+               $this->data['rep'] = 'estampillas-pro';
                    
                
                foreach ($this->data['facturas'] as $key => $value) { 
@@ -220,7 +220,7 @@ class Generarpdf extends CI_controller {
 
                   //aqui se configura la carpeta contenedora
                   //del repositorio para cargar la ruta absoluta
-                  $this->data['rep'] = 'estampillas';
+                  $this->data['rep'] = 'estampillas-pro';
 
 
                   

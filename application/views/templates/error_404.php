@@ -11,7 +11,7 @@
                  </div>
             <div class="clearfix"></div>
             <br /><br />
-          <p class="text-muted">La página a la que está intentando acceder no se encuentrea en este sitio. </p>
+          <p class="text-muted">La página a la que está intentando acceder no se encuentra en este sitio. </p>
           
             <div class="clearfix"></div>
             <br />
