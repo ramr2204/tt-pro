@@ -260,7 +260,7 @@
           <center>
             <br/>
             <p style="font-size: 20px;">
-                Thomas Greg & Sons | de Colombia S.A. © 2014
+                Thomas Greg & Sons de Colombia S.A. © 2014
             </p>
 
           </center>
