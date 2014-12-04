@@ -112,7 +112,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-           <div class="logo"><a class="navbar-brand" href="<?php echo base_url(); ?>"><img src="<?php echo base_url(); ?>/images/logo_presentacion.jpg" alt="bitbahia.com" class="img-responsive"></a></div>
+           <div class="logo"><a class="navbar-brand" href="<?php echo base_url(); ?>"><img src="<?php echo base_url(); ?>/images/logo_presentacion.png" alt="bitbahia.com" class="img-responsive logoImagen"></a></div>
 
         </div>
 
