@@ -1115,7 +1115,7 @@ function verliquidartramite()
           $usuarioLogueado=$this->ion_auth->user()->row();
 
           if ($usuarioLogueado->perfilid==4)
-          {echo "trackeo";exit();
+          {
               $validacionPapeleriaAsignada = $this->codegen_model->getSelect('est_papeles',
                   'pape_codigoinicial, pape_codigofinal', ' where pape_usuario = '.$usuarioLogueado->id);
 
