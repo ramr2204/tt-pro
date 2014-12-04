@@ -83,13 +83,13 @@
 
 <header class="cabecera">
       <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-3 contLogo">
           <div align="center"> 
-            
+            <img src="<?php echo base_url(); ?>/images/logo_presentacion.png" alt="bitbahia.com" class="img-responsive logoLogin">
           </div>
         </div>
         <div class="col-md-9" >
-          <p style="font-size: 55px; padding-top: 4%">
+          <p style="font-size: 35px; padding-top: 2.5%;">
             Sistema De Información De Estampillas PRO
           </p>
         </div>
