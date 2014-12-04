@@ -30,11 +30,11 @@
  <thead>
     <tr>
      <th colspan="1" class="text-center small">
-           <img src="<?php echo base_url() ?>images/gobernacion_tolima1.jpg" height="50" width="40" >
+           <img src="<?php echo $_SERVER['DOCUMENT_ROOT'].'/'.$rep; ?>/images/gobernacion_tolima1.jpg" height="50" width="40" >
      </th>
      <th colspan="2" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
      <th colspan="1" class="text-center small">
-           <img src="<?php echo base_url() ?>images/gobernacion_tolima2.jpg" height="50" width="90" >
+           <img src="<?php echo $_SERVER['DOCUMENT_ROOT'].'/'.$rep; ?>/images/gobernacion_tolima2.jpg" height="50" width="90" >
      </th>
    </tr>
  </thead>
@@ -136,11 +136,11 @@
  <thead>
     <tr>
      <th colspan="1" class="text-center small">
-           <img src="<?php echo base_url() ?>images/gobernacion_tolima1.jpg" height="50" width="40" >
+           <img src="<?php echo $_SERVER['DOCUMENT_ROOT'].'/'.$rep; ?>/images/gobernacion_tolima1.jpg" height="50" width="40" >
      </th>
      <th colspan="2" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
      <th colspan="1" class="text-center small">
-           <img src="<?php echo base_url() ?>images/gobernacion_tolima2.jpg" height="50" width="90" >
+           <img src="<?php echo $_SERVER['DOCUMENT_ROOT'].'/'.$rep; ?>/images/gobernacion_tolima2.jpg" height="50" width="90" >
      </th>
    </tr>
  </thead>
@@ -244,11 +244,11 @@
  <thead>
     <tr>
      <th colspan="1" class="text-center small">
-           <img src="<?php echo base_url() ?>images/gobernacion_tolima1.jpg" height="50" width="40" >
+           <img src="<?php echo $_SERVER['DOCUMENT_ROOT'].'/'.$rep; ?>/images/gobernacion_tolima1.jpg" height="50" width="40" >
      </th>
      <th colspan="2" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
      <th colspan="1" class="text-center small">
-           <img src="<?php echo base_url() ?>images/gobernacion_tolima2.jpg" height="50" width="90" >
+           <img src="<?php echo $_SERVER['DOCUMENT_ROOT'].'/'.$rep; ?>/images/gobernacion_tolima2.jpg" height="50" width="90" >
      </th>
    </tr>
  </thead>
