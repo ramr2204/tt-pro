@@ -179,18 +179,10 @@ class Tiposestampillas extends MY_Controller {
                   $this->session->set_flashdata('infomessage', 'Debe elegir un tipo de estampilla para eliminar');
                   redirect(base_url().'index.php/tiposestampillas');
               }
-              if (!$this->codegen_model->depend('est_contratos','cntr_tipocontratoid',$this->input->post('id'))) {
 
                   $this->codegen_model->delete('est_tiposestampillas','ties_id',$this->input->post('id'));
                   $this->session->set_flashdata('successmessage', 'El tipo de estampilla se ha eliminado con éxito');
-                  redirect(base_url().'index.php/tiposestampillas');  
-
-              } else {
-
-                  $this->session->set_flashdata('errormessage', 'El tipo de estampilla se encuentra en uso, no es posible eliminarlo.');
-                  redirect(base_url().'index.php/tiposestampillas/edit/'.$this->input->post('id'));
-
-              }
+                  redirect(base_url().'index.php/tiposestampillas');        
                          
           } else {
               redirect(base_url().'index.php/error_404');       

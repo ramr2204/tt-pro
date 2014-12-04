@@ -18,12 +18,13 @@
                         </div>
                         <div class="col-md-4 column">
                            <div class="panel panel-default">
-                            <div class="panel-heading"><h1>Crear un nuevo banco</h1></div>
+                            <div class="panel-heading"><h1>Cargar un Nuevo Archivo de Pagos</h1></div>
                              <div class="panel-body">
-                              <?php echo form_open_multipart(current_url()); ?>
+                              <?php echo form_open_multipart('pagos/doadd', array('id' => 'cargarTxtPagos')); ?>
 
+                              
                                     <div class="form-group">
-                                        <label for="archivo">Archivo (txt)</label>
+                                        <label for="archivo">Formato (txt)</label>
                                         <input id="file" type="file" class="file" name="archivo" multiple=false>
                                     </div>
 
@@ -42,3 +43,18 @@
                   </div> 
             </div>
       </div>
+
+
+<script type="text/javascript">
+    $("#file").fileinput({
+
+        initialCaption: "",
+        showCaption: false,
+        browseClass: "btn btn-default",
+        browseLabel: "Cargar Archivo",
+        showUpload: false,
+        showRemove: false,
+
+    });
+
+</script>

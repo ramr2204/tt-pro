@@ -20,6 +20,16 @@
                             <div class="panel-heading"><h1>Ingreso de papelería para estampillas</h1></div>
                              <div class="panel-body">
                               <?php echo form_open(current_url()); ?>
+                                    <div class="form-group">
+                                           <label for="responsablePapel">Nombre Responsable</label>
+                                           <input class="form-control responsable" id="responsable" type="text" name="responsablePapel" placeholder="Nombre" required autocomplete="off"/>
+                                           <?php echo form_error('responsablePapel','<span class="text-danger">','</span>'); ?>
+                                    </div>
+
+                                    <div class="form-group">
+                                           <label for="documentoRespPapel">Documento</label>
+                                           <input class="form-control" id="docuResponsable" type="text" name="documentoRespPapel" placeholder="Documento" readonly />
+                                    </div>
 
                                     <div class="form-group">
                                            <label for="codigoinicial">Código inicial</label>
@@ -64,6 +74,6 @@
   <script type="text/javascript">
     $("#codigofinal").change(function(){
         var cantidad= $("#codigofinal").val() - $("#codigoinicial").val();
-        $("#cantidad").val(cantidad);
+        $("#cantidad").val(cantidad+1);
     });
   </script>

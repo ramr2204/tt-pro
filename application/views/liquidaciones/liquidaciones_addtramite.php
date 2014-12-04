@@ -22,15 +22,13 @@
                              <div class="panel-body">
                                 
 
-                              <?php echo form_open(current_url()); ?>
-                                  
-                                     
+                              <?php echo form_open(current_url()); ?>                                                                       
                                      
                                        <input class="form-control" id="encontrado" type="hidden" name="encontrado" value="0"/>
                                        <div class="col-md-4 column">
                                           <div class="form-group">
                                             <label for="documento">Documento</label>
-                                                <input class="form-control" id="documento" type="text" name="documento" value="<?php echo set_value('documento'); ?>" required="required" maxlength="200" />
+                                                <input class="form-control" id="documento" type="number" name="documento" value="<?php echo set_value('documento'); ?>" required="required" maxlength="200" />
                                               
                                             <?php echo form_error('documento','<span class="text-danger">','</span>'); ?>
                                           </div>
@@ -72,7 +70,7 @@
 
 
                                     <div class="pull-right">
-                                     <?php  echo anchor('contratistas', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
+                                     <?php  echo anchor('liquidaciones/liquidartramites', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
                                     <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
                                     </div>
                                 <?php echo form_close();?>
@@ -110,6 +108,7 @@
                 $('#encontrado').val(0);  
                 $('#nombre').val(nombre);
             } else {
+                $('#nombre').attr('readonly', 'readonly');
                 $('#nombre').val(msg);
                 $('#encontrado').val(1); 
             }

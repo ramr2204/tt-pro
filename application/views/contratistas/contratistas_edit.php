@@ -32,7 +32,7 @@
                                            <select class="form-control" id="tipocontratistaid" name="tipocontratistaid" required="required" >
                                              <option value="0">Seleccione...</option>
                                              <?php  foreach($tiposcontratistas as $row) { ?>
-                                                 <?php if ($row->tpco_id==$result->cont_municipioid) { ?>
+                                                 <?php if ($row->tpco_id==$result->cont_tipocontratistaid) { ?>
                                                  <option selected value="<?php echo $row->tpco_id; ?>" ><?php echo $row->tpco_nombre; ?></option>
                                                  <?php } else { ?>
                                                  <option value="<?php echo $row->tpco_id; ?>"><?php echo $row->tpco_nombre; ?></option>

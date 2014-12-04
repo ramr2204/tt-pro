@@ -13,7 +13,7 @@ var oTable = $('#tablaq').dataTable( {
 "aoColumns": [ 
                       { "sClass": "center","sWidth": "5%" }, /*id 0*/
                       { "sClass": "item" }, 
-                      { "sClass": "item" }, 
+                      { "sClass": "item" },  
                       { "sClass": "item","sWidth": "5%" }, 
                       { "sClass": "center","bSortable": false,"bSearchable": false,"sWidth": "5%" },
 
@@ -48,7 +48,7 @@ var oTable = $('#tablaq').dataTable( {
     <tr>
      <th>Identificación</th>
      <th>Email</th> 
-     <th>perfil</th>  
+     <th>Perfil</th>  
      <th>Estado</th> 
      <th>Acciones</th>
    </tr>

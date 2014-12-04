@@ -35,6 +35,8 @@
      echo link_tag( array( 'href' => 'css/favicon.ico', 'media' => 'screen', 'rel' => 'shortcut icon' ) ) . "\n";
      echo link_tag( array( 'href' => 'css/bootstrap.min.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
      echo link_tag( array( 'href' => 'css/sb-admin.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
+     echo link_tag( array( 'href' => 'css/estampillas.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
+
      //echo link_tag( array( 'href' => 'css/font-awesome.min.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n"; 
      ?> 
      <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
@@ -56,6 +58,7 @@
     // jQuery  always loaded
     echo script_tag( 'js/jquery-1.10.2.js' ) . "\n";
     echo script_tag( 'js/bootstrap.min.js' ) . "\n";
+    echo script_tag( 'js/applicationEvents.js' ) . "\n";
 
     
     // Add any additional javascript
@@ -75,7 +78,7 @@
 </head>
 
 <body> 
-
+<input id="base" type="hidden" value="<?php echo base_url(); ?>">
 <?php if (!$this->ion_auth->logged_in()) { ?>
 
 <header class="cabecera">
@@ -109,7 +112,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-           <div class="logo"><a class="navbar-brand" href="<?php echo base_url(); ?>"><img src="<?php echo base_url(); ?>/images/logo_presentacion.jpg" alt="bitbahia.com" class="img-responsive"></a></div>
+           <div class="logo"><a class="navbar-brand" href="<?php echo base_url(); ?>"><img src="<?php echo base_url(); ?>/images/logo_presentacion.png" alt="bitbahia.com" class="img-responsive logoImagen"></a></div>
 
         </div>
 
@@ -231,7 +234,7 @@
           
           if ($warnigmessage)
             {
-              echo '<div class="alert alert-dismissable alert-warnig"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>'. $warnigmessage.'</div>';
+              echo '<div class="alert alert-dismissable alert-warning"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>'. $warnigmessage.'</div>';
             }
          }  
        if (isset($primarymessage)) {
@@ -257,7 +260,7 @@
           <center>
             <br/>
             <p style="font-size: 20px;">
-                TurriSystem © 2014
+                Thomas Greg & Sons | de Colombia S.A. © 2014
             </p>
 
           </center>

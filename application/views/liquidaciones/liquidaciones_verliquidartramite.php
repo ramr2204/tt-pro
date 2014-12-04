@@ -37,16 +37,16 @@
      <td colspan="4"></td>
 </tr>
 <tr>
-     <td colspan="1"><strong>Nombre del contratista</strong></td>
-     <td colspan="3"><?php echo $result->cont_nombre; ?>
-     <input type="hidden" name="nombrecontratista" value="<?php echo $result->cont_nombre; ?>">
+     <td colspan="1"><strong>Nombre del Tramitador</strong></td>
+     <td colspan="3"><?php echo $result->litr_tramitadornombre; ?>
+     <input type="hidden" name="nombretramitador" value="<?php echo $result->litr_tramitadornombre; ?>">
      </td>
 </tr>
 
  <tr>
-     <td colspan="1"><strong>C.C. o NIT</strong></td>
-     <td colspan="3"><?php echo $result->cont_nit; ?>
-     <input type="hidden" name="nit" value="<?php echo $result->cont_nit; ?>">
+     <td colspan="1"><strong>Número de documento</strong></td>
+     <td colspan="3"><?php echo $result->litr_tramitadorid; ?>
+     <input type="hidden" name="idtramitador" value="<?php echo $result->litr_tramitadorid; ?>">
      </td>
 </tr>
 <tr>
@@ -56,7 +56,7 @@
      </td>
 </tr>
 <tr>
-     <td colspan="1"><strong>Salario mínimo</strong></td>
+     <td colspan="1"><strong>Salario mínimo diario</strong></td>
      <td colspan="3"><?php echo '$'.number_format($cnrt_valorsiniva, 2, ',', '.'); ?>
      <input type="hidden" name="valorsiniva" value="<?php echo $cnrt_valorsiniva; ?>">
      </td>
@@ -88,6 +88,7 @@ $cuentas='';
 <tr>
      <td colspan="1"><?php echo $row2->estm_nombre; ?>
      <input type="hidden" name="nombreestampilla<?php echo $x; ?>" value="<?php echo $row2->estm_nombre; ?>">
+     <input type="hidden" name="idestampilla<?php echo $x; ?>" value="<?php echo $row2->estm_id; ?>">
      <?php if ($row2->estm_rutaimagen) { ?>
      <img src="<?php echo base_url().$row2->estm_rutaimagen; ?>" height="60" width="60" >
     <?php } ?>

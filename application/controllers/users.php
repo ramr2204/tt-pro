@@ -142,6 +142,9 @@ class Users extends MY_Controller {
 	//change password
 	function editme()
 	{
+		if (!$this->ion_auth->logged_in()) {
+			redirect('users/login', 'refresh');
+		}
 
         $user = $this->ion_auth->user()->row();
 	    $this->data['result']=$user;   
@@ -162,10 +165,12 @@ class Users extends MY_Controller {
 		     $this->form_validation->set_rules('password_confirm', $this->lang->line('edit_user_validation_password_confirm_label'), 'required');
 
 		     $data['password'] = $this->input->post('password');
-	    }
-		if (!$this->ion_auth->logged_in()) {
-			redirect('users/login', 'refresh');
-		}
+	    }		
+
+		//valida la información personal
+		$this->form_validation->set_rules('telefono', $this->lang->line('create_user_validation_telefono_label'), 'required|numeric');
+		$this->form_validation->set_rules('apellidos', $this->lang->line('create_user_validation_apellidos_label'), 'required|min_length[4]|max_length[40]');
+        $this->form_validation->set_rules('nombres', $this->lang->line('create_user_validation_nombres_label'), 'required|min_length[4]|max_length[40]');
 
 		if ($this->form_validation->run() == false) {
 			//display the form
@@ -179,7 +184,10 @@ class Users extends MY_Controller {
 			$identity = $this->session->userdata($this->config->item('identity', 'ion_auth'));
             
             $data = array(
-				    'email' => $this->input->post('email')
+				    'email' => $this->input->post('email'),
+				    'first_name' => $this->input->post('nombres'),
+				    'last_name' => $this->input->post('apellidos'),
+				    'phone' => $this->input->post('telefono')
 			      );
 				  $this->ion_auth->update($user->id, $data); 
 				  $this->session->set_flashdata('successmessage', 'Ha editado sus datos con éxito');
@@ -404,6 +412,9 @@ class Users extends MY_Controller {
 			  $this->data['title'] = "Crear usuario";	
 		      $this->form_validation->set_rules('id', $this->lang->line('create_user_validation_id_label'), 'required|xss_clean|numeric|greater_than[0]|is_unique[users.id]');
 		      $this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'required|valid_email|is_unique[users.email]');
+		      $this->form_validation->set_rules('telefono', $this->lang->line('create_user_validation_telefono_label'), 'required|numeric');
+		      $this->form_validation->set_rules('apellidos', $this->lang->line('create_user_validation_apellidos_label'), 'required|min_length[4]|max_length[40]');
+		      $this->form_validation->set_rules('nombres', $this->lang->line('create_user_validation_nombres_label'), 'required|min_length[4]|max_length[40]');
 		      $this->form_validation->set_rules('password', $this->lang->line('create_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[password_confirm]');
 		      $this->form_validation->set_rules('password_confirm', $this->lang->line('create_user_validation_password_confirm_label'), 'required');
               $this->form_validation->set_rules('perfilid', 'Perfil',  'required|numeric|greater_than[0]'); 
@@ -416,7 +427,11 @@ class Users extends MY_Controller {
 				  $username = $this->input->post('id'); //este id será el identificador de la tabla usuarios, no se usa nombre de usuario
 			      $email    = strtolower($this->input->post('email'));
 			      $password = $this->input->post('password');
-                  $additional_data = array('perfilid' => $this->input->post('perfilid'));
+                  $additional_data = array('perfilid' => $this->input->post('perfilid'),                  	
+                      'first_name'=> $this->input->post('nombres'),
+                      'last_name'=> $this->input->post('apellidos'),
+                      'phone'=> $this->input->post('telefono'),
+                      'id'=> $this->input->post('id'));                  
 
 				  if ($this->ion_auth->register($username, $password, $email, $additional_data))
 					 {
@@ -485,6 +500,9 @@ class Users extends MY_Controller {
 				  $this->form_validation->set_rules('password', $this->lang->line('edit_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[password_confirm]');
 				  $this->form_validation->set_rules('password_confirm', $this->lang->line('edit_user_validation_password_confirm_label'), 'required');
                   $this->form_validation->set_rules('perfilid', 'Perfil',  'required|numeric|greater_than[0]'); 
+                  $this->form_validation->set_rules('telefono', $this->lang->line('create_user_validation_telefono_label'), 'required|numeric');
+		          $this->form_validation->set_rules('apellidos', $this->lang->line('create_user_validation_apellidos_label'), 'required|min_length[4]|max_length[40]');
+    		      $this->form_validation->set_rules('nombres', $this->lang->line('create_user_validation_nombres_label'), 'required|min_length[4]|max_length[40]');
 				  $data['password'] = $this->input->post('password');
 			  }
 
@@ -492,7 +510,10 @@ class Users extends MY_Controller {
 			  {
 				  $data = array(
 				    'email' => $this->input->post('email'),
-                    'perfilid' => $this->input->post('perfilid')
+                    'perfilid' => $this->input->post('perfilid'),
+                    'phone'=> $this->input->post('telefono'),
+                    'last_name'=> $this->input->post('apellidos'),
+                    'first_name'=> $this->input->post('nombres')
 			      );
 
 				  $this->ion_auth->update($user->id, $data); 
@@ -705,5 +726,22 @@ class Users extends MY_Controller {
               redirect(base_url().'index.php/users/login');
             }           
     }
+    
 
+    //Funcion que carga el arreglo de opciones para autocompletar
+    //en la busqueda de usuarios para asignar papeleria
+    function extraerUsuarios()
+     {
+       $fragmento = $this->input->post('piece');
+       $where = ['perfilid ='=>'4'];
+       $resultado = $this->codegen_model->getLike('users',"users.first_name, users.last_name, users.id",'concat(first_name, last_name)',$fragmento,$where);
+       
+       foreach ($resultado->result_array() as $value) 
+       {
+          $vector_usuarios['idd'][]=$value['id'];
+          $vector_usuarios['nombre'][]=$value['first_name'].' '.$value['last_name'];
+       }
+    
+       echo json_encode($vector_usuarios);
+     }  
 }

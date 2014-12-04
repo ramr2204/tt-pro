@@ -1,0 +1,96 @@
+/**
+* estampillas.css
+* Ruta:              /indicadores/extras/js/estampillas.css
+* Fecha Creación:    13/Nov/2014
+*
+* Contiene los estilos del formato de impresión para las estampillas
+*
+*
+* @author           Michael Ortiz <michael.ortiz@turrisystem.com>
+* @copyright        2014 Michael Ortiz
+* @license          GPL 2 or later
+* @version          2014-11-13
+* @link             http://www.example.org
+*
+*/
+
+
+/* Box-model */
+
+ .col-1 {
+  width: 39.30708661417px;/*26mm*/
+}
+
+ .col-2 {
+  width: 119.0551181102px;/*31.5mm*/
+}
+
+ .col-3 {
+  width: 90.70866141732px;/*24mm*/
+}
+
+ .col-4 {
+  width: 49.13385826772px;/*13mm*/
+}
+
+ .col-5 {
+  width: 98.26771653543px;/*26mm*/
+}
+
+
+ .row-1 {
+  height: 71.81px;/*19mm*/
+}
+
+ .row-2 {
+  height: 18.89px;/*5mm*/
+}
+
+ .row-3 {
+  height: 34.01px;/*9mm*/
+}
+
+ .row-4 {
+  height: 18.89px;/*5mm*/
+}
+
+ .row-5 {
+  height: 18.89px;/*5mm*/
+}
+
+ .row-6 {
+  height: 18.89px;/*5mm*/
+}
+
+ .row-7 {
+  height: 18.89px;/*5mm*/
+}
+
+ .row-8 {
+  height: 60.47px;/*16mm*/
+}
+
+ .row-9 {
+  height: 56.69px;/*15mm*/
+}
+
+ #logo_gobernacion {
+  height: 68.03149606299px;
+  width: 94.48818897638px;
+}
+
+
+ #leyenda_encabezado {
+  width: 257.0078740157px;
+}
+
+ #logo_gobernador {
+  height: 49.13385826772px;
+  width: 94.48818897638px;
+}
+
+
+ #tabla {
+  border-style: solid;
+  border-width: 1px; 	
+ }

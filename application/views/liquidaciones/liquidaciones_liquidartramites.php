@@ -11,14 +11,7 @@
 */
 
 ?>
-<?php 
-    $a= "[";
-    foreach ($vigencias as $key => $value) {
-      $a.='"'.$value.'", ';
-    }
-    $a=substr($a, 0, -2);
-    $a.= "]";
-?>
+
 <script type="text/javascript" language="javascript" charset="utf-8">
 //generación de la tabla mediante json
 $(document).ready(function() {
@@ -58,7 +51,7 @@ var oTable = $('#tablaq').dataTable( {
       $(".liquidar").on('click', function(event) {
            event.preventDefault();
            var ID = $(this).attr("id");
-            $("#idcontrato").val(ID);
+            $("#idtramite").val(ID);
              $('.liquida').load('<?php echo base_url(); ?>index.php/liquidaciones/verliquidartramite/'+ID,function(result){
               $('#myModal').modal({show:true});
              });
@@ -66,7 +59,7 @@ var oTable = $('#tablaq').dataTable( {
        $(".pagar").on('click', function(event) {
            event.preventDefault();
            var ID = $(this).attr("id");
-            $("#idcontrato").val(ID);
+            $("#idtramite").val(ID);
              $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramiteliquidado/'+ID,function(result){
               $('#myModal2').modal({show:true});
              });
@@ -74,9 +67,23 @@ var oTable = $('#tablaq').dataTable( {
       $(".terminar").on('click', function(event) {
            event.preventDefault();
            var ID = $(this).attr("id");
-            $("#idcontrato").val(ID);
+            $("#idtramite").val(ID);
              $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramitelegalizado/'+ID,function(result){
               $('#myModal3').modal({show:true});
+
+                $('.confirmar_impresion').click(function(event) {
+                  
+                  var siguienteEstampilla = $('#siguienteEstampilla').val();
+                  if(!confirm('SIGUIENTE ESTAMPIILLA A IMPRIMIRSE => No. '+siguienteEstampilla+'\n\n'
+                        +'Esta seguro de generar la impresión?'
+                        +' Recuerde que será modificado el consecutivo de la papeleria asignada a usted!'))
+                  {
+                    event.preventDefault();
+                  }
+
+              });
+          
+
              });
          });
     }      
@@ -104,12 +111,7 @@ var oTable = $('#tablaq').dataTable( {
                                          bSmart: false
 
                                     },
-                                    {    
-                                         sSelector: "#buscarano", 
-                                         type:"select" ,
-                                         values : <?php echo $a; ?>,
-                                         selected: <?php echo $vigencias[0]; ?>
-                                    },
+                                    null,
                                     null,
                                     null,
                                     null,
@@ -154,13 +156,12 @@ var oTable = $('#tablaq').dataTable( {
     ?>
  </div>
 </div> 
-
+<br>
 <div class="row"> 
 <div class="col-sm-1"></div>
  <div class="col-sm-2">Identificación:<div align="center" id="buscarnumero"></div></div>
- <div class="col-sm-3">Nomnre:<div align="center" id="buscarnit"></div></div>
- <div class="col-sm-3">Támite:<div align="center" id="buscarcontratista"></div></div>
- <div class="col-sm-2">Año:<div align="center" id="buscarano"></div></div>
+ <div class="col-sm-3">Nombre:<div align="center" id="buscarnit"></div></div>
+ <div class="col-sm-3">Trámite:<div align="center" id="buscarcontratista"></div></div>
  <div class="col-sm-1"></div>
 </div>
 
@@ -207,7 +208,7 @@ var oTable = $('#tablaq').dataTable( {
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-    <input class="form-control" id="idcontrato" type="hidden" name="idcontrato" value=""/>
+    <input class="form-control" id="idtramite" type="hidden" name="idtramite" value=""/>
       <div class="modal-body liquida">
          
       </div>
@@ -249,7 +250,7 @@ var oTable = $('#tablaq').dataTable( {
 <div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <input class="form-control" id="idcontrato" type="hidden" name="idcontrato" value=""/>
+      <input class="form-control" id="idtramite" type="hidden" name="idtramite" value=""/>
       <div class="modal-body termina">
          
       </div>
@@ -265,7 +266,7 @@ var oTable = $('#tablaq').dataTable( {
 <?php if ($accion=='creado') { ?>
 <script type="text/javascript">
   
-            var ID = <?php echo $idcontrato; ?>;
+            var ID = <?php echo $idtramite; ?>;
             
            $('.liquida').load('<?php echo base_url(); ?>index.php/liquidaciones/verliquidartramite/'+ID,function(result){
             
@@ -281,12 +282,12 @@ var oTable = $('#tablaq').dataTable( {
 <?php if ($accion=='liquidado') { ?>
 <script type="text/javascript">
   
-            var ID = <?php echo $idcontrato; ?>;
+            var ID = <?php echo $idtramite; ?>;
             
             $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramiteliquidado/'+ID,function(result){
             
             $('#myModal2').modal('show');
-            //alert(ID+'....');
+            
         });
         
  
@@ -299,12 +300,12 @@ var oTable = $('#tablaq').dataTable( {
 <?php if ($accion=='legalizado') { ?>
 <script type="text/javascript">
   
-            var ID = <?php echo $idcontrato; ?>;
+            var ID = <?php echo $idtramite; ?>;
             
            $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramitelegalizado/'+ID,function(result){
-            
+  var siguienteEstampilla = $('#siguienteEstampilla').val();          
             $('#myModal3').modal('show');
-          
+
         });
         
  

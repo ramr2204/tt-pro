@@ -32,7 +32,7 @@ class Liquidaciones extends MY_Controller {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
 
-              $this->data['successmessage2']=$this->session->flashdata('successmessage');
+              $this->data['successmessage']=$this->session->flashdata('successmessage');
               $this->data['errormessage']=$this->session->flashdata('errormessage');
               $this->data['infomessage']=$this->session->flashdata('infomessage');
               $this->data['accion']=$this->session->flashdata('accion');
@@ -55,7 +55,8 @@ class Liquidaciones extends MY_Controller {
                         'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
                         'js/accounting.min.js',
                         'js/plugins/bootstrap/fileinput.min.js',
-                        'js/plugins/bootstrap/bootstrap-switch.min.js'
+                        'js/plugins/bootstrap/bootstrap-switch.min.js',
+                        'js/applicationEvents.js'
                        );
               $resultado = $this->codegen_model->max('con_contratos','cntr_fecha_firma');
               
@@ -83,14 +84,14 @@ class Liquidaciones extends MY_Controller {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
 
-              $this->data['successmessage2']=$this->session->flashdata('successmessage');
+              $this->data['successmessage']=$this->session->flashdata('successmessage');
               $this->data['errormessage']=$this->session->flashdata('errormessage');
               $this->data['infomessage']=$this->session->flashdata('infomessage');
               $this->data['accion']=$this->session->flashdata('accion');
               if ($this->uri->segment(3)>0){
-                  $this->data['idcontrato']= $this->uri->segment(3);
+                  $this->data['idtramite']= $this->uri->segment(3);
                } else {
-                  $this->data['idcontrato']= 0;
+                  $this->data['idtramite']= 0;
                }
               //template data
               $this->template->set('title', 'Administrar liquidaciones');
@@ -108,14 +109,7 @@ class Liquidaciones extends MY_Controller {
                         'js/plugins/bootstrap/fileinput.min.js',
                         'js/plugins/bootstrap/bootstrap-switch.min.js'
                        );
-              $resultado = $this->codegen_model->max('con_contratos','cntr_fecha_firma');
-              
-              foreach ($resultado as $key => $value) {
-                  $aplilo[$key]=$value;
-              }
-              $vigencia_mayor=substr($aplilo['cntr_fecha_firma'], 0, 4);
-              $vigencia_anterior=$vigencia_mayor-1;
-              $this->data['vigencias']= array($vigencia_mayor,$vigencia_anterior);
+             
               $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_liquidartramites', $this->data);
               
           } else {
@@ -138,19 +132,76 @@ class Liquidaciones extends MY_Controller {
               $idcontrato=$this->uri->segment(3);
               $this->data['result'] = $this->liquidaciones_model->get($idcontrato);
               $contrato = $this->data['result'];
-      
-              $this->data['estampillas'] = $this->liquidaciones_model->getestampillas($contrato->cntr_tipocontratoid);
-              $estampillas=$this->data['estampillas'];   
-              $valorsiniva = $contrato->cntr_valor/(($contrato->regi_iva/100)+1);
-              $totalestampilla= array();
+   
+              $estampillas = $this->liquidaciones_model->getestampillas($contrato->cntr_tipocontratoid);  
+              $this->data['estampillas'] = [];
+
+
+              //valida el valor del porcentaje según el regimen
+              //del contratista para realizar un calcúlo acertado
+
+              if($contrato->regi_iva > 0)
+              {
+                  $valorsiniva = (float)$contrato->cntr_valor/(((float)$contrato->regi_iva/100)+1);
+
+                  //Formatea el resultado del calculo de valor sin iva
+                  //para que redondee por decimales y centenares
+                  //ej valorsiniva=204519396.55172 ->decimales -> 204519397 ->centenas ->204519400
+                  $sinIvaRedondeoDecimales = round($valorsiniva);
+                  $sinIvaRedondeoCentenas = round($sinIvaRedondeoDecimales, -2);  
+                  unset($valorsiniva);
+                  $valorsiniva = $sinIvaRedondeoCentenas;
+              }else
+                  {
+                       $valorsiniva = (float)$contrato->cntr_valor;
+                  }
+              
+
+              //arreglo que guarda los distintos valores
+              //de liquidacion de las estampillas    
+              $totalestampilla= array(); 
+
+
               $valortotal=0;
-              $parametros=$this->codegen_model->get('adm_parametros','para_redondeo','para_id = 1',1,NULL,true);
+              $parametros=$this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo','para_id = 1',1,NULL,true);
+              
               foreach ($estampillas as $key => $value) {
                 
-                 $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
-                 $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
-                 $valortotal+=$totalestampilla[$value->estm_id];
+                 //Realiza la validación para los contratos de tipo
+                 //consultoria o consesión y que el valor del contrato
+                 //sea >= 10 SMMLV para aplicar la estampilla pro grandeza de colombia                
+
+                if($value->estm_id == 8)
+                {
+                    if($contrato->cntr_tipocontratoid==9 || $contrato->cntr_tipocontratoid==7)
+                    {
+                         $valor10SMMLV = $parametros->para_salariominimo * 10;
+
+                         if($contrato->cntr_valor >= $valor10SMMLV)
+                         {
+                              $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
+                              $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
+                              $valortotal+=$totalestampilla[$value->estm_id]; 
+                              array_push($this->data['estampillas'], $value);
+                         }
+                    }else
+                        {
+                             $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
+                             $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
+                             $valortotal+=$totalestampilla[$value->estm_id];
+                             array_push($this->data['estampillas'], $value);  
+                        }
+                }else
+                    {
+                         $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
+                         $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
+                         $valortotal+=$totalestampilla[$value->estm_id]; 
+
+                         array_push($this->data['estampillas'], $value);
+                    }    
+                 
               }
+
               $this->data['est_totalestampilla']=$totalestampilla;
               $this->data['cnrt_valorsiniva']=$valorsiniva;
               $this->data['est_valortotal']=$valortotal;
@@ -206,12 +257,13 @@ class Liquidaciones extends MY_Controller {
                        'fact_banco' => $this->input->post('banco'.$i),
                        'fact_cuenta' => $this->input->post('cuenta'.$i),
                        'fact_liquidacionid' => $liquidacionid,
+                       'fact_estampillaid' => $this->input->post('idestampilla'.$i),
                        'fact_rutaimagen' => $this->input->post('rutaimagen'.$i),
                        );
                   	   $this->codegen_model->add('est_facturas',$data);
                   }
 
-                  //print_r($data);
+                 
                   $data = array(
                    'cntr_estadolocalid' => 1,
                    );
@@ -220,7 +272,7 @@ class Liquidaciones extends MY_Controller {
                       $this->session->set_flashdata('successmessage', 'La liquidación se realizó con éxito');
                       $this->session->set_flashdata('accion', 'liquidado');
                       redirect(base_url().'index.php/liquidaciones/liquidar/'.$idcontrato);
-                     // echo $this->db->last_query();
+                
                   }
               }
                 
@@ -246,16 +298,34 @@ class Liquidaciones extends MY_Controller {
               $this->data['result'] = $this->liquidaciones_model->getrecibos($idcontrato);
               $liquidacion = $this->data['result'];
               $this->data['facturas'] = $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
+
+
+              //$todopago variable bandera indica si la totalidad de facturas 
+              //no se han pagado
               $todopago=0;
               $numerocomprobantes=0;
               $ncomprobantescargados=0;
               $totalpagado=0;
+              //vector $comprobantecargado
+              //almacena la relacion indice->valor
+              //tal que ==>    (id factura)->(true)
+              //si no se ha cargado comprobante para
+              //esa factura.   (id factura)->(false)
+              //si ya se cargó comprobante
               $comprobantecargado=array();
               $facturapagada=array();
               $facturas=$this->data['facturas']; 
+
+              //Itera por las filas de informacion de las facturas
+              //creadas para cada estampilla asignada al contrato
               foreach ($facturas as $key => $value) {
                   $totalpagado += $value->pago_valor;
                   $numerocomprobantes++;  
+
+                  //si el valor en la tabla pagos es mayor o igual
+                  //al valor de la factura de la estampilla
+                  //se asigna al vector $facturapagada el indice 
+                  //del id de la factura y el valor true
                  if ($value->pago_valor >= $value->fact_valor) {
                      $facturapagada[$value->fact_id]=true;
                  } else {
@@ -270,7 +340,7 @@ class Liquidaciones extends MY_Controller {
                    $ncomprobantescargados++;
                  }
               }
-             // print_r($facturapagada);
+             
               $this->data['comprobantecargado'] = $comprobantecargado;
               $this->data['facturapagada'] =$facturapagada;
               $this->data['comprobantes'] = ($numerocomprobantes==$ncomprobantescargados) ? true : false ;
@@ -280,7 +350,6 @@ class Liquidaciones extends MY_Controller {
               $this->data['numerocomprobantes'] =$numerocomprobantes;
               $this->data['ncomprobantescargados'] =$ncomprobantescargados;
               $this->template->set('title', 'Contrato liquidado');
-              //$this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_vercontratoliquidado', $this->data);
               $this->load->view('liquidaciones/liquidaciones_vercontratoliquidado', $this->data); 
           } else {
               redirect(base_url().'index.php/error_404');
@@ -301,6 +370,9 @@ class Liquidaciones extends MY_Controller {
               $this->data['successmessage']=$this->session->flashdata('message');
               $this->data['errormessage']=''; 
               $this->form_validation->set_rules('numeroarchivos', 'numero archivos', 'trim|xss_clean|numeric|integer|greater_than[0]');
+
+              //Validaciones para el id ya sea de tramite o contrato
+              //elije el nombre de carpeta y el id
               if ($this->input->post('contratoid')) {
                   $this->form_validation->set_rules('contratoid', 'contrato id', 'trim|xss_clean|numeric|integer|greater_than[0]');
                   $carpeta='facturas';
@@ -312,6 +384,7 @@ class Liquidaciones extends MY_Controller {
                   $carpeta='facturas_tramites';
                   $id=$this->input->post('tramiteid');
               }
+
               $numeroarchivos=$this->input->post('numeroarchivos');
               
               if ($id >0 && $numeroarchivos > 0 ) {
@@ -323,11 +396,12 @@ class Liquidaciones extends MY_Controller {
                   $config['allowed_types'] = 'jpg|jpeg|gif|png';
                   $config['remove_spaces']=TRUE;
                   $config['max_size']    = '2048';
-                  //$config['overwrite']    = TRUE;
+                  $config['overwrite']    = TRUE;
                   $this->load->library('upload');
 
 
                   $success=0;
+                  $referenciaCargados='';
                   for ($i=0; $i < $numeroarchivos; $i++) {
                       $pago=$this->input->post('pago'.$i);
                       
@@ -357,7 +431,8 @@ class Liquidaciones extends MY_Controller {
                                  'fact_fechacomprobante' => date("Y-m-d H:i:s")
                                );
                               if ($this->codegen_model->edit('est_facturas',$data,'fact_id',$idfactura) == TRUE) {
-                                  $success++; 
+                                  $success++;
+                                  $referenciaCargados.=' Comprobante: '.$this->input->post('facturaNombre'.$i).': archivo -> '.$file_data['client_name'].' ||';
                                     
                               } else {
                                    $this->data['errormessage'] .= '<br>No se pudo registrar el comprobante'.$i;
@@ -372,12 +447,15 @@ class Liquidaciones extends MY_Controller {
                   $this->data['errormessage'] = 'Datos incorrectos'.$this->input->post('contratoid').' ---- '.$numeroarchivos;
               }
               if ($success > 0) {
-                $this->session->set_flashdata('successmessage', 'E con éxito'); 
+                $this->session->set_flashdata('successmessage', 'Se Cargó con éxito'.$referenciaCargados); 
 
               } else {
                 $this->session->set_flashdata('errormessage', '<strong>Error!</strong> '.$this->data['errormessage'] );
               }
               $this->session->set_flashdata('accion', 'liquidado');
+
+              //Dependiendo del tipo de liquidacion redirecciona
+              //a la ruta respectiva
               if ($this->input->post('contratoid')) {
                   redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);    
               }
@@ -399,98 +477,45 @@ class Liquidaciones extends MY_Controller {
 
 function legalizar()
   {        
-      if ($this->ion_auth->logged_in()) {
+      if ($this->ion_auth->logged_in()) 
+      {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
-               $codigo='00000000';
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) 
+          {
                
-               if ($this->input->post('contratoid')) {
+               //realiza el proceso de actualización
+               //dependiendo del tipo de documento
+               //para el que se generó el evento
+               if ($this->input->post('contratoid')) 
+               {
                    $id=$this->input->post('contratoid');
-               }
-               if ($this->input->post('tramiteid')) {
-                   $id=$this->input->post('tramiteid');
-               }
-               $disponible=0;
-               $nodisponible=0;
-               
-               $x=0;
-               $papelid=array();
-               $this->data['facturas'] = $this->liquidaciones_model->getfacturas($this->input->post('liquidacionid'));
-               foreach ($this->data['facturas'] as $key => $value) {
-                 $nousado=0;
-                 $max = $this->codegen_model->max('est_impresiones','impr_codigopapel', 'impr_estado = 1');
-                 $nuevoingreso=$max['impr_codigopapel']+1;
-                
-                 while ($nousado==0) { //comprueba si ya se está usando el codigo del papel
-                     $comimpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso,1,NULL,true);
-                     
-                     if (!$comimpresiones) {
-                        $nousado=1;
-                     } else {
-                         $nuevoingreso++;
-                         
-                     }
-                     
-                 }
-                 
-                 $papeles = $this->codegen_model->get('est_papeles','pape_id,pape_codigoinicial,pape_codigofinal','pape_codigoinicial <= '.$nuevoingreso.' AND pape_codigofinal >= '.$nuevoingreso,1,NULL,true);        
-                 if ($papeles) {
-                     $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado','impr_facturaid = '.$value->fact_id,1,NULL,true);
-                     if ($impresiones) { //ya se encuentra asignado
-                      
-                     } else {
-                        $data = array(
-                          'impr_codigopapel' => $nuevoingreso,
-                          'impr_papelid' => $papeles->pape_id,
-                          'impr_facturaid' => $value->fact_id,
-                          'impr_observaciones' => 'Correcta',
-                          'impr_fecha' => date('Y-m-d H:i:s',now()),
-                          'impr_codigo' => $codigo,
-                          'impr_estado' => '1'
-                        );
-                         $disponible++;
-                         // print_r($data); 
-                         //  echo'<br>';
-                         $this->codegen_model->add('est_impresiones',$data);
-                     }
-                      
-                 } else {
-                    $nodisponible++;
-                 } 
-                 $x++;    
-               } 
-               if ($nodisponible==0) {
-                   if ($this->input->post('contratoid')) {
-                       $data = array(
-                        'cntr_estadolocalid' => 2,
-                       );
-                       if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$id) == TRUE) {
-                           $this->session->set_flashdata('accion', 'legalizado');
-                           $this->session->set_flashdata('successmessage', 'La legalización se realizó con éxito');
-                       }
-                   }
-                   if ($this->input->post('tramiteid')) {
-                       $data = array(
-                        'litr_estadolocalid' => 2,
-                       );
-                       if ($this->codegen_model->edit('est_liquidartramites',$data,'litr_id',$id) == TRUE) {
-                           $this->session->set_flashdata('accion', 'legalizado');
-                           $this->session->set_flashdata('successmessage', 'La legalización se realizó con éxito');
-                       }
-                   }
-                   
-                  
-               } else {
 
-                   $this->session->set_flashdata('errormessage', 'no hay suficientes hojas de estampilla en el inventario para imprimir');
-                   $this->session->set_flashdata('accion', 'liquidado');
+                   $data = array(
+                   'cntr_estadolocalid' => 2,
+                   );
+                   if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$id) == TRUE) {
+                       $this->session->set_flashdata('accion', 'legalizado');
+                       $this->session->set_flashdata('successmessage', 'La legalización se realizó con éxito');
+                   }
+
+                   redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
                }
-               if ($this->input->post('contratoid')) {
-               redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
+
+               if ($this->input->post('tramiteid')) 
+               {
+                   $id=$this->input->post('tramiteid');
+
+                   $data = array(
+                   'litr_estadolocalid' => 2,
+                   );
+                   if ($this->codegen_model->edit('est_liquidartramites',$data,'litr_id',$id) == TRUE) {
+                       $this->session->set_flashdata('accion', 'legalizado');
+                       $this->session->set_flashdata('successmessage', 'La legalización se realizó con éxito');
+                   }
+
+                   redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
                }
-               if ($this->input->post('tramiteid')) {
-               redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
-               }
+
                 
           } else {
               redirect(base_url().'index.php/error_404');
@@ -511,6 +536,134 @@ function vercontratolegalizado()
                redirect(base_url().'index.php/error_404');
           }    
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
+              
+          //verifica que el usuario que llama el metodo
+          //tenga perfil de liquidador para cargar
+          //el proximo codigo de estampilla fisica a imprimir  
+          $usuarioLogueado=$this->ion_auth->user()->row();
+
+          if ($usuarioLogueado->perfilid==4)
+          {
+               //extrae el ultimo codigo de papeleria resgistrado
+               //en las impresiones para el liquidador autenticado
+               $tablaJoin='est_papeles';
+               $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
+               $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
+
+               $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);                          
+
+               //verifica si ya habia asignado por lo menos
+               //un consecutivo a una impresion
+               //de lo contrario elige el primer codigo
+
+              if((int)$max['impr_codigopapel']>0)
+              {
+                   //extrae el ultimo codigo de papeleria asignado al
+                   //liquidador para verificar que el ultimo impreso
+                   //no sea el ultimo asignado                           
+                   $where='pape_usuario ='.$usuarioLogueado->id;
+
+                   $maxAsignado = $this->codegen_model->max('est_papeles','pape_codigofinal',$where);                                
+
+                   $nuevoingreso=$max['impr_codigopapel']+1;
+
+              }else
+                  {
+                        //extrae el primer codigo de papeleria resgistrado
+                        //en los rangos de papel asginado al liquidador autenticado
+                        $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
+                        $primerCodigo = $this->codegen_model->min('est_papeles','pape_codigoinicial',$where);
+                        $nuevoingreso = (int)$primerCodigo['pape_codigoinicial'];
+                  }
+                       
+
+              //extrae los posibles rangos de papeleria asignados
+              //al usuario que se encuentra logueado que debe ser
+              //un liquidador, en los que pueda estar el nuevo 
+              //codigo a asignar
+                   
+              $papeles = $this->codegen_model->get('est_papeles','pape_id'
+              .',pape_codigoinicial,pape_codigofinal',
+              'pape_codigoinicial <= '.$nuevoingreso
+              .' AND pape_codigofinal >='
+              .$nuevoingreso
+              .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true);
+
+
+              //verifica que exista un rango de papeleria asignado
+              //al liquidador en el que se encuentre el posible
+               //codigo a registrar
+              if ($papeles)
+              {
+                           
+                  //comprueba si ya se está usando el codigo del papel
+                  $nousado=0;
+
+                  while ($nousado==0)
+                  {
+                      $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso,1,NULL,true);
+
+                         if (!$combrobacionImpresiones) 
+                         {
+                             $nousado=1;
+                         } else
+                             {
+                             $nuevoingreso++;
+                             }
+                      }                                
+                                
+              } else
+                  {   
+
+                       //extrae los posibles rangos de papeleria asignados
+                       //al usuario que se encuentra logueado que debe ser
+                       //un liquidador
+                   
+                       $papelesAsignados = $this->codegen_model->getSelect('est_papeles','pape_id'
+                       .',pape_codigoinicial,pape_codigofinal',                                    
+                       ' where pape_usuario = '.$usuarioLogueado->id, '', '',
+                       'order by pape_codigoinicial');
+
+                       foreach ($papelesAsignados as $value) 
+                       {
+                            if($nuevoingreso < (int)$value->pape_codigoinicial)
+                            {
+                                 $nuevoingreso = (int)$value->pape_codigoinicial;
+
+
+                                 //comprueba si ya se está usando el codigo del papel
+                                 //en alguna impresión y ademas que no se salga del rango
+                                 //si sale del rango va y compara con el rango siguiente
+                                 $nousado=0;
+
+                                 while ($nousado==0 && $nuevoingreso <= (int)$value->pape_codigofinal)
+                                 {
+                                     $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso,1,NULL,true);
+    
+                                     if (!$combrobacionImpresiones) 
+                                     {
+                                         $nousado=1;
+                                     } else
+                                         {
+                                         $nuevoingreso++;
+                                         }                                                  
+                                 }
+
+                                  //valida si ya se encontró un codigo para asignar
+                                  //y rompe el ciclo foreach
+                                  if($nousado == 1)
+                                  {
+                                     $idRangoCodigo = $value->pape_id;
+                                     break;
+                                  }
+
+                            }
+                        }
+                  }
+
+                $this->data['proximaImpresion'] = $nuevoingreso;   
+          }          
+          
               $idcontrato=$this->uri->segment(3);
               $this->data['result'] = $this->liquidaciones_model->getrecibos($idcontrato);
               $liquidacion = $this->data['result'];
@@ -539,7 +692,7 @@ function vercontratolegalizado()
                    $ncomprobantescargados++;
                  }
               }
-             // print_r($facturapagada);
+             
               $this->data['comprobantecargado'] = $comprobantecargado;
               $this->data['facturapagada'] =$facturapagada;
               $this->data['comprobantes'] = ($numerocomprobantes==$ncomprobantescargados) ? true : false ;
@@ -549,7 +702,6 @@ function vercontratolegalizado()
               $this->data['numerocomprobantes'] =$numerocomprobantes;
               $this->data['ncomprobantescargados'] =$ncomprobantescargados;
               $this->template->set('title', 'Contrato liquidado');
-              //$this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_vercontratoliquidado', $this->data);
               $this->load->view('liquidaciones/liquidaciones_vercontratolegalizado', $this->data); 
           } else {
               redirect(base_url().'index.php/error_404');
@@ -560,6 +712,7 @@ function vercontratolegalizado()
       }
 
   }
+
 function verliquidartramite()
   {        
       if ($this->ion_auth->logged_in()) {
@@ -570,25 +723,28 @@ function verliquidartramite()
               $idliquidacion=$this->uri->segment(3);
               
               $this->data['result'] = $this->liquidaciones_model->getliquidartramite($idliquidacion);
-              $contrato = $this->data['result'];
+              $tramite = $this->data['result'];
               $parametros=$this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo','para_id = 1',1,NULL,true);
               $this->data['estampillas'] = $this->liquidaciones_model->getestampillastramites($this->data['result']->litr_tramiteid);
 
               $estampillas=$this->data['estampillas'];   
-              $valorsiniva = $parametros->para_salariominimo;
+
+              //calcula el SMDLV
+              $salarioMinimoDiario = round((float)$parametros->para_salariominimo/30,0);
+
               $totalestampilla= array();
               $valortotal=0;
               
               foreach ($estampillas as $key => $value) {
                 
-                 $totalestampilla[$value->estm_id] = (($valorsiniva*$value->estr_porcentaje)/100);
+                 $totalestampilla[$value->estm_id] = (($salarioMinimoDiario*$value->estr_porcentaje)/100);
                  $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
                  $valortotal+=$totalestampilla[$value->estm_id];
               }
               $this->data['est_totalestampilla']=$totalestampilla;
-              $this->data['cnrt_valorsiniva']=$valorsiniva;
+              $this->data['cnrt_valorsiniva']=$salarioMinimoDiario;
               $this->data['est_valortotal']=$valortotal;
-              $this->template->set('title', 'Editar contrato');
+              $this->template->set('title', 'Liquidar Tramite');
               $this->load->view('liquidaciones/liquidaciones_verliquidartramite', $this->data); 
              
           } else {
@@ -607,14 +763,15 @@ function verliquidartramite()
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
                $codigo='00000000';
-               $idtramite=$this->input->post('idcontrato');
+               $idtramite=$this->input->post('idtramite');
               $data = array(
-                   'liqu_tramiteid' => $this->input->post('idcontrato'),
-                   'liqu_nombrecontratista' => $this->input->post('nombrecontratista'),
-                   'liqu_nit' => $this->input->post('nit'),
+                   'liqu_tramiteid' => $this->input->post('idtramite'),
+                   'liqu_nombrecontratista' => $this->input->post('nombretramitador'),
+                   'liqu_nit' => $this->input->post('idtramitador'),
                    'liqu_valorsiniva' => $this->input->post('valorsiniva'),
                    'liqu_totalestampilla' => $this->input->post('totalestampillas'),
                    'liqu_valortotal' => $this->input->post('valortotal'),
+                   'liqu_tipocontrato' => 'Tramite',
                    'liqu_codigo' => $codigo
 
                  );
@@ -629,6 +786,7 @@ function verliquidartramite()
                        'fact_banco' => $this->input->post('banco'.$i),
                        'fact_cuenta' => $this->input->post('cuenta'.$i),
                        'fact_liquidacionid' => $liquidacionid,
+                       'fact_estampillaid' => $this->input->post('idestampilla'.$i),
                        'fact_rutaimagen' => $this->input->post('rutaimagen'.$i),
                        );
                        $this->codegen_model->add('est_facturas',$data);
@@ -643,7 +801,7 @@ function verliquidartramite()
                       $this->session->set_flashdata('successmessage', 'La liquidación se realizó con éxito');
                       $this->session->set_flashdata('accion', 'liquidado');
                       redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$idtramite);
-                     // echo $this->db->last_query();
+                
                   }
               }
                 
@@ -658,65 +816,6 @@ function verliquidartramite()
   } 
 
   function vertramiteliquidado()
- {        
-      if ($this->ion_auth->logged_in()) {
-          if ($this->uri->segment(3)==''){
-               redirect(base_url().'index.php/error_404');
-          }    
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
-              $idcontrato=$this->uri->segment(3);
-              $this->data['result'] = $this->liquidaciones_model->getrecibostramites($idcontrato);
-              $liquidacion = $this->data['result'];
-              $this->data['facturas'] = $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
-              $todopago=0;
-              $numerocomprobantes=0;
-              $ncomprobantescargados=0;
-              $totalpagado=0;
-              $comprobantecargado=array();
-              $facturapagada=array();
-              $facturas=$this->data['facturas']; 
-              foreach ($facturas as $key => $value) {
-                  $totalpagado += $value->pago_valor;
-                  $numerocomprobantes++;  
-                 if ($value->pago_valor >= $value->fact_valor) {
-                     $facturapagada[$value->fact_id]=true;
-                 } else {
-                    $todopago=1;
-                    $facturapagada[$value->fact_id]=false;
-                 }
-                 if ($value->fact_rutacomprobante=='') {
-                     $comprobantecargado[$value->fact_id]=true;
-                     
-                 } else {
-                   $comprobantecargado[$value->fact_id]=false;
-                   $ncomprobantescargados++;
-                 }
-              }
-             // print_r($facturapagada);
-              $this->data['comprobantecargado'] = $comprobantecargado;
-              $this->data['facturapagada'] =$facturapagada;
-              $this->data['comprobantes'] = ($numerocomprobantes==$ncomprobantescargados) ? true : false ;
-              $this->data['todopago'] = ($todopago==1) ? false : true ;
-              $this->data['completado'] = ($todopago AND $this->data['comprobantes'] ) ? false : true ;
-              $this->data['totalpagado'] =$totalpagado;
-              $this->data['numerocomprobantes'] =$numerocomprobantes;
-              $this->data['ncomprobantescargados'] =$ncomprobantescargados;
-              $this->template->set('title', 'Contrato liquidado');
-              //$this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_vercontratoliquidado', $this->data);
-              $this->load->view('liquidaciones/liquidaciones_vertramiteliquidado', $this->data); 
-          } else {
-              redirect(base_url().'index.php/error_404');
-          }
-
-      } else {
-          redirect(base_url().'index.php/users/login');
-      }
-
-  } 
-
-
-
-  function vertramitelegalizado()
  {        
       if ($this->ion_auth->logged_in()) {
           if ($this->uri->segment(3)==''){
@@ -751,7 +850,101 @@ function verliquidartramite()
                    $ncomprobantescargados++;
                  }
               }
-             // print_r($facturapagada);
+    
+              $this->data['comprobantecargado'] = $comprobantecargado;
+              $this->data['facturapagada'] =$facturapagada;
+              $this->data['comprobantes'] = ($numerocomprobantes==$ncomprobantescargados) ? true : false ;
+              $this->data['todopago'] = ($todopago==1) ? false : true ;
+              $this->data['completado'] = ($todopago AND $this->data['comprobantes'] ) ? false : true ;
+              $this->data['totalpagado'] =$totalpagado;
+              $this->data['numerocomprobantes'] =$numerocomprobantes;
+              $this->data['ncomprobantescargados'] =$ncomprobantescargados;
+              $this->template->set('title', 'Tramite liquidado');
+              
+              $this->load->view('liquidaciones/liquidaciones_vertramiteliquidado', $this->data); 
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+
+      } else {
+          redirect(base_url().'index.php/users/login');
+      }
+
+  } 
+
+
+
+  function vertramitelegalizado()
+ {        
+      if ($this->ion_auth->logged_in()) {
+          if ($this->uri->segment(3)==''){
+               redirect(base_url().'index.php/error_404');
+          }    
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
+
+          //verifica que el usuario que llama el metodo
+          //tenga perfil de liquidador para cargar
+          //el proximo codigo de estampilla fisica a imprimir  
+          $usuarioLogueado=$this->ion_auth->user()->row();
+
+          if ($usuarioLogueado->perfilid==4)
+          {
+               //extrae el ultimo codigo de papeleria resgistrado
+               //en las impresiones para el liquidador autenticado
+               $tablaJoin='est_papeles';
+               $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
+               $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
+
+               $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);
+               
+               //verifica si ya habia asignado por lo menos
+               //un consecutivo a una impresion
+               //de lo contrario elige el primer codigo
+
+               if((int)$max['impr_codigopapel']>0)
+               {
+                                $nuevoingreso=$max['impr_codigopapel']+1;
+               }else
+                   {
+                         //extrae el primer codigo de papeleria resgistrado
+                         //en los rangos de papel asginado al liquidador autenticado
+                         $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
+                         $primerCodigo = $this->codegen_model->min('est_papeles','pape_codigoinicial',$where);
+                         $nuevoingreso = (int)$primerCodigo['pape_codigoinicial'];
+                   }
+                   
+                $this->data['proximaImpresion'] = $nuevoingreso;   
+          }     
+
+              $idtramite=$this->uri->segment(3);
+              $this->data['result'] = $this->liquidaciones_model->getrecibostramites($idtramite);
+              $liquidacion = $this->data['result'];
+              $this->data['facturas'] = $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
+              $todopago=0;
+              $numerocomprobantes=0;
+              $ncomprobantescargados=0;
+              $totalpagado=0;
+              $comprobantecargado=array();
+              $facturapagada=array();
+              $facturas=$this->data['facturas']; 
+              foreach ($facturas as $key => $value) {
+                  $totalpagado += $value->pago_valor;
+                  $numerocomprobantes++;  
+                 if ($value->pago_valor >= $value->fact_valor) {
+                     $facturapagada[$value->fact_id]=true;
+                 } else {
+                    $todopago=1;
+                    $facturapagada[$value->fact_id]=false;
+                 }
+                 if ($value->fact_rutacomprobante=='') {
+                     $comprobantecargado[$value->fact_id]=true;
+                     
+                 } else {
+                   $comprobantecargado[$value->fact_id]=false;
+                   $ncomprobantescargados++;
+                 }
+              }
+         
               $this->data['comprobantecargado'] = $comprobantecargado;
               $this->data['facturapagada'] =$facturapagada;
               $this->data['comprobantes'] = ($numerocomprobantes==$ncomprobantescargados) ? true : false ;
@@ -761,7 +954,7 @@ function verliquidartramite()
               $this->data['numerocomprobantes'] =$numerocomprobantes;
               $this->data['ncomprobantescargados'] =$ncomprobantescargados;
               $this->template->set('title', 'Contrato liquidado');
-              //$this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_vercontratoliquidado', $this->data);
+              
               $this->load->view('liquidaciones/liquidaciones_vertramitelegalizado', $this->data); 
           } else {
               redirect(base_url().'index.php/error_404');
@@ -792,23 +985,12 @@ function verliquidartramite()
 
                   $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
               } else {    
-                  if ($this->input->post('encontrado')>0) {
-                      $contratista= $this->codegen_model->get('con_contratistas','cont_id','cont_nit = '.$this->input->post('documento'),1,NULL,true);
-                      $contratistaid= $contratista->cont_id;
-                  } else {
-                      $datos = array(
-                        'cont_nit' => $this->input->post('documento'),
-                        'cont_nombre' => $this->input->post('nombre')
-                      );
-                      $this->codegen_model->add('con_contratistas',$datos);
-                      $contratistaid=$this->db->insert_id();
-                  }
-                  
-
+                                   
 
                   $data = array(
                         'litr_tramiteid' => $this->input->post('tramiteid'),
-                        'litr_contratistaid' => $contratistaid,
+                        'litr_tramitadorid' => $this->input->post('documento'),
+                        'litr_tramitadornombre' => $this->input->post('nombre'),
                         'litr_fechaliquidacion' => date("Y-m-d H:i:s"),
                         'litr_estadolocalid' => 0,
                         'litr_observaciones' => $this->input->post('observaciones')
@@ -852,9 +1034,9 @@ function verliquidartramite()
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
             
-              $contratista= $this->codegen_model->get('con_contratistas','cont_id,cont_nombre','cont_nit = '.$this->input->post('documento'),1,NULL,true);
-              if ($contratista) {
-                 echo $contratista->cont_nombre;
+              $tramitador= $this->codegen_model->get('est_liquidartramites','litr_tramitadorid,litr_tramitadornombre','litr_tramitadorid = '.$this->input->post('documento'),1,NULL,true);
+              if ($tramitador) {
+                 echo $tramitador->litr_tramitadornombre;
               } else {
                 echo 0;
               }
@@ -875,9 +1057,8 @@ function verliquidartramite()
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
               
               $this->load->library('datatables');
-              $this->datatables->select('l.litr_id,co.cont_nit,co.cont_nombre,tr.tram_nombre,l.litr_fechaliquidacion,l.litr_observaciones,el.eslo_nombre');
-              $this->datatables->from('est_liquidartramites l');
-              $this->datatables->join('con_contratistas co', 'co.cont_id = l.litr_contratistaid', 'left');
+              $this->datatables->select('l.litr_id,l.litr_tramitadorid,l.litr_tramitadornombre,tr.tram_nombre,l.litr_fechaliquidacion,l.litr_observaciones,el.eslo_nombre');
+              $this->datatables->from('est_liquidartramites l');              
               $this->datatables->join('est_tramites tr', 'tr.tram_id = l.litr_tramiteid', 'left');
               $this->datatables->join('con_estadoslocales el', 'el.eslo_id = l.litr_estadolocalid', 'left');
               $this->datatables->add_column('edit', '-');
@@ -899,7 +1080,7 @@ function verliquidartramite()
 
 
   function liquidaciones_datatable ()
-  {
+  { 
       if ($this->ion_auth->logged_in()) {
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
@@ -909,7 +1090,6 @@ function verliquidartramite()
               $this->datatables->from('con_contratos c');
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
               $this->datatables->join('con_estadoslocales el', 'el.eslo_id = c.cntr_estadolocalid', 'left');
-              //$this->datatables->join('est_facturas fa', 'c.cntr_id = fa.fact_contratoid', 'left');
               $this->datatables->add_column('edit', '-');
               echo $this->datatables->generate();
 
@@ -919,7 +1099,304 @@ function verliquidartramite()
                
       } else{
               redirect(base_url().'index.php/users/login');
-      }           
+      }        
+  }
+
+
+
+  function procesarConsecutivos()
+  {
+    if ($this->ion_auth->logged_in())
+    {
+          //verifica que el usuario que llama el metodo
+          //tenga perfil de liquidador
+          $usuarioLogueado=$this->ion_auth->user()->row();
+
+          if ($usuarioLogueado->perfilid==4)
+          {
+              $validacionPapeleriaAsignada = $this->codegen_model->getSelect('est_papeles',
+                  'pape_codigoinicial, pape_codigofinal', ' where pape_usuario = '.$usuarioLogueado->id);
+
+              
+              if($validacionPapeleriaAsignada)
+              {
+
+                  if ($this->uri->segment(3)=='')
+                  {
+                      redirect(base_url().'index.php/error_404');
+                  
+                  } else 
+                       {
+                           $idFactura = $this->uri->segment(3);
+
+                           $codigo='00000000';
+
+                           $ObjetoFactura = $this->liquidaciones_model->getfacturaIndividual($idFactura);
+
+ 
+                           //extrae el ultimo codigo de papeleria resgistrado
+                           //en las impresiones para el liquidador autenticado
+                           $tablaJoin='est_papeles';
+                           $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
+                           $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
+
+                           $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);                          
+
+                           //verifica si ya habia asignado por lo menos
+                           //un consecutivo a una impresion
+                           //de lo contrario elige el primer codigo
+
+                           if((int)$max['impr_codigopapel']>0)
+                           {
+                                //extrae el ultimo codigo de papeleria asignado al
+                                //liquidador para verificar que el ultimo impreso
+                                //no sea el ultimo asignado                           
+                                $where='pape_usuario ='.$usuarioLogueado->id;
+
+                                $maxAsignado = $this->codegen_model->max('est_papeles','pape_codigofinal',$where);
+
+                                if((int)$max['impr_codigopapel'] >= (int)$maxAsignado['pape_codigofinal'])
+                                {
+                                     $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Usted no tiene papeleria disponible para realizar esta impresión!');
+                                     redirect(base_url().'index.php/liquidaciones/liquidar'); 
+                                }
+
+                                $nuevoingreso=$max['impr_codigopapel']+1;
+
+                           }else
+                               {
+                                     //extrae el primer codigo de papeleria resgistrado
+                                     //en los rangos de papel asginado al liquidador autenticado
+                                     $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
+                                     $primerCodigo = $this->codegen_model->min('est_papeles','pape_codigoinicial',$where);
+                                     $nuevoingreso = (int)$primerCodigo['pape_codigoinicial'];
+                               }
+                       
+
+                           //extrae los posibles rangos de papeleria asignados
+                           //al usuario que se encuentra logueado que debe ser
+                           //un liquidador, en los que pueda estar el nuevo 
+                           //codigo a asignar
+                   
+                           $papeles = $this->codegen_model->get('est_papeles','pape_id'
+                           .',pape_codigoinicial,pape_codigofinal',
+                           'pape_codigoinicial <= '.$nuevoingreso
+                           .' AND pape_codigofinal >='
+                           .$nuevoingreso
+                           .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true);
+
+
+                           //verifica que exista un rango de papeleria asignado
+                           //al liquidador en el que se encuentre el posible
+                           //codigo a registrar
+                           if ($papeles)
+                           {
+                           
+                               //comprueba si ya se está usando el codigo del papel
+                               $nousado=0;
+
+                               while ($nousado==0)
+                               {
+                                   $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso,1,NULL,true);
+    
+                                   if (!$combrobacionImpresiones) 
+                                   {
+                                       $nousado=1;
+                                   } else
+                                       {
+                                       $nuevoingreso++;
+                                       }
+                                }
+
+                                //verifica si no se encuentra asignada papeleria
+                                //a esa factura en la tabla de impresiones
+                                //para crear el registro de la impresion
+                                $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado,impr_codigopapel','impr_facturaid = '.$ObjetoFactura[0]->fact_id,1,NULL,true);
+                                if (!$impresiones)
+                                {
+                                    
+                                    $codificacion = $this->generadorIdEstampilla($ObjetoFactura[0]->fact_estampillaid, $ObjetoFactura[0]->liqu_nit);
+
+                                    $data = array(
+                                    'impr_codigopapel' => $nuevoingreso,
+                                    'impr_papelid' => $papeles->pape_id,
+                                    'impr_facturaid' => $ObjetoFactura[0]->fact_id,
+                                    'impr_observaciones' => 'Correcta',
+                                    'impr_fecha' => date('Y-m-d H:i:s',now()),
+                                    'impr_codigo' => $codigo,
+                                    'impr_estampillaid' => $codificacion,
+                                    'impr_estado' => '1'
+                                    );
+    
+                                    //extrae la cantidad actual impresa para el rango
+                                    //de papeleria de donde se sacará el consecutivo
+                                    //luego aumenta ese valor y lo actualiza en la bd
+                                    $cantidadImpresa = $this->codegen_model->getSelect('est_papeles','pape_imprimidos',
+                                    'where pape_usuario = '.$usuarioLogueado->id
+                                    .' AND pape_id = '.$papeles->pape_id);
+                                 
+                                    $cantidadNeta=(int)$cantidadImpresa[0]->pape_imprimidos;
+                                                            
+                                    $this->codegen_model->edit('est_papeles',
+                                    ['pape_imprimidos'=>$cantidadNeta+1],
+                                    'pape_id', $papeles->pape_id);
+                              
+                                    $this->codegen_model->add('est_impresiones',$data);
+
+                                    redirect(base_url().'index.php/generarpdf/generar_estampilla/'.$idFactura); 
+
+                                }else
+                                    {
+                                        $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Ya se ha impreso la Estampilla No.'.$impresiones->impr_codigopapel.' !');
+                                        redirect(base_url().'index.php/liquidaciones/liquidar'); 
+                                    }
+                                
+                            } else
+                                {   
+
+                                    //extrae los posibles rangos de papeleria asignados
+                                    //al usuario que se encuentra logueado que debe ser
+                                    //un liquidador
+                   
+                                    $papelesAsignados = $this->codegen_model->getSelect('est_papeles','pape_id'
+                                    .',pape_codigoinicial,pape_codigofinal',                                    
+                                    ' where pape_usuario = '.$usuarioLogueado->id, '', '',
+                                    'order by pape_codigoinicial');
+
+                                    foreach ($papelesAsignados as $value) 
+                                    {
+                                         if($nuevoingreso < (int)$value->pape_codigoinicial)
+                                         {
+                                              $nuevoingreso = (int)$value->pape_codigoinicial;
+
+
+                                              //comprueba si ya se está usando el codigo del papel
+                                              //en alguna impresión y ademas que no se salga del rango
+                                              //si sale del rango va y compara con el rango siguiente
+                                              $nousado=0;
+
+                                              while ($nousado==0 && $nuevoingreso <= (int)$value->pape_codigofinal)
+                                              {
+                                                  $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso,1,NULL,true);
+    
+                                                  if (!$combrobacionImpresiones) 
+                                                  {
+                                                      $nousado=1;
+                                                  } else
+                                                      {
+                                                      $nuevoingreso++;
+                                                      }                                                  
+                                              }
+
+                                              //valida si ya se encontró un codigo para asignar
+                                              //y rompe el ciclo foreach
+                                              if($nousado == 1)
+                                              {
+                                                 $idRangoCodigo = $value->pape_id;
+                                                 break;
+                                              }
+
+                                         }
+                                    }
+
+
+                                    if($nousado == 1)
+                                    {
+                                         //verifica si no se encuentra asignada papeleria
+                                         //a esa factura en la tabla de impresiones
+                                         //para crear el registro de la impresion
+                                         $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado,impr_codigopapel','impr_facturaid = '.$ObjetoFactura[0]->fact_id,1,NULL,true);
+                                         if (!$impresiones)
+                                         {
+                                              $codificacion = $this->generadorIdEstampilla($ObjetoFactura[0]->fact_estampillaid, $ObjetoFactura[0]->liqu_nit);
+
+                                              $data = array(
+                                              'impr_codigopapel' => $nuevoingreso,
+                                              'impr_papelid' => $idRangoCodigo,
+                                              'impr_facturaid' => $ObjetoFactura[0]->fact_id,
+                                              'impr_observaciones' => 'Correcta',
+                                              'impr_fecha' => date('Y-m-d H:i:s',now()),
+                                              'impr_codigo' => $codigo,
+                                              'impr_estampillaid' => $codificacion,
+                                              'impr_estado' => '1'
+                                              );
+    
+                                              //extrae la cantidad actual impresa para el rango
+                                              //de papeleria de donde se sacará el consecutivo
+                                              //luego aumenta ese valor y lo actualiza en la bd
+                                              $cantidadImpresa = $this->codegen_model->getSelect('est_papeles','pape_imprimidos',
+                                              'where pape_usuario = '.$usuarioLogueado->id
+                                              .' AND pape_id = '.$idRangoCodigo);
+                                 
+                                              $cantidadNeta=(int)$cantidadImpresa[0]->pape_imprimidos;
+                                                            
+                                              $this->codegen_model->edit('est_papeles',
+                                              ['pape_imprimidos'=>$cantidadNeta+1],
+                                              'pape_id', $idRangoCodigo);
+                              
+                                              $this->codegen_model->add('est_impresiones',$data);
+
+                                              redirect(base_url().'index.php/generarpdf/generar_estampilla/'.$idFactura); 
+
+                                          }else
+                                              {
+                                                  $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Ya se ha impreso la Estampilla No.'.$impresiones->impr_codigopapel.' !');
+                                                  redirect(base_url().'index.php/liquidaciones/liquidar'); 
+                                              } 
+                                    }else
+                                        {
+                                             $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Usted no tiene papeleria disponible para realizar esta impresión!');
+                                             redirect(base_url().'index.php/liquidaciones/liquidar');       
+                                        }                                                                  
+                                }
+
+                        }     
+
+
+              }else
+                {
+                     $this->session->set_flashdata('errormessage', '<strong>Error!</strong> No se puede imprimir, usted no tiene asignada papeleria!');
+                     redirect(base_url().'index.php/liquidaciones/liquidar');  
+                }
+
+          }else 
+              {
+                  redirect(base_url().'index.php/error_404');
+              }
+    }else 
+        {
+            redirect(base_url().'index.php/users/login');
+        }
+
+
+  }
+
+  
+   
+  //Funcion que genera el codigo que identifica la estampilla impresa
+  function generadorIdEstampilla($tipoEstampilla, $nit)
+  {
+        if ($this->ion_auth->logged_in()) {
+
+            //verifica que el usuario que llama el metodo
+            //tenga perfil de liquidador
+            $usuarioLogueado=$this->ion_auth->user()->row();
+
+            if ($usuarioLogueado->perfilid==4)
+            { 
+                 mt_srand(strtotime(date('H:i:s')));
+                 $alea = mt_rand();               
+                 $codificado = $tipoEstampilla.'-'.substr($nit, -5).date('d').date('m').date('y').substr($alea, -4);
+                 
+                 return $codificado;              
+
+            } else {
+                redirect(base_url().'index.php/error_404');
+            }
+               
+      } else{
+              redirect(base_url().'index.php/users/login');
+      }        
   }
 
 

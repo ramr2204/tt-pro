@@ -133,11 +133,11 @@ class Contratistas extends MY_Controller {
                   redirect(base_url().'index.php/contratistas');
               }
               $resultado = $this->codegen_model->get('con_contratistas','cont_nit','cont_id = '.$idregimen,1,NULL,true);
-              
+       
               foreach ($resultado as $key => $value) {
                   $aplilo[$key]=$value;
               }
-              
+             
               if ($aplilo['cont_nit']==$this->input->post('nit')) {
                   
                   $this->form_validation->set_rules('nit', 'NIT', 'required|trim|xss_clean|max_length[100]');
@@ -188,7 +188,7 @@ class Contratistas extends MY_Controller {
                         );    
                   $this->data['successmessage']=$this->session->flashdata('successmessage');
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                	$this->data['result'] = $this->codegen_model->get('con_contratistas','cont_id,cont_nombre,cont_nit,cont_direccion,cont_municipioid,cont_regimenid,cont_tributarioid','cont_id = '.$idregimen,1,NULL,true);
+                	$this->data['result'] = $this->codegen_model->get('con_contratistas','cont_id,cont_nombre,cont_nit,cont_direccion,cont_municipioid,cont_regimenid,cont_tributarioid, cont_tipocontratistaid','cont_id = '.$idregimen,1,NULL,true);
                   $this->data['municipios']  = $this->codegen_model->getMunicipios();
                   $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
                   $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
@@ -213,7 +213,7 @@ class Contratistas extends MY_Controller {
                   $this->session->set_flashdata('infomessage', 'Debe elegir un contratista para eliminar');
                   redirect(base_url().'index.php/contratistas');
               }
-              if (!$this->codegen_model->depend('con_contratos','cont_contratoid',$this->input->post('id'))) {
+              if (!$this->codegen_model->depend('con_contratos','cntr_contratistaid',$this->input->post('id'))) {
 
                   $this->codegen_model->delete('con_contratistas','cont_id',$this->input->post('id'));
                   $this->session->set_flashdata('successmessage', 'El contratista se ha eliminado con éxito');

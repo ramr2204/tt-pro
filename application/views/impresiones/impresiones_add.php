@@ -18,7 +18,7 @@
                         </div>
                         <div class="col-md-4 column">
                            <div class="panel panel-default">
-                            <div class="panel-heading"><h1>Crear un nuevo régimen</h1></div>
+                            <div class="panel-heading"><h1>Nueva Anulación</h1></div>
                              <div class="panel-body">
                               <?php echo form_open(current_url()); ?>
                                     <div class="form-group">

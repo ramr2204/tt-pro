@@ -62,71 +62,24 @@ class Pagos extends MY_Controller {
       if ($this->ion_auth->logged_in()) {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/add')) {
-               $path = 'uploads/pagos/'.date('d-m-Y');
-               if(!is_dir($path)) { //create the folder if it's not already exists
-                   mkdir($path,0777,TRUE);      
-               }
-               $config['upload_path'] = $path;
-               $config['allowed_types'] = 'txt';
-               $config['remove_spaces']=TRUE;
-               $config['max_size']    = '2048';
-               $config['overwrite']    = TRUE;
 
-               $this->load->library('upload');
-               $this->upload->initialize($config);
-               if ($this->upload->do_upload("archivo")) {
-                   $file_data= $this->upload->data();
-                   $success=0;
-                   $error=0;
-                   $path2 = $path."/".$file_data['raw_name'].".txt";
-                   $string = file_get_contents($path2);
-                   $file = fopen($path2,"r");
-                   while(!feof($file)) {
-                       $linea = fgets($file);
-                       $explode = explode(',', $linea);
+              $this->data['successmessage']=$this->session->flashdata('successmessage');
+              $this->data['errormessage']=$this->session->flashdata('errormessage');
+              $this->data['infomessage']=$this->session->flashdata('infomessage');
+               
+              //carga las librerias para los estilos
+              //y funcionalidad del boton de carga de 
+              //archivos
 
-                       echo '<pre>';
-                       print_r($explode);
-                       echo '</pre>';
-                       $resultado = $this->codegen_model->get('est_pagos','pago_id','pago_facturaid = '."'$explode[0]'",1,NULL,true);
-                       if ($resultado) {
-                               
-                       } else {
-                           $data = array(
-                              'pago_facturaid' => $explode[0],
-                              'pago_fecha' => $explode[1],
-                              'pago_valor' => $explode[2],
-                              'pago_metodo' => 'Archivo'
-                           );
-                           //acá hay que hacer las validaciones
-
-
-                           if ($this->codegen_model->add('est_pagos',$data) == TRUE) {
-                               $success++;
-                           } else {
-                               $error++;
-                           }
-                       }
-
-                   }
-
-                   fclose($file);               
-                   $this->session->set_flashdata('infomessage', 'Se cargaron '.$success.' con éxito y '.$error. 'con errores');
-                   redirect(base_url().'index.php/pagos/add');
-
-               } else {
-                 $this->data['errormessage'] =$this->upload->display_errors(); 
-               }  
-
-              $data = array(
-                    'banc_nombre' => $this->input->post('nombre'),
-                    'banc_descripcion' => $this->input->post('descripcion')
-
-                 );
-                 
-    			    
-
-                
+              $this->data['style_sheets']= array(
+                        'css/chosen.css' => 'screen',
+                        'css/plugins/bootstrap/fileinput.css' => 'screen'
+                    );
+              $this->data['javascripts']= array(
+                        'js/chosen.jquery.min.js',
+                        'js/plugins/bootstrap/fileinput.min.js'
+                    );    
+              
               $this->template->set('title', 'Cargar archivo de pagos');
               $this->template->load($this->config->item('admin_template'),'pagos/pagos_add', $this->data);
              
@@ -140,6 +93,105 @@ class Pagos extends MY_Controller {
 
   }	
 
+  function doadd()
+  {
+      if ($this->ion_auth->logged_in()) {
+
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/add')) {
+               
+              $path = 'uploads/pagos/'.date('d-m-Y');
+               if(!is_dir($path)) { //create the folder if it's not already exists
+                   mkdir($path,0777,TRUE);      
+               }
+               $config['upload_path'] = $path;
+               $config['allowed_types'] = 'txt';
+               $config['remove_spaces']=TRUE;
+               $config['max_size']    = '2048';
+               $config['overwrite']    = TRUE;
+
+               //inicializa la variable que guardara los mensajes de :
+               //información
+               $msjInfo='';       
+
+
+               $this->load->library('upload');
+               $this->upload->initialize($config);  
+
+               if ($this->upload->do_upload("archivo")) {
+         
+                    $file_data= $this->upload->data();
+                    $success=0;
+                    $error=0;
+
+                    $path2 = $path."/".$file_data['raw_name'].".txt";
+                    $string = file_get_contents($path2);
+                    $file = fopen($path2,"r");
+                    while(!feof($file)) {
+                        $linea = fgets($file);
+                        $explode = explode(',', $linea);
+
+                        $resultado = $this->codegen_model->get('est_pagos','pago_id','pago_facturaid = '."'$explode[0]'",1,NULL,true);
+                        if (!$resultado) {                               
+                            $data = array(
+                               'pago_facturaid' => $explode[0],
+                               'pago_fecha' => $explode[1],
+                              'pago_valor' => $explode[2],
+                               'pago_metodo' => 'Archivo'
+                            );
+                           //acá hay que hacer las validaciones
+         
+         
+                           if ($this->codegen_model->add('est_pagos',$data) == TRUE) {
+                               $success++;
+                            } else {
+                               $error++;
+                           }
+                       }else 
+                           {                 
+                                //valida que no sea una linea en blanco
+                                //o sin codigo para no almacenar el mensaje vacio
+                                 if($explode[0])
+                                {
+                                      $msjInfo .= 'El pago de la factura No. '.$explode[0]. ' ya fue registrado.<br>';
+                                 }                                
+                            }
+         
+                    }
+         
+                    fclose($file);               
+         
+                   //Valida si la cantidad de pagos en error o exito
+                   //se alteraron para cargar el mensaje de exito
+                   if($error > 0 || $success > 0)
+                   {
+                       $this->session->set_flashdata('successmessage', 'Se cargaron '.$success.' pagos con éxito y '.$error. ' con errores');                                                               
+                   }
+                                
+         
+               } else {
+                     $err = $this->upload->display_errors(); 
+                    $this->session->set_flashdata('errormessage', $err);                                                                
+                             
+                }  
+                          
+              //carga el mensaje de información si existe
+               if($msjInfo != '')
+                {                            
+                    $this->session->set_flashdata('infomessage', $msjInfo);
+               } 
+                    
+                         
+              redirect(base_url().'index.php/pagos/add');
+
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+
+      } else {
+          redirect(base_url().'index.php/users/login');
+      }
+
+  }
 
 	function edit()
   {    

@@ -140,3 +140,13 @@ footer{
 	background-color: #00635D;
 	color: #FFFFFF;
 }
+
+
+.navbar-brand {
+    padding: 4.5px;
+}
+
+.logoImagen {
+  width: 250px;
+  height: 40px;
+}

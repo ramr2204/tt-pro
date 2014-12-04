@@ -103,11 +103,11 @@ class Estampillas extends MY_Controller {
                  
                        if ($this->codegen_model->add('est_estampillas',$data) == TRUE) {
 
-                           $this->session->set_flashdata('message', 'El estampilla se ha creado con éxito');
+                           $this->session->set_flashdata('message', 'La estampilla se ha creado con éxito');
                            redirect(base_url().'index.php/estampillas/add');
                        } else {
 
-                           $this->data['errormessage'] = 'No se pudo registrar el estampilla';
+                           $this->data['errormessage'] = 'No se pudo registrar la estampilla';
 
                        }
                                                           
@@ -150,7 +150,7 @@ class Estampillas extends MY_Controller {
 
               $idestampilla = ($this->uri->segment(3)) ? $this->uri->segment(3) : $this->input->post('id') ;
               if ($idestampilla==''){
-                  $this->session->set_flashdata('infomessage', 'Debe elegir un estampilla para editar');
+                  $this->session->set_flashdata('infomessage', 'Debe elegir una estampilla para editar');
                   redirect(base_url().'index.php/estampillas');
               }
               $resultado = $this->codegen_model->get('est_estampillas','estm_cuenta','estm_id = '.$idestampilla,1,NULL,true);
@@ -211,14 +211,11 @@ class Estampillas extends MY_Controller {
 
                        );
                   }
-                  // echo "<pre>";
-                  // print_r($data);
-                  // echo "</pre>";         
+                          
                 	if ($this->codegen_model->edit('est_estampillas',$data,'estm_id',$idestampilla) == TRUE) {
 
-                      $this->session->set_flashdata('successmessage', 'El estampilla se ha editado con éxito');
-                      //redirect(base_url().'index.php/estampillas/edit/'.$idestampilla);
-                      
+                      $this->data['successmessage']='La estampilla se ha editado con éxito';
+                     
                 	} else {
                 				  
                       $this->data['errormessage'] = 'No se pudo registrar la estampilla';
@@ -240,7 +237,7 @@ class Estampillas extends MY_Controller {
                         'js/chosen.jquery.min.js',
                         'js/plugins/bootstrap/fileinput.min.js'
                         );    
-                  $this->data['successmessage']=$this->session->flashdata('successmessage');
+                  
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
                 	$this->data['result'] = $this->codegen_model->get('est_estampillas','estm_id,estm_nombre,estm_cuenta,estm_descripcion,estm_bancoid,estm_rutaimagen','estm_id = '.$idestampilla,1,NULL,true);
                   $this->data['bancos']  = $this->codegen_model->getSelect('par_bancos','banc_id,banc_nombre');
@@ -255,6 +252,7 @@ class Estampillas extends MY_Controller {
       }
         
   }
+
 	function cobros()
   {    
       if ($this->ion_auth->logged_in()) {

@@ -7,7 +7,7 @@ class Codegen_model extends CI_Model
     }
 
     
-    function get($table,$fields,$where='',$perpage=0,$start=0,$one=false,$array='array',$join='')
+    function get($table,$fields,$where='',$perpage=0,$start=0,$one=false,$array='array',$tablaJoin='', $condicionJoin='')
     {
         
         $this->db->select($fields);
@@ -16,13 +16,31 @@ class Codegen_model extends CI_Model
         if($where){
         $this->db->where($where);
         }
-        if($join){
-        $this->db->join($join);
+        if($tablaJoin){
+        $this->db->join($tablaJoin, $condicionJoin);
         }
         $query = $this->db->get();
         
         $result =  !$one  ? $query->result($array) : $query->row() ;
         return $result;
+    }
+
+    //Funcion que extrae coincidencias de una tabla según
+    //una cadena especificada
+    function getLike($table,$fields,$like='',$match='',$where='')
+    {
+        
+        $this->db->select($fields);
+        $this->db->from($table);
+        $this->db->like($like, $match);        
+
+        if($where!='')
+        {
+          $this->db->where($where);
+        }
+
+        $query = $this->db->get();
+        return $query;
     }
     
     function add($table,$data)
@@ -80,12 +98,18 @@ class Codegen_model extends CI_Model
     }
 
 
-    function max($table, $field, $where='')
+    function max($table, $field, $where='', $tablaJoin='', $equivalentesJoin='')
      {
         $this->db->select_max($field);
         if($where){
         $this->db->where($where);
         }
+
+        if($tablaJoin and $equivalentesJoin)
+        {
+            $this->db->join($tablaJoin, $equivalentesJoin);
+        }
+
         $query = $this->db->get($table);
         if ($query->num_rows() > 0) {
            return $query->row_array(); //return the row as an associative array
@@ -93,9 +117,31 @@ class Codegen_model extends CI_Model
            return FALSE;
     }
 
-    function getSelect($table,$fields,$where='',$join='')
+
+    function min($table, $field, $where='', $tablaJoin='', $equivalentesJoin='')
+     {
+        $this->db->select_min($field);
+        if($where){
+        $this->db->where($where);
+        }
+
+        if($tablaJoin and $equivalentesJoin)
+        {
+            $this->db->join($tablaJoin, $equivalentesJoin);
+        }
+
+        $query = $this->db->get($table);
+        if ($query->num_rows() > 0) {
+           return $query->row_array(); //return the row as an associative array
+        }
+           return FALSE;
+    }
+
+
+
+    function getSelect($table,$fields,$where='',$join='', $group='', $orderBy='')
     {
-        $query = $this->db->query("SELECT ".$fields."  FROM ".$table." ".$join." ".$where." ");
+        $query = $this->db->query("SELECT ".$fields."  FROM ".$table." ".$join." ".$where." ".$group." ".$orderBy);
         return $query->result();
     }
 
@@ -136,7 +182,7 @@ class Codegen_model extends CI_Model
     } else {
         if ($accion=='UPDATE') {
             foreach ($valores as $key => $value) {
-                echo $field_list.=$key.',';   
+                $field_list.=$key.',';   
             }
             $field_list = substr($field_list, 0, - 1);
         } else {
