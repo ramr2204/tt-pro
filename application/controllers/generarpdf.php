@@ -213,7 +213,7 @@ class Generarpdf extends CI_controller {
 
                   //aqui se configura la carpeta contenedora
                   //del repositorio para cargar la ruta absoluta
-                  $this->data['rep'] = 'estampillas_mike';
+                  $this->data['rep'] = 'estampillas';
 
 
                   
