@@ -25,12 +25,12 @@ $lang['error_csrf'] = 'Esta forma no pasó nuestras pruebas de seguridad.';
 
 // Login
 $lang['login_heading']         = 'Ingresar';
-$lang['login_subheading']      = 'Por favor ingresa con tu email y contraseña.';
+$lang['login_subheading']      = 'Por favor ingrese su e-mail y contraseña.';
 $lang['login_identity_label']  = 'Email:';
 $lang['login_password_label']  = 'Contraseña:';
-$lang['login_remember_label']  = 'Recuérdame:';
+$lang['login_remember_label']  = 'Recordarme:';
 $lang['login_submit_btn']      = 'Ingresar';
-$lang['login_forgot_password'] = 'Olvidaste tu contraseña?';
+$lang['login_forgot_password'] = 'Olvidó su contraseña?';
 
 // Index
 $lang['index_heading']           = 'Usuarios';
@@ -48,7 +48,7 @@ $lang['index_create_group_link'] = 'Crear nuevo grupo';
 
 // Deactivate User
 $lang['deactivate_heading']                  = 'Desactivar usuario';
-$lang['deactivate_subheading']               = 'Estás seguro que quieres desactivar al usuario \'%s\'';
+$lang['deactivate_subheading']               = 'Está seguro que quiere desactivar al usuario \'%s\'';
 $lang['deactivate_confirm_y_label']          = 'Si:';
 $lang['deactivate_confirm_n_label']          = 'No:';
 $lang['deactivate_submit_btn']               = 'Enviar';
@@ -57,7 +57,7 @@ $lang['deactivate_validation_user_id_label'] = 'identificación de usuario';
 
 // Create User
 $lang['create_user_heading']                           = 'Crear Usuario';
-$lang['create_user_subheading']                        = 'Por favor registra la informacion del usuario.';
+$lang['create_user_subheading']                        = 'Por favor registre la informacion del usuario.';
 $lang['create_user_fname_label']                       = 'Nombre:';
 $lang['create_user_lname_label']                       = 'Apellido:';
 $lang['create_user_company_label']                     = 'Compañía:';
@@ -78,14 +78,14 @@ $lang['create_user_validation_password_confirm_label'] = 'Confirmación de contr
 
 // Edit User
 $lang['edit_user_heading']                           = 'Editar Usuario';
-$lang['edit_user_subheading']                        = 'Por favor registra la informacion del usuario abajo.';
+$lang['edit_user_subheading']                        = 'Por favor registre la informacion del usuario abajo.';
 $lang['edit_user_fname_label']                       = 'Nombre:';
 $lang['edit_user_lname_label']                       = 'Apellido:';
 $lang['edit_user_company_label']                     = 'Compañia:';
 $lang['edit_user_email_label']                       = 'Email:';
 $lang['edit_user_phone_label']                       = 'Telefono:';
-$lang['edit_user_password_label']                    = 'Contraseña: (si quieres cambiarla)';
-$lang['edit_user_password_confirm_label']            = 'Confirmar contraseña: (si quieres cambiarla)';
+$lang['edit_user_password_label']                    = 'Contraseña: (si quiere cambiarla)';
+$lang['edit_user_password_confirm_label']            = 'Confirmar contraseña: (si quiere cambiarla)';
 $lang['edit_user_groups_heading']                    = 'Miembro de grupos';
 $lang['edit_user_submit_btn']                        = 'Guardar Usuario';
 $lang['edit_user_validation_fname_label']            = 'Nombre';
@@ -102,7 +102,7 @@ $lang['edit_user_validation_password_confirm_label'] = 'Confirmacion de contrase
 // Create Group
 $lang['create_group_title']                  = 'Crear Grupo';
 $lang['create_group_heading']                = 'Crear Grupo';
-$lang['create_group_subheading']             = 'Por favor registra la informacion del grupo abajo.';
+$lang['create_group_subheading']             = 'Por favor registre la informacion del grupo abajo.';
 $lang['create_group_name_label']             = 'Nombre de Grupo:';
 $lang['create_group_desc_label']             = 'Descripción:';
 $lang['create_group_submit_btn']             = 'Crear Grupo';
@@ -113,7 +113,7 @@ $lang['create_group_validation_desc_label']  = 'Descripción';
 $lang['edit_group_title']                  = 'Editar Grupo';
 $lang['edit_group_saved']                  = 'Grupo Guardado';
 $lang['edit_group_heading']                = 'Editar Grupo';
-$lang['edit_group_subheading']             = 'Por favor registra la información del grupo abajo.';
+$lang['edit_group_subheading']             = 'Por favor registre la información del grupo abajo.';
 $lang['edit_group_name_label']             = 'Nombre de Grupo:';
 $lang['edit_group_desc_label']             = 'Descripción:';
 $lang['edit_group_submit_btn']             = 'Guardar Grupo';
@@ -132,7 +132,7 @@ $lang['change_password_validation_new_password_confirm_label'] = 'Confirmar Nuev
 
 // Forgot Password
 $lang['forgot_password_heading']                 = 'Recuperar ontraseña';
-$lang['forgot_password_subheading']              = 'Por favor ingresa tu %s para que podamos enviarte la información para restablecer tu contraseña.';
+$lang['forgot_password_subheading']              = 'Por favor ingrese su %s para que podamos enviarle la información para restablecer su contraseña.';
 $lang['forgot_password_email_label']             = '%s:';
 $lang['forgot_password_submit_btn']              = 'Enviar';
 $lang['forgot_password_validation_email_label']  = 'Correo Electrónico';
@@ -150,15 +150,15 @@ $lang['reset_password_validation_new_password_confirm_label'] = 'Confirmar Nueva
 
 // Activation Email
 $lang['email_activate_heading']    = 'Activar cuenta por %s';
-$lang['email_activate_subheading'] = 'Por favor ingresa a este enlace para %s.';
-$lang['email_activate_link']       = 'activar tu cuenta';
+$lang['email_activate_subheading'] = 'Por favor ingrese a este enlace para %s.';
+$lang['email_activate_link']       = 'activar su cuenta';
 
 // Forgot Password Email
 $lang['email_forgot_password_heading']    = 'Reestablecer contraseña para %s';
-$lang['email_forgot_password_subheading'] = 'Por favor ingresa a este enlace para %s.';
-$lang['email_forgot_password_link']       = 'Restablecer Tu Contraseña';
+$lang['email_forgot_password_subheading'] = 'Por favor ingrese a este enlace para %s.';
+$lang['email_forgot_password_link']       = 'Restablecer Su Contraseña';
 
 // New Password Email
 $lang['email_new_password_heading']    = 'Nueva contraseña para %s';
-$lang['email_new_password_subheading'] = 'Tu contraseña ha sido restablecida a: %s';
+$lang['email_new_password_subheading'] = 'Su contraseña ha sido restablecida a: %s';
 
