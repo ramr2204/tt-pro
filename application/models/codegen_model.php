@@ -197,9 +197,16 @@ class Codegen_model extends CI_Model
     $field_list='';
     if ($id==0) { 
            $database = $this->db->database; 
-           $query = $this->db->query("SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE  TABLE_NAME = '$tabla' AND TABLE_SCHEMA = '$database'");
+           $query = $this->db->query("select k.column_name "
+               ."FROM information_schema.table_constraints t "
+               ."JOIN information_schema.key_column_usage k "
+               ."USING(constraint_name,table_schema,table_name) "
+               ."WHERE t.constraint_type='PRIMARY KEY'"
+               ."AND t.table_schema='".$database."'"
+               ."AND t.table_name='".$tabla."'");
+
            $result=$query->row();
-           $id=$result->AUTO_INCREMENT;
+           $id=$result->column_name;
            $datos_anteriores='';
     } else {
         if ($accion=='UPDATE') {
