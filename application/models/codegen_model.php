@@ -167,6 +167,27 @@ class Codegen_model extends CI_Model
 
     }
 
+
+    function registerAccesos($accion='')
+    {         
+         $datos = array('loga_fecha' => date('Y-m-d H:i:s',now()),
+                        'loga_tabla' => 'session',
+                        'logacodigonombre' => 'no_aplica',
+                        'loga_codigoid' => 0,
+                        'loga_valoresanteriores' => 'no_aplica',
+                        'loga_valoresnuevos' => 'no_aplica',
+                        'loga_accion' =>  $accion,
+                        'loga_ip' => $this->input->ip_address(),
+                        'loga_usuarioid' => $this->ion_auth->get_user_id()
+                     );
+
+
+
+        $this->db->insert('adm_logactividades', $datos); 
+
+    }
+
+
     function addlog($tabla,$accion,$id,$valores=array())
     {
 
