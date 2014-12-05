@@ -167,7 +167,8 @@ class Codegen_model extends CI_Model
 
     }
 
-
+    //Función que registra el log de autenticación
+    //en el sistema
     function registerAccesos($accion='')
     {         
          $datos = array('loga_fecha' => date('Y-m-d H:i:s',now()),

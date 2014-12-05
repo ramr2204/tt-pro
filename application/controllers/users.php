@@ -136,6 +136,11 @@ class Users extends MY_Controller {
 	{
 		$this->data['title'] = "Logout";
 
+		//llama al metodo de registro de log
+		//en el modelo				
+		$this->codegen_model->registerAccesos('log_out');
+
+
 		//log the user out
 		$logout = $this->ion_auth->logout();
 
