@@ -160,13 +160,7 @@
           </li>
 
        <?php endforeach; ?> 
-      <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-check"></i> Liquidador<b class="caret"></b></a>
-            <ul class="dropdown-menu">
-                <li><a href="<?php echo base_url(); ?>liquidaciones/liquidar">Liquidar contratos</a></li>
-                <li><a href="<?php echo base_url(); ?>liquidaciones/liquidartramites">Liquidar trámites</a></li>
-              </ul>
-          </li>
+      
       </ul>
 
         <?php } ?>
