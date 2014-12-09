@@ -45,46 +45,43 @@ class Codegen_model extends CI_Model
     
     function add($table,$data)
     {
-         
-         $this->db->insert($table, $data);         
-
-                  if ($this->db->affected_rows() == '1')
-                  {   
-                      $this->addlog($table,'INSERT',0,$data);
-                      return TRUE;
-                  }     
-
-                  return FALSE; 
-             
-         				      
+        $this->addlog($table,'INSERT',0,$data);
+        $this->db->insert($table, $data);         
+        if ($this->db->affected_rows() == '1')
+        {
+            return TRUE;
+        }
+    
+        return FALSE;       
     }
     
     function edit($table,$data,$fieldID,$ID)
-    {        
+    {
+        $this->addlog($table,'UPDATE',$ID,$data);
         $this->db->where($fieldID,$ID);
         $this->db->update($table, $data);
 
         if ($this->db->affected_rows() >= 0)
-		{
-            $this->addlog($table,'UPDATE',$ID,$data);
-			return TRUE;
-		}
-		
-		return FALSE;       
+        {
+            return TRUE;
+        }
+    
+        return FALSE;       
     }
     
     function delete($table,$fieldID,$ID)
-    {       
-       $this->db->where($fieldID,$ID);
+    {
+        $this->addlog($table,'DELETE',$ID);
+        $this->db->where($fieldID,$ID);
         $this->db->delete($table);
         if ($this->db->affected_rows() == '1')
-		{
-            $this->addlog($table,'DELETE',$ID);
-			return TRUE;
-		}
-		
-		return FALSE;        
+        {
+            return TRUE;
+        }
+    
+        return FALSE;        
     }   
+  
 
 	
 	function count($table)
