@@ -74,8 +74,6 @@ class Tramites extends MY_Controller {
                } 
 
 
-
-
               if ($this->form_validation->run() == false) {
 
                   $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);

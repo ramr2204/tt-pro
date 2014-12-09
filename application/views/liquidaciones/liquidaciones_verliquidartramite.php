@@ -29,6 +29,10 @@
  </thead>
  <tbody>
    
+   <?php if(isset($idtramite)){?>
+   <input class="form-control" id="idtramite" type="hidden" name="idtramite" value="<?php echo $idtramite; ?>"/>
+   <?php }?>
+
  <tr>
      <td colspan="4"><h1>Liquidación</h1></td>
 </tr>
