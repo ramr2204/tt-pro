@@ -74,11 +74,7 @@ class Generarpdf extends CI_controller {
             
                // set font
                $pdf->SetFont('times', 'BI', 10);
-               
-               //aqui se configura la carpeta contenedora
-               //del repositorio para cargar la ruta absoluta
-               $this->data['rep'] = 'estampillas-pro';    
-               
+                                                              
                foreach ($this->data['facturas'] as $key => $value) { 
                 $pdf->AddPage();
                 $numerofactura=str_pad($value->fact_id, 10, '0', STR_PAD_LEFT);
@@ -153,10 +149,6 @@ class Generarpdf extends CI_controller {
                // set font
                $pdf->SetFont('times', 'BI', 10);
 
-               //aqui se configura la carpeta contenedora
-               //del repositorio para cargar la ruta absoluta
-               $this->data['rep'] = 'estampillas-pro';
-                   
                
                foreach ($this->data['facturas'] as $key => $value) { 
                 $pdf->AddPage();
@@ -216,12 +208,7 @@ class Generarpdf extends CI_controller {
 
                   
               
-                  $estampilla=$this->data['estampilla'];
-
-                  //aqui se configura la carpeta contenedora
-                  //del repositorio para cargar la ruta absoluta
-                  $this->data['rep'] = 'estampillas-pro';
-
+                  $estampilla=$this->data['estampilla'];  
 
                   
                   $this->load->library("Pdf");
