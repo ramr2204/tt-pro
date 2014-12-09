@@ -84,7 +84,7 @@ class Users extends MY_Controller {
             {
               redirect(base_url().'index.php/users/login');
             }
-    }
+    } 
 	//log the user in
 	function login()
 	{
@@ -102,8 +102,13 @@ class Users extends MY_Controller {
 
 			if ($this->ion_auth->login($this->input->post('identity'), $this->input->post('password'), $remember))
 			{
+
+				//llama al metodo de registro de log
+				//en el modelo				
+				$this->codegen_model->registerAccesos('log_in');
+
 				//if the login is successful
-				//redirect them back to the home page
+				//redirect them back to the home page				
 				$this->session->set_flashdata('successmessage', $this->ion_auth->messages());
 				redirect(base_url().'liquidaciones/liquidar', 'refresh');
 			}
@@ -130,6 +135,11 @@ class Users extends MY_Controller {
 	function logout()
 	{
 		$this->data['title'] = "Logout";
+
+		//llama al metodo de registro de log
+		//en el modelo				
+		$this->codegen_model->registerAccesos('log_out');
+
 
 		//log the user out
 		$logout = $this->ion_auth->logout();

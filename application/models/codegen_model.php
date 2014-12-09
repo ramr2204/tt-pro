@@ -45,24 +45,28 @@ class Codegen_model extends CI_Model
     
     function add($table,$data)
     {
-        $this->addlog($table,'INSERT',0,$data);
-        $this->db->insert($table, $data);         
-        if ($this->db->affected_rows() == '1')
-		{
-			return TRUE;
-		}
-		
-		return FALSE;       
+         
+         $this->db->insert($table, $data);         
+
+                  if ($this->db->affected_rows() == '1')
+                  {   
+                      $this->addlog($table,'INSERT',0,$data);
+                      return TRUE;
+                  }     
+
+                  return FALSE; 
+             
+         				      
     }
     
     function edit($table,$data,$fieldID,$ID)
-    {
-        $this->addlog($table,'UPDATE',$ID,$data);
+    {        
         $this->db->where($fieldID,$ID);
         $this->db->update($table, $data);
 
         if ($this->db->affected_rows() >= 0)
 		{
+            $this->addlog($table,'UPDATE',$ID,$data);
 			return TRUE;
 		}
 		
@@ -70,12 +74,12 @@ class Codegen_model extends CI_Model
     }
     
     function delete($table,$fieldID,$ID)
-    {
-       $this->addlog($table,'DELETE',$ID);
+    {       
        $this->db->where($fieldID,$ID);
         $this->db->delete($table);
         if ($this->db->affected_rows() == '1')
 		{
+            $this->addlog($table,'DELETE',$ID);
 			return TRUE;
 		}
 		
@@ -167,6 +171,28 @@ class Codegen_model extends CI_Model
 
     }
 
+    //Función que registra el log de autenticación
+    //en el sistema
+    function registerAccesos($accion='')
+    {         
+         $datos = array('loga_fecha' => date('Y-m-d H:i:s',now()),
+                        'loga_tabla' => 'session',
+                        'logacodigonombre' => 'no_aplica',
+                        'loga_codigoid' => 0,
+                        'loga_valoresanteriores' => 'no_aplica',
+                        'loga_valoresnuevos' => 'no_aplica',
+                        'loga_accion' =>  $accion,
+                        'loga_ip' => $this->input->ip_address(),
+                        'loga_usuarioid' => $this->ion_auth->get_user_id()
+                     );
+
+
+
+        $this->db->insert('adm_logactividades', $datos); 
+
+    }
+
+
     function addlog($tabla,$accion,$id,$valores=array())
     {
 
@@ -175,9 +201,16 @@ class Codegen_model extends CI_Model
     $field_list='';
     if ($id==0) { 
            $database = $this->db->database; 
-           $query = $this->db->query("SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE  TABLE_NAME = '$tabla' AND TABLE_SCHEMA = '$database'");
+           $query = $this->db->query("select k.column_name "
+               ."FROM information_schema.table_constraints t "
+               ."JOIN information_schema.key_column_usage k "
+               ."USING(constraint_name,table_schema,table_name) "
+               ."WHERE t.constraint_type='PRIMARY KEY'"
+               ."AND t.table_schema='".$database."'"
+               ."AND t.table_name='".$tabla."'");
+
            $result=$query->row();
-           $id=$result->AUTO_INCREMENT;
+           $id=$result->column_name;
            $datos_anteriores='';
     } else {
         if ($accion=='UPDATE') {

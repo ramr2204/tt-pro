@@ -83,13 +83,13 @@
 
 <header class="cabecera">
       <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-3 contLogo">
           <div align="center"> 
-            
+            <img src="<?php echo base_url(); ?>/images/logo_presentacion.png" alt="bitbahia.com" class="img-responsive logoLogin">
           </div>
         </div>
         <div class="col-md-9" >
-          <p style="font-size: 55px; padding-top: 4%">
+          <p style="font-size: 35px; padding-top: 2.5%;">
             Sistema De Información De Estampillas PRO
           </p>
         </div>
@@ -123,7 +123,7 @@
 
 
 
-       <?php foreach($nav_procesos as $key_proceso => $value_proceso) : ?>
+       <?php  foreach($nav_procesos as $key_proceso => $value_proceso) : ?>
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <span class="glyphicon glyphicon-folder-close"></span> <?php echo $value_proceso['proc_nombre']; ?><b class="caret"></b> </a>
             <ul class="dropdown-menu">
@@ -160,13 +160,7 @@
           </li>
 
        <?php endforeach; ?> 
-      <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-check"></i> Liquidador<b class="caret"></b></a>
-            <ul class="dropdown-menu">
-                <li><a href="<?php echo base_url(); ?>liquidaciones/liquidar">Liquidar contratos</a></li>
-                <li><a href="<?php echo base_url(); ?>liquidaciones/liquidartramites">Liquidar trámites</a></li>
-              </ul>
-          </li>
+      
       </ul>
 
         <?php } ?>
@@ -260,7 +254,7 @@
           <center>
             <br/>
             <p style="font-size: 20px;">
-                Thomas Greg & Sons | de Colombia S.A. © 2014
+                Thomas Greg & Sons de Colombia S.A. © 2014
             </p>
 
           </center>
