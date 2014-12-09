@@ -9,7 +9,7 @@ class Pagos extends MY_Controller {
 		$this->load->model('codegen_model','',TRUE);
 
 	}	
-	
+	 
 	function index(){
 		$this->manage();
 	}

@@ -8,7 +8,7 @@
 *   @version           2014-05-20
 *
 */
-
+ 
 class Liquidaciones extends MY_Controller {
     
   function __construct() 
@@ -1119,7 +1119,7 @@ function verliquidartramite()
               $validacionPapeleriaAsignada = $this->codegen_model->getSelect('est_papeles',
                   'pape_codigoinicial, pape_codigofinal', ' where pape_usuario = '.$usuarioLogueado->id);
 
-              
+               
               if($validacionPapeleriaAsignada)
               {
 
@@ -1134,27 +1134,8 @@ function verliquidartramite()
                            $codigo='00000000';
 
                            $ObjetoFactura = $this->liquidaciones_model->getfacturaIndividual($idFactura);
-//////////////////
 
-do{
-                                              $codificacion = $this->generadorIdEstampilla($ObjetoFactura[0]->fact_estampillaid, $ObjetoFactura[0]->liqu_nit);
 
-                                              $data = array(
-                                              'impr_codigopapel' => $nuevoingreso,
-                                              'impr_papelid' => $idRangoCodigo,
-                                              'impr_facturaid' => $ObjetoFactura[0]->fact_id,
-                                              'impr_observaciones' => 'Correcta',
-                                              'impr_fecha' => date('Y-m-d H:i:s',now()),
-                                              'impr_codigo' => $codigo,
-                                              'impr_estampillaid' => $codificacion,
-                                              'impr_estado' => '1'
-                                              );
-
-}while(!$ref = $this->codegen_model->add('est_impresiones',$data));
-
-echo $ref; exit();
-/////////////////                           
- 
                            //extrae el ultimo codigo de papeleria resgistrado
                            //en las impresiones para el liquidador autenticado
                            $tablaJoin='est_papeles';
@@ -1236,7 +1217,25 @@ echo $ref; exit();
                                 if (!$impresiones)
                                 {
                                     
-                                    $codificacion = $this->generadorIdEstampilla($ObjetoFactura[0]->fact_estampillaid, $ObjetoFactura[0]->liqu_nit);
+                                     do{  
+  
+                                         $c=0;
+                                         $m=0;           
+                                         $codificacion = $this->generadorIdEstampilla($ObjetoFactura[0]->fact_estampillaid, $ObjetoFactura[0]->liqu_nit);                                               
+
+                                         $codes=$this->codegen_model->getSelect('est_impresiones','impr_estampillaid');
+
+                                         foreach ($codes as $code) 
+                                         {
+                                              if($codificacion != $code->impr_estampillaid)
+                                              {
+                                               $c++;          
+                                              }
+                                              $m++;
+                                         }                                                                                                                               
+
+                                      }while($c != $m);
+                                    
 
                                     $data = array(
                                     'impr_codigopapel' => $nuevoingreso,
@@ -1329,7 +1328,25 @@ echo $ref; exit();
                                          $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado,impr_codigopapel','impr_facturaid = '.$ObjetoFactura[0]->fact_id,1,NULL,true);
                                          if (!$impresiones)
                                          {
-                                              $codificacion = $this->generadorIdEstampilla($ObjetoFactura[0]->fact_estampillaid, $ObjetoFactura[0]->liqu_nit);
+                                              
+                                              do{  
+  
+                                                  $c=0;
+                                                  $m=0;           
+                                                  $codificacion = $this->generadorIdEstampilla($ObjetoFactura[0]->fact_estampillaid, $ObjetoFactura[0]->liqu_nit);                                               
+                                         
+                                                  $codes=$this->codegen_model->getSelect('est_impresiones','impr_estampillaid');
+
+                                                  foreach ($codes as $code) 
+                                                  {
+                                                       if($codificacion != $code->impr_estampillaid)
+                                                       {
+                                                        $c++;          
+                                                       }
+                                                       $m++;
+                                                  }                                                                                                                               
+
+                                               }while($c != $m);
 
                                               $data = array(
                                               'impr_codigopapel' => $nuevoingreso,

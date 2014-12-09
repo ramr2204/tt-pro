@@ -123,7 +123,7 @@
 
 
 
-       <?php foreach($nav_procesos as $key_proceso => $value_proceso) : ?>
+       <?php  foreach($nav_procesos as $key_proceso => $value_proceso) : ?>
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <span class="glyphicon glyphicon-folder-close"></span> <?php echo $value_proceso['proc_nombre']; ?><b class="caret"></b> </a>
             <ul class="dropdown-menu">

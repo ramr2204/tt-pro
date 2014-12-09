@@ -84,7 +84,7 @@ class Users extends MY_Controller {
             {
               redirect(base_url().'index.php/users/login');
             }
-    }
+    } 
 	//log the user in
 	function login()
 	{

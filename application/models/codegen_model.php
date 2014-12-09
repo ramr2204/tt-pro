@@ -45,15 +45,18 @@ class Codegen_model extends CI_Model
     
     function add($table,$data)
     {
-        
-        $this->db->insert($table, $data);         
-        if ($this->db->affected_rows() == '1')
-		{   
-            $this->addlog($table,'INSERT',0,$data);
-			return TRUE;
-		}
-		
-		return FALSE;       
+         
+         $this->db->insert($table, $data);         
+
+                  if ($this->db->affected_rows() == '1')
+                  {   
+                      $this->addlog($table,'INSERT',0,$data);
+                      return TRUE;
+                  }     
+
+                  return FALSE; 
+             
+         				      
     }
     
     function edit($table,$data,$fieldID,$ID)
