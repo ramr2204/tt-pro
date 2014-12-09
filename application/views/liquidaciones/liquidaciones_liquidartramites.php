@@ -267,7 +267,7 @@ var oTable = $('#tablaq').dataTable( {
 <script type="text/javascript">
   
             var ID = <?php echo $idtramite; ?>;
-            
+           
            $('.liquida').load('<?php echo base_url(); ?>index.php/liquidaciones/verliquidartramite/'+ID,function(result){
             
             $('#myModal').modal('show');

@@ -109,7 +109,7 @@ class Liquidaciones extends MY_Controller {
                         'js/plugins/bootstrap/fileinput.min.js',
                         'js/plugins/bootstrap/bootstrap-switch.min.js'
                        );
-             
+       
               $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_liquidartramites', $this->data);
               
           } else {
@@ -743,6 +743,7 @@ function verliquidartramite()
                  $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
                  $valortotal+=$totalestampilla[$value->estm_id];
               }
+              $this->data['idtramite']=$idliquidacion;
               $this->data['est_totalestampilla']=$totalestampilla;
               $this->data['cnrt_valorsiniva']=$salarioMinimoDiario;
               $this->data['est_valortotal']=$valortotal;
