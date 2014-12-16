@@ -275,6 +275,7 @@ class Contratos extends MY_Controller {
                                
                       $result = json_decode($response);
                       $contratos = $result->contratos;
+                      $contratistas = $result->contratistas;
                                             
                   }
 
@@ -287,22 +288,30 @@ class Contratos extends MY_Controller {
                   $contratistas_falloimpotacion=0;
                    
                   //Se extraen los nombres de los campos
-                  //pre-formateados en la API
+                  //pre-formateados en la API para los contratos
                   foreach ($contratos[0] as $key => $value) 
                    {                       
-                       $campos[] = $key;                    
+                       $camposContratos[] = $key;                    
+                   } 
+
+
+                  //Se extraen los nombres de los campos
+                  //pre-formateados en la API para los contratistas
+                  foreach ($contratistas[0] as $key => $value) 
+                   {                       
+                       $camposContratistas[] = $key;                    
                    } 
                    
                   //Recorre los contratos obtenidos del API
                   //y verifica que el contrato no exista en
                   //la base de datos local 
-                  foreach ($contratos as $contrato) {
+                  foreach ($contratos as $contrato) 
+                  {
                       
-                      if ($contrato) {
+                      if ($contrato) 
+                      {
                       
-                          $datos_contrato = $this->codegen_model->get('con_contratos','cntr_id','cntr_numero = '.$contrato->cntr_numero.' AND cntr_vigencia = '.$contrato->cntr_vigencia,1,NULL,true);
-                          //$datos_contratista = $this->codegen_model->get('con_contratistas','cont_id','cont_nit = '.$contrato->nit_contratista,1,NULL,true);
-
+                          $datos_contrato = $this->codegen_model->get('con_contratos','cntr_id','cntr_numero = '.$contrato->cntr_numero.' AND cntr_vigencia = '.$contrato->cntr_vigencia,1,NULL,true);                          
 
                           // cargamos contratos nuevos
                           if (!$datos_contrato) 
@@ -312,7 +321,7 @@ class Contratos extends MY_Controller {
                               $data = array();
                               //Crea el arreglo para el query según los campos
                               //codificados en el API
-                              foreach ($campos as $value) 
+                              foreach ($camposContratos as $value) 
                               {
                                    $data [$value] = $contrato->$value;
                               }
@@ -326,21 +335,35 @@ class Contratos extends MY_Controller {
                               }
 
                           }
-exit();
+
+                      }
+                  }
+
+                  
+                  //Recorre los contratistas obtenidos del API
+                  //y verifica que el contratista no exista en
+                  //la base de datos local 
+                  foreach ($contratistas as $contratista) 
+                  {
+                      
+                      if ($contratista) 
+                      {
+                          $datos_contratista = $this->codegen_model->get('con_contratistas','cont_id','cont_nit = '.$contratistas->cont_nit,1,NULL,true);
 
                           // cargamos contratistas nuevos
-                          if ($datos_contratista) {
-                            //el contratista ya se encuentra en la base de datos
-                          } else {
-                              
+                          if (!$datos_contratista) {
+                                                                               
                               $contratistas_nuevos++;
-                              $datos = array(
-                                  'cont_nit' => $contrato->nit_contratista,
-                                  'cont_nombre' => $contrato->nombre_contratista,
-                                  'cont_regimenid' => $contrato->regimen,
-                                  'cont_direccion' => $contrato->direccion
-                              );
-                              // echo "<pre>"; print_r($data); echo "</pre>";
+
+                              $data = array();
+                              //Crea el arreglo para el query según los campos
+                              //codificados en el API
+                              foreach ($camposContratistas as $value) 
+                              {
+                                   $data [$value] = $contratistas->$value;
+                              }
+                              print_r($data);
+                                                      
                               if ($this->codegen_model->add('con_contratistas',$datos) == TRUE) {
                                   $contratistas_importados++;     
                               } else {
@@ -349,12 +372,12 @@ exit();
                               }
 
                           }
-                                
-                                  
+
         
                       }
-             
                   }
+             
+                  exit();
                    if ($contratos_importados>0 || $contratistas_nuevos>0) {
                        $this->session->set_flashdata('successmessage', 'Se importaron '.$contratos_importados.' contratos y '.$contratistas_importados.' contratistas con éxito');
                    }
