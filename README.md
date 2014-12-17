@@ -10,6 +10,8 @@ Instalacion del aplicativo Estampillas-Pro
 
 - La aplicacion hace uso de la bases de datos ***estampillas_pro***, las cuales debe estar instalada en el servidor *MySQL* para que la aplicacion pueda funcionar.
 
+- La aplicacion hace uso de un WEB SERVICE para actualizar la base de datos local de contratos, para ello utiliza la funcionalidad CURL de php en la cual se especifica una ruta absoluta a dicha API y se envía el parametro vige ´´´http://192.168.77.19/siscon/main/modulos/informes/general/contratos.php?vige=".$vigencia´´´, en caso de que el aplicativo SISCON sea movido de servidor o de directorio se deberá modificar dicha ruta en ```estampillas/application/controllers/contratos.php:264´´´ para garantizar la correcta importación de contratos.
+
 
 ### Pasos de instalacion
 
