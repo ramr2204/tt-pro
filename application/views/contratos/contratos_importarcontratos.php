@@ -38,7 +38,7 @@
                                       <br><br>
                                     <div class="pull-right">
                                      <?php  echo anchor('contratos', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
-                                    <button type="submit" class="btn btn-success"><i class="fa fa-level-down"></i> Importar</button>
+                                    <button type="submit" id="cargaImportacion" class="btn btn-success ladda-button" data-style="expand-right"><i class="fa fa-level-down"></i> <span class="ladda-label">Importar</span></button>
                                     </div>
                                 <?php echo form_close();?>
                               

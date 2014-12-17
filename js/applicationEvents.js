@@ -38,8 +38,18 @@ function inicial ()
   //Eventos Reasignar Papeleria
   $('#btn-confirmarReassign').click(establecerDatosElegidos);
 
+  //Eventos Importar Contratos
+  $('#cargaImportacion').click(iniciarCarga);
+
 }
 
+//Funcion que activa el boton ladda
+//para simulacion de carga
+function iniciarCarga (e) 
+{    
+    var l = Ladda.create(this);
+    l.start();        
+}
 
 
  //función que realiza el autocompletar

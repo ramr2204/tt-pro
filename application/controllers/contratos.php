@@ -254,6 +254,31 @@ class Contratos extends MY_Controller {
               } else {    
 
                   $vigencia=$this->input->post('vigencia');
+                 
+                  //WEB SERVICE a contratos en SISCON
+                  if (function_exists('curl_init')) 
+                  {
+                      
+                      $ch = curl_init();
+                      //asignamos la direccion al cual se conecta
+                      curl_setopt($ch, CURLOPT_URL,"http://192.168.77.19/siscon/main/modulos/informes/general/contratos.php?vige=".$vigencia);
+                      //el tiempo maximo de respuesta
+                      curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+                      //hace que cada que realice la peticion cree una nueva
+                      curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);                      
+                      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                      curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                      // se guarda el resultado obtenido
+                      $response = curl_exec ($ch);
+                      curl_close($ch);
+                      //se imprime
+                               
+                      $result = json_decode($response);
+                      $contratos = $result->contratos;
+                      $contratistas = $result->contratistas;
+                                            
+                  }
+
 
                   $contratos_nuevos=0;
                   $contratos_importados=0;
@@ -261,39 +286,112 @@ class Contratos extends MY_Controller {
                   $contratistas_nuevos=0;
                   $contratistas_importados=0;
                   $contratistas_falloimpotacion=0;
+                   
+                  //Se extraen los nombres de los campos
+                  //pre-formateados en la API para los contratos
+                  foreach ($contratos[0] as $key => $value) 
+                   {                       
+                       $camposContratos[] = $key;                    
+                   } 
 
-                  $this->load->library('rest', array(
-                          'server' => 'http://190.121.133.172:81/siscon/main/modulos/informes/general/contratos.php',
-                          //'http_user' => 'admin',
-                          //'http_pass' => '1234',
-                          //'http_auth' => 'basic' // or 'digest'
-                      ));
-     
-                  $contratos = $this->rest->get('v_contrato', array('v_contrato' => $vigencia), 'json');
-                  foreach ($contratos as $key => $value) {
-                      $contrato=json_decode($value);
-                      if ($contrato) {
+
+                  //Se extraen los nombres de los campos
+                  //pre-formateados en la API para los contratistas
+                  foreach ($contratistas[0] as $key => $value) 
+                   {                       
+                       $camposContratistas[] = $key;                    
+                   } 
+                   
+                  //Recorre los contratos obtenidos del API
+                  //y verifica que el contrato no exista en
+                  //la base de datos local 
+                  foreach ($contratos as $contrato) 
+                  {
                       
-                          $datos_contrato = $this->codegen_model->get('con_contratos','cntr_id','cntr_numero = '.$contrato->nro_contrato.' AND cntr_vigencia = '.$contrato->a_contrato,1,NULL,true);
-                          $datos_contratista = $this->codegen_model->get('con_contratistas','cont_id','cont_nit = '.$contrato->nit_contratista,1,NULL,true);
-
+                      if ($contrato) 
+                      {
+                      
+                          $datos_contrato = $this->codegen_model->get('con_contratos','cntr_id','cntr_numero = '.$contrato->cntr_numero.' AND cntr_vigencia = '.$contrato->cntr_vigencia,1,NULL,true);                          
 
                           // cargamos contratos nuevos
-                          if ($datos_contrato) {
-                            //el contrato ya se encuentra en la base de datos
-                          } else {
-                              
+                          if (!$datos_contrato) 
+                          {           
+
+                               //Recorre los contratistas obtenidos del API
+                               //y verifica que el contratista no exista en
+                               //la base de datos local 
+                               foreach ($contratistas as $contratista) 
+                               {
+                                   
+                                   if ($contratista->contrato_remoto == $contrato->contrato_remoto ) 
+                                   {
+                                       $datos_contratista = $this->codegen_model->get('con_contratistas','cont_id','cont_nit = '.$contratista->cont_nit,1,NULL,true);
+             
+                                       // cargamos contratistas nuevos
+                                       if (!$datos_contratista) 
+                                       {
+                                                                                            
+                                           $contratistas_nuevos++;
+             
+                                           $data = array();
+                                           //Crea el arreglo para el query según los campos
+                                           //codificados en el API                              
+                                           foreach ($camposContratistas as $value) 
+                                           {    
+                                                if($value != 'contrato_remoto')
+                                                {
+                                                    $data [$value] = $contratista->$value; 
+                                                }
+                                                
+                                           }
+                                           
+                                                                   
+                                           if ($this->codegen_model->add('con_contratistas',$data) == TRUE) {
+                                               $contratistas_importados++;     
+
+                                               //capturamos el id del nuevo contratista
+                                               //para establecerlo como foreign key
+                                               //en el contrato que se importará
+                                               $tistaid=$this->db->insert_id();
+                                           } else {
+             
+                                               $contratistas_falloimpotacion=0;
+                                           }
+             
+                                        }else
+                                            {
+                                                 $tistaid=$datos_contratista->cont_id; 
+                                            }
+             
+                                        //sale del foreach de los contratistas si encontró
+                                        //coincidencia
+                                        break;  
+                                    }
+                                } 
+
+
                               $contratos_nuevos++;
-                              $data = array(
-                                  'cntr_contratistaid' => $contrato->id_contratista,
-                                  'cntr_tipocontratoid' => $contrato->id_tipo_contrato,
-                                  'cntr_fecha_firma' => $contrato->fecha_firma,
-                                  'cntr_numero' => $contrato->nro_contrato,
-                                  'cntr_objeto' => $contrato->objeto,
-                                  'cntr_valor' => $contrato->valor_contrato,
-                                  'cntr_vigencia' => $contrato->a_contrato,
-                              );
-                              // echo "<pre>"; print_r($data); echo "</pre>";
+
+                              //se establece el id del contratista nuevo o existente
+                              //en la bd local como foreign key del contrato importado
+                              $contrato->cntr_contratistaid = $tistaid;
+                              
+                              $data = array();
+                              //Crea el arreglo para el query según los campos
+                              //codificados en el API
+                              foreach ($camposContratos as $value) 
+                              {    
+                                   if($value != 'contrato_remoto')
+                                   {
+                                       $data [$value] = $contrato->$value; 
+                                   }
+                                   
+                              } 
+                              //establece el estado local del contrato
+                              //como no liquidado
+                              $data['cntr_estadolocalid'] = 0;
+                              
+                              
                               if ($this->codegen_model->add('con_contratos',$data) == TRUE) {
                                   $contratos_importados++;     
                               } else {
@@ -303,34 +401,10 @@ class Contratos extends MY_Controller {
 
                           }
 
-
-                          // cargamos contratistas nuevos
-                          if ($datos_contratista) {
-                            //el contratista ya se encuentra en la base de datos
-                          } else {
-                              
-                              $contratistas_nuevos++;
-                              $datos = array(
-                                  'cont_nit' => $contrato->nit_contratista,
-                                  'cont_nombre' => $contrato->nombre_contratista,
-                                  'cont_regimenid' => $contrato->regimen,
-                                  'cont_direccion' => $contrato->direccion
-                              );
-                              // echo "<pre>"; print_r($data); echo "</pre>";
-                              if ($this->codegen_model->add('con_contratistas',$datos) == TRUE) {
-                                  $contratistas_importados++;     
-                              } else {
-
-                                  $contratistas_falloimpotacion=0;
-                              }
-
-                          }
-                                
-                                  
-        
                       }
-             
-                  }
+                  }                  
+                  
+                               
                    if ($contratos_importados>0 || $contratistas_nuevos>0) {
                        $this->session->set_flashdata('successmessage', 'Se importaron '.$contratos_importados.' contratos y '.$contratistas_importados.' contratistas con éxito');
                    }
