@@ -28,6 +28,7 @@ var oTable = $('#tablaq').dataTable( {
 "bServerSide": true,
 "sAjaxSource": "<?php echo base_url(); ?>index.php/liquidaciones/liquidaciones_dataTable",
 "sServerMethod": "POST",
+"iDisplayLength": 5,
 "aoColumns": [ 
                       { "sClass": "center","bVisible": false}, /*id 0*/
                       { "sClass": "center","sWidth": "6%" }, 
@@ -35,16 +36,22 @@ var oTable = $('#tablaq').dataTable( {
                       { "sClass": "item" },
                       { "sClass": "item" },
                       { "sClass": "item" },  
-                      { "sClass": "money" },
-                      { "sClass": "item",},
+                      { "sClass": "money"},
+                      { "sClass": "item"},
                       { "sClass": "center","bSortable": false,"bSearchable": false},
 
                     
             ],   
 "fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+  if(aData[5] != null)
+  {
+      $("td:eq(4)", nRow).html('<div class="small">' + aData[5].substr( 0, 130 )+ '...</div>');
+  }else
+      {
+           $("td:eq(4)", nRow).html('<div class="small">NO REGISTRA...</div>');     
+      }
 
-  $("td:eq(4)", nRow).html('<div class="small">' + aData[5].substr( 0, 130 )+ '...</div>');
-
+  
    
   var number= accounting.formatMoney(aData[6], "$", 2, ".", ","); // €4.999,99
   $("td:eq(5)", nRow).html('<div class="">' + number + '</div>');
@@ -54,7 +61,8 @@ var oTable = $('#tablaq').dataTable( {
    if (aData[7]=='Liquidado') {
    $("td:eq(7)", nRow).html('<a href="#" class="btn btn-primary btn-xs pagar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-money"></i></a>');
   }
-  if (aData[7]==null) {
+  if (aData[7]==null) { 
+   $("td:eq(6)", nRow).html('<div>Sin Liquidar</div>'); 
    $("td:eq(7)", nRow).html('<a href="#" class="btn btn-danger btn-xs liquidar" title="Liquidar" id="'+aData[0]+'"><i class="fa fa-file-excel-o"></i></a>');
   }
 

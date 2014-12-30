@@ -36,7 +36,14 @@ var oTable = $('#tablaq').dataTable( {
             ],   
 "fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
 
-  $("td:eq(5)", nRow).html('<div>' + aData[5].substr( 0, 130 )+ '...</div>');
+if(aData[5] != null)
+  {
+      $("td:eq(5)", nRow).html('<div class="small">' + aData[5].substr( 0, 130 )+ '...</div>');
+  }else
+      {
+           $("td:eq(5)", nRow).html('<div class="small">NO REGISTRA...</div>');     
+      }
+
 
  }             
    });
