@@ -147,7 +147,7 @@ var oTable = $('#tablaq').dataTable( {
 
 );
     
-    //oTable.fnSearchHighlighting();
+    oTable.fnSearchHighlighting();
     
 
 } );
