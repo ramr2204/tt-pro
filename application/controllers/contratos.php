@@ -261,7 +261,8 @@ class Contratos extends MY_Controller {
                       
                       $ch = curl_init();
                       //asignamos la direccion al cual se conecta
-                      curl_setopt($ch, CURLOPT_URL,"http://192.168.77.19/siscon/main/modulos/informes/general/contratos.php?vige=".$vigencia);
+                      //direccion a servidor 19 de pruebas -->http://192.168.77.19/siscon/main/modulos/informes/general/contratos.php?vige=".$vigencia
+                      curl_setopt($ch, CURLOPT_URL,"http://190.121.133.172:81/siscon/main/modulos/informes/general/contratos.php?vige=".$vigencia);
                       //el tiempo maximo de respuesta
                       curl_setopt($ch, CURLOPT_TIMEOUT, 30);
                       //hace que cada que realice la peticion cree una nueva
@@ -273,7 +274,7 @@ class Contratos extends MY_Controller {
                       curl_close($ch);
                       //se imprime
                                
-                      $result = json_decode($response);
+                      $result = json_decode($response); 
                       $contratos = $result->contratos;
                       $contratistas = $result->contratistas;
                                             
