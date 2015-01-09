@@ -54,6 +54,29 @@ var oTable = $('#tablaq').dataTable( {
             $("#idtramite").val(ID);
              $('.liquida').load('<?php echo base_url(); ?>index.php/liquidaciones/verliquidartramite/'+ID,function(result){
               $('#myModal').modal({show:true});
+
+              //Eventos liquidar tramites-temporal
+              $('.calcular').blur(actualizarTotal); 
+              function actualizarTotal(e)
+              { 
+                  var total = 0;
+
+                  $('.calcular').map(function(){      
+
+                      if($(this).val()!='')
+                      {
+                          total += parseInt($(this).val());   
+                      }else
+                          {
+                              total += 0;  
+                          }                
+                      
+                  });
+
+                  $('#valortotal').val(total);
+                  
+              }
+
              });
          });
        $(".pagar").on('click', function(event) {
@@ -271,6 +294,28 @@ var oTable = $('#tablaq').dataTable( {
            $('.liquida').load('<?php echo base_url(); ?>index.php/liquidaciones/verliquidartramite/'+ID,function(result){
             
             $('#myModal').modal('show');
+
+            //Eventos liquidar tramites-temporal
+              $('.calcular').blur(actualizarTotal); 
+              function actualizarTotal(e)
+              { 
+                  var total = 0;
+
+                  $('.calcular').map(function(){      
+
+                      if($(this).val()!='')
+                      {
+                          total += parseInt($(this).val());   
+                      }else
+                          {
+                              total += 0;  
+                          }                
+                      
+                  });
+
+                  $('#valortotal').val(total);
+                  
+              }
           
         });
         
