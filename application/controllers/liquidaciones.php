@@ -405,18 +405,31 @@ class Liquidaciones extends MY_Controller {
                   $success=0;
                   $referenciaCargados='';
                   for ($i=0; $i < $numeroarchivos; $i++) {
-                      $pago=$this->input->post('pago'.$i);
-                      
+                 
+                    //Si se envia el pago en el checkbox
+                    //permitira entrar a la consulta 
+                    //para crear la factura, de lo contrario
+                    //creará una bandera
+                    if(isset($_POST['pago'.$i]))
+                    {
+                        $pago = $this->input->post('pago'.$i);  
+                    }else
+                        {
+                            $pago = 'flag'  ;
+                        }
+                   
+                    
                       $idfactura=$this->input->post('facturaid'.$i);
                       $config['file_name']=$idfactura.'_'.date("F_d_Y");
                       $this->upload->initialize($config);
-                      if ($pago) {
+
+                      if ($pago != 'flag') {
                         $datos = array(
                                  'pago_facturaid' => $idfactura,
                                  'pago_fecha' => date("Y-m-d H:i:s"),
                                  'pago_valor' => $pago,
                                  'pago_metodo' => 'manual',
-                               );
+                               );echo 'debe';
                         $this->codegen_model->add('est_pagos',$datos);
                       }
                       
