@@ -41,7 +41,10 @@ function inicial ()
   //Eventos Importar Contratos
   $('#cargaImportacion').click(iniciarCarga);
 
+  
+
 }
+
 
 //Funcion que activa el boton ladda
 //para simulacion de carga

@@ -74,6 +74,29 @@ var oTable = $('#tablaq').dataTable( {
             $("#idcontrato").val(ID);
              $('.liquida').load('<?php echo base_url(); ?>index.php/liquidaciones/liquidarcontrato/'+ID,function(result){
               $('#myModal').modal({show:true});
+
+              //Eventos liquidar contratos-temporal
+              $('.calcular').blur(actualizarTotal); 
+              function actualizarTotal(e)
+              { 
+                  var total = 0;
+
+                  $('.calcular').map(function(){      
+
+                      if($(this).val()!='')
+                      {
+                          total += parseInt($(this).val());   
+                      }else
+                          {
+                              total += 0;  
+                          }                
+                      
+                  });
+
+                  $('#valortotal').val(total);
+                  
+              }
+
              });
          });
        $(".pagar").on('click', function(event) {
