@@ -1137,7 +1137,8 @@ function consultar()
               $this->template->set('title', 'Listado de Liquidaciones');
               $this->data['style_sheets']= array(
                             'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen',
-                            'css/plugins/bootstrap/fileinput.css' => 'screen'                            
+                            'css/plugins/bootstrap/fileinput.css' => 'screen',
+                            'css/applicationStyles.css' => 'screen'                             
                         );
               $this->data['javascripts']= array(
                         'js/jquery.dataTables.min.js',
@@ -1518,6 +1519,13 @@ function consultar()
       }        
   }
 
+
+/**
+* Funcion que extrae las estampillas y sus respectivos valores
+* para la vista de consultar liquidaciones
+* Mike Ortiz
+*/
+
   function extraerFacturas()
   {    
        $liquidacion = $this->input->post('id');
@@ -1532,6 +1540,19 @@ function consultar()
        }
     
        echo json_encode($vector_facturas); 
+  }
+
+
+/**
+* Funcion que ordena la renderizacion o no del PDF
+* de las liquidaciones de la fecha especificada
+* Mike Ortiz
+*/
+
+  function renderizarPDF($value='')
+  {
+      
+      echo "asd"  ;
   }
 
 }

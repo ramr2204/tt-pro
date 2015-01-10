@@ -69,11 +69,11 @@ var oTable = $('#tablaq').dataTable( {
                                     null,
                                     null,
                                     null,
+                                    null,
                                     {
-                                         type: "number",
+                                         type: "date",
                                          sSelector: "#buscarfecha"
                                     },
-                                    null,
                                     null,
                                     null
 
@@ -120,8 +120,14 @@ var oTable = $('#tablaq').dataTable( {
  </div>
 </div> 
 
-<div class="row"> 
-    <div class="col-xs-12 col-sm-2 col-sm-offset-10">Fecha:<div align="center" id="buscarfecha"></div></div>
+<div class="row">     
+    <div class="col-xs-12 col-sm-2 col-sm-offset-8">
+        Fecha:<div align="center" id="buscarfecha"></div>                
+    </div>              
+    <div class="col-xs-12 col-sm-2 btn-pdf">
+        <a class="btn btn-danger" id="btn-pdf" href="<?php echo base_url(); ?>index.php/liquidaciones/renderizarPDF" value="" target="_blank">PDF</a>
+    </div>
+
 </div>
             
 

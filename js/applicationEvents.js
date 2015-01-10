@@ -41,7 +41,12 @@ function inicial ()
   //Eventos Importar Contratos
   $('#cargaImportacion').click(iniciarCarga);
 
-  
+  $('#btn-pdf').click(function(e){
+    e.preventDefault();
+    var fecha = $('#buscarfecha').find(':text').val();
+    alert(fecha);
+  });
+    
 
 }
 
