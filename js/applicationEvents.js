@@ -42,9 +42,9 @@ function inicial ()
   $('#cargaImportacion').click(iniciarCarga);
 
   $('#btn-pdf').click(function(e){
-    e.preventDefault();
-    var fecha = $('#buscarfecha').find(':text').val();
-    alert(fecha);
+    e.preventDefault();    window.open(base_url+'index.php/liquidaciones/renderizarPDF');    
+ 
+    
   });
     
 
