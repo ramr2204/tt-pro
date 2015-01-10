@@ -243,7 +243,8 @@ class Liquidaciones extends MY_Controller {
                    'liqu_totalestampilla' => $this->input->post('totalestampillas'),
                    'liqu_valortotal' => $this->input->post('valortotal'),
                    'liqu_comentarios' => $this->input->post('comentarios'),
-                   'liqu_codigo' => $codigo
+                   'liqu_codigo' => $codigo,
+                   'liqu_fecha' => date('Y-m-d')
 
                  );
                   
@@ -788,7 +789,8 @@ function verliquidartramite()
                    'liqu_totalestampilla' => $this->input->post('totalestampillas'),
                    'liqu_valortotal' => $this->input->post('valortotal'),
                    'liqu_tipocontrato' => 'Tramite',
-                   'liqu_codigo' => $codigo
+                   'liqu_codigo' => $codigo,
+                   'liqu_fecha' => date('Y-m-d')
 
                  );
                   
@@ -1092,9 +1094,6 @@ function verliquidartramite()
 
 
 
-
-
-
   function liquidaciones_datatable ()
   { 
       if ($this->ion_auth->logged_in()) {
@@ -1118,6 +1117,74 @@ function verliquidartramite()
       }        
   }
 
+
+/**
+* Funcion que renderiza la vista de consulta de liquidaciones
+* Mike Ortiz
+*/
+
+function consultar()
+  {
+      if ($this->ion_auth->logged_in()){
+
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
+
+              $this->data['successmessage']=$this->session->flashdata('successmessage');
+              $this->data['errormessage']=$this->session->flashdata('errormessage');
+              $this->data['infomessage']=$this->session->flashdata('infomessage');
+                            
+              //template data
+              $this->template->set('title', 'Listado de Liquidaciones');
+              $this->data['style_sheets']= array(
+                            'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen',
+                            'css/plugins/bootstrap/fileinput.css' => 'screen'                            
+                        );
+              $this->data['javascripts']= array(
+                        'js/jquery.dataTables.min.js',
+                        'js/plugins/dataTables/dataTables.bootstrap.js',
+                        'js/jquery.dataTables.defaults.js',
+                        'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
+                        'js/accounting.min.js',
+                        'js/plugins/bootstrap/fileinput.min.js',
+                        'js/plugins/bootstrap/bootstrap-switch.min.js',
+                        'js/applicationEvents.js'
+                       );
+                                              
+              $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_consultar', $this->data);
+              
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+
+      } else {
+              redirect(base_url().'index.php/users/login');
+      }
+
+  }
+
+
+
+  function  consultas_dataTable ()
+  { 
+      if ($this->ion_auth->logged_in()) {
+          
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
+              
+              $this->load->library('datatables');
+              $this->datatables->select('l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha');
+              $this->datatables->from('est_liquidaciones l');  
+              $this->datatables->add_column('facturas','edess');
+              $this->datatables->add_column('edit', '-');
+              echo $this->datatables->generate();
+
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+               
+      } else{
+              redirect(base_url().'index.php/users/login');
+      }        
+  }
 
 
   function procesarConsecutivos()
@@ -1451,6 +1518,20 @@ function verliquidartramite()
       }        
   }
 
+  function extraerFacturas()
+  {    
+       $liquidacion = $this->input->post('id');
+       $where = 'where fact_liquidacionid = '.$liquidacion;
+       $resultado = $this->codegen_model->getSelect('est_facturas',"fact_nombre, fact_valor",$where);
+       
+       $vector_facturas['estampillas']='';
 
+       foreach ($resultado as $value) 
+       {
+          $vector_facturas['estampillas'] .= $value->fact_nombre.' ==> '.$value->fact_valor.'<br>';          
+       }
+    
+       echo json_encode($vector_facturas); 
+  }
 
 }
