@@ -14,7 +14,7 @@ class Liquidaciones extends MY_Controller {
   function __construct() 
   {
       parent::__construct();
-	    $this->load->library('form_validation');		
+	    $this->load->library('form_validation','Pdf');		
 		  $this->load->helper(array('form','url','codegen_helper'));
       $this->load->model('liquidaciones_model','',TRUE);
       $this->load->model('codegen_model','',TRUE);
@@ -243,7 +243,8 @@ class Liquidaciones extends MY_Controller {
                    'liqu_totalestampilla' => $this->input->post('totalestampillas'),
                    'liqu_valortotal' => $this->input->post('valortotal'),
                    'liqu_comentarios' => $this->input->post('comentarios'),
-                   'liqu_codigo' => $codigo
+                   'liqu_codigo' => $codigo,
+                   'liqu_fecha' => date('Y-m-d')
 
                  );
                   
@@ -429,7 +430,7 @@ class Liquidaciones extends MY_Controller {
                                  'pago_fecha' => date("Y-m-d H:i:s"),
                                  'pago_valor' => $pago,
                                  'pago_metodo' => 'manual',
-                               );echo 'debe';
+                               );
                         $this->codegen_model->add('est_pagos',$datos);
                       }
                       
@@ -788,7 +789,8 @@ function verliquidartramite()
                    'liqu_totalestampilla' => $this->input->post('totalestampillas'),
                    'liqu_valortotal' => $this->input->post('valortotal'),
                    'liqu_tipocontrato' => 'Tramite',
-                   'liqu_codigo' => $codigo
+                   'liqu_codigo' => $codigo,
+                   'liqu_fecha' => date('Y-m-d')
 
                  );
                   
@@ -1092,9 +1094,6 @@ function verliquidartramite()
 
 
 
-
-
-
   function liquidaciones_datatable ()
   { 
       if ($this->ion_auth->logged_in()) {
@@ -1118,6 +1117,106 @@ function verliquidartramite()
       }        
   }
 
+
+/**
+* Funcion que renderiza la vista de consulta de liquidaciones
+* Mike Ortiz
+*/
+
+function consultar()
+  {
+      if ($this->ion_auth->logged_in()){
+
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
+
+              $this->data['successmessage']=$this->session->flashdata('successmessage');
+              $this->data['errormessage']=$this->session->flashdata('errormessage');
+              $this->data['infomessage']=$this->session->flashdata('infomessage');
+                            
+              //template data
+              $this->template->set('title', 'Listado de Liquidaciones');
+              $this->data['style_sheets']= array(
+                            'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen',
+                            'css/plugins/bootstrap/fileinput.css' => 'screen',
+                            'css/applicationStyles.css' => 'screen'                             
+                        );
+              $this->data['javascripts']= array(
+                        'js/jquery.dataTables.min.js',
+                        'js/plugins/dataTables/dataTables.bootstrap.js',
+                        'js/jquery.dataTables.defaults.js',
+                        'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
+                        'js/accounting.min.js',
+                        'js/plugins/bootstrap/fileinput.min.js',
+                        'js/plugins/bootstrap/bootstrap-switch.min.js'                        
+                       );
+                                              
+              $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_consultar', $this->data);
+              
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+
+      } else {
+              redirect(base_url().'index.php/users/login');
+      }
+
+  }
+
+
+
+  function  consultas_dataTable ()
+  { 
+      if ($this->ion_auth->logged_in()) {
+          
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
+              
+              //Extrae los id de las facturas para las que se han hecho impresiones              
+              $usuario = $this->ion_auth->user()->row();
+              $where = 'where pape_usuario = '.$usuario->id;              
+              $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
+
+              $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid",$where,$join);
+         
+              //se extrae el vector con los id de las facturas
+              $idFacturas = '(';
+              foreach ($facturas as $factura) 
+              {
+                  $idFacturas .= $factura->impr_facturaid.',';
+              }  
+              $idFacturas .= '0)';
+              $where = 'where fact_id in '.$idFacturas;                            
+              
+              //Extrae los id de las liquidaciones
+              $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"distinct f.fact_liquidacionid",$where);
+
+              //se extrae el vector con los id de las liquidaciones
+              $idLiquidaciones = '(';
+              foreach ($liquidaciones as $liquidacion) 
+              {
+                  $idLiquidaciones .= $liquidacion->fact_liquidacionid.',';
+              }  
+              $idLiquidaciones .= '0)';
+              $whereIn = 'l.liqu_id in '.$idLiquidaciones;
+
+              $this->load->library('datatables');
+              $this->datatables->select('l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha');
+              $this->datatables->whereString($whereIn);
+              $this->datatables->from('est_liquidaciones l');  
+
+                           
+
+              $this->datatables->add_column('facturas','edess');
+              $this->datatables->add_column('edit', '-');
+              echo $this->datatables->generate();
+
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+               
+      } else{
+              redirect(base_url().'index.php/users/login');
+      }        
+  }
 
 
   function procesarConsecutivos()
@@ -1452,5 +1551,163 @@ function verliquidartramite()
   }
 
 
+/**
+* Funcion que extrae las estampillas y sus respectivos valores
+* para la vista de consultar liquidaciones
+* Mike Ortiz
+*/
+
+  function extraerFacturas()
+  {    
+       $liquidacion = $this->input->post('id');
+       $where = 'where fact_liquidacionid = '.$liquidacion;
+       $resultado = $this->codegen_model->getSelect('est_facturas',"fact_nombre, fact_valor",$where);
+       
+       $vector_facturas['estampillas']='';
+
+       foreach ($resultado as $value) 
+       {
+          $vector_facturas['estampillas'] .= $value->fact_nombre.' ==> '.$value->fact_valor.'<br>';          
+       }
+    
+       echo json_encode($vector_facturas); 
+  }
+
+
+/**
+* Funcion que ordena la renderizacion o no del PDF
+* de las liquidaciones de la fecha especificada
+* Mike Ortiz
+*/
+
+  function renderizarPDF()
+  {
+      if ($this->ion_auth->logged_in()) 
+      {
+          
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) 
+          { 
+              $fecha = $_GET['fecha'];
+
+              //Extrae los id de las facturas para las que se han hecho impresiones              
+              $usuario = $this->ion_auth->user()->row();
+              $where = 'where pape_usuario = '.$usuario->id;              
+              $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
+
+              $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid",$where,$join);
+         
+              //se extrae el vector con los id de las facturas
+              $idFacturas = '(';
+              foreach ($facturas as $factura) 
+              {
+                  $idFacturas .= $factura->impr_facturaid.',';
+              }  
+              $idFacturas .= '0)';
+              $where = 'where fact_id in '.$idFacturas;                            
+              
+              //Extrae los id de las liquidaciones
+              $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"distinct f.fact_liquidacionid",$where);
+
+              //se extrae el vector con los id de las liquidaciones
+              $idLiquidaciones = '(';
+              foreach ($liquidaciones as $liquidacion) 
+              {
+                  $idLiquidaciones .= $liquidacion->fact_liquidacionid.',';
+              }  
+              $idLiquidaciones .= '0)';
+              $whereIn = 'where l.liqu_id in '.$idLiquidaciones;
+
+
+              
+              $campos = 'l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha';
+              $where = $whereIn.' and l.liqu_fecha = '.'"'.$fecha.'"';
+
+              $liquidaciones = $this->codegen_model->getSelect('est_liquidaciones l',$campos,$where);
+              
+              if($liquidaciones)
+              {
+                  
+                  foreach ($liquidaciones as $liquidacion) 
+                  {
+                      $where = 'where fact_liquidacionid = '.$liquidacion->liqu_id;                      
+                      $resultado = $this->codegen_model->getSelect('est_facturas',"fact_nombre, fact_valor",$where);
+                      
+                      $facturas='';
+               
+                      foreach ($resultado as $value) 
+                      {
+                         $facturas .= $value->fact_nombre.' ==> '.$value->fact_valor.'<br>';          
+                      }
+
+                      $liquidacion->estampillas = $facturas;
+                  }
+                  
+                  $datos['liquidaciones'] = $liquidaciones;
+                  $datos['fecha'] = $fecha;
+                  //Creación del PDF
+                  $this->load->library("Pdf");                  
+                  $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+                  $pdf->setPageOrientation('l');
+
+                  // set document information
+                  $pdf->SetCreator(PDF_CREATOR);
+                  $pdf->SetAuthor('turrisystem');
+                  $pdf->SetTitle('Listado de Impresiones');
+                  $pdf->SetSubject('Gobernación del Tolima');
+                  $pdf->SetKeywords('estampillas,gobernación');
+                  $pdf->SetPrintHeader(false);
+                  $pdf->SetPrintFooter(false);
+                  // set default monospaced font
+                  $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+                  // set margins
+                  $pdf->setPageUnit('mm');
+                  $pdf->SetMargins(15, 5, 20, true);
+                  $pdf->SetHeaderMargin(0);
+                  $pdf->SetFooterMargin(0);
+      
+                  // set auto page breaks
+                  $pdf->SetAutoPageBreak(TRUE, 2);
+
+                  // set some language-dependent strings (optional)
+                  if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+                      require_once(dirname(__FILE__).'/lang/eng.php');
+                      $pdf->setLanguageArray($l);
+                  }
+               
+                  // ---------------------------------------------------------
+            
+                  // set font
+                   $pdf->SetFont('times', 'BI', 10);
+                   $pdf->AddPage();                  
+                   $html = $this->load->view('generarpdf/generarpdf_impresiones', $datos, TRUE);  
+                
+                   $pdf->writeHTML($html, true, false, true, false, '');
+           
+
+                  // ---------------------------------------------------------
+                  //para evitar el error de que se ha impreso algo antes de enviar
+                  //el PDF 
+                  ob_end_clean();
+                  //Close and output PDF document
+                  $pdf->Output('Impresiones_'.$fecha.'.pdf', 'I');
+
+
+              }else
+                  {   
+                      $this->session->set_flashdata('errormessage', 'La fecha elegida no presenta registros!'); 
+                      redirect(base_url().'index.php/liquidaciones/consultar');  
+                  }
+
+             
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+               
+      } else{
+              redirect(base_url().'index.php/users/login');
+      } 
+      
+  }
 
 }

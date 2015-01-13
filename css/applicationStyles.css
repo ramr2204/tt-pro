@@ -1,0 +1,18 @@
+/**
+* applicationStyles.css
+* Ruta:              /estampillas/css/applicationStyles.css
+* Fecha Creación:    10/Ene/2015
+*
+* Contiene los estilos de los objetos del DOM contenidos en las vistas 
+*
+*
+* @author           Michael Ortiz <michael.ortiz@turrisystem.com>
+* @copyright        2015 Michael Ortiz
+* @license          GPL 2 or later
+* @version          2015-01-10
+*
+*/
+
+.btn-pdf{
+  padding-top: 20px;	
+}

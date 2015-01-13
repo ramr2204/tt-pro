@@ -41,7 +41,17 @@ function inicial ()
   //Eventos Importar Contratos
   $('#cargaImportacion').click(iniciarCarga);
 
-  
+  $('#btn-pdf').click(function(e){
+    e.preventDefault();  
+    var fecha = $('#buscarfecha').find(':text').val();
+    
+    if(fecha != '')
+    {
+        window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha='+fecha);  
+    }    
+    
+  });
+    
 
 }
 
