@@ -10,20 +10,17 @@
 *
 */
 ?>
+<p><h1 style="text-align: center;">Sistema Estampillas-Pro, Impresiones <?php echo $liquidaciones[0]->liqu_fecha; ?></h1></p>
 
-<h1 style="text-align: center;">Listado de Impresiones para la Fecha <?php echo $fecha; ?></h1>
-<br>
-<br>
-<table class="table table-striped table-bordered table-hover" id="tablaq">
+<table border="1" style="text-align:center;">
     <thead>
         <tr>
             <th>Id</th>
             <th>Tipo Liquidación</th>
             <th>NIT</th>
             <th>Contratista</th>
-            <th>Total</th>            
-            <th>Estampillas</th>       
-            <th></th>                  
+            <th>Estampillas</th> 
+            <th>Total</th>                                                    
         </tr>
     </thead>
     <tbody>
@@ -32,9 +29,9 @@
             	<td><?php echo $liquidacion->liqu_id; ?></td>
             	<td><?php echo $liquidacion->liqu_tipocontrato; ?></td>
             	<td><?php echo $liquidacion->liqu_nit; ?></td>
-            	<td><?php echo $liquidacion->liqu_nombrecontratista; ?></td>
-            	<td><?php echo $liquidacion->liqu_valortotal; ?></td>
-            	<td><?php echo $liquidacion->estampillas; ?></td>            	
+            	<td><?php echo $liquidacion->liqu_nombrecontratista; ?></td>            	
+            	<td><?php echo $liquidacion->estampillas; ?></td>           
+            	<td><br><?php echo $liquidacion->liqu_valortotal; ?></td> 	
             </tr>
         <?php }?>	
     </tbody>       

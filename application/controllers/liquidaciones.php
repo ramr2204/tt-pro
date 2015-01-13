@@ -1170,9 +1170,41 @@ function consultar()
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
               
+              //Extrae los id de las facturas para las que se han hecho impresiones              
+              $usuario = $this->ion_auth->user()->row();
+              $where = 'where pape_usuario = '.$usuario->id;              
+              $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
+
+              $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid",$where,$join);
+         
+              //se extrae el vector con los id de las facturas
+              $idFacturas = '(';
+              foreach ($facturas as $factura) 
+              {
+                  $idFacturas .= $factura->impr_facturaid.',';
+              }  
+              $idFacturas .= '0)';
+              $where = 'where fact_id in '.$idFacturas;                            
+              
+              //Extrae los id de las liquidaciones
+              $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"distinct f.fact_liquidacionid",$where);
+
+              //se extrae el vector con los id de las liquidaciones
+              $idLiquidaciones = '(';
+              foreach ($liquidaciones as $liquidacion) 
+              {
+                  $idLiquidaciones .= $liquidacion->fact_liquidacionid.',';
+              }  
+              $idLiquidaciones .= '0)';
+              $whereIn = 'l.liqu_id in '.$idLiquidaciones;
+
               $this->load->library('datatables');
               $this->datatables->select('l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha');
+              $this->datatables->whereString($whereIn);
               $this->datatables->from('est_liquidaciones l');  
+
+                           
+
               $this->datatables->add_column('facturas','edess');
               $this->datatables->add_column('edit', '-');
               echo $this->datatables->generate();
@@ -1600,7 +1632,7 @@ function consultar()
 
                   // set margins
                   $pdf->setPageUnit('mm');
-                  $pdf->SetMargins(16, 2.5, 4.9, true);
+                  $pdf->SetMargins(20, 20, 20, true);
                   $pdf->SetHeaderMargin(0);
                   $pdf->SetFooterMargin(0);
       

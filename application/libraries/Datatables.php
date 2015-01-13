@@ -139,6 +139,21 @@
       $this->ci->db->where($key_condition, $val, $backtick_protect);
       return $this;
     }
+    
+
+    /**
+    * Generates the WHERE portion of the query
+    * Enabling to set where string    
+    * @param string $where    
+    * @return mixed
+    * Mike Ortiz 2015-01-13
+    */
+    public function whereString($where)
+    {      
+      $this->ci->db->where($where);
+      return $this;
+    }
+    
 
     /**
     * Generates the WHERE portion of the query
