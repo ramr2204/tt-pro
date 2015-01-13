@@ -125,7 +125,7 @@ var oTable = $('#tablaq').dataTable( {
         Fecha:<div align="center" id="buscarfecha"></div>                
     </div>              
     <div class="col-xs-12 col-sm-2 btn-pdf">
-        <a class="btn btn-danger" id="btn-pdf" href="#" target="_blank">PDF</a>
+        <a class="btn btn-danger" id="btn-pdf">PDF</a>
     </div>
 
 </div>

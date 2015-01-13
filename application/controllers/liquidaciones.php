@@ -14,7 +14,7 @@ class Liquidaciones extends MY_Controller {
   function __construct() 
   {
       parent::__construct();
-	    $this->load->library('form_validation');		
+	    $this->load->library('form_validation','Pdf');		
 		  $this->load->helper(array('form','url','codegen_helper'));
       $this->load->model('liquidaciones_model','',TRUE);
       $this->load->model('codegen_model','',TRUE);
@@ -430,7 +430,7 @@ class Liquidaciones extends MY_Controller {
                                  'pago_fecha' => date("Y-m-d H:i:s"),
                                  'pago_valor' => $pago,
                                  'pago_metodo' => 'manual',
-                               );echo 'debe';
+                               );
                         $this->codegen_model->add('est_pagos',$datos);
                       }
                       
@@ -1147,8 +1147,7 @@ function consultar()
                         'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
                         'js/accounting.min.js',
                         'js/plugins/bootstrap/fileinput.min.js',
-                        'js/plugins/bootstrap/bootstrap-switch.min.js',
-                        'js/applicationEvents.js'
+                        'js/plugins/bootstrap/bootstrap-switch.min.js'                        
                        );
                                               
               $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_consultar', $this->data);
@@ -1549,10 +1548,104 @@ function consultar()
 * Mike Ortiz
 */
 
-  function renderizarPDF($value='')
+  function renderizarPDF()
   {
+      if ($this->ion_auth->logged_in()) 
+      {
+          
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) 
+          { 
+              $fecha = $_GET['fecha'];
+              
+              $campos = 'l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha';
+              $where = 'where liqu_fecha = '.$fecha;
+
+              $liquidaciones = $this->codegen_model->getSelect('est_liquidaciones l',$campos,$where);
+              
+              if($liquidaciones)
+              {
+                  
+                  foreach ($liquidaciones as $liquidacion) 
+                  {
+                      $where = 'where fact_liquidacionid = '.$liquidacion->liqu_id;                      
+                      $resultado = $this->codegen_model->getSelect('est_facturas',"fact_nombre, fact_valor",$where);
+                      
+                      $facturas='';
+               
+                      foreach ($resultado as $value) 
+                      {
+                         $facturas .= $value->fact_nombre.' ==> '.$value->fact_valor.'<br>';          
+                      }
+
+                      $liquidacion->estampillas = $facturas;
+                  }
+                  
+                  $datos['liquidaciones'] = $liquidaciones;
+                  $datos['fecha'] = $fecha;
+                  //Creación del PDF
+                  $this->load->library("Pdf");                  
+                  $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+
+                  // set document information
+                  $pdf->SetCreator(PDF_CREATOR);
+                  $pdf->SetAuthor('turrisystem');
+                  $pdf->SetTitle('Listado de Impresiones');
+                  $pdf->SetSubject('Gobernación del Tolima');
+                  $pdf->SetKeywords('estampillas,gobernación');
+                  $pdf->SetPrintHeader(false);
+                  $pdf->SetPrintFooter(false);
+                  // set default monospaced font
+                  $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+                  // set margins
+                  $pdf->setPageUnit('mm');
+                  $pdf->SetMargins(16, 2.5, 4.9, true);
+                  $pdf->SetHeaderMargin(0);
+                  $pdf->SetFooterMargin(0);
       
-      echo "asd"  ;
+                  // set auto page breaks
+                  $pdf->SetAutoPageBreak(TRUE, 2);
+
+                  // set some language-dependent strings (optional)
+                  if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+                      require_once(dirname(__FILE__).'/lang/eng.php');
+                      $pdf->setLanguageArray($l);
+                  }
+               
+                  // ---------------------------------------------------------
+            
+                  // set font
+                   $pdf->SetFont('times', 'BI', 10);
+                   $pdf->AddPage();                  
+                   $html = $this->load->view('generarpdf/generarpdf_impresiones', $datos, TRUE);  
+                
+                   $pdf->writeHTML($html, true, false, true, false, '');
+           
+
+                  // ---------------------------------------------------------
+                  //para evitar el error de que se ha impreso algo antes de enviar
+                  //el PDF 
+                  ob_end_clean();
+                  //Close and output PDF document
+                  $pdf->Output('Impresiones_'.$fecha.'.pdf', 'I');
+
+
+              }else
+                  {   
+                      $this->session->set_flashdata('errormessage', 'La fecha elegida no presenta registros!'); 
+                      redirect(base_url().'index.php/liquidaciones/consultar');  
+                  }
+
+             
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+               
+      } else{
+              redirect(base_url().'index.php/users/login');
+      } 
+      
   }
 
 }
