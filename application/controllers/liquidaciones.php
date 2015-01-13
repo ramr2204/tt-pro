@@ -1588,9 +1588,39 @@ function consultar()
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) 
           { 
               $fecha = $_GET['fecha'];
+
+              //Extrae los id de las facturas para las que se han hecho impresiones              
+              $usuario = $this->ion_auth->user()->row();
+              $where = 'where pape_usuario = '.$usuario->id;              
+              $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
+
+              $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid",$where,$join);
+         
+              //se extrae el vector con los id de las facturas
+              $idFacturas = '(';
+              foreach ($facturas as $factura) 
+              {
+                  $idFacturas .= $factura->impr_facturaid.',';
+              }  
+              $idFacturas .= '0)';
+              $where = 'where fact_id in '.$idFacturas;                            
+              
+              //Extrae los id de las liquidaciones
+              $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"distinct f.fact_liquidacionid",$where);
+
+              //se extrae el vector con los id de las liquidaciones
+              $idLiquidaciones = '(';
+              foreach ($liquidaciones as $liquidacion) 
+              {
+                  $idLiquidaciones .= $liquidacion->fact_liquidacionid.',';
+              }  
+              $idLiquidaciones .= '0)';
+              $whereIn = 'where l.liqu_id in '.$idLiquidaciones;
+
+
               
               $campos = 'l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha';
-              $where = 'where liqu_fecha = '.$fecha;
+              $where = $whereIn.' and l.liqu_fecha = '.'"'.$fecha.'"';
 
               $liquidaciones = $this->codegen_model->getSelect('est_liquidaciones l',$campos,$where);
               
