@@ -1647,7 +1647,7 @@ function consultar()
                   //Creación del PDF
                   $this->load->library("Pdf");                  
                   $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
+                  $pdf->setPageOrientation('l');
 
                   // set document information
                   $pdf->SetCreator(PDF_CREATOR);
@@ -1662,7 +1662,7 @@ function consultar()
 
                   // set margins
                   $pdf->setPageUnit('mm');
-                  $pdf->SetMargins(20, 20, 20, true);
+                  $pdf->SetMargins(15, 5, 20, true);
                   $pdf->SetHeaderMargin(0);
                   $pdf->SetFooterMargin(0);
       

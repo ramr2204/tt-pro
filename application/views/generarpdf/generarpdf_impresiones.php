@@ -15,23 +15,23 @@
 <table border="1" style="text-align:center;">
     <thead>
         <tr>
-            <th>Id</th>
-            <th>Tipo Liquidación</th>
-            <th>NIT</th>
-            <th>Contratista</th>
-            <th>Estampillas</th> 
-            <th>Total</th>                                                    
+            <th style="width:15mm;">Id</th>
+            <th style="width:30mm;">Tipo Liquidación</th>
+            <th style="width:30mm;">NIT</th>
+            <th style="width:50mm;">Contratista</th>
+            <th style="width:120mm;">Estampillas</th> 
+            <th style="width:20mm;">Total</th>                                                    
         </tr>
     </thead>
     <tbody>
         <?php foreach ($liquidaciones as $liquidacion) {  ?>        	
             <tr>
-            	<td><?php echo $liquidacion->liqu_id; ?></td>
-            	<td><?php echo $liquidacion->liqu_tipocontrato; ?></td>
-            	<td><?php echo $liquidacion->liqu_nit; ?></td>
-            	<td><?php echo $liquidacion->liqu_nombrecontratista; ?></td>            	
-            	<td><?php echo $liquidacion->estampillas; ?></td>           
-            	<td><br><?php echo $liquidacion->liqu_valortotal; ?></td> 	
+            	<td style="width:15mm;"><?php echo $liquidacion->liqu_id; ?></td>
+            	<td style="width:30mm;"><?php echo $liquidacion->liqu_tipocontrato; ?></td>
+            	<td style="width:30mm;"><?php echo $liquidacion->liqu_nit; ?></td>
+            	<td style="width:50mm;"><?php echo $liquidacion->liqu_nombrecontratista; ?></td>            	
+            	<td style="text-align:left; width:120mm;"><?php echo $liquidacion->estampillas; ?></td>           
+            	<td style="width:20mm;"><br><?php echo $liquidacion->liqu_valortotal; ?></td> 	
             </tr>
         <?php }?>	
     </tbody>       
