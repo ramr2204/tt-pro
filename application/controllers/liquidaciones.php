@@ -1537,7 +1537,7 @@ function consultar()
             { 
                  mt_srand(strtotime(date('H:i:s')));
                  $alea = mt_rand();               
-                 $codificado = $tipoEstampilla.'-'.substr($nit, -5).date('d').date('m').date('y').substr($alea, -4);
+                 $codificado = '73-'.$tipoEstampilla.substr($nit, -5).date('d').date('m').date('y').substr($alea, -4);
                  
                  return $codificado;              
 
