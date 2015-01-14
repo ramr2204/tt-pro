@@ -56,7 +56,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        vertical-align: text-middle;">Nombre Contratista y/o Empresa</td>
+                        vertical-align: text-middle;"><br><br>Nombre y/o Empresa</td>
 
                     <td colspan="4" style="height: 9mm; width: 94mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
