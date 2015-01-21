@@ -251,6 +251,13 @@ class Liquidaciones extends MY_Controller {
               if ($this->codegen_model->add('est_liquidaciones',$data) == TRUE) {
               	  $liquidacionid=$this->db->insert_id();
                   for ($i=1; $i < $this->input->post('numeroestampillas'); $i++) { 
+                      
+                    //Valida si la factura viene en valor cero
+                    //no guarda factura
+                    $valor = $this->input->post('totalestampilla'.$i);
+
+                    if($valor > 0)
+                    {
                   	   $data = array(
                        'fact_nombre' => $this->input->post('nombreestampilla'.$i),
                        'fact_porcentaje' => $this->input->post('porcentaje'.$i),
@@ -262,6 +269,8 @@ class Liquidaciones extends MY_Controller {
                        'fact_rutaimagen' => $this->input->post('rutaimagen'.$i),
                        );
                   	   $this->codegen_model->add('est_facturas',$data);
+                    }
+                    
                   }
 
                  
