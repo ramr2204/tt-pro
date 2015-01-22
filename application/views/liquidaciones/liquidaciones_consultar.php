@@ -121,13 +121,19 @@ var oTable = $('#tablaq').dataTable( {
 </div> 
 
 <div class="row">     
-    <div class="col-xs-12 col-sm-2 col-sm-offset-8">
+    <div class="col-xs-12 col-sm-2 col-sm-offset-6">
         Fecha:<div align="center" id="buscarfecha"></div>                
-    </div>              
-    <div class="col-xs-12 col-sm-2 btn-pdf">
-        <a class="btn btn-danger" id="btn-pdf">PDF</a>
-    </div>
-
+    </div>   
+    <div class="col-xs-12 col-sm-4 btn-pdf">        
+        <a class="btn btn-danger" id="btn-relacion" >
+        <i class="fa fa-file-pdf-o fa-1x"></i>
+        Relación
+        </a>
+        <a class="btn btn-danger" id="btn-detalle">
+        <i class="fa fa-file-pdf-o fa-1x"></i>
+        Detalle
+        </a>
+    </div>               
 </div>
             
 
