@@ -38,7 +38,7 @@
                     <td class="text-center" id="leyenda_encabezado" colspan="2" style="height: 
                         19mm;width:110mm;                          
                         border-bottom: 0.5px solid black;
-                        font-size:9;"><br><br>GOBERNACIÓN DEL TOLIMA <br>SECRETARIA DE HACIENDA<br>DIRECCION FINANCIERA DE RENTAS E INGRESOS</td>
+                        font-size:9;"><br><br>GOBERNACIÓN DEL TOLIMA <br><span style="font-size:8px;">SECRETARIA DE HACIENDA<br>DIRECCION FINANCIERA DE RENTAS E INGRESOS</span></td>
 
                     <td style="height: 19mm; width: 26mm; 
                         border-bottom: 0.5px solid black;"><br><br><img id="logo_gobernador" src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima2.jpg" style="height: 13mm; width: 25mm;" ></td>
@@ -50,13 +50,97 @@
 <table><tr><td style="height: 12mm; color:white">espaciador</td></tr></table>
 
 
-<p>Ibagué <?php echo date('Y-m-d'); ?></p>
+
+
+
+
+
+
+
+
+<p>Ibagué, <?php 
+
+$diaNumero = date('d');
+$diaNombre = date('l');
+$mesNumero = date('m');
+
+switch ($diaNombre) 
+{
+    case 'Sunday': $diaNombre = 'Domingo';        
+        break;
+
+    case 'Monday': $diaNombre = 'Lunes';        
+        break;
+
+    case 'Tuesday': $diaNombre = 'Martes';        
+        break;
+
+    case 'Wednesday': $diaNombre = 'Miercoles';        
+        break;
+
+    case 'Thursday': $diaNombre = 'Jueves';        
+        break;
+
+    case 'Friday': $diaNombre = 'Viernes';        
+        break;
+
+    case 'Saturday': $diaNombre = 'Sabado';        
+        break;
+        
+}
+
+switch ($mesNumero) 
+{
+    case '01': $mesNombre = 'Enero';        
+        break;
+
+    case '02': $mesNombre = 'Febrero';        
+        break;
+
+    case '03': $mesNombre = 'Marzo';        
+        break;
+
+    case '04': $mesNombre = 'Abril';        
+        break;
+
+    case '05': $mesNombre = 'Mayo';        
+        break;
+
+    case '06': $mesNombre = 'Junio';        
+        break;
+
+    case '07': $mesNombre = 'Julio';        
+        break;
+
+    case '08': $mesNombre = 'Agosto';        
+        break;
+
+    case '09': $mesNombre = 'Septiembre';        
+        break;
+
+    case '10': $mesNombre = 'Octubre';        
+        break;
+
+    case '11': $mesNombre = 'Noviembre';        
+        break;
+
+    case '12': $mesNombre = 'Diciembre';        
+        break;
+        
+}
+
+$fechaNombres = $diaNombre.' '.$diaNumero.' de '.$mesNombre.' de '.date('Y');
+
+echo  strtoupper($diaNumero.' de '.$mesNombre.' de '.date('Y'));
+
+
+?></p>
 
 <table><tr><td style="height: 2mm; color:white">espaciador</td></tr></table>
 
 <p>
 Doctora<br>
-<b>LUZ MERY HERRERA RODRIGUEZ<b><br>
+<b>LUZ MERY HERRERA RODRIGUEZ</b><br>
 Directora Financiera de Tesorería<br>
 Gobernación del Tolima<br>
 Ibagué<br>
@@ -66,7 +150,7 @@ Ibagué<br>
    
 <p class="text-center">
 <b>RELACION ENTREGA DE ESTAMPILLAS</b><br>
-(MARTES 20  DE ENERO DE 2015)
+(<?php echo strtoupper($fechaNombres);?>)
 </p>
 
 
@@ -78,19 +162,19 @@ Ibagué<br>
             <td class="text-center" style="height: 5mm; width:50mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;">Tipo Estampilla</td>
+                        border-bottom: 0.5px solid black;"><b>Tipo Estampilla</b></td>
             <td class="text-center" style="height: 5mm; width:30mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;">Nro. Consignación</td>
+                        border-bottom: 0.5px solid black;"><b>Nro. Consignación</b></td>
             <td class="text-center" style="height: 5mm; width:30mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;">Valor en $</td>
+                        border-bottom: 0.5px solid black;"><b>Valor en $</b></td>
             <td class="text-center" style="height: 5mm; width:40mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;">Observaciones</td>            
+                        border-bottom: 0.5px solid black;"><b>Observaciones</b></td>            
         </tr>
         <?php $n=0;
         foreach ($liquidaciones as $liquidacion) {

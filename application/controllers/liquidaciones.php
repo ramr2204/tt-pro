@@ -1754,7 +1754,7 @@ function consultar()
 
               if($facturas)
               {
-                
+
               //se extrae el vector con los id de las facturas
               //asociadas a las impresiones para la fecha suministrada              
               $idFacturas = '(';
@@ -1832,7 +1832,7 @@ function consultar()
                   // ---------------------------------------------------------
             
                   // set font
-                   $pdf->SetFont('times', 'BI', 10);
+                   $pdf->SetFont('helvetica', '', 10);
                    $pdf->AddPage();                  
                    $html = $this->load->view('generarpdf/generarpdf_relacionEntregaEstampillas', $datos, TRUE);  
                 
