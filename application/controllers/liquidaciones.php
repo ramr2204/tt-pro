@@ -1753,8 +1753,7 @@ function consultar()
               $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid, DATE(i.impr_fecha) as fecha",$where,$join);
       
               //se extrae el vector con los id de las facturas
-              //asociadas a las impresiones para la fecha suministrada
-              $vectorIdEstampillas = [];
+              //asociadas a las impresiones para la fecha suministrada              
               $idFacturas = '(';
               foreach ($facturas as $factura) 
               {   
@@ -1769,41 +1768,59 @@ function consultar()
               
               //Extrae las facturas
               $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"f.fact_valor, f.fact_estampillaid, f.fact_nombre",$where);
-             //Selecciona los id de las estampillas
-                      //impresas
-                      if(!in_array($factura->impr_facturaid, $vectorIdEstampillas))
-                      {
-                          $vectorIdEstampillas[] = $factura->impr_facturaid;
-                      } 
-              
+             
+              $vectorIdEstampillas = [];
+              $vectorValorEstampillas = [];
               if($liquidaciones)
               {
                   
                   foreach ($liquidaciones as $liquidacion) 
                   {
                                             
-                      
-                      $facturas='';
-               
-                      foreach ($resultado as $value) 
+                      //Selecciona los id de las estampillas
+                      //impresas y crea un arreglo por cada tipo de estampilla
+                      //inicializando el valor en cero y guardando el nombre de la estampilla
+                      if(!in_array($liquidacion->fact_estampillaid, $vectorIdEstampillas))
                       {
-                         $facturas .= $value->fact_nombre.' ==> '.$value->fact_valor.'<br>';          
+                          $vectorIdEstampillas[] = $liquidacion->fact_estampillaid;
+                          $vectorValorEstampillas[$liquidacion->fact_estampillaid]['valor'] = 0;
+                          $vectorValorEstampillas[$liquidacion->fact_estampillaid]['nombre'] = $liquidacion->fact_nombre;;
                       }
 
-                      $liquidacion->estampillas = $facturas;
-                  }
-                  echo json_encode($liquidaciones);exit();
-                  $datos['liquidaciones'] = $liquidaciones;
+                      //acumula los valores por id de estampillas
+                      if(in_array($liquidacion->fact_estampillaid, $vectorIdEstampillas))
+                      {
+                          $vectorValorEstampillas[$liquidacion->fact_estampillaid]['valor'] += $liquidacion->fact_valor;
+                      } 
+                      
+                  }$vectorValorEstampillas[100]['valor'] = 0;
+                  $vectorValorEstampillas[100]['nombre'] = 'Tolima 150 Años de Contribución a la Grandeza de Colombia';
+
+                  $vectorValorEstampillas[101]['valor'] = 0;
+                  $vectorValorEstampillas[101]['nombre'] = 'cultura';
+
+                  $vectorValorEstampillas[102]['valor'] = 0;
+                  $vectorValorEstampillas[102]['nombre'] = 'Universidad del Tolima';
+
+$vectorValorEstampillas[103]['valor'] = 0;
+                  $vectorValorEstampillas[103]['nombre'] = 'Hospitales Universitarios Públicos del Departamento';
+
+                  $vectorValorEstampillas[104]['valor'] = 0;
+                  $vectorValorEstampillas[104]['nombre'] = 'Para el bienestar del Adulto mayor';
+
+                  $vectorValorEstampillas[105]['valor'] = 0;
+                  $vectorValorEstampillas[105]['nombre'] = 'Electrificación Rural';
+
+                  $datos['liquidaciones'] = $vectorValorEstampillas;
                   $datos['fecha'] = $fecha;
                   //Creación del PDF
                   $this->load->library("Pdf");                  
-                  $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-                  $pdf->setPageOrientation('l');
+                  $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);                  
 
                   // set document information
                   $pdf->SetCreator(PDF_CREATOR);
                   $pdf->SetAuthor('turrisystem');
-                  $pdf->SetTitle('Listado de Impresiones');
+                  $pdf->SetTitle('Relacion Entrega Estampillas');
                   $pdf->SetSubject('Gobernación del Tolima');
                   $pdf->SetKeywords('estampillas,gobernación');
                   $pdf->SetPrintHeader(false);
@@ -1813,7 +1830,7 @@ function consultar()
 
                   // set margins
                   $pdf->setPageUnit('mm');
-                  $pdf->SetMargins(15, 5, 20, true);
+                  $pdf->SetMargins(30, 10, 20, true);
                   $pdf->SetHeaderMargin(0);
                   $pdf->SetFooterMargin(0);
       
@@ -1831,7 +1848,7 @@ function consultar()
                   // set font
                    $pdf->SetFont('times', 'BI', 10);
                    $pdf->AddPage();                  
-                   $html = $this->load->view('generarpdf/generarpdf_impresiones', $datos, TRUE);  
+                   $html = $this->load->view('generarpdf/generarpdf_relacionEntregaEstampillas', $datos, TRUE);  
                 
                    $pdf->writeHTML($html, true, false, true, false, '');
            
@@ -1841,7 +1858,7 @@ function consultar()
                   //el PDF 
                   ob_end_clean();
                   //Close and output PDF document
-                  $pdf->Output('Impresiones_'.$fecha.'.pdf', 'I');
+                  $pdf->Output('Relacion_Entrega_Estampillas_'.$fecha.'.pdf', 'I');
 
 
               }else

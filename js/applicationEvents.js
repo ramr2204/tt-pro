@@ -41,7 +41,9 @@ function inicial ()
   //Eventos Importar Contratos
   $('#cargaImportacion').click(iniciarCarga);
 
-  $('#btn-pdf').click(generarInformeDetallado);
+  //Eventos informes vista consultar
+  $('#btn-detalle').click(generarInformeDetallado);
+  $('#btn-relacion').click(generarInformeRelacion);
     
 
 }
@@ -53,7 +55,7 @@ function inicial ()
 function generarInformeDetallado (e)
 {
     e.preventDefault();  
-    
+
     var fecha = $('#buscarfecha').find(':text').val();
     
     if(fecha != '')
@@ -62,6 +64,24 @@ function generarInformeDetallado (e)
     }    
     
 }
+
+
+//Funcion que valida si se ha digitado
+//una fecha para generar el informe
+//detallado y envia la orden
+function generarInformeRelacion (e)
+{
+    e.preventDefault();  
+
+    var fecha = $('#buscarfecha').find(':text').val();
+    
+    if(fecha != '')
+    {
+        window.open(base_url+'index.php/liquidaciones/renderizarRelacionEstampillasPDF?fecha='+fecha);  
+    }    
+    
+}
+
 
 //Funcion que activa el boton ladda
 //para simulacion de carga
