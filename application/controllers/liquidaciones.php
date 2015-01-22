@@ -805,18 +805,27 @@ function verliquidartramite()
                   
               if ($this->codegen_model->add('est_liquidaciones',$data) == TRUE) {
                   $liquidacionid=$this->db->insert_id();
+
                   for ($i=1; $i < $this->input->post('numeroestampillas'); $i++) { 
-                       $data = array(
-                       'fact_nombre' => $this->input->post('nombreestampilla'.$i),
-                       'fact_porcentaje' => $this->input->post('porcentaje'.$i),
-                       'fact_valor' => $this->input->post('totalestampilla'.$i),
-                       'fact_banco' => $this->input->post('banco'.$i),
-                       'fact_cuenta' => $this->input->post('cuenta'.$i),
-                       'fact_liquidacionid' => $liquidacionid,
-                       'fact_estampillaid' => $this->input->post('idestampilla'.$i),
-                       'fact_rutaimagen' => $this->input->post('rutaimagen'.$i),
-                       );
-                       $this->codegen_model->add('est_facturas',$data);
+                      
+                      //Valida si la factura viene en valor cero
+                      //no guarda factura
+                      $valor = $this->input->post('totalestampilla'.$i);
+                      
+                      if($valor > 0)
+                      {  
+                          $data = array(
+                          'fact_nombre' => $this->input->post('nombreestampilla'.$i),
+                          'fact_porcentaje' => $this->input->post('porcentaje'.$i),
+                          'fact_valor' => $this->input->post('totalestampilla'.$i),
+                          'fact_banco' => $this->input->post('banco'.$i),
+                          'fact_cuenta' => $this->input->post('cuenta'.$i),
+                          'fact_liquidacionid' => $liquidacionid,
+                          'fact_estampillaid' => $this->input->post('idestampilla'.$i),
+                          'fact_rutaimagen' => $this->input->post('rutaimagen'.$i),
+                          );
+                          $this->codegen_model->add('est_facturas',$data);
+                      }
                   }
 
                   //print_r($data);
@@ -1651,6 +1660,139 @@ function consultar()
                       $liquidacion->estampillas = $facturas;
                   }
                   
+                  $datos['liquidaciones'] = $liquidaciones;
+                  $datos['fecha'] = $fecha;
+                  //Creación del PDF
+                  $this->load->library("Pdf");                  
+                  $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+                  $pdf->setPageOrientation('l');
+
+                  // set document information
+                  $pdf->SetCreator(PDF_CREATOR);
+                  $pdf->SetAuthor('turrisystem');
+                  $pdf->SetTitle('Listado de Impresiones');
+                  $pdf->SetSubject('Gobernación del Tolima');
+                  $pdf->SetKeywords('estampillas,gobernación');
+                  $pdf->SetPrintHeader(false);
+                  $pdf->SetPrintFooter(false);
+                  // set default monospaced font
+                  $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+                  // set margins
+                  $pdf->setPageUnit('mm');
+                  $pdf->SetMargins(15, 5, 20, true);
+                  $pdf->SetHeaderMargin(0);
+                  $pdf->SetFooterMargin(0);
+      
+                  // set auto page breaks
+                  $pdf->SetAutoPageBreak(TRUE, 2);
+
+                  // set some language-dependent strings (optional)
+                  if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+                      require_once(dirname(__FILE__).'/lang/eng.php');
+                      $pdf->setLanguageArray($l);
+                  }
+               
+                  // ---------------------------------------------------------
+            
+                  // set font
+                   $pdf->SetFont('times', 'BI', 10);
+                   $pdf->AddPage();                  
+                   $html = $this->load->view('generarpdf/generarpdf_impresiones', $datos, TRUE);  
+                
+                   $pdf->writeHTML($html, true, false, true, false, '');
+           
+
+                  // ---------------------------------------------------------
+                  //para evitar el error de que se ha impreso algo antes de enviar
+                  //el PDF 
+                  ob_end_clean();
+                  //Close and output PDF document
+                  $pdf->Output('Impresiones_'.$fecha.'.pdf', 'I');
+
+
+              }else
+                  {   
+                      $this->session->set_flashdata('errormessage', 'La fecha elegida no presenta registros!'); 
+                      redirect(base_url().'index.php/liquidaciones/consultar');  
+                  }
+
+             
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+               
+      } else{
+              redirect(base_url().'index.php/users/login');
+      } 
+      
+  }
+
+
+/**
+* Funcion que ordena la renderizacion o no del PDF
+* de la Relación de Entrega de estampillas de la fecha especificada
+* Mike Ortiz
+*/
+
+  function renderizarRelacionEstampillasPDF()
+  {
+      if ($this->ion_auth->logged_in()) 
+      {
+          
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) 
+          { 
+              $fecha = '2015-01-16';//$_GET['fecha'];
+
+              //Extrae los id de las facturas para las que se han hecho impresiones  
+              //y las fechas de las impresiones            
+              $usuario = $this->ion_auth->user()->row();
+              $where = 'where pape_usuario = '.$usuario->id;              
+              $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
+
+              $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid, DATE(i.impr_fecha) as fecha",$where,$join);
+      
+              //se extrae el vector con los id de las facturas
+              //asociadas a las impresiones para la fecha suministrada
+              $vectorIdEstampillas = [];
+              $idFacturas = '(';
+              foreach ($facturas as $factura) 
+              {   
+                  if($factura->fecha == $fecha)
+                  {
+                      $idFacturas .= $factura->impr_facturaid.',';                                            
+
+                  }                  
+              }  
+              $idFacturas .= '0)';
+              $where = 'where fact_id in '.$idFacturas;                            
+              
+              //Extrae las facturas
+              $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"f.fact_valor, f.fact_estampillaid, f.fact_nombre",$where);
+             //Selecciona los id de las estampillas
+                      //impresas
+                      if(!in_array($factura->impr_facturaid, $vectorIdEstampillas))
+                      {
+                          $vectorIdEstampillas[] = $factura->impr_facturaid;
+                      } 
+              
+              if($liquidaciones)
+              {
+                  
+                  foreach ($liquidaciones as $liquidacion) 
+                  {
+                                            
+                      
+                      $facturas='';
+               
+                      foreach ($resultado as $value) 
+                      {
+                         $facturas .= $value->fact_nombre.' ==> '.$value->fact_valor.'<br>';          
+                      }
+
+                      $liquidacion->estampillas = $facturas;
+                  }
+                  echo json_encode($liquidaciones);exit();
                   $datos['liquidaciones'] = $liquidaciones;
                   $datos['fecha'] = $fecha;
                   //Creación del PDF
