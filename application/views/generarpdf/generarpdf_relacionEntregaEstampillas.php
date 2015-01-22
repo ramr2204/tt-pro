@@ -129,7 +129,81 @@ switch ($mesNumero)
         
 }
 
-$fechaNombres = $diaNombre.' '.$diaNumero.' de '.$mesNombre.' de '.date('Y');
+//separa la fecha en un arreglo segun la expresion regular
+preg_match('/(\d{4})-(\d{2})-(\d{2})/',$fecha,$partes);
+
+$diaNumeroImpresiones = $partes[3];
+$diaNombreImpresiones = date('l',strtotime($fecha));
+$mesNumeroImpresiones = $partes[2];
+$anioNumeroImpresiones = $partes[1];
+
+switch ($diaNombreImpresiones) 
+{
+    case 'Sunday': $diaNombreImpresiones = 'Domingo';        
+        break;
+
+    case 'Monday': $diaNombreImpresiones = 'Lunes';        
+        break;
+
+    case 'Tuesday': $diaNombreImpresiones = 'Martes';        
+        break;
+
+    case 'Wednesday': $diaNombreImpresiones = 'Miercoles';        
+        break;
+
+    case 'Thursday': $diaNombreImpresiones = 'Jueves';        
+        break;
+
+    case 'Friday': $diaNombreImpresiones = 'Viernes';        
+        break;
+
+    case 'Saturday': $diaNombreImpresiones = 'Sabado';        
+        break;
+        
+}
+
+switch ($mesNumeroImpresiones) 
+{
+    case '01': $mesNombreImpresiones = 'Enero';        
+        break;
+
+    case '02': $mesNombreImpresiones = 'Febrero';        
+        break;
+
+    case '03': $mesNombreImpresiones = 'Marzo';        
+        break;
+
+    case '04': $mesNombreImpresiones = 'Abril';        
+        break;
+
+    case '05': $mesNombreImpresiones = 'Mayo';        
+        break;
+
+    case '06': $mesNombreImpresiones = 'Junio';        
+        break;
+
+    case '07': $mesNombreImpresiones = 'Julio';        
+        break;
+
+    case '08': $mesNombreImpresiones = 'Agosto';        
+        break;
+
+    case '09': $mesNombreImpresiones = 'Septiembre';        
+        break;
+
+    case '10': $mesNombreImpresiones = 'Octubre';        
+        break;
+
+    case '11': $mesNombreImpresiones = 'Noviembre';        
+        break;
+
+    case '12': $mesNombreImpresiones = 'Diciembre';        
+        break;
+        
+}
+
+
+$fechaNombres = $diaNombreImpresiones.' '.$diaNumeroImpresiones.' de '.$mesNombreImpresiones.' de '.$anioNumeroImpresiones;
 
 echo  strtoupper($diaNumero.' de '.$mesNombre.' de '.date('Y'));
 
