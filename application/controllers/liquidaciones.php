@@ -1742,16 +1742,19 @@ function consultar()
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) 
           { 
-              $fecha = '2015-01-16';//$_GET['fecha'];
+              $fecha = $_GET['fecha'];
 
               //Extrae los id de las facturas para las que se han hecho impresiones  
               //y las fechas de las impresiones            
               $usuario = $this->ion_auth->user()->row();
-              $where = 'where pape_usuario = '.$usuario->id;              
+              $where = 'where pape_usuario = '.$usuario->id.' and DATE(i.impr_fecha) = "'.$_GET['fecha'].'"';              
               $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
 
               $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid, DATE(i.impr_fecha) as fecha",$where,$join);
-      
+
+              if($facturas)
+              {
+                
               //se extrae el vector con los id de las facturas
               //asociadas a las impresiones para la fecha suministrada              
               $idFacturas = '(';
@@ -1771,8 +1774,7 @@ function consultar()
              
               $vectorIdEstampillas = [];
               $vectorValorEstampillas = [];
-              if($liquidaciones)
-              {
+              
                   
                   foreach ($liquidaciones as $liquidacion) 
                   {
@@ -1793,23 +1795,7 @@ function consultar()
                           $vectorValorEstampillas[$liquidacion->fact_estampillaid]['valor'] += $liquidacion->fact_valor;
                       } 
                       
-                  }$vectorValorEstampillas[100]['valor'] = 0;
-                  $vectorValorEstampillas[100]['nombre'] = 'Tolima 150 Años de Contribución a la Grandeza de Colombia';
-
-                  $vectorValorEstampillas[101]['valor'] = 0;
-                  $vectorValorEstampillas[101]['nombre'] = 'cultura';
-
-                  $vectorValorEstampillas[102]['valor'] = 0;
-                  $vectorValorEstampillas[102]['nombre'] = 'Universidad del Tolima';
-
-$vectorValorEstampillas[103]['valor'] = 0;
-                  $vectorValorEstampillas[103]['nombre'] = 'Hospitales Universitarios Públicos del Departamento';
-
-                  $vectorValorEstampillas[104]['valor'] = 0;
-                  $vectorValorEstampillas[104]['nombre'] = 'Para el bienestar del Adulto mayor';
-
-                  $vectorValorEstampillas[105]['valor'] = 0;
-                  $vectorValorEstampillas[105]['nombre'] = 'Electrificación Rural';
+                  }
 
                   $datos['liquidaciones'] = $vectorValorEstampillas;
                   $datos['fecha'] = $fecha;

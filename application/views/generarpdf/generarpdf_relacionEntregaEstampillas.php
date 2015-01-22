@@ -92,7 +92,10 @@ Ibagué<br>
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;">Observaciones</td>            
         </tr>
-        <?php foreach ($liquidaciones as $liquidacion) {  ?>        	
+        <?php $n=0;
+        foreach ($liquidaciones as $liquidacion) {
+        $n++;  
+        ?>        	
             <tr>
             	<td  style="height: 5mm; width:50mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
@@ -115,7 +118,42 @@ Ibagué<br>
     </tbody>       
 </table>
 
-<table><tr><td style="height: 12mm; color:white">espaciador</td></tr></table>
+<?php 
+    //Según la cantidad de tipos de estampillas 
+    //establece los espacios a dejar
+    switch ($n) 
+    {
+        case 1: $n = 6;            
+        break;
+        
+        case 2: $n = 5;            
+        break;
+
+        case 3: $n = 4;            
+        break;
+
+        case 4: $n = 3;            
+        break;
+
+        case 5: $n = 2;            
+        break;
+        
+        case 6: $n = 1;            
+        break;
+
+        default : $n = 1;            
+        break;
+       
+    
+      }
+
+      for ($i=1; $i <=$n ; $i++) 
+      { 
+          echo '<table><tr><td style="height: 12mm; color:white">espaciador</td></tr></table>';
+      }
+?>
+
+
 Cordial saludo,
 
 <table><tr><td style="height: 15mm; color:white">espaciador</td></tr></table>
