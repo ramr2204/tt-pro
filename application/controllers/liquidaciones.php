@@ -405,7 +405,7 @@ class Liquidaciones extends MY_Controller {
                       mkdir($path,0777,TRUE);      
                   }
                   $config['upload_path'] = $path;
-                  $config['allowed_types'] = 'jpg|jpeg|gif|png';
+                  $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
                   $config['remove_spaces']=TRUE;
                   $config['max_size']    = '2048';
                   $config['overwrite']    = TRUE;
