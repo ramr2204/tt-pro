@@ -1267,7 +1267,7 @@ function consultar()
                            $ObjetoFactura = $this->liquidaciones_model->getfacturaIndividual($idFactura);
 
 
-                           //extrae el ultimo codigo de papeleria resgistrado
+                           //extrae el ultimo codigo de papeleria registrado
                            //en las impresiones para el liquidador autenticado
                            $tablaJoin='est_papeles';
                            $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
