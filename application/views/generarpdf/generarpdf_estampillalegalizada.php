@@ -31,7 +31,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:9;"><br>GOBERNACIÓN DEL TOLIMA <br>Departamento Administrativo de Asuntos<br>Jurídicos <br>Dirección de Contratación</td>
+                        font-size:9;"><br><br>GOBERNACIÓN DEL TOLIMA <br>Estampilla Departamental</td>
 
                     <td style="height: 19mm; width: 26mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
@@ -42,7 +42,7 @@
                 <tr>
                     <td class="text-center" colspan="2" style="height: 5mm; width: 57.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
-                        border-left: 0.5px solid black;
+                        border-left: 0.5px solid black;                        
                         border-bottom: 0.5px solid black;">Número Estampilla</td>
 
                     <td class="text-center" colspan="3" style="height: 5mm; width: 62.5mm; border-top: 0.5px solid black;
@@ -56,7 +56,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        vertical-align: text-middle;"><br><br>Nombre Contratista</td>
+                        vertical-align: text-middle;"><br><br>Nombre y/o Empresa</td>
 
                     <td colspan="4" style="height: 9mm; width: 94mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
@@ -86,7 +86,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:7;"> Número Contrato</td>
+                        font-size:7;"> Número Acto</td>
 
                     <td class="text-center" style="height: 5mm; width: 24mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
@@ -98,7 +98,7 @@
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
                         font-size:7;
-                        text-align: center;">Vigencia</td>
+                        text-align: center;">Fecha</td>
 
                     <td class="text-center" style="height: 5mm; width: 25.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
@@ -111,7 +111,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:7;"> Valor contrato Sin IVA</td>
+                        font-size:7;"> Valor Gravado</td>
 
                     <td colspan="2" style="height: 5mm; width: 24mm; border-top: 0.5px solid black;
                         border-left: 0.5px solid black;
@@ -141,8 +141,8 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:7;
-                        text-align: center;">Valor</td>
+                        font-size:6;
+                        text-align: center;">Valor Estampilla</td>
 
                     <td style="height: 5mm; width: 25.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
@@ -193,7 +193,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:10;"><small> "Unidos por la grandeza del Tolima"<br>Edificio de la Gobernación del Tolima, Carrera 3 Calles 10 y 11, Piso 9<br>Teléfonos (8) 2611111 Exts. 209 - 305<br>dcontratos@outlook.com</small></td>
+                        font-size:10;"><small> "Unidos por la grandeza del Tolima"<br>Edificio de la Gobernación del Tolima<br>Carrera 3 Calles 10 y 11, Piso 9<br>Código Postal 730006</small></td>
 
                     <td class="text-center" colspan="2" style="height: 15mm; width: 38.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
