@@ -82,7 +82,8 @@ class Contratistas extends MY_Controller {
                         'cont_nit' => $this->input->post('nit'),
                         'cont_direccion' => $this->input->post('direccion'),
                         'cont_municipioid' => $this->input->post('municipioid'),
-                        'cont_regimenid' => $this->input->post('regimenid')
+                        'cont_regimenid' => $this->input->post('regimenid'),
+                        'cont_fecha' => date('Y-m-d')
 
                      );
                  
