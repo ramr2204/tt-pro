@@ -169,7 +169,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        text-align: center;"><br><br>QR</td>
+                        text-align: center;"><tcpdf method="write2DBarcode" params="<?php echo $params; ?>" /></td>
                 </tr>
 
                 <tr>
@@ -199,7 +199,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        color: red;"><br><br>0000001</td>
+                        color: red;"></td>
                 </tr>   
             </table>
         
