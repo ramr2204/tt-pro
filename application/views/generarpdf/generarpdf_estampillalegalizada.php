@@ -169,7 +169,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        text-align: center;"><br><br>QR</td>
+                        text-align: center;"></td>
                 </tr>
 
                 <tr>
