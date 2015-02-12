@@ -218,8 +218,8 @@ class Generarpdf extends CI_controller {
 
                   // set document information
                   $pdf->SetCreator(PDF_CREATOR);
-                  $pdf->SetAuthor('turrisystem');
-                  $pdf->SetTitle('Liquidación de estampillas');
+                  $pdf->SetAuthor('turrisystem');                  
+                  $pdf->SetTitle('Liquidación de estampillas - Rotulo No '.$estampilla->impr_codigopapel.' Factura');
                   $pdf->SetSubject('Gobernación del Tolima');
                   $pdf->SetKeywords('estampillas,gobernación');
                   $pdf->SetPrintHeader(false);
@@ -242,7 +242,7 @@ class Generarpdf extends CI_controller {
                       require_once(dirname(__FILE__).'/lang/eng.php');
                       $pdf->setLanguageArray($l);
                   }
-               
+             //  print_r($this->data);exit();
                   // ---------------------------------------------------------
                   // set style for barcode
                   $style = array(
