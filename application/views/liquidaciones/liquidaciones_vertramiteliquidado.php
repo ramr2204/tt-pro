@@ -78,8 +78,8 @@
      <td colspan="1" class="text-center">
     <div class="form-group">                            
         <div class="input-group">
-            <input id="fecha_pago_<?php echo $x; ?>" type="hidden" name="fecha_pago_<?php echo $x; ?>" class="form-control" />                      
-            <span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+            <input id="fecha_pago_<?php echo $x; ?>" type="text" name="fecha_pago_<?php echo $x; ?>" class="form-control date" required="required" value="<?php echo $row2->pago_fecha; ?>"/>                      
+            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
         </div>
     </div> 
      <div class="form-group">
@@ -100,6 +100,8 @@
      </td>
 </tr>
 <script type="text/javascript">
+    $('.date').datepicker({format:'yyyy-mm-dd',type:'component'});
+
     $("#file-<?php echo $x; ?>").fileinput({
         
       <?php   if ($row2->fact_rutacomprobante != '') { ?>
