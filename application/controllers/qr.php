@@ -91,7 +91,7 @@ function q()
                   // set font
                    $pdf->SetFont('times', '', 8);
                    $pdf->AddPage('L',array(92,141));
-                   $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array('http://190.85.28.74:8182/estampillas-pro/index.php/qr/q/'.$this->uri->segment(3), 'QRCODE,H', 110, 56, 16, 16, $style, 'T'));
+                   $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array('http://190.85.28.74:8086/estampillas-pro/index.php/qr/q/'.$this->uri->segment(3), 'QRCODE,H', 110, 56, 16, 16, $style, 'T'));
                    $html = $this->load->view('generarpdf/generarpdf_estampillalegalizada', $this->data, TRUE);  
                 
                    $pdf->writeHTML($html, true, false, true, false, '');
