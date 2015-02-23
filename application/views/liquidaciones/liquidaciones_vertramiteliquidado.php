@@ -76,7 +76,12 @@
 
      </td>
      <td colspan="1" class="text-center">
-       
+    <div class="form-group">                            
+        <div class="input-group">
+            <input id="fecha_pago_<?php echo $x; ?>" type="hidden" name="fecha_pago_<?php echo $x; ?>" class="form-control" />                      
+            <span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+        </div>
+    </div> 
      <div class="form-group">
              <input id="facturaid" type="hidden" name="facturaid<?php echo $x; ?>" value="<?php echo $row2->fact_id; ?>"/> 
              <input id="file-<?php echo $x; ?>" type="file" class="file" name="comprobante<?php echo $x; ?>" multiple=false>

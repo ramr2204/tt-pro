@@ -97,7 +97,7 @@
      <div class="form-group">
              <input id="facturaid" type="hidden" name="facturaid<?php echo $x; ?>" value="<?php echo $row2->fact_id; ?>"/> 
              <input id="facturaNombre" type="hidden" name="facturaNombre<?php echo $x; ?>" value="<?php echo $row2->fact_nombre; ?>"/> 
-             <input id="file-<?php echo $x; ?>" type="file" class="file" name="comprobante<?php echo $x; ?>" multiple=false>
+             <input id="file-<?php echo $x; ?>" type="file" class="file" name="comprobante<?php echo $x; ?>" multiple=false>             
      </div>
      <?php if ($facturapagada[$row2->fact_id]) {  ?>      
       <div class="bg-success">Pagado: <?php echo '$'.number_format($row2->pago_valor, 2, ',', '.'); ?> <i class="fa fa-check"></i> </div> 
