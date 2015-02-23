@@ -325,7 +325,17 @@ var oTable = $('#tablaq').dataTable( {
             var ID = <?php echo $idcontrato; ?>;
             
             $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/verrecibos/'+ID,function(result){
-            
+            <?php
+            if (isset($errorModal)) 
+            {              
+                if ($errorModal)
+                { ?>
+                    var mensajeError = '<div class="alert alert-dismissable alert-danger">'+$('.alert').html();+'</div>'                    
+                    $('#errorModal').html(mensajeError);
+                  <?php
+                }
+            }
+            ?>
             $('#myModal2').modal('show');
             
         });

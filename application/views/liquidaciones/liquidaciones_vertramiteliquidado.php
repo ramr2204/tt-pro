@@ -14,6 +14,7 @@
 <div class="row"> 
  <div class="col-sm-12">    
    <?php echo form_open_multipart("liquidaciones/cargar_comprobante",'role="form"');?>
+    <div id="errorModal"></div>
     <div class="table-responsive">
       <table class="table table-striped table-bordered " id="tablaq">
  <thead>
