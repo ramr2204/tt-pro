@@ -416,6 +416,22 @@ class Liquidaciones extends MY_Controller {
                   $referenciaCargados='';
                   for ($i=0; $i < $numeroarchivos; $i++) {
                  
+                    if(isset($_POST['fecha_pago_'.$i]) && $_POST['fecha_pago_'.$i] == '')
+                    {
+                        $this->session->set_flashdata('accion', 'liquidado');
+                        $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe Ingresar una Fecha para el Pago.');
+                        redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
+
+                    }elseif(isset($_POST['fecha_pago_'.$i]) && $_POST['fecha_pago_'.$i] != '')
+                        {
+                            if(strtotime($_POST['fecha_pago_'.$i]) > strtotime(date('Y-m-d')))
+                            {
+                                $this->session->set_flashdata('accion', 'liquidado');
+                                $this->session->set_flashdata('errormessage', '<strong>Error!</strong> la Fecha de Pago no Puede ser Mayor al Dia actual.');
+                                redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
+                            }
+                        }
+
                     //Si se envia el pago en el checkbox
                     //permitira entrar a la consulta 
                     //para crear la factura, de lo contrario
@@ -436,7 +452,7 @@ class Liquidaciones extends MY_Controller {
                       if ($pago != 'flag') {
                         $datos = array(
                                  'pago_facturaid' => $idfactura,
-                                 'pago_fecha' => date("Y-m-d H:i:s"),
+                                 'pago_fecha' => $_POST['fecha_pago_'.$i],
                                  'pago_valor' => $pago,
                                  'pago_metodo' => 'manual',
                                );
