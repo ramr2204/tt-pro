@@ -32,6 +32,7 @@ class Liquidaciones extends MY_Controller {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
 
+              $this->data['errorModal']=$this->session->flashdata('errorModal');
               $this->data['successmessage']=$this->session->flashdata('successmessage');
               $this->data['errormessage']=$this->session->flashdata('errormessage');
               $this->data['infomessage']=$this->session->flashdata('infomessage');
@@ -83,7 +84,8 @@ class Liquidaciones extends MY_Controller {
       if ($this->ion_auth->logged_in()){
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
-
+ 
+              $this->data['errorModal']=$this->session->flashdata('errorModal');
               $this->data['successmessage']=$this->session->flashdata('successmessage');
               $this->data['errormessage']=$this->session->flashdata('errormessage');
               $this->data['infomessage']=$this->session->flashdata('infomessage');
@@ -416,6 +418,43 @@ class Liquidaciones extends MY_Controller {
                   $referenciaCargados='';
                   for ($i=0; $i < $numeroarchivos; $i++) {
                  
+                    if(isset($_POST['fecha_pago_'.$i]) && $_POST['fecha_pago_'.$i] == '')
+                    {
+                        $this->session->set_flashdata('errorModal', '<strong>Error!</strong> Debe Ingresar una Fecha para el Pago.');
+                        $this->session->set_flashdata('accion', 'liquidado');                        
+                        $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe Ingresar una Fecha para el Pago.');
+                        
+                        //Valida para redirecionar a la vista respectiva
+                        //tramite o contrato
+                        if ($this->input->post('contratoid'))
+                        {
+                            redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
+                        }elseif ($this->input->post('tramiteid'))
+                            {
+                                redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
+                            }
+                        
+
+                    }elseif(isset($_POST['fecha_pago_'.$i]) && $_POST['fecha_pago_'.$i] != '')
+                        {
+                            if(strtotime($_POST['fecha_pago_'.$i]) > strtotime(date('Y-m-d')))
+                            {
+                                $this->session->set_flashdata('errorModal', '<strong>Error!</strong> la Fecha de Pago no Puede ser Mayor al Dia actual.');
+                                $this->session->set_flashdata('accion', 'liquidado');
+                                $this->session->set_flashdata('errormessage', '<strong>Error!</strong> la Fecha de Pago no Puede ser Mayor al Dia actual.');
+                                
+                                //Valida para redirecionar a la vista respectiva
+                                //tramite o contrato
+                                if ($this->input->post('contratoid'))
+                                {
+                                    redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
+                                }elseif ($this->input->post('tramiteid'))
+                                    {
+                                        redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
+                                    }
+                            }
+                        }
+
                     //Si se envia el pago en el checkbox
                     //permitira entrar a la consulta 
                     //para crear la factura, de lo contrario
@@ -436,7 +475,7 @@ class Liquidaciones extends MY_Controller {
                       if ($pago != 'flag') {
                         $datos = array(
                                  'pago_facturaid' => $idfactura,
-                                 'pago_fecha' => date("Y-m-d H:i:s"),
+                                 'pago_fecha' => $_POST['fecha_pago_'.$i],
                                  'pago_valor' => $pago,
                                  'pago_metodo' => 'manual',
                                );
@@ -1267,7 +1306,7 @@ function consultar()
                            $ObjetoFactura = $this->liquidaciones_model->getfacturaIndividual($idFactura);
 
 
-                           //extrae el ultimo codigo de papeleria resgistrado
+                           //extrae el ultimo codigo de papeleria registrado
                            //en las impresiones para el liquidador autenticado
                            $tablaJoin='est_papeles';
                            $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';

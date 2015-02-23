@@ -330,8 +330,19 @@ var oTable = $('#tablaq').dataTable( {
             var ID = <?php echo $idtramite; ?>;
             
             $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramiteliquidado/'+ID,function(result){
-            
+            <?php
+            if (isset($errorModal)) 
+            {              
+                if ($errorModal)
+                { ?>
+                    var mensajeError = '<div class="alert alert-dismissable alert-danger">'+$('.alert').html();+'</div>'                    
+                    $('#errorModal').html(mensajeError);
+                  <?php
+                }
+            }
+            ?>
             $('#myModal2').modal('show');
+
             
         });
         
