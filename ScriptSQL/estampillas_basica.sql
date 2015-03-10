@@ -203,6 +203,13 @@ CREATE TABLE IF NOT EXISTS `adm_parametros` (
   `para_salariominimo` double NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+--
+-- Volcado de datos para la tabla `adm_parametros`
+--
+
+INSERT INTO `adm_parametros` (`para_id`, `para_redondeo`, `para_salariominimo`) VALUES
+(1, 2, 644336);
+
 -- --------------------------------------------------------
 
 --
@@ -391,6 +398,15 @@ CREATE TABLE IF NOT EXISTS `con_estadoslocales` (
   `eslo_nombre` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 
+--
+-- Volcado de datos para la tabla `con_estadoslocales`
+--
+
+INSERT INTO `con_estadoslocales` (`eslo_id`, `eslo_nombre`) VALUES
+(1, 'Liquidado'),
+(2, 'Legalizado'),
+(3, 'Terminado');
+
 -- --------------------------------------------------------
 
 --
@@ -404,6 +420,15 @@ CREATE TABLE IF NOT EXISTS `con_regimenes` (
   `regi_iva` float unsigned NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+--
+-- Volcado de datos para la tabla `con_regimenes`
+--
+
+INSERT INTO `con_regimenes` (`regi_id`, `regi_nombre`, `regi_descripcion`, `regi_iva`) VALUES
+(1, 'común', '', 16),
+(2, 'simplificado', '', 8),
+(3, 'exento', 'No se realiza descuento para el calculo de las estampillas.', 0);
+
 -- --------------------------------------------------------
 
 --
@@ -414,6 +439,14 @@ CREATE TABLE IF NOT EXISTS `con_tiposcontratistas` (
   `tpco_id` int(11) NOT NULL,
   `tpco_nombre` varchar(100) COLLATE utf8_unicode_ci NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `con_tiposcontratistas`
+--
+
+INSERT INTO `con_tiposcontratistas` (`tpco_id`, `tpco_nombre`) VALUES
+(1, 'Natural'),
+(2, 'Jurídica');
 
 -- --------------------------------------------------------
 
