@@ -1256,14 +1256,15 @@ function consultar()
               $whereIn = 'l.liqu_id in '.$idLiquidaciones;
 
               $this->load->library('datatables');
-              $this->datatables->select('l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha');
+              $this->datatables->select('l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha, p.pago_fecha, f.fact_valor, f.fact_nombre');              
+              $this->datatables->from('est_facturas f');  
+              $this->datatables->join('est_liquidaciones l', 'l.liqu_id = f.fact_liquidacionid', 'left');
+              $this->datatables->join('est_pagos p', 'p.pago_facturaid = f.fact_id', 'left');
               $this->datatables->whereString($whereIn);
-              $this->datatables->from('est_liquidaciones l');  
 
                            
 
-              $this->datatables->add_column('facturas','edess');
-              $this->datatables->add_column('edit', '-');
+              $this->datatables->add_column('facturas','edess');              
               echo $this->datatables->generate();
 
           } else {
