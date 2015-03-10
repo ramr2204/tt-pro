@@ -1674,13 +1674,13 @@ function consultar()
               }  
               $idLiquidaciones .= '0)';
               $whereIn = 'where l.liqu_id in '.$idLiquidaciones;
-
-
+              $join2 = ' INNER JOIN est_liquidaciones l ON l.liqu_id = f.fact_liquidacionid';
+              $join2 .= ' INNER JOIN est_pagos p ON p.pago_facturaid = f.fact_id';              
               
-              $campos = 'l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha';
+              $campos = 'l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha, p.pago_fecha, f.fact_valor, f.fact_nombre';
               $where = $whereIn.' and l.liqu_fecha = '.'"'.$fecha.'"';
 
-              $liquidaciones = $this->codegen_model->getSelect('est_liquidaciones l',$campos,$where);
+              $liquidaciones = $this->codegen_model->getSelect('est_facturas f',$campos,$where,$join2);
               
               if($liquidaciones)
               {
