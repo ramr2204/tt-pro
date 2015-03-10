@@ -1,4 +1,10 @@
 application/config/database.php
+application/config/database.php.25
+application/config/database.php.produccion
+application/controllers/generarpdf.php.25
+application/controllers/generarpdf.php.produccion
+application/controllers/qr.php.25
+application/controllers/qr.php.produccion
 uploads/
 
 # Created by http://www.gitignore.io
