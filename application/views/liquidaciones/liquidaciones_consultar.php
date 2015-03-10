@@ -28,8 +28,10 @@ var oTable = $('#tablaq').dataTable( {
                       { "sClass": "center" },
                       { "sClass": "item" },
                       { "sClass": "item" },  
-                      { "sClass": "item6"},
-                      { "sClass": "item"},
+                      { "sClass": "item2"},
+                      { "sClass": "item2"},
+                      { "sClass": "item2"},
+                      { "sClass": "item8"},
                       { "sClass": "center","bSortable": false,"bSearchable": false},
 
                     
@@ -47,7 +49,7 @@ var oTable = $('#tablaq').dataTable( {
       data: {id : liquidacion},
       url: base_url+"index.php/liquidaciones/extraerFacturas",
       success: function(data) {              
-          $("td:eq(6)", nRow).html('<div class="text-left">' + data.estampillas + '</div>');                                        
+          $("td:eq(9)", nRow).html('<div class="text-left">' + data.estampillas + '</div>');                                        
       }
   });
 
@@ -107,7 +109,7 @@ var oTable = $('#tablaq').dataTable( {
     width: 20px;
     height: 15px;    
 }
-.item6{
+.item8{
     width: 40px;
     height: 15px;    
 }
@@ -150,8 +152,12 @@ var oTable = $('#tablaq').dataTable( {
                          <th>NIT</th>
                          <th>Contratista</th>
                          <th>Total</th>
-                         <th>Fecha</th>
-                         <th>Estampillas</th>       
+                         <th>Fecha Liquidacion</th>                             
+                         <th>Fecha Pago</th> 
+                         <th>Valor Factura</th> 
+                         <th>Concepto</th>
+                         <th>Estampillas</th>
+
                          <th></th>                  
                      </tr>
                  </thead>
