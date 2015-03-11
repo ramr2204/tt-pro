@@ -200,15 +200,16 @@ INSERT INTO `adm_modulos` (`modu_id`, `modu_nombre`, `modu_descripcion`, `modu_a
 CREATE TABLE IF NOT EXISTS `adm_parametros` (
   `para_id` int(11) NOT NULL,
   `para_redondeo` int(11) NOT NULL,
-  `para_salariominimo` double NOT NULL
+  `para_salariominimo` double NOT NULL,
+  `para_codigodepartamento` varchar(45) COLLATE utf8_unicode_ci NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Volcado de datos para la tabla `adm_parametros`
 --
 
-INSERT INTO `adm_parametros` (`para_id`, `para_redondeo`, `para_salariominimo`) VALUES
-(1, 2, 644336);
+INSERT INTO `adm_parametros` (`para_id`, `para_redondeo`, `para_salariominimo`,`para_codigodepartamento`) VALUES
+(1, 2, 644336, '0073');
 
 -- --------------------------------------------------------
 
