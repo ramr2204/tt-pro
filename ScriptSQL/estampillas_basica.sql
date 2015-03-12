@@ -549,7 +549,7 @@ CREATE TABLE IF NOT EXISTS `est_estampillas_tramites` (
 
 CREATE TABLE IF NOT EXISTS `est_facturas` (
   `fact_id` int(10) unsigned NOT NULL,
-  `fact_codigo` bigint(20) unsigned NOT NULL,
+  `fact_codigo` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `fact_nombre` varchar(200) COLLATE utf8_unicode_ci NOT NULL,
   `fact_porcentaje` varchar(5) COLLATE utf8_unicode_ci NOT NULL,
   `fact_valor` double NOT NULL,
