@@ -169,8 +169,18 @@
       </ul>
 
         <?php } ?>
-      
-         
+
+          <ul class="nav navbar-nav navbar-right">           
+              <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Manuales<b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="#" id="manual_liqu" dominio = "<?php echo $_SERVER['SERVER_ADDR'].':'.$_SERVER['SERVER_PORT']; ?>/estampillas-pro-mike/">Manual del Liquidador</a></li>
+                <li><a href="#">Parámetros</a></li>                
+              </ul>
+            </li>
+          </ul>  
+
+
           <ul class="nav navbar-nav navbar-right">
             <?php if ($this->ion_auth->is_admin()) { ?>
             <li class="dropdown">
