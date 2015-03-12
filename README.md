@@ -18,8 +18,8 @@ Instalacion del aplicativo Estampillas-Pro
 
 ### Pasos de instalacion
 
-
-- Ejecutar el archivo ***estampillas_pro.sql*** en el servidor *MySQL*.
+- Ir a la ruta ```ScriptSQL/```.
+- Ejecutar el archivo ***estampillas_basica.sql*** en el servidor *MySQL*.
 - Copiar la carpeta ***/estampillas-pro*** en la raiz del servidor apache.
 
 
