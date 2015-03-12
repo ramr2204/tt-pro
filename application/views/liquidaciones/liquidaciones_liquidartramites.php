@@ -94,17 +94,41 @@ var oTable = $('#tablaq').dataTable( {
              $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramitelegalizado/'+ID,function(result){
               $('#myModal3').modal({show:true});
 
-                $('.confirmar_impresion').click(function(event) {
-                  
+              //Solicita el ultimo rotulo al cargar la modal
+              solicitarUltimoRotulo();    
+
+              $('.confirmar_impresion').click(function(event) {
+                  //Solicita el ultimo rotulo para la impresion
+                  solicitarUltimoRotulo();                   
+
                   var siguienteEstampilla = $('#siguienteEstampilla').val();
                   if(!confirm('SIGUIENTE ESTAMPIILLA A IMPRIMIRSE => No. '+siguienteEstampilla+'\n\n'
                         +'Esta seguro de generar la impresión?'
                         +' Recuerde que será modificado el consecutivo de la papeleria asignada a usted!'))
                   {
                     event.preventDefault();
-                  }
+                  }                  
 
               });
+
+              /**
+              * Funcion de Apoyo que solicita el ultimo rotulo impreso
+              * del usuario liquidador
+              */
+              function solicitarUltimoRotulo()
+              {
+                  var usuario = <?php echo $this->ion_auth->user()->row()->id ?>;
+
+                  $.ajax({
+                      type: "POST",
+                      dataType: "json",
+                      data: {usuario : usuario},
+                      url: base_url+"index.php/liquidaciones/solicitarUltimoRotuloImpreso",
+                      success: function(data) {              
+                          $('#siguienteEstampilla').val(data.rotulo);                          
+                      }
+                  });  
+              }
           
 
              });
@@ -359,20 +383,44 @@ var oTable = $('#tablaq').dataTable( {
             var ID = <?php echo $idtramite; ?>;
             
            $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramitelegalizado/'+ID,function(result){
-  var siguienteEstampilla = $('#siguienteEstampilla').val();          
+  
             $('#myModal3').modal('show');
 
-            $('.confirmar_impresion').click(function(event) {
-                  
+            //Solicita el ultimo rotulo al cargar la modal
+              solicitarUltimoRotulo();    
+
+              $('.confirmar_impresion').click(function(event) {
+                  //Solicita el ultimo rotulo para la impresion
+                  solicitarUltimoRotulo();                   
+
                   var siguienteEstampilla = $('#siguienteEstampilla').val();
                   if(!confirm('SIGUIENTE ESTAMPIILLA A IMPRIMIRSE => No. '+siguienteEstampilla+'\n\n'
                         +'Esta seguro de generar la impresión?'
                         +' Recuerde que será modificado el consecutivo de la papeleria asignada a usted!'))
                   {
                     event.preventDefault();
-                  }
+                  }                  
 
-              });          
+              });
+
+              /**
+              * Funcion de Apoyo que solicita el ultimo rotulo impreso
+              * del usuario liquidador
+              */
+              function solicitarUltimoRotulo()
+              {
+                  var usuario = <?php echo $this->ion_auth->user()->row()->id ?>;
+
+                  $.ajax({
+                      type: "POST",
+                      dataType: "json",
+                      data: {usuario : usuario},
+                      url: base_url+"index.php/liquidaciones/solicitarUltimoRotuloImpreso",
+                      success: function(data) {              
+                          $('#siguienteEstampilla').val(data.rotulo);                          
+                      }
+                  });  
+              }         
 
         });
         

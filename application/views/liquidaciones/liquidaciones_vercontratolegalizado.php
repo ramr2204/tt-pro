@@ -80,10 +80,7 @@
      <td colspan="1" class="text-center"><strong>Procesos</strong></td>
 </tr>
 
-<?php //para usuarios con perfil de liquidador
-      if(isset($proximaImpresion)){ ?>
-<input type="hidden" id="siguienteEstampilla" value="<?= $proximaImpresion; ?>" >
-<?php } ?>
+<input type="hidden" id="siguienteEstampilla" value="" >
 
 <?php $x=0; ?>
 <?php foreach($facturas as $row2) { ?>
@@ -107,7 +104,6 @@
       <?php } ?> 
      </div>
      <?php if ($facturapagada[$row2->fact_id]) {  ?>      
-     <div class="bg-success">Código: <?php echo $row2->fact_codigo; ?> <i class="fa fa-check"></i> </div> 
     
                 <div class="bg-info">legalizado: <?php  ?> <i class="fa fa-gavel"></i> </div>
 
