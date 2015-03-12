@@ -95,8 +95,7 @@
        <a href='<?php echo base_url().$row2->fact_rutacomprobante; ?>' target='_blank'><img src='<?php echo base_url().$row2->fact_rutacomprobante; ?>' class='file-preview-image' alt='comprobante de pago' title='comprobante de pago'  height="42" width="42"></a>
       <?php } ?> 
      </div>
-     <?php if ($facturapagada[$row2->fact_id]) {  ?>      
-     <div class="bg-success">Código: <?php echo $row2->fact_codigo; ?> <i class="fa fa-check"></i> </div> 
+     <?php if ($facturapagada[$row2->fact_id]) {  ?>           
      <div class="bg-info">legalizado: <?php  ?> <i class="fa fa-gavel"></i> </div>
 
                 <?php //verifica si el perfil del usuario logueado es 
