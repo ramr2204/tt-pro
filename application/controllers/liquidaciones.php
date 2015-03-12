@@ -225,9 +225,9 @@ class Liquidaciones extends MY_Controller {
   {        
       if ($this->ion_auth->logged_in()) {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
-               $codigo='00000000';
-               $idcontrato=$this->input->post('idcontrato');
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) { 
+              $codigo = 00000; 
+              $idcontrato=$this->input->post('idcontrato');
               $data = array(
                    'liqu_contratoid' => $this->input->post('idcontrato'),
                    'liqu_nombrecontratista' => $this->input->post('nombrecontratista'),
@@ -256,10 +256,10 @@ class Liquidaciones extends MY_Controller {
                       
                     //Valida si la factura viene en valor cero
                     //no guarda factura
-                    $valor = $this->input->post('totalestampilla'.$i);
+                    $valor = $this->input->post('totalestampilla'.$i);                                      
 
                     if($valor > 0)
-                    {
+                    {                                              
                   	   $data = array(
                        'fact_nombre' => $this->input->post('nombreestampilla'.$i),
                        'fact_porcentaje' => $this->input->post('porcentaje'.$i),
@@ -270,7 +270,13 @@ class Liquidaciones extends MY_Controller {
                        'fact_estampillaid' => $this->input->post('idestampilla'.$i),
                        'fact_rutaimagen' => $this->input->post('rutaimagen'.$i),
                        );
-                  	   $this->codegen_model->add('est_facturas',$data);
+                  	   
+                       $this->codegen_model->add('est_facturas',$data);
+                       
+                       /**
+                       * Solicita la Asignación del codigo para el codigo de barras
+                       */
+                       $this->asignarCodigoParaBarras($liquidacionid,$this->input->post('idestampilla'.$i));
                     }
                     
                   }
@@ -864,6 +870,11 @@ function verliquidartramite()
                           'fact_rutaimagen' => $this->input->post('rutaimagen'.$i),
                           );
                           $this->codegen_model->add('est_facturas',$data);
+
+                          /**
+                          * Solicita la Asignación del codigo para el codigo de barras
+                          */
+                          $this->asignarCodigoParaBarras($liquidacionid,$this->input->post('idestampilla'.$i));
                       }
                   }
 
@@ -1916,5 +1927,33 @@ function consultar()
       } 
       
   }
+
+
+/**
+* Funcion de apoyo que crea y asigna el codigo a la factura
+* para generar el codigo de barras del recibo
+*/
+function asignarCodigoParaBarras($idLiquidacion,$idEstampilla)
+{
+    /**
+    * Crea el codigo para generar el codigo de barras
+    */                        
+    //Extrae la factura creada y el codigo de la estampilla
+    $tabla = 'est_facturas f';
+    $campos = 'f.fact_id, f.fact_estampillaid, f.fact_valor, e.estm_cuenta'; 
+    $donde = 'WHERE fact_liquidacionid = '.$idLiquidacion.' AND fact_estampillaid = '.$idEstampilla;
+    $join = 'INNER JOIN est_estampillas e ON e.estm_id = f.fact_estampillaid';
+    $factura = $this->codegen_model->getSelect($tabla, $campos, $donde, $join);
+                                   
+    //Formatea el valor y consecutivo de la factura para que quede de 10 digitos
+    $valorEstampilla = str_pad($factura[0]->fact_valor, 12, 0, STR_PAD_LEFT);
+    $consecutivoFactura = str_pad($factura[0]->fact_id, 12, 0, STR_PAD_LEFT);
+    $codigoParaBarra='(415)'.$factura[0]->estm_cuenta.'~F1(8020)'.$consecutivoFactura.'~F1(390y)'.$valorEstampilla;                                                
+
+    $info = array('fact_codigo' => $codigoParaBarra);
+    //Actualiza el registro de la Factura para asignarle el codigo                        
+    $t = $this->codegen_model->edit('est_facturas',$info,'fact_id',$factura[0]->fact_id);                          
+}
+
 
 }
