@@ -109,8 +109,11 @@
       Teléfonos 2610758 - 2611111 -Ext. 209 - 305<br>
       dcontratos@outlook.com </small> 
      </th>
-     <th colspan="2" class="text-center">
-      <tcpdf method="write1DBarcode" params="<?php echo $params; ?>" />
+     <th colspan="2" class="text-center" >
+     <br><br>
+      <!-- <tcpdf method="write1DBarcode" params="<?php echo $params; ?>" /> -->
+      <img src="<?php echo $this->config->item('application_root'); ?>application/libraries/barcodegen/<?php echo $codebar ?>.png" width="300" height="40">
+      <small><?php echo $codebar; ?></small>
      </th>
    </tr>
  </tfoot>
@@ -207,8 +210,11 @@
       Teléfonos 2610758 - 2611111 -Ext. 209 - 305<br>
       dcontratos@outlook.com </small> 
      </th>
-     <th colspan="2" class="text-center">
-      <tcpdf method="write1DBarcode" params="<?php echo $params; ?>" />
+     <th colspan="2" class="text-center" >
+     <br><br>
+      <!-- <tcpdf method="write1DBarcode" params="<?php echo $params; ?>" /> -->
+      <img src="<?php echo $this->config->item('application_root'); ?>application/libraries/barcodegen/<?php echo $codebar ?>.png" width="300" height="40">
+      <small><?php echo $codebar; ?></small>
      </th>
    </tr>
  </tfoot>
@@ -308,8 +314,11 @@
       Teléfonos 2610758 - 2611111 -Ext. 209 - 305<br>
       dcontratos@outlook.com </small> 
      </th>
-     <th colspan="2" class="text-center">
-      <tcpdf method="write1DBarcode" params="<?php echo $params; ?>" />
+     <th colspan="2" class="text-center" >
+     <br><br>
+      <!-- <tcpdf method="write1DBarcode" params="<?php echo $params; ?>" /> -->
+      <img src="<?php echo $this->config->item('application_root'); ?>application/libraries/barcodegen/<?php echo $codebar ?>.png" width="300" height="40">
+      <small><?php echo $codebar; ?></small>
      </th>
      
    </tr>
