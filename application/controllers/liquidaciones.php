@@ -1227,10 +1227,23 @@ function consultar()
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
               
-              //Extrae los id de las facturas para las que se han hecho impresiones              
-              $usuario = $this->ion_auth->user()->row();
-              $where = 'where pape_usuario = '.$usuario->id;              
-              $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
+
+              /**
+              * Valida si es administrador para mostrar todas las impresiones
+              */
+              if($this->ion_auth->is_admin())
+              {
+                  //Extrae los id de las facturas para las que se han hecho impresiones              
+                  $usuario = $this->ion_auth->user()->row();
+                  $where = '';              
+                  $join = 'join est_papeles p on p.pape_id = i.impr_papelid';  
+              }else
+                  {
+                      //Extrae los id de las facturas para las que se han hecho impresiones              
+                      $usuario = $this->ion_auth->user()->row();
+                      $where = 'where pape_usuario = '.$usuario->id;              
+                      $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
+                  }              
 
               $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid",$where,$join);
          
