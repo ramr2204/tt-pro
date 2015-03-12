@@ -40,15 +40,21 @@
                 </tr>
  
                 <tr>
-                    <td class="text-center" colspan="2" style="height: 5mm; width: 57.5mm; border-top: 0.5px solid black;
+                    <td class="text-center"  style="height: 5mm; width: 57.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;                        
                         border-bottom: 0.5px solid black;">Número Estampilla</td>
 
-                    <td class="text-center" colspan="3" style="height: 5mm; width: 62.5mm; border-top: 0.5px solid black;
+                    <td class="text-center" colspan="2" style="height: 5mm; width: 45.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;"><?php echo $estampilla->impr_estampillaid; ?></td>
+
+                    <td class="text-center" colspan="2" style="height: 5mm; width: 17mm; border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;
+                        color:red;"><?php echo $estampilla->impr_codigopapel; ?></td>
                 </tr>
 
                 <tr>
@@ -169,7 +175,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        text-align: center;"><br><br>QR</td>
+                        text-align: center;"><tcpdf method="write2DBarcode" params="<?php echo $params; ?>" /></td>
                 </tr>
 
                 <tr>
@@ -199,7 +205,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        color: red;"><br><br>0000001</td>
+                        color: red;"></td>
                 </tr>   
             </table>
         

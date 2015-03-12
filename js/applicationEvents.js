@@ -41,8 +41,21 @@ function inicial ()
   //Eventos Importar Contratos
   $('#cargaImportacion').click(iniciarCarga);
 
-  $('#btn-pdf').click(function(e){
+  //Eventos informes vista consultar
+  $('#btn-detalle').click(generarInformeDetallado);
+  $('#btn-relacion').click(generarInformeRelacion);
+    
+
+}
+
+
+//Funcion que valida si se ha digitado
+//una fecha para generar el informe
+//detallado y envia la orden
+function generarInformeDetallado (e)
+{
     e.preventDefault();  
+
     var fecha = $('#buscarfecha').find(':text').val();
     
     if(fecha != '')
@@ -50,9 +63,23 @@ function inicial ()
         window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha='+fecha);  
     }    
     
-  });
-    
+}
 
+
+//Funcion que valida si se ha digitado
+//una fecha para generar el informe
+//detallado y envia la orden
+function generarInformeRelacion (e)
+{
+    e.preventDefault();  
+
+    var fecha = $('#buscarfecha').find(':text').val();
+    
+    if(fecha != '')
+    {
+        window.open(base_url+'index.php/liquidaciones/renderizarRelacionEstampillasPDF?fecha='+fecha);  
+    }    
+    
 }
 
 

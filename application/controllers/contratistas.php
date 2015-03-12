@@ -65,7 +65,7 @@ class Contratistas extends MY_Controller {
 
               $this->data['successmessage']=$this->session->flashdata('message');  
         		  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
-              $this->form_validation->set_rules('nit', 'NIT', 'required|trim|xss_clean|max_length[100]|is_unique[con_contratistas.cont_nit]');   
+              $this->form_validation->set_rules('nit', 'NIT', 'required|numeric|trim|xss_clean|max_length[100]|is_unique[con_contratistas.cont_nit]');   
               $this->form_validation->set_rules('direccion', 'Dirección', 'trim|xss_clean|max_length[256]');
               $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
               $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
@@ -82,7 +82,8 @@ class Contratistas extends MY_Controller {
                         'cont_nit' => $this->input->post('nit'),
                         'cont_direccion' => $this->input->post('direccion'),
                         'cont_municipioid' => $this->input->post('municipioid'),
-                        'cont_regimenid' => $this->input->post('regimenid')
+                        'cont_regimenid' => $this->input->post('regimenid'),
+                        'cont_fecha' => date('Y-m-d')
 
                      );
                  

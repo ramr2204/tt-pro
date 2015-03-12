@@ -32,6 +32,7 @@ class Liquidaciones extends MY_Controller {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
 
+              $this->data['errorModal']=$this->session->flashdata('errorModal');
               $this->data['successmessage']=$this->session->flashdata('successmessage');
               $this->data['errormessage']=$this->session->flashdata('errormessage');
               $this->data['infomessage']=$this->session->flashdata('infomessage');
@@ -83,7 +84,8 @@ class Liquidaciones extends MY_Controller {
       if ($this->ion_auth->logged_in()){
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
-
+ 
+              $this->data['errorModal']=$this->session->flashdata('errorModal');
               $this->data['successmessage']=$this->session->flashdata('successmessage');
               $this->data['errormessage']=$this->session->flashdata('errormessage');
               $this->data['infomessage']=$this->session->flashdata('infomessage');
@@ -223,9 +225,9 @@ class Liquidaciones extends MY_Controller {
   {        
       if ($this->ion_auth->logged_in()) {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
-               $codigo='00000000';
-               $idcontrato=$this->input->post('idcontrato');
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) { 
+              $codigo = 00000; 
+              $idcontrato=$this->input->post('idcontrato');
               $data = array(
                    'liqu_contratoid' => $this->input->post('idcontrato'),
                    'liqu_nombrecontratista' => $this->input->post('nombrecontratista'),
@@ -251,6 +253,13 @@ class Liquidaciones extends MY_Controller {
               if ($this->codegen_model->add('est_liquidaciones',$data) == TRUE) {
               	  $liquidacionid=$this->db->insert_id();
                   for ($i=1; $i < $this->input->post('numeroestampillas'); $i++) { 
+                      
+                    //Valida si la factura viene en valor cero
+                    //no guarda factura
+                    $valor = $this->input->post('totalestampilla'.$i);                                      
+
+                    if($valor > 0)
+                    {                                              
                   	   $data = array(
                        'fact_nombre' => $this->input->post('nombreestampilla'.$i),
                        'fact_porcentaje' => $this->input->post('porcentaje'.$i),
@@ -261,7 +270,15 @@ class Liquidaciones extends MY_Controller {
                        'fact_estampillaid' => $this->input->post('idestampilla'.$i),
                        'fact_rutaimagen' => $this->input->post('rutaimagen'.$i),
                        );
-                  	   $this->codegen_model->add('est_facturas',$data);
+                  	   
+                       $this->codegen_model->add('est_facturas',$data);
+                       
+                       /**
+                       * Solicita la Asignación del codigo para el codigo de barras
+                       */
+                       $this->asignarCodigoParaBarras($liquidacionid,$this->input->post('idestampilla'.$i));
+                    }
+                    
                   }
 
                  
@@ -396,7 +413,7 @@ class Liquidaciones extends MY_Controller {
                       mkdir($path,0777,TRUE);      
                   }
                   $config['upload_path'] = $path;
-                  $config['allowed_types'] = 'jpg|jpeg|gif|png';
+                  $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
                   $config['remove_spaces']=TRUE;
                   $config['max_size']    = '2048';
                   $config['overwrite']    = TRUE;
@@ -407,6 +424,43 @@ class Liquidaciones extends MY_Controller {
                   $referenciaCargados='';
                   for ($i=0; $i < $numeroarchivos; $i++) {
                  
+                    if(isset($_POST['fecha_pago_'.$i]) && $_POST['fecha_pago_'.$i] == '')
+                    {
+                        $this->session->set_flashdata('errorModal', '<strong>Error!</strong> Debe Ingresar una Fecha para el Pago.');
+                        $this->session->set_flashdata('accion', 'liquidado');                        
+                        $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe Ingresar una Fecha para el Pago.');
+                        
+                        //Valida para redirecionar a la vista respectiva
+                        //tramite o contrato
+                        if ($this->input->post('contratoid'))
+                        {
+                            redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
+                        }elseif ($this->input->post('tramiteid'))
+                            {
+                                redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
+                            }
+                        
+
+                    }elseif(isset($_POST['fecha_pago_'.$i]) && $_POST['fecha_pago_'.$i] != '')
+                        {
+                            if(strtotime($_POST['fecha_pago_'.$i]) > strtotime(date('Y-m-d')))
+                            {
+                                $this->session->set_flashdata('errorModal', '<strong>Error!</strong> la Fecha de Pago no Puede ser Mayor al Dia actual.');
+                                $this->session->set_flashdata('accion', 'liquidado');
+                                $this->session->set_flashdata('errormessage', '<strong>Error!</strong> la Fecha de Pago no Puede ser Mayor al Dia actual.');
+                                
+                                //Valida para redirecionar a la vista respectiva
+                                //tramite o contrato
+                                if ($this->input->post('contratoid'))
+                                {
+                                    redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
+                                }elseif ($this->input->post('tramiteid'))
+                                    {
+                                        redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
+                                    }
+                            }
+                        }
+
                     //Si se envia el pago en el checkbox
                     //permitira entrar a la consulta 
                     //para crear la factura, de lo contrario
@@ -427,7 +481,7 @@ class Liquidaciones extends MY_Controller {
                       if ($pago != 'flag') {
                         $datos = array(
                                  'pago_facturaid' => $idfactura,
-                                 'pago_fecha' => date("Y-m-d H:i:s"),
+                                 'pago_fecha' => $_POST['fecha_pago_'.$i],
                                  'pago_valor' => $pago,
                                  'pago_metodo' => 'manual',
                                );
@@ -560,7 +614,7 @@ function vercontratolegalizado()
 
           if ($usuarioLogueado->perfilid==4)
           {
-               //extrae el ultimo codigo de papeleria resgistrado
+               //extrae el ultimo codigo de papeleria registrado
                //en las impresiones para el liquidador autenticado
                $tablaJoin='est_papeles';
                $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
@@ -585,7 +639,7 @@ function vercontratolegalizado()
 
               }else
                   {
-                        //extrae el primer codigo de papeleria resgistrado
+                        //extrae el primer codigo de papeleria registrado
                         //en los rangos de papel asginado al liquidador autenticado
                         $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
                         $primerCodigo = $this->codegen_model->min('est_papeles','pape_codigoinicial',$where);
@@ -608,7 +662,7 @@ function vercontratolegalizado()
 
               //verifica que exista un rango de papeleria asignado
               //al liquidador en el que se encuentre el posible
-               //codigo a registrar
+              //codigo a registrar
               if ($papeles)
               {
                            
@@ -796,18 +850,32 @@ function verliquidartramite()
                   
               if ($this->codegen_model->add('est_liquidaciones',$data) == TRUE) {
                   $liquidacionid=$this->db->insert_id();
+
                   for ($i=1; $i < $this->input->post('numeroestampillas'); $i++) { 
-                       $data = array(
-                       'fact_nombre' => $this->input->post('nombreestampilla'.$i),
-                       'fact_porcentaje' => $this->input->post('porcentaje'.$i),
-                       'fact_valor' => $this->input->post('totalestampilla'.$i),
-                       'fact_banco' => $this->input->post('banco'.$i),
-                       'fact_cuenta' => $this->input->post('cuenta'.$i),
-                       'fact_liquidacionid' => $liquidacionid,
-                       'fact_estampillaid' => $this->input->post('idestampilla'.$i),
-                       'fact_rutaimagen' => $this->input->post('rutaimagen'.$i),
-                       );
-                       $this->codegen_model->add('est_facturas',$data);
+                      
+                      //Valida si la factura viene en valor cero
+                      //no guarda factura
+                      $valor = $this->input->post('totalestampilla'.$i);
+                      
+                      if($valor > 0)
+                      {  
+                          $data = array(
+                          'fact_nombre' => $this->input->post('nombreestampilla'.$i),
+                          'fact_porcentaje' => $this->input->post('porcentaje'.$i),
+                          'fact_valor' => $this->input->post('totalestampilla'.$i),
+                          'fact_banco' => $this->input->post('banco'.$i),
+                          'fact_cuenta' => $this->input->post('cuenta'.$i),
+                          'fact_liquidacionid' => $liquidacionid,
+                          'fact_estampillaid' => $this->input->post('idestampilla'.$i),
+                          'fact_rutaimagen' => $this->input->post('rutaimagen'.$i),
+                          );
+                          $this->codegen_model->add('est_facturas',$data);
+
+                          /**
+                          * Solicita la Asignación del codigo para el codigo de barras
+                          */
+                          $this->asignarCodigoParaBarras($liquidacionid,$this->input->post('idestampilla'.$i));
+                      }
                   }
 
                   //print_r($data);
@@ -1170,10 +1238,23 @@ function consultar()
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
               
-              //Extrae los id de las facturas para las que se han hecho impresiones              
-              $usuario = $this->ion_auth->user()->row();
-              $where = 'where pape_usuario = '.$usuario->id;              
-              $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
+
+              /**
+              * Valida si es administrador para mostrar todas las impresiones
+              */
+              if($this->ion_auth->is_admin())
+              {
+                  //Extrae los id de las facturas para las que se han hecho impresiones              
+                  $usuario = $this->ion_auth->user()->row();
+                  $where = '';              
+                  $join = 'join est_papeles p on p.pape_id = i.impr_papelid';  
+              }else
+                  {
+                      //Extrae los id de las facturas para las que se han hecho impresiones              
+                      $usuario = $this->ion_auth->user()->row();
+                      $where = 'where pape_usuario = '.$usuario->id;              
+                      $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
+                  }              
 
               $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid",$where,$join);
          
@@ -1199,14 +1280,15 @@ function consultar()
               $whereIn = 'l.liqu_id in '.$idLiquidaciones;
 
               $this->load->library('datatables');
-              $this->datatables->select('l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha');
+              $this->datatables->select('l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha, p.pago_fecha, f.fact_valor, f.fact_nombre');              
+              $this->datatables->from('est_facturas f');  
+              $this->datatables->join('est_liquidaciones l', 'l.liqu_id = f.fact_liquidacionid', 'left');
+              $this->datatables->join('est_pagos p', 'p.pago_facturaid = f.fact_id', 'left');
               $this->datatables->whereString($whereIn);
-              $this->datatables->from('est_liquidaciones l');  
 
                            
 
-              $this->datatables->add_column('facturas','edess');
-              $this->datatables->add_column('edit', '-');
+              $this->datatables->add_column('facturas','edess');              
               echo $this->datatables->generate();
 
           } else {
@@ -1249,7 +1331,7 @@ function consultar()
                            $ObjetoFactura = $this->liquidaciones_model->getfacturaIndividual($idFactura);
 
 
-                           //extrae el ultimo codigo de papeleria resgistrado
+                           //extrae el ultimo codigo de papeleria registrado
                            //en las impresiones para el liquidador autenticado
                            $tablaJoin='est_papeles';
                            $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
@@ -1616,13 +1698,13 @@ function consultar()
               }  
               $idLiquidaciones .= '0)';
               $whereIn = 'where l.liqu_id in '.$idLiquidaciones;
-
-
+              $join2 = ' INNER JOIN est_liquidaciones l ON l.liqu_id = f.fact_liquidacionid';
+              $join2 .= ' INNER JOIN est_pagos p ON p.pago_facturaid = f.fact_id';              
               
-              $campos = 'l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha';
+              $campos = 'l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha, p.pago_fecha, f.fact_valor, f.fact_nombre';
               $where = $whereIn.' and l.liqu_fecha = '.'"'.$fecha.'"';
 
-              $liquidaciones = $this->codegen_model->getSelect('est_liquidaciones l',$campos,$where);
+              $liquidaciones = $this->codegen_model->getSelect('est_facturas f',$campos,$where,$join2);
               
               if($liquidaciones)
               {
@@ -1709,5 +1791,169 @@ function consultar()
       } 
       
   }
+
+
+/**
+* Funcion que ordena la renderizacion o no del PDF
+* de la Relación de Entrega de estampillas de la fecha especificada
+* Mike Ortiz
+*/
+
+  function renderizarRelacionEstampillasPDF()
+  {
+      if ($this->ion_auth->logged_in()) 
+      {
+          
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) 
+          { 
+              $fecha = $_GET['fecha'];
+
+              //Extrae los id de las facturas para las que se han hecho impresiones  
+              //y las fechas de las impresiones            
+              $usuario = $this->ion_auth->user()->row();
+              $where = 'where pape_usuario = '.$usuario->id.' and DATE(i.impr_fecha) = "'.$_GET['fecha'].'"';              
+              $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
+
+              $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid, DATE(i.impr_fecha) as fecha",$where,$join);
+
+              if($facturas)
+              {
+
+              //se extrae el vector con los id de las facturas
+              //asociadas a las impresiones para la fecha suministrada              
+              $idFacturas = '(';
+              foreach ($facturas as $factura) 
+              {   
+                  if($factura->fecha == $fecha)
+                  {
+                      $idFacturas .= $factura->impr_facturaid.',';                                            
+
+                  }                  
+              }  
+              $idFacturas .= '0)';
+              $where = 'where fact_id in '.$idFacturas;                            
+              
+              //Extrae las facturas
+              $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"f.fact_valor, f.fact_estampillaid, f.fact_nombre",$where);
+             
+              $vectorIdEstampillas = [];
+              $vectorValorEstampillas = [];
+              
+                  
+                  foreach ($liquidaciones as $liquidacion) 
+                  {
+                                            
+                      //Selecciona los id de las estampillas
+                      //impresas y crea un arreglo por cada tipo de estampilla
+                      //inicializando el valor en cero y guardando el nombre de la estampilla
+                      if(!in_array($liquidacion->fact_estampillaid, $vectorIdEstampillas))
+                      {
+                          $vectorIdEstampillas[] = $liquidacion->fact_estampillaid;
+                          $vectorValorEstampillas[$liquidacion->fact_estampillaid]['valor'] = 0;
+                          $vectorValorEstampillas[$liquidacion->fact_estampillaid]['nombre'] = $liquidacion->fact_nombre;;
+                      }
+
+                      //acumula los valores por id de estampillas
+                      if(in_array($liquidacion->fact_estampillaid, $vectorIdEstampillas))
+                      {
+                          $vectorValorEstampillas[$liquidacion->fact_estampillaid]['valor'] += $liquidacion->fact_valor;
+                      } 
+                      
+                  }
+
+                  $datos['liquidaciones'] = $vectorValorEstampillas;
+                  $datos['fecha'] = $fecha;
+                  //Creación del PDF
+                  $this->load->library("Pdf");                  
+                  $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);                  
+
+                  // set document information
+                  $pdf->SetCreator(PDF_CREATOR);
+                  $pdf->SetAuthor('turrisystem');
+                  $pdf->SetTitle('Relacion Entrega Estampillas');
+                  $pdf->SetSubject('Gobernación del Tolima');
+                  $pdf->SetKeywords('estampillas,gobernación');
+                  $pdf->SetPrintHeader(false);
+                  $pdf->SetPrintFooter(false);
+                  // set default monospaced font
+                  $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+                  // set margins
+                  $pdf->setPageUnit('mm');
+                  $pdf->SetMargins(30, 10, 20, true);
+                  $pdf->SetHeaderMargin(0);
+                  $pdf->SetFooterMargin(0);
+      
+                  // set auto page breaks
+                  $pdf->SetAutoPageBreak(TRUE, 2);
+
+                  // set some language-dependent strings (optional)
+                  if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+                      require_once(dirname(__FILE__).'/lang/eng.php');
+                      $pdf->setLanguageArray($l);
+                  }
+               
+                  // ---------------------------------------------------------
+            
+                  // set font
+                   $pdf->SetFont('helvetica', '', 10);
+                   $pdf->AddPage();                  
+                   $html = $this->load->view('generarpdf/generarpdf_relacionEntregaEstampillas', $datos, TRUE);  
+                
+                   $pdf->writeHTML($html, true, false, true, false, '');
+           
+
+                  // ---------------------------------------------------------
+                  //para evitar el error de que se ha impreso algo antes de enviar
+                  //el PDF 
+                  ob_end_clean();
+                  //Close and output PDF document
+                  $pdf->Output('Relacion_Entrega_Estampillas_'.$fecha.'.pdf', 'I');
+
+
+              }else
+                  {   
+                      $this->session->set_flashdata('errormessage', 'La fecha elegida no presenta registros!'); 
+                      redirect(base_url().'index.php/liquidaciones/consultar');  
+                  }
+
+             
+          } else {
+              redirect(base_url().'index.php/error_404');
+          }
+               
+      } else{
+              redirect(base_url().'index.php/users/login');
+      } 
+      
+  }
+
+
+/**
+* Funcion de apoyo que crea y asigna el codigo a la factura
+* para generar el codigo de barras del recibo
+*/
+function asignarCodigoParaBarras($idLiquidacion,$idEstampilla)
+{
+    /**
+    * Crea el codigo para generar el codigo de barras
+    */                        
+    //Extrae la factura creada y el codigo de la estampilla
+    $tabla = 'est_facturas f';
+    $campos = 'f.fact_id, f.fact_estampillaid, f.fact_valor, e.estm_cuenta'; 
+    $donde = 'WHERE fact_liquidacionid = '.$idLiquidacion.' AND fact_estampillaid = '.$idEstampilla;
+    $join = 'INNER JOIN est_estampillas e ON e.estm_id = f.fact_estampillaid';
+    $factura = $this->codegen_model->getSelect($tabla, $campos, $donde, $join);
+                                   
+    //Formatea el valor y consecutivo de la factura para que quede de 10 digitos
+    $valorEstampilla = str_pad($factura[0]->fact_valor, 10, 0, STR_PAD_LEFT);
+    $consecutivoFactura = str_pad($factura[0]->fact_id, 10, 0, STR_PAD_LEFT);
+    $codigoParaBarra='(415)'.$factura[0]->estm_cuenta.'~F1(8020)'.$consecutivoFactura.'~F1(390y)'.$valorEstampilla;                                                
+
+    $info = array('fact_codigo' => $codigoParaBarra);
+    //Actualiza el registro de la Factura para asignarle el codigo                        
+    $t = $this->codegen_model->edit('est_facturas',$info,'fact_id',$factura[0]->fact_id);                          
+}
+
 
 }

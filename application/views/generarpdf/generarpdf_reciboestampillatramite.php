@@ -34,12 +34,17 @@
      </th>
      <th colspan="2" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
      <th colspan="1" class="text-center small">
-           <img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima2" height="50" width="90" >
+           <img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima2.jpg" height="50" width="90" >
      </th>
    </tr>
  </thead>
  <tbody>
-   
+
+<tr>
+     <td colspan="1"><strong>Numero Factura </strong></td>
+     <td colspan="3"> <?php echo $codigodepto.'-'.$facturaestampilla->fact_id; ?></td>
+</tr>
+
 <tr>
      <td colspan="1"><strong>Nombre </strong></td>
      <td colspan="3"><?php echo $result->liqu_nombrecontratista; ?>
@@ -64,9 +69,6 @@
      <td colspan="4"><strong></strong></td>
 </tr>
 <tr>
-     <td colspan="4"></td>
-</tr>
-<tr>
      <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
      <td colspan="1" class="text-center"><strong>Cuenta de ahorro</strong></td>
      <td colspan="1" class="text-center"><strong>Porcentaje</strong></td>
@@ -134,12 +136,17 @@
      </th>
      <th colspan="2" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
      <th colspan="1" class="text-center small">
-           <img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima2" height="50" width="90" >
+           <img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima2.jpg" height="50" width="90" >
      </th>
    </tr>
  </thead>
  <tbody>
  
+<tr>
+     <td colspan="1"><strong>Numero Factura </strong></td>
+     <td colspan="3"> <?php echo $codigodepto.'-'.$facturaestampilla->fact_id; ?></td>
+</tr>
+
 <tr>
      <td colspan="1"><strong>Nombre del contratista</strong></td>
      <td colspan="3"><?php echo $result->liqu_nombrecontratista; ?>
@@ -161,9 +168,7 @@
 <tr>
      <td colspan="4"><strong></strong></td>
 </tr>
-<tr>
-     <td colspan="4"></td>
-</tr>
+
 <tr>
      <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
      <td colspan="1" class="text-center"><strong>Cuenta de ahorro</strong></td>
@@ -232,12 +237,17 @@
      </th>
      <th colspan="2" class="text-center small">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
      <th colspan="1" class="text-center small">
-           <img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima2" height="50" width="90" >
+           <img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima2.jpg" height="50" width="90" >
      </th>
    </tr>
  </thead>
  <tbody>
-   
+
+<tr>
+     <td colspan="1"><strong>Numero Factura </strong></td>
+     <td colspan="3"> <?php echo $codigodepto.'-'.$facturaestampilla->fact_id; ?></td>
+</tr>
+
 <tr>
      <td colspan="1"><strong>Nombre del contratista</strong></td>
      <td colspan="3"><?php echo $result->liqu_nombrecontratista; ?>
@@ -261,9 +271,7 @@
      <td colspan="1"><?php echo $result->liqu_tipocontrato; ?></td>
      <td colspan="2" class="text-center"><strong>Régimen <?php echo $result->liqu_regimen; ?></strong></td>
 </tr>
-<tr>
-     <td colspan="4"></td>
-</tr>
+
 <tr>
      <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
      <td colspan="1" class="text-center"><strong>Cuenta de ahorro</strong></td>

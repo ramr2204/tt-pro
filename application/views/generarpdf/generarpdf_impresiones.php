@@ -15,22 +15,34 @@
 <table border="1" style="text-align:center;">
     <thead>
         <tr>
-            <th style="width:15mm;">Id</th>
-            <th style="width:30mm;">Tipo Liquidación</th>
-            <th style="width:30mm;">NIT</th>
-            <th style="width:50mm;">Contratista</th>
-            <th style="width:120mm;">Estampillas</th> 
+            <th style="width:10mm;">No</th>
+            <th style="width:20mm;">Tipo Liquidación</th>
+            <th style="width:25mm;">NIT</th>
+            <th style="width:40mm;">Contratista</th>
+            <th style="width:20mm;">Fecha Liquidacion</th>
+            <th style="width:25mm;">Concepto</th>
+            <th style="width:27mm;">Valor</th>
+            <th style="width:20mm;">Fecha Pago</th>
+            <th style="width:60mm;">Estampillas</th> 
             <th style="width:20mm;">Total</th>                                                    
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($liquidaciones as $liquidacion) {  ?>        	
+        <?php
+            $n = 0;
+            foreach ($liquidaciones as $liquidacion) {  
+            $n++; 
+        ?>        	
             <tr>
-            	<td style="width:15mm;"><?php echo $liquidacion->liqu_id; ?></td>
-            	<td style="width:30mm;"><?php echo $liquidacion->liqu_tipocontrato; ?></td>
-            	<td style="width:30mm;"><?php echo $liquidacion->liqu_nit; ?></td>
-            	<td style="width:50mm;"><?php echo $liquidacion->liqu_nombrecontratista; ?></td>            	
-            	<td style="text-align:left; width:120mm;"><?php echo $liquidacion->estampillas; ?></td>           
+            	<td style="width:10mm;"><?php echo $n; ?></td>
+            	<td style="width:20mm;"><?php echo $liquidacion->liqu_tipocontrato; ?></td>
+            	<td style="width:25mm;"><?php echo $liquidacion->liqu_nit; ?></td>
+            	<td style="width:40mm;"><?php echo $liquidacion->liqu_nombrecontratista; ?></td>
+                <td style="width:20mm;"><?php echo $liquidacion->liqu_fecha; ?></td>
+                <td style="width:25mm;"><?php echo $liquidacion->fact_nombre; ?></td>
+                <td style="width:27mm;"><?php echo $liquidacion->fact_valor; ?></td>
+                <td style="width:20mm;"><?php echo $liquidacion->pago_fecha; ?></td>
+            	<td style="text-align:left; width:60mm;"><?php echo $liquidacion->estampillas; ?></td>           
             	<td style="width:20mm;"><br><?php echo $liquidacion->liqu_valortotal; ?></td> 	
             </tr>
         <?php }?>	

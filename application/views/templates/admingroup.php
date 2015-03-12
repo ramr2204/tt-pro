@@ -36,6 +36,7 @@
      echo link_tag( array( 'href' => 'css/bootstrap.min.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
      echo link_tag( array( 'href' => 'css/sb-admin.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
      echo link_tag( array( 'href' => 'dist/ladda-themeless.min.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
+     echo link_tag( array( 'href' => 'css/datepicker.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
      echo link_tag( array( 'href' => 'css/estampillas.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
 
      //echo link_tag( array( 'href' => 'css/font-awesome.min.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n"; 
@@ -61,6 +62,7 @@
     echo script_tag( 'js/bootstrap.min.js' ) . "\n";
     echo script_tag( 'dist/spin.min.js' ) . "\n";
     echo script_tag( 'dist/ladda.min.js' ) . "\n";
+    echo script_tag( 'js/datepicker.js' ) . "\n";
     echo script_tag( 'js/applicationEvents.js' ) . "\n";
 
     
