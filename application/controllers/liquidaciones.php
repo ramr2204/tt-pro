@@ -614,7 +614,7 @@ function vercontratolegalizado()
 
           if ($usuarioLogueado->perfilid==4)
           {
-               //extrae el ultimo codigo de papeleria resgistrado
+               //extrae el ultimo codigo de papeleria registrado
                //en las impresiones para el liquidador autenticado
                $tablaJoin='est_papeles';
                $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
@@ -639,7 +639,7 @@ function vercontratolegalizado()
 
               }else
                   {
-                        //extrae el primer codigo de papeleria resgistrado
+                        //extrae el primer codigo de papeleria registrado
                         //en los rangos de papel asginado al liquidador autenticado
                         $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
                         $primerCodigo = $this->codegen_model->min('est_papeles','pape_codigoinicial',$where);
@@ -662,7 +662,7 @@ function vercontratolegalizado()
 
               //verifica que exista un rango de papeleria asignado
               //al liquidador en el que se encuentre el posible
-               //codigo a registrar
+              //codigo a registrar
               if ($papeles)
               {
                            
@@ -1946,8 +1946,8 @@ function asignarCodigoParaBarras($idLiquidacion,$idEstampilla)
     $factura = $this->codegen_model->getSelect($tabla, $campos, $donde, $join);
                                    
     //Formatea el valor y consecutivo de la factura para que quede de 10 digitos
-    $valorEstampilla = str_pad($factura[0]->fact_valor, 12, 0, STR_PAD_LEFT);
-    $consecutivoFactura = str_pad($factura[0]->fact_id, 12, 0, STR_PAD_LEFT);
+    $valorEstampilla = str_pad($factura[0]->fact_valor, 10, 0, STR_PAD_LEFT);
+    $consecutivoFactura = str_pad($factura[0]->fact_id, 10, 0, STR_PAD_LEFT);
     $codigoParaBarra='(415)'.$factura[0]->estm_cuenta.'~F1(8020)'.$consecutivoFactura.'~F1(390y)'.$valorEstampilla;                                                
 
     $info = array('fact_codigo' => $codigoParaBarra);
