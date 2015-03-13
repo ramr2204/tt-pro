@@ -43,7 +43,9 @@ function inicial ()
 
   //Eventos informes vista consultar
   $('#btn-detalle').click(generarInformeDetallado);
-  $('#btn-relacion').click(generarInformeRelacion);
+  $('#btn-relacion').click(generarInformeRelacion);      
+ 
+  
     
 
 }
