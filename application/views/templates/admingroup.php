@@ -168,17 +168,7 @@
       
       </ul>
 
-        <?php } ?>
-
-          <ul class="nav navbar-nav navbar-right">           
-              <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Manuales<b class="caret"></b></a>
-              <ul class="dropdown-menu">
-                <li><a href="#" id="manual_liqu" dominio = "<?php echo $_SERVER['SERVER_ADDR'].':'.$_SERVER['SERVER_PORT']; ?>/estampillas-pro-mike/">Manual del Liquidador</a></li>
-                <li><a href="#">Parámetros</a></li>                
-              </ul>
-            </li>
-          </ul>  
+        <?php } ?>        
 
 
           <ul class="nav navbar-nav navbar-right">
@@ -204,6 +194,18 @@
               </ul>
             </li>
           </ul>
+
+          <ul class="nav navbar-nav navbar-right">           
+              <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Manuales<b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="<?php echo base_url(); ?>Manuales_Estampillas/estampillas_liquidador/site/index.html" target="_blank">Manual del Liquidador</a></li>
+                <?php if ($this->ion_auth->is_admin()) { ?>
+                <li><a href="<?php echo base_url(); ?>Manuales_Estampillas/estampillas_administrador/site/index.html" target="_blank">Manual del Administrador</a></li>     
+                <?php } ?>           
+              </ul>
+            </li>
+          </ul> 
 
         </div><!--/.nav-collapse -->
       </div>

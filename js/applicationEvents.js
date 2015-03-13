@@ -43,14 +43,8 @@ function inicial ()
 
   //Eventos informes vista consultar
   $('#btn-detalle').click(generarInformeDetallado);
-  $('#btn-relacion').click(generarInformeRelacion);
-
-  //Eventos Manuales
-  $('#manual_liqu').click(function(e)
-  { 
-      var raiz = $(this).attr('dominio');
-      window.open(raiz+'/Manuales_Estampillas/estampillas_liquidador/site/index.html');
-  });
+  $('#btn-relacion').click(generarInformeRelacion);      
+ 
   
     
 
