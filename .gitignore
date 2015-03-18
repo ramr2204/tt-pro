@@ -16,6 +16,7 @@ uploads/
 */cache/*
 */cache/!index.html
 */cache/!.htaccess
+
 # |
 # | .gitignore
 # | :::::::::::::::::::::::::::
@@ -23,12 +24,14 @@ uploads/
 *.txt
 *.TXT
 *.dat
+
 # |
 # | Images
 # | :::::::::::::::::::::::::::
-# *.gif
-# *.jpg
-# *.png
+*.gif
+*.jpg
+*.png
+
 # |
 # | Media
 # | :::::::::::::::::::::::::::
@@ -38,6 +41,7 @@ uploads/
 *.mp3
 *.wmv
 *.mpeg
+
 # |
 # | System
 # | :::::::::::::::::::::::::::
@@ -48,6 +52,7 @@ uploads/
 *.dll
 *.sh
 *.bat
+
 # |
 # | Office
 # | :::::::::::::::::::::::::::
@@ -55,16 +60,19 @@ uploads/
 *.xls
 *.docx
 *.xlsx
+
 # |
 # | Executable
 # | :::::::::::::::::::::::::::
 *.msi
 *.exe
+
 # |
 # | Databases
 # | ::::::::::::::::::::::::::
 *.dbf
 *.sql
+
 # |
 # | Compress
 # | :::::::::::::::::::::::::::
@@ -72,6 +80,7 @@ uploads/
 *.rar
 *.tar
 *.tar.gz
+
 # |
 # | Temp
 # | :::::::::::::::::::::::::::
@@ -83,6 +92,7 @@ uploads/
 /./**/temp/**/*
 temp/*
 temp/**/*
+
 # |
 # | Others
 # | :::::::::::::::::::::::::::
