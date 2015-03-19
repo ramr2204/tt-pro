@@ -38,6 +38,12 @@
                                            <input class="form-control" id="cuenta" type="text" name="cuenta" value="<?php echo $result->estm_cuenta; ?>" required="required" />
                                            <?php echo form_error('cuenta','<span class="text-danger">','</span>'); ?>
                                     </div>
+
+                                    <div class="form-group">
+                                           <label for="codigoB">Codigo Barras</label>
+                                           <input class="form-control" id="codigoB" type="number" name="codigoB" value="<?php echo $result->estm_codigoB; ?>" required="required" maxlength="100" />
+                                           <?php echo form_error('codigoB','<span class="text-danger">','</span>'); ?>
+                                    </div>
                                     
                                     <div class="form-group">
                                            <label for="bancoid">Banco</label>
