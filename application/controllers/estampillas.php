@@ -65,6 +65,7 @@ class Estampillas extends MY_Controller {
 
               $this->data['successmessage']=$this->session->flashdata('message');  
         		  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
+              $this->form_validation->set_rules('codigoB', 'Codigo Barras', 'required|trim|xss_clean|numeric|max_length[128]|is_unique[est_estampillas.estm_codigoB]');
               $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]|is_unique[est_estampillas.estm_cuenta]');   
               $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[256]');
               $this->form_validation->set_rules('bancoid', 'Banco',  'required|numeric|greater_than[0]');
@@ -98,6 +99,7 @@ class Estampillas extends MY_Controller {
                           'estm_cuenta' => $this->input->post('cuenta'),
                           'estm_descripcion' => $this->input->post('descripcion'),
                           'estm_bancoid' => $this->input->post('bancoid'),
+                          'estm_codigoB' => $this->input->post('codigoB'),
                           'estm_rutaimagen' => $ruta
                        );
                  
@@ -152,25 +154,38 @@ class Estampillas extends MY_Controller {
               if ($idestampilla==''){
                   $this->session->set_flashdata('infomessage', 'Debe elegir una estampilla para editar');
                   redirect(base_url().'index.php/estampillas');
-              }
-              $resultado = $this->codegen_model->get('est_estampillas','estm_cuenta','estm_id = '.$idestampilla,1,NULL,true);
+              }              
               
-              foreach ($resultado as $key => $value) {
-                  $aplilo[$key]=$value;
-              }
-              
-              if ($aplilo['estm_cuenta']==$this->input->post('cuenta')) {
-                  
-                  $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]');
-              
-              } else {
+              /**
+              * Valida si el numero codigo para barras es el mismo al registrado
+              * o no para validarlo como unique
+              */
+              $currentCuenta = $this->codegen_model->get('est_estampillas','estm_cuenta','estm_id = '.$idestampilla,1,NULL,true);
 
-                  $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]|is_unique[est_estampillas.estm_cuenta]');
-              
-              }
+              if ($currentCuenta->estm_cuenta != $this->input->post('cuenta')) {                  
+                  $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]|is_unique[est_estampillas.estm_cuenta]');              
+              } else 
+                  {   
+                      $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]');                              
+                  }
+
               $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]');   
               $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[256]');
               $this->form_validation->set_rules('bancoid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
+              /**
+              * Valida si el numero codigo para barras es el mismo al registrado
+              * o no para validarlo como unique
+              */
+              $currentCodigoB = $this->codegen_model->get('est_estampillas','estm_codigoB','estm_id = '.$idestampilla,1,NULL,true);
+
+              if($currentCodigoB->estm_codigoB != $this->input->post('codigoB'))
+              {
+                  $this->form_validation->set_rules('codigoB', 'Codigo Barras', 'required|trim|xss_clean|numeric|max_length[128]|is_unique[est_estampillas.estm_codigoB]');  
+              }else
+                  {
+                      $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]');  
+                  }
+              
               $path = "uploads/imagenesestampillas";
               if(!is_dir($path)) { //create the folder if it's not already exists
                   mkdir($path,0777,TRUE);      
@@ -198,6 +213,7 @@ class Estampillas extends MY_Controller {
                         'estm_cuenta' => $this->input->post('cuenta'),
                         'estm_descripcion' => $this->input->post('descripcion'),
                         'estm_bancoid' => $this->input->post('bancoid'),
+                        'estm_codigoB' => $this->input->post('codigoB'),
                         'estm_rutaimagen' => $ruta
 
                        );
@@ -207,6 +223,7 @@ class Estampillas extends MY_Controller {
                         'estm_nombre' => $this->input->post('nombre'),
                         'estm_cuenta' => $this->input->post('cuenta'),
                         'estm_descripcion' => $this->input->post('descripcion'),
+                        'estm_codigoB' => $this->input->post('codigoB'),
                         'estm_bancoid' => $this->input->post('bancoid')
 
                        );
@@ -223,6 +240,7 @@ class Estampillas extends MY_Controller {
                         'estm_nombre' => $this->input->post('nombre'),
                         'estm_cuenta' => $this->input->post('cuenta'),
                         'estm_descripcion' => $this->input->post('descripcion'),
+                        'estm_codigoB' => $this->input->post('codigoB'),
                         'estm_bancoid' => $this->input->post('bancoid')
 
                        );
@@ -239,7 +257,7 @@ class Estampillas extends MY_Controller {
                         );    
                   
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                	$this->data['result'] = $this->codegen_model->get('est_estampillas','estm_id,estm_nombre,estm_cuenta,estm_descripcion,estm_bancoid,estm_rutaimagen','estm_id = '.$idestampilla,1,NULL,true);
+                	$this->data['result'] = $this->codegen_model->get('est_estampillas','estm_id,estm_nombre,estm_cuenta,estm_descripcion,estm_bancoid,estm_rutaimagen,estm_codigoB','estm_id = '.$idestampilla,1,NULL,true);                  
                   $this->data['bancos']  = $this->codegen_model->getSelect('par_bancos','banc_id,banc_nombre');
                   $this->template->set('title', 'Editar estampilla');
                   $this->template->load($this->config->item('admin_template'),'estampillas/estampillas_edit', $this->data);

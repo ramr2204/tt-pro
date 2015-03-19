@@ -33,6 +33,12 @@
                                            <?php echo form_error('cuenta','<span class="text-danger">','</span>'); ?>
                                     </div>
 
+                                    <div class="form-group">
+                                           <label for="codigoB">Codigo Barras</label>
+                                           <input class="form-control" id="codigoB" type="number" name="codigoB" value="<?php echo set_value('codigoB'); ?>" required="required" maxlength="100" />
+                                           <?php echo form_error('codigoB','<span class="text-danger">','</span>'); ?>
+                                    </div>
+
                                      <div class="form-group">
                                            <label for="bancoid">Banco</label>
                                            <select class="form-control" id="bancoid" name="bancoid" required="required" >

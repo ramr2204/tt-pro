@@ -11,11 +11,6 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
-
 --
 -- Base de datos: `estampillas_arauca`
 --
@@ -509,6 +504,7 @@ CREATE TABLE IF NOT EXISTS `est_estampillas` (
   `estm_nombre` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `estm_cuenta` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `estm_bancoid` int(11) NOT NULL,
+  `estm_codigoB` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `estm_rutaimagen` varchar(200) COLLATE utf8_unicode_ci NOT NULL,
   `estm_descripcion` varchar(500) COLLATE utf8_unicode_ci NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -2416,6 +2412,5 @@ ADD CONSTRAINT `fk_users_perfil` FOREIGN KEY (`perfilid`) REFERENCES `adm_perfil
 ALTER TABLE `users_groups`
 ADD CONSTRAINT `fk_users_groups_groups1` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+

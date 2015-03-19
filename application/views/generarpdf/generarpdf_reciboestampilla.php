@@ -80,7 +80,7 @@
 
 <tr>
      <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
-     <td colspan="1" class="text-center"><strong>Cuenta de ahorro</strong></td>
+     <td colspan="1" class="text-center"><strong>Cuenta Corriente</strong></td>
      <td colspan="1" class="text-center"><strong>Porcentaje</strong></td>
      <td colspan="1" class="text-center"><strong>Valor</strong></td>
 
@@ -195,7 +195,7 @@
 
 <tr>
      <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
-     <td colspan="1" class="text-center"><strong>Cuenta de ahorro</strong></td>
+     <td colspan="1" class="text-center"><strong>Cuenta Corriente</strong></td>
      <td colspan="1" class="text-center"><strong>Porcentaje</strong></td>
      <td colspan="1" class="text-center"><strong>Valor</strong></td>
 
@@ -307,7 +307,7 @@
 
 <tr>
      <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
-     <td colspan="1" class="text-center"><strong>Cuenta de ahorro</strong></td>
+     <td colspan="1" class="text-center"><strong>Cuenta Corriente</strong></td>
      <td colspan="1" class="text-center"><strong>Porcentaje</strong></td>
      <td colspan="1" class="text-center"><strong>Valor</strong>
      </td>
