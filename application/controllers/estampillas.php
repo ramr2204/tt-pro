@@ -162,12 +162,10 @@ class Estampillas extends MY_Controller {
               */
               $currentCuenta = $this->codegen_model->get('est_estampillas','estm_cuenta','estm_id = '.$idestampilla,1,NULL,true);
 
-              if ($currentCuenta->estm_cuenta != $this->input->post('cuenta')) {
-                  
-                  $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]|is_unique[est_estampillas.estm_cuenta]');                  
-              
+              if ($currentCuenta->estm_cuenta != $this->input->post('cuenta')) {                  
+                  $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]|is_unique[est_estampillas.estm_cuenta]');              
               } else 
-                  {
+                  {   
                       $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]');                              
                   }
 

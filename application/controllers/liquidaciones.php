@@ -1818,7 +1818,7 @@ function asignarCodigoParaBarras($idLiquidacion,$idEstampilla)
     */                        
     //Extrae la factura creada y el codigo de la estampilla
     $tabla = 'est_facturas f';
-    $campos = 'f.fact_id, f.fact_estampillaid, f.fact_valor, e.estm_cuenta'; 
+    $campos = 'f.fact_id, f.fact_estampillaid, f.fact_valor, e.estm_codigoB'; 
     $donde = 'WHERE fact_liquidacionid = '.$idLiquidacion.' AND fact_estampillaid = '.$idEstampilla;
     $join = 'INNER JOIN est_estampillas e ON e.estm_id = f.fact_estampillaid';
     $factura = $this->codegen_model->getSelect($tabla, $campos, $donde, $join);
@@ -1826,7 +1826,7 @@ function asignarCodigoParaBarras($idLiquidacion,$idEstampilla)
     //Formatea el valor y consecutivo de la factura para que quede de 10 digitos
     $valorEstampilla = str_pad($factura[0]->fact_valor, 10, 0, STR_PAD_LEFT);
     $consecutivoFactura = str_pad($factura[0]->fact_id, 10, 0, STR_PAD_LEFT);
-    $codigoParaBarra='(415)'.$factura[0]->estm_cuenta.'~F1(8020)'.$consecutivoFactura.'~F1(390y)'.$valorEstampilla;                                                
+    $codigoParaBarra='(415)'.$factura[0]->estm_codigoB.'~F1(8020)'.$consecutivoFactura.'~F1(390y)'.$valorEstampilla;                                                
 
     $info = array('fact_codigo' => $codigoParaBarra);
     //Actualiza el registro de la Factura para asignarle el codigo                        
