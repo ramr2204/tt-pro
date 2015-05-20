@@ -105,9 +105,9 @@ $cuentas='';
      <input type="hidden" name="porcentaje<?php echo $x; ?>" value="<?php echo $row2->estr_porcentaje; ?>">
      <input type="hidden" name="rutaimagen<?php echo $x; ?>" value="<?php echo $row2->estm_rutaimagen; ?>">
      </td>
-     <td colspan="1" class="text-right">
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($est_totalestampilla[$row2->estm_id], 2, ',', '.'); ?>
      <br>
-     <input type="text" class="calcular" name="totalestampilla<?php echo $x; ?>" value="<?php echo $est_totalestampilla[$row2->estm_id]; ?>">
+     <input type="hidden" name="totalestampilla<?php echo $x; ?>" value="<?php echo $est_totalestampilla[$row2->estm_id]; ?>">
      </td>
 </tr>
 <?php 
@@ -126,8 +126,8 @@ $cuentas='';
      <input type="hidden" name="numeroestampillas" value="<?php echo $x; ?>"
 
      </td>
-     <td colspan="1" class="text-right">
-     <input type="text" name="valortotal" id="valortotal" value="<?php echo $est_valortotal; ?>" readonly="readonly">
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($est_valortotal, 2, ',', '.'); ?>
+     <input type="hidden" name="valortotal" value="<?php echo $est_valortotal; ?>">
      </td>
 </tr>
  </tbody>     
