@@ -54,7 +54,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        color:red;"><?php echo $estampilla->impr_codigopapel; ?></td>
+                        color:red;"><?php echo 'C'.$estampilla->impr_codigopapel; ?></td>
                 </tr>
 
                 <tr>
@@ -205,7 +205,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        color: red;"></td>
+                        color: red;"><br><br><br><?php echo 'C'.$estampilla->impr_codigopapel; ?></td>
                 </tr>   
             </table>
         
