@@ -19,7 +19,7 @@ $config['template'] = 'templates/main.php';
 $config['admin_template'] = 'templates/admingroup.php';
 //aqui se configura la carpeta contenedora
 //del repositorio para cargar la ruta absoluta
-$config['application_root'] = $_SERVER['DOCUMENT_ROOT'].'/estampillas-pro/';
+$config['application_root'] = $_SERVER['DOCUMENT_ROOT'].'/estampillas-pro-mike/';
 /*
 |--------------------------------------------------------------------------
 | Index File
