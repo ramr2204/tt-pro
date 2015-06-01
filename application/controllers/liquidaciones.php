@@ -1260,7 +1260,6 @@ function consultar()
                            .$nuevoingreso
                            .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true);
 
-
                            //verifica que exista un rango de papeleria asignado
                            //al liquidador en el que se encuentre el posible
                            //codigo a registrar
@@ -1268,12 +1267,13 @@ function consultar()
                            {
                            
                                //comprueba si ya se está usando el codigo del papel
+                               //para ese liquidador según el rango en que se encuentra
                                $nousado=0;
 
                                while ($nousado==0)
                                {
-                                   $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso,1,NULL,true);
-    
+                                   $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso.' AND impr_papelid = '.$papeles->pape_id,1,NULL,true);                                 
+
                                    if (!$combrobacionImpresiones) 
                                    {
                                        $nousado=1;
@@ -1311,13 +1311,14 @@ function consultar()
                                     
 
                                     $data = array(
-                                    'impr_codigopapel' => $nuevoingreso,
+                                    'impr_codigopapel' => str_pad($nuevoingreso, 4, '0', STR_PAD_LEFT),
                                     'impr_papelid' => $papeles->pape_id,
                                     'impr_facturaid' => $ObjetoFactura[0]->fact_id,
                                     'impr_observaciones' => 'Correcta',
                                     'impr_fecha' => date('Y-m-d H:i:s',now()),
                                     'impr_codigo' => $codigo,
                                     'impr_estampillaid' => $codificacion,
+                                    'impr_estadoContintencia' => 'SI',
                                     'impr_estado' => '1'
                                     );
     
@@ -1908,7 +1909,7 @@ function solicitarUltimoRotuloImpreso()
 
             while ($nousado==0)
             {
-                $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso,1,NULL,true);
+                $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso.' AND impr_papelid = '.$papeles->pape_id,1,NULL,true);
 
                 if (!$combrobacionImpresiones) 
                 {
