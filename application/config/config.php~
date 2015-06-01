@@ -14,7 +14,7 @@
 | path to your installation.
 |
 */
-$config['base_url']	= '';
+$config['base_url']	= 'http://www.softwareenlanube.net:8086/estampillas-pro';
 $config['template'] = 'templates/main.php';
 $config['admin_template'] = 'templates/admingroup.php';
 //aqui se configura la carpeta contenedora
