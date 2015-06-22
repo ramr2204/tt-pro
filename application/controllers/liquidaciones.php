@@ -1318,7 +1318,7 @@ function consultar()
                                     'impr_fecha' => date('Y-m-d'),
                                     'impr_codigo' => $codigo,
                                     'impr_estampillaid' => $codificacion,
-                                    'impr_estadoContintencia' => 'SI',
+                                    'impr_estadoContintencia' => 'NO',
                                     'impr_estado' => '1'
                                     );
     
