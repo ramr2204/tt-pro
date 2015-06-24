@@ -155,6 +155,38 @@
  </tbody>  
  <tfoot>
      <tr>
+        <th colspan="5">
+            <div class="col-xs-12 col-sm-8 text-right">        
+                <label>REGISTRAR OBJETO CONTRATO</label>     
+            </div>
+            <div class="col-xs-12 col-sm-4 text-right">
+                <input id="comprobante_objeto" type="file" class="file" name="comprobante_objeto" multiple=false>
+            </div>
+            <input type="hidden" name="liquida_id" value="<?php echo $result->liqu_id; ?>">     
+        </th>
+     </tr>
+     <script type="text/javascript">
+    $("#comprobante_objeto").fileinput({
+        
+      <?php   if ($row2->fact_rutacomprobante != '') { ?>
+            
+        initialPreview: ["<a href='<?php echo base_url().$row2->fact_rutacomprobante; ?>' target='_blank'><img src='<?php echo base_url().$row2->fact_rutacomprobante; ?>' class='file-preview-image' alt='The Moon' title='The Moon'></a>"
+],
+        initialCaption: "",
+
+        <?php
+        }
+
+        ?>
+        showCaption: false,
+        browseClass: "btn btn-default btn-sm",
+        browseLabel: "Cargar Copia",
+        showUpload: false,
+        showRemove: false,
+
+    });
+</script>
+     <tr>
          <th colspan="5">
          <div class="pull-right">
         <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
