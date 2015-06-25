@@ -90,7 +90,7 @@
       </td>
      <td colspan="1" class="text-center"><?php echo $row2->fact_cuenta; ?><br><?php echo $row2->fact_banco; ?></td>
      <td colspan="1" class="text-center"><?php echo $row2->fact_porcentaje; ?>%</td>
-     <td colspan="1" class="text-right"><?php echo '$'.number_format($row2->fact_valor, 2, ',', '.'); ?>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($row2->fact_valor, 3, ',', '.'); ?>
 
      </td>
      <td colspan="1" class="text-center">
@@ -106,7 +106,7 @@
              <input id="file-<?php echo $x; ?>" type="file" class="file" name="comprobante<?php echo $x; ?>" multiple=false>
      </div>
      <?php if ($facturapagada[$row2->fact_id]) {  ?>      
-      <div class="bg-success">Pagado: <?php echo '$'.number_format($row2->pago_valor, 2, ',', '.'); ?> <i class="fa fa-check"></i> </div> 
+      <div class="bg-success">Pagado: <?php echo '$'.number_format($row2->pago_valor, 3, ',', '.'); ?> <i class="fa fa-check"></i> </div> 
           <?php if ($row2->impr_codigopapel>0) { ?>
                 <div class="bg-info">legalizado: <?php echo $row2->impr_codigopapel; ?> <i class="fa fa-gavel"></i> </div>
           <?php  } ?>
@@ -155,7 +155,7 @@
      <input type="hidden" name="numeroarchivos" value="<?php echo $x; ?>">
      <input class="form-control" id="contratoid" type="hidden" name="contratoid" value="<?php echo $result->liqu_contratoid; ?>"/>
      </td>
-     <td colspan="1" class="text-right"><?php echo '$'.number_format($result->liqu_valortotal, 2, ',', '.'); ?></td>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($result->liqu_valortotal, 3, ',', '.'); ?></td>
      <td>
          <?php if ($comprobantes) {  ?>
                 <div class="bg-success">Comprobantes: <?php echo $ncomprobantescargados.'/'.$numerocomprobantes; ?> <i class="fa fa-check"></i> </div> 
@@ -163,9 +163,9 @@
                 <div class="bg-danger">Comprobantes: <?php echo $ncomprobantescargados.'/'.$numerocomprobantes; ?> <i class="fa fa-times"></i> </div>
          <?php  }  ?>
          <?php if ($todopago) {  ?>
-                <div class="bg-success">Pagado: <?php echo '$'.number_format($totalpagado, 2, ',', '.'); ?> <i class="fa fa-check"></i> </div> 
+                <div class="bg-success">Pagado: <?php echo '$'.number_format($totalpagado, 3, ',', '.'); ?> <i class="fa fa-check"></i> </div> 
          <?php  } else { ?>
-                <div class="bg-danger">Pagado: <?php echo '$'.number_format($totalpagado, 2, ',', '.'); ?> <i class="fa fa-times"></i> </div>
+                <div class="bg-danger">Pagado: <?php echo '$'.number_format($totalpagado, 3, ',', '.'); ?> <i class="fa fa-times"></i> </div>
          <?php  }  ?>
 
      </td>
