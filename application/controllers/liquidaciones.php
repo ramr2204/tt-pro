@@ -404,68 +404,103 @@ class Liquidaciones extends MY_Controller {
                   $carpeta='facturas_tramites';
                   $id=$this->input->post('tramiteid');
               }
-                        
-                  $path = 'uploads/objetosContrato/'.$id;
-                  if(!is_dir($path)) { //crea la carpeta para los objetos si no existe
-                      mkdir($path,0777,TRUE);      
-                  }
-                  $config['upload_path'] = $path;
-                  $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
-                  $config['remove_spaces']=TRUE;
-                  $config['max_size']    = '2048';
-                  $config['overwrite']    = TRUE;
-                  $this->load->library('upload');
+                
 
-                  $idComprobante = $this->input->post('liquida_id');
-                  $config['file_name']='liquidacion_'.$idComprobante.'_'.date("F_d_Y");
-                  $this->upload->initialize($config);
-                  
-                  //Valida si se carga correctamente el soporte
-                  if ($this->upload->do_upload("comprobante_objeto")) 
-                  {
-                      /*
-                      * Establece la informacion para actualizar la liquidacion
-                      * en este caso la ruta de la copia del objeto del contrato
-                      */
-                      $file_datos= $this->upload->data();
-                      $data = array(
-                          'liqu_soporteobjeto' => $path.'/'.$file_datos['orig_name']                          
-                        );
-
-                      if ($this->codegen_model->edit('est_liquidaciones',$data,'liqu_id',$idComprobante) == FALSE)
-                      {
-                          $this->session->set_flashdata('errorModal', '<strong>Error!</strong> No se pudo registrar la Copia de Objeto del Contrato.');
-                          $this->session->set_flashdata('accion', 'liquidado');                        
-                          $this->session->set_flashdata('errormessage', '<strong>Error!</strong> No se pudo registrar la Copia de Objeto del Contrato.');
-
-                          //Valida para redirecionar a la vista respectiva
-                          //tramite o contrato
-                          if ($this->input->post('contratoid'))
-                          {
-                              redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
-                          }elseif ($this->input->post('tramiteid'))
-                              {
-                                  redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
-                              }
-                      }
-                  }else 
-                      {
-                          $this->session->set_flashdata('errorModal', '<strong>Error!</strong> '.$this->upload->display_errors());
-                          $this->session->set_flashdata('accion', 'liquidado');
-                          $this->session->set_flashdata('errormessage', '<strong>Error!</strong> '.$this->upload->display_errors());
-
-                          //Valida para redirecionar a la vista respectiva
-                          //tramite o contrato
-                          if ($this->input->post('contratoid'))
-                          {
-                              redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
-                          }elseif ($this->input->post('tramiteid'))
-                              {
-                                  redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
-                              }
-                      }            
-exit();
-
+              /*
+              * Valida si es un contrato para verificar la carga de la copia del objeto
+              */
+              if($this->input->post('contratoid'))
+              {              
+                /*
+                * Valida que la liquidacion tenga registrada la ruta del soporte
+                */
+                $vSoporteObjeto = $parametros=$this->codegen_model->get('est_liquidaciones','liqu_soporteobjeto','liqu_id = '.$this->input->post('liquida_id'),1,NULL,true);
+                if($vSoporteObjeto->liqu_soporteobjeto == '')
+                {
+                    /*
+                    * Valida si el archivo fue cargado
+                    */        
+                    if (!isset($_FILES['upload_field_name']) && !is_uploaded_file($_FILES['comprobante_objeto']['tmp_name'])) 
+                    {
+                        $this->session->set_flashdata('errorModal', '<strong>Error!</strong> Debe cargar la Copia de Objeto del Contrato.');
+                        $this->session->set_flashdata('accion', 'liquidado');                        
+                        $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe cargar la Copia de Objeto del Contrato.');
+  
+                        //Valida para redirecionar a la vista respectiva
+                        //tramite o contrato
+                        if ($this->input->post('contratoid'))
+                        {
+                            redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
+                        }elseif ($this->input->post('tramiteid'))
+                            {
+                                redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
+                            }                      
+                    }else
+                        {
+                            $path = 'uploads/objetosContrato/liquidacion'.$id;
+                            if(!is_dir($path)) { //crea la carpeta para los objetos si no existe
+                                mkdir($path,0777,TRUE);      
+                            }
+                            $config['upload_path'] = $path;
+                            $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
+                            $config['remove_spaces']=TRUE;
+                            $config['max_size']    = '2048';
+                            $config['overwrite']    = TRUE;
+                            $this->load->library('upload');
+          
+                            $idComprobante = $this->input->post('liquida_id');
+                            $config['file_name']='liquidacion_'.$idComprobante.'_'.date("F_d_Y");
+                            $this->upload->initialize($config);
+          
+                            //Valida si se carga correctamente el soporte
+                            if ($this->upload->do_upload("comprobante_objeto")) 
+                            {
+                                /*
+                                * Establece la informacion para actualizar la liquidacion
+                                * en este caso la ruta de la copia del objeto del contrato
+                                */
+                                $file_datos= $this->upload->data();
+                                $data = array(
+                                    'liqu_soporteobjeto' => $path.'/'.$file_datos['orig_name']                          
+                                  );
+          
+                                if ($this->codegen_model->edit('est_liquidaciones',$data,'liqu_id',$idComprobante) == FALSE)
+                                {
+                                    $this->session->set_flashdata('errorModal', '<strong>Error!</strong> No se pudo registrar la Copia de Objeto del Contrato.');
+                                    $this->session->set_flashdata('accion', 'liquidado');                        
+                                    $this->session->set_flashdata('errormessage', '<strong>Error!</strong> No se pudo registrar la Copia de Objeto del Contrato.');
+          
+                                    //Valida para redirecionar a la vista respectiva
+                                    //tramite o contrato
+                                    if ($this->input->post('contratoid'))
+                                    {
+                                        redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
+                                    }elseif ($this->input->post('tramiteid'))
+                                        {
+                                            redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
+                                        }
+                                }
+                            }else 
+                                {
+                                    $this->session->set_flashdata('errorModal', '<strong>Error!</strong> '.$this->upload->display_errors());
+                                    $this->session->set_flashdata('accion', 'liquidado');
+                                    $this->session->set_flashdata('errormessage', '<strong>Error!</strong> '.$this->upload->display_errors());
+          
+                                    //Valida para redirecionar a la vista respectiva
+                                    //tramite o contrato
+                                    if ($this->input->post('contratoid'))
+                                    {
+                                        redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
+                                    }elseif ($this->input->post('tramiteid'))
+                                        {
+                                            redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
+                                        }
+                                }            
+                            
+                        }
+                }
+              }
+              
               $numeroarchivos=$this->input->post('numeroarchivos');
               
               if ($id >0 && $numeroarchivos > 0 ) {

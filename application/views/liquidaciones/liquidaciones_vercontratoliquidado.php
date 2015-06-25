@@ -172,6 +172,31 @@
 </tr>
  </tbody>  
  <tfoot>
+      <tr>
+        <th colspan="5">
+            <div class="col-xs-12 col-sm-8 text-right">        
+                <label>REGISTRAR OBJETO CONTRATO</label>     
+            </div>
+            <div class="col-xs-12 col-sm-4 text-right">
+                <input id="comprobante_objeto" type="file" class="file" name="comprobante_objeto" multiple=false >
+            </div>
+            <input type="hidden" name="liquida_id" value="<?php echo $result->liqu_id; ?>">     
+        </th>
+     </tr>
+<script type="text/javascript">
+    $("#comprobante_objeto").fileinput({showCaption: false,
+        browseClass: "btn btn-default btn-sm",
+        browseLabel: "Cargar Copia",
+        showUpload: false,
+        showRemove: false,
+        <?php   if ($result->liqu_soporteobjeto != '') { ?>            
+            initialPreview: ["<a href='<?php echo base_url().$result->liqu_soporteobjeto; ?>' target='_blank'><img src='<?php echo base_url().$result->liqu_soporteobjeto; ?>' class='file-preview-image' alt='The Moon' title='The Moon'></a>"],
+            initialCaption: ""
+        <?php
+        }
+        ?>
+    });
+</script>     
      <tr>
          <th colspan="5">
          <div class="pull-right">
