@@ -66,10 +66,10 @@
 </tr>
 <tr>
      <td colspan="1"><strong>Valor del contrato</strong></td>
-     <td colspan="1"><?php echo '$'.number_format($result->liqu_valorconiva, 3, ',', '.'); ?>
+     <td colspan="1"><?php echo '$'.number_format($result->liqu_valorconiva, 2, ',', '.'); ?>
      </td>
      <td colspan="1"><strong>Valor sin IVA</strong></td>
-     <td colspan="1"><?php echo '$'.number_format($result->liqu_valorsiniva, 3, ',', '.'); ?>
+     <td colspan="1"><?php echo '$'.number_format($result->liqu_valorsiniva, 2, ',', '.'); ?>
      </td>
 </tr>
 <tr>
@@ -95,7 +95,7 @@
      </td>
      <td colspan="1" class="text-center"><?php echo $facturaestampilla->fact_porcentaje; ?>%
      </td>
-     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 3, ',', '.'); ?>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 2, ',', '.'); ?>
     
      </td>
 </tr>
@@ -107,7 +107,7 @@
 
 
      </td>
-     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 3, ',', '.'); ?>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 2, ',', '.'); ?>
      </td>
 </tr>
  </tbody>     
@@ -181,10 +181,10 @@
 </tr>
 <tr>
      <td colspan="1"><strong>Valor del contrato</strong></td>
-     <td colspan="1"><?php echo '$'.number_format($result->liqu_valorconiva, 3, ',', '.'); ?>
+     <td colspan="1"><?php echo '$'.number_format($result->liqu_valorconiva, 2, ',', '.'); ?>
      </td>
      <td colspan="1"><strong>Valor sin IVA</strong></td>
-     <td colspan="1"><?php echo '$'.number_format($result->liqu_valorsiniva, 3, ',', '.'); ?>
+     <td colspan="1"><?php echo '$'.number_format($result->liqu_valorsiniva, 2, ',', '.'); ?>
      </td>
 </tr>
 <tr>
@@ -210,7 +210,7 @@
      </td>
      <td colspan="1" class="text-center"><?php echo $facturaestampilla->fact_porcentaje; ?>%
      </td>
-     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 3, ',', '.'); ?>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 2, ',', '.'); ?>
     
      </td>
 </tr>
@@ -222,7 +222,7 @@
 
 
      </td>
-     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 3, ',', '.'); ?>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 2, ',', '.'); ?>
      </td>
 </tr>
  </tbody>     
@@ -323,7 +323,7 @@
      </td>
      <td colspan="1" class="text-center"><?php echo $facturaestampilla->fact_porcentaje; ?>%
      </td>
-     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 3, ',', '.'); ?>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 2, ',', '.'); ?>
     
      </td>
 </tr>
@@ -335,7 +335,7 @@
 
 
      </td>
-     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 3, ',', '.'); ?>
+     <td colspan="1" class="text-right"><?php echo '$'.number_format($facturaestampilla->fact_valor, 2, ',', '.'); ?>
      </td>
 </tr>
  </tbody>     
