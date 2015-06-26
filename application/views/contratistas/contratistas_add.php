@@ -49,6 +49,12 @@
                                     </div>
 
                                     <div class="form-group">
+                                           <label for="telefono">Telefono</label>
+                                           <input class="form-control" id="telefono" type="telefono" name="telefono" value="<?php echo set_value('telefono'); ?>" maxlength="15" />
+                                           <?php echo form_error('telefono','<span class="text-danger">','</span>'); ?>
+                                    </div>
+
+                                    <div class="form-group">
                                            <label for="municipioid">Municipio</label>
                                            <select class="form-control" id="municipioid" name="municipioid" required="required" >
                                              <option value="0">Seleccione...</option>
