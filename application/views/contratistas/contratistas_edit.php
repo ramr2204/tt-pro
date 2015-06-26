@@ -60,6 +60,12 @@
                                            <input class="form-control" id="direccion" type="text" name="direccion" value="<?php echo $result->cont_direccion; ?>" required="required" />
                                            <?php echo form_error('direccion','<span class="text-danger">','</span>'); ?>
                                     </div>
+
+                                    <div class="form-group">
+                                           <label for="telefono">Telefono</label>
+                                           <input class="form-control" id="telefono" type="telefono" name="telefono" value="<?php echo $result->cont_telefono; ?>" maxlength="15" />
+                                           <?php echo form_error('telefono','<span class="text-danger">','</span>'); ?>
+                                    </div>
                                       
                                     <div class="form-group">
                                            <label for="municipioid">Municipio</label>

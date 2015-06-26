@@ -40,17 +40,17 @@
                 </tr>
  
                 <tr>
-                    <td class="text-center"  style="height: 5mm; width: 57.5mm; border-top: 0.5px solid black;
+                    <td class="text-center"  style="height: 4mm; width: 57.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;                        
                         border-bottom: 0.5px solid black;">Número Estampilla</td>
 
-                    <td class="text-center" colspan="2" style="height: 5mm; width: 45.5mm; border-top: 0.5px solid black;
+                    <td class="text-center" colspan="2" style="height: 4mm; width: 45.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;"><?php echo $estampilla->impr_estampillaid; ?></td>
 
-                    <td class="text-center" colspan="2" style="height: 5mm; width: 17mm; border-top: 0.5px solid black;
+                    <td class="text-center" colspan="2" style="height: 4mm; width: 17mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
@@ -58,17 +58,17 @@
                 </tr>
 
                 <tr>
-                    <td class="text-center" style="height: 9mm; width: 26mm; border-top: 0.5px solid black;
+                    <td class="text-center" style="height: 4.5mm; width: 26mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        vertical-align: text-middle;"><br><br>Nombre y/o Empresa</td>
+                        vertical-align: text-middle;">Tipo Contratista<br><?php echo $estampilla->liqu_tipocontratista; ?></td>
 
-                    <td colspan="4" style="height: 9mm; width: 94mm; border-top: 0.5px solid black;
+                    <td colspan="4" style="height: 4.5mm; width: 94mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><br><br>  <?php echo $estampilla->cont_nombre; ?></td>
-                </tr>
+                        border-bottom: 0.5px solid black;"> <?php echo $estampilla->cont_nombre; ?></td>
+                </tr>                
 
                 <tr>
                     <td class="text-center" style="height: 5mm; width: 26mm; border-top: 0.5px solid black;
@@ -76,10 +76,33 @@
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;">C.C. ó Nit.</td>
 
-                    <td colspan="4" style="height: 5mm; width: 94mm; border-top: 0.5px solid black;
+                    <td style="height: 5mm; width: 31.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;">  <?php echo $estampilla->cont_nit; ?></td>
+
+                    <td class="text-center" style="height: 5mm; width: 24mm; border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;">Regimen</td>                 
+
+                    <td class="text-center" style="height: 5mm; width: 38.5mm; border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;"><?php echo $estampilla->liqu_regimen; ?></td>
+                </tr>
+
+                <tr>
+                    <td class="text-center" style="height: 4.5mm; width: 26mm; border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;
+                        vertical-align: text-middle;">Tipo Acto</td>
+
+                    <td colspan="4" style="height: 4.5mm; width: 94mm; border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;"> <?php echo $estampilla->liqu_tipocontrato; ?></td>
                 </tr>
 
                 <tr>
@@ -113,20 +136,35 @@
                 </tr>
 
                 <tr>
-                    <td style="height: 5mm; width: 31.5mm; border-top: 0.5px solid black;
+                    <td style="height: 5mm; width: 23mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:7;"> Valor Gravado</td>
+                        font-size:7;"> Valor Acto con IVA</td>
 
-                    <td colspan="2" style="height: 5mm; width: 24mm; border-top: 0.5px solid black;
+                    <td style="height: 5mm; width: 3mm; border-top: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;">  $</td>
 
-                    <td colspan="2" style="height: 5mm; width: 38.5mm; border-top: 0.5px solid black;
+                    <td style="height: 5mm; width: 21mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        text-align: right;"><?= number_format($estampilla->liqu_valorsiniva,2, ',', '.'); ?></td>
+                        text-align: right;"><?= number_format((double)$estampilla->liqu_valorconiva,2, ',', '.'); ?><span style="color:white;">.</span></td>
+
+                    <td style="height: 5mm; width: 23mm; border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;
+                        font-size:7;"> Valor Acto sin IVA</td>
+
+                    <td style="height: 5mm; width: 3mm; border-top: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;">  $</td>
+
+                    <td style="height: 5mm; width: 21mm; border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-bottom: 0.5px solid black;
+                        text-align: right;"><?= number_format($estampilla->liqu_valorsiniva,2, ',', '.'); ?><span style="color:white;">.</span></td>
                 </tr>
 
                 <tr>
