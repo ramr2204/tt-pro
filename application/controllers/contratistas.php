@@ -66,6 +66,7 @@ class Contratistas extends MY_Controller {
               $this->data['successmessage']=$this->session->flashdata('message');  
         		  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
               $this->form_validation->set_rules('nit', 'NIT', 'required|numeric|trim|xss_clean|max_length[100]|is_unique[con_contratistas.cont_nit]');   
+              $this->form_validation->set_rules('telefono', 'Telefono', 'numeric|trim|xss_clean|max_length[15]');
               $this->form_validation->set_rules('direccion', 'Dirección', 'trim|xss_clean|max_length[256]');
               $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
               $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
@@ -83,6 +84,7 @@ class Contratistas extends MY_Controller {
                         'cont_direccion' => $this->input->post('direccion'),
                         'cont_municipioid' => $this->input->post('municipioid'),
                         'cont_regimenid' => $this->input->post('regimenid'),
+                        'cont_telefono' => $this->input->post('telefono'),
                         'cont_fecha' => date('Y-m-d')
 
                      );
@@ -150,6 +152,7 @@ class Contratistas extends MY_Controller {
               }
               $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]');   
               $this->form_validation->set_rules('direccion', 'Dirección', 'trim|xss_clean|max_length[256]');
+              $this->form_validation->set_rules('telefono', 'Telefono', 'numeric|trim|xss_clean|max_length[15]');
               $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
               $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
               $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|greater_than[0]');   
@@ -166,6 +169,7 @@ class Contratistas extends MY_Controller {
                         'cont_direccion' => $this->input->post('direccion'),
                         'cont_municipioid' => $this->input->post('municipioid'),
                         'cont_regimenid' => $this->input->post('regimenid'),
+                        'cont_telefono' => $this->input->post('telefono'),
                         'cont_tipocontratistaid' => $this->input->post('tipocontratistaid')
 
                      );
@@ -189,7 +193,7 @@ class Contratistas extends MY_Controller {
                         );    
                   $this->data['successmessage']=$this->session->flashdata('successmessage');
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                	$this->data['result'] = $this->codegen_model->get('con_contratistas','cont_id,cont_nombre,cont_nit,cont_direccion,cont_municipioid,cont_regimenid,cont_tributarioid, cont_tipocontratistaid','cont_id = '.$idregimen,1,NULL,true);
+                	$this->data['result'] = $this->codegen_model->get('con_contratistas','cont_id,cont_nombre,cont_nit,cont_direccion,cont_telefono,cont_municipioid,cont_regimenid,cont_tributarioid, cont_tipocontratistaid','cont_id = '.$idregimen,1,NULL,true);
                   $this->data['municipios']  = $this->codegen_model->getMunicipios();
                   $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
                   $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
