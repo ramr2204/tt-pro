@@ -62,7 +62,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        vertical-align: text-middle;">Tipo Contratista<br><?php echo $estampilla->liqu_tipocontratista; ?></td>
+                        vertical-align: text-middle;">Tipo Contratista<br><?php echo $estampilla->liqu_tipocontratista != '' ? $estampilla->liqu_tipocontratista : 'N/A'; ?></td>
 
                     <td colspan="4" style="height: 4.5mm; width: 94mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
@@ -89,7 +89,7 @@
                     <td class="text-center" style="height: 5mm; width: 38.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><?php echo $estampilla->liqu_regimen; ?></td>
+                        border-bottom: 0.5px solid black;"><?php echo $estampilla->liqu_regimen != '' ? $estampilla->liqu_regimen : 'N/A'; ?></td>
                 </tr>
 
                 <tr>
