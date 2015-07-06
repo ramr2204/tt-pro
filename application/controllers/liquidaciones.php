@@ -1648,7 +1648,7 @@ function consultar()
 
               //Extrae los id de las facturas para las que se han hecho impresiones              
               $usuario = $this->ion_auth->user()->row();
-              $where = 'where pape_usuario = '.$usuario->id.'and DATE(i.impr_fecha) = "'.$_GET['fecha'].'"';
+              $where = 'where pape_usuario = '.$usuario->id.' and DATE(i.impr_fecha) = "'.$_GET['fecha'].'"';
               $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
 
               $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid",$where,$join);
