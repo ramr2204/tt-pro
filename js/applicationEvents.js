@@ -43,13 +43,26 @@ function inicial ()
 
   //Eventos informes vista consultar
   $('#btn-detalle').click(generarInformeDetallado);
-  $('#btn-relacion').click(generarInformeRelacion);      
+  $('#btn-relacion').click(generarInformeRelacion);
+  $('#btn-rango').click(generarInformeRango);
  
-  
-    
-
+  //Evento para el timepicker del rango de impresiones
+  $('#datetimepicker_inicial').datetimepicker({
+      pickTime: false
+  });
+  $('#datetimepicker_final').datetimepicker({
+      pickTime: false
+  });
 }
 
+/*
+* Funcion que renderiza la modal para solicitar
+* el rango de fechas para el informe
+*/
+function generarInformeRango(e)
+{
+    $('#m_rango').modal('show');
+}
 
 //Funcion que valida si se ha digitado
 //una fecha para generar el informe

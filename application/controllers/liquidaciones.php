@@ -1180,7 +1180,8 @@ function consultar()
               $this->data['style_sheets']= array(
                             'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen',
                             'css/plugins/bootstrap/fileinput.css' => 'screen',
-                            'css/applicationStyles.css' => 'screen'                             
+                            'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen',
+                            'css/applicationStyles.css' => 'screen'
                         );
               $this->data['javascripts']= array(
                         'js/jquery.dataTables.min.js',
@@ -1188,6 +1189,7 @@ function consultar()
                         'js/jquery.dataTables.defaults.js',
                         'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
                         'js/accounting.min.js',
+                        'js/plugins/bootstrap/bootstrap-datetimepicker.js',
                         'js/plugins/bootstrap/fileinput.min.js',
                         'js/plugins/bootstrap/bootstrap-switch.min.js'                        
                        );
