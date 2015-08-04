@@ -1639,131 +1639,163 @@ function consultar()
 
   function renderizarPDF()
   {
-      if ($this->ion_auth->logged_in()) 
-      {
+    if ($this->ion_auth->logged_in()) 
+    {
           
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) 
-          { 
-              $fecha = $_GET['fecha'];
+        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) 
+        { 
+            $fecha = $_GET['fecha'];
 
-              //Extrae los id de las facturas para las que se han hecho impresiones              
-              $usuario = $this->ion_auth->user()->row();
-              $where = 'where pape_usuario = '.$usuario->id.' and DATE(i.impr_fecha) = "'.$_GET['fecha'].'"';
-              $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
+            /*
+            * Crea la consulta para el perfil de administrador sin filtrar por usuario
+            */
+            if($this->ion_auth->is_admin())
+            {
+                //Extrae los id de las facturas para las que se han hecho impresiones  
+                //y las fechas de las impresiones hechas por los usuarios liquidadores
+                $usuario = $this->ion_auth->user()->row();
+                $where = 'where DATE(i.impr_fecha) = "'.$_GET['fecha'].'"';              
+                $join = '';
+            }else
+                {
+                    /*
+                    * Crea la consulta para el perfil de liquidador con el id del usuario autenticado
+                    */
 
-              $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid",$where,$join);
+                    //Extrae los id de las facturas para las que se han hecho impresiones  
+                    //y las fechas de las impresiones hechas por el liquidador autenticado
+                    $usuario = $this->ion_auth->user()->row();
+                    $where = 'where p.pape_usuario = '.$usuario->id.' and DATE(i.impr_fecha) = "'.$_GET['fecha'].'"';              
+                    $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
+                }         
+
+            $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid",$where,$join);
          
-              //se extrae el vector con los id de las facturas
-              $idFacturas = '(';
-              foreach ($facturas as $factura) 
-              {
-                  $idFacturas .= $factura->impr_facturaid.',';
-              }  
-              $idFacturas .= '0)';
-              $where = 'where fact_id in '.$idFacturas;                            
+            //se extrae el vector con los id de las facturas
+            $idFacturas = '(';
+            foreach ($facturas as $factura) 
+            {
+                $idFacturas .= $factura->impr_facturaid.',';
+            }  
+            $idFacturas .= '0)';
+            $where = 'where fact_id in '.$idFacturas;                            
               
-              //Extrae los id de las liquidaciones
-              $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"distinct f.fact_liquidacionid",$where);
+            //Extrae los id de las liquidaciones
+            $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"distinct f.fact_liquidacionid",$where);
 
-              //se extrae el vector con los id de las liquidaciones
-              $idLiquidaciones = '(';
-              foreach ($liquidaciones as $liquidacion) 
-              {
-                  $idLiquidaciones .= $liquidacion->fact_liquidacionid.',';
-              }  
-              $idLiquidaciones .= '0)';
-              $whereIn = 'where l.liqu_id in '.$idLiquidaciones;
-              $join2 = ' INNER JOIN est_liquidaciones l ON l.liqu_id = f.fact_liquidacionid';
-              $join2 .= ' INNER JOIN est_pagos p ON p.pago_facturaid = f.fact_id';              
+            //se extrae el vector con los id de las liquidaciones
+            $idLiquidaciones = '(';
+            foreach ($liquidaciones as $liquidacion) 
+            {
+                $idLiquidaciones .= $liquidacion->fact_liquidacionid.',';
+            }  
+            $idLiquidaciones .= '0)';
+            $whereIn = 'where l.liqu_id in '.$idLiquidaciones;
+            $join2 = ' INNER JOIN est_liquidaciones l ON l.liqu_id = f.fact_liquidacionid';
+            $join2 .= ' INNER JOIN est_pagos p ON p.pago_facturaid = f.fact_id';                        
               
-              $campos = 'l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha, p.pago_fecha, f.fact_valor, f.fact_nombre';
-              $where = $whereIn;
+            $campos = 'l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha, p.pago_fecha, f.fact_valor, f.fact_nombre';
+            $where = $whereIn;
 
-              $liquidaciones = $this->codegen_model->getSelect('est_facturas f',$campos,$where,$join2);
+            $liquidaciones = $this->codegen_model->getSelect('est_facturas f',$campos,$where,$join2);
               
-              if($liquidaciones)
-              {
+            if($liquidaciones)
+            {
                   
-                  foreach ($liquidaciones as $liquidacion) 
-                  {
-                      $where = 'where fact_liquidacionid = '.$liquidacion->liqu_id;                      
-                      $resultado = $this->codegen_model->getSelect('est_facturas',"fact_nombre, fact_valor",$where);
+                foreach ($liquidaciones as $liquidacion) 
+                {
+                    $where = 'where f.fact_liquidacionid = '.$liquidacion->liqu_id;  
+                    $join3 = ' INNER JOIN est_impresiones i ON i.impr_facturaid=f.fact_id';
+                    $join3 .= ' INNER JOIN est_papeles p ON i.impr_papelid=p.pape_id';
+                    $join3 .= ' INNER JOIN users u ON u.id=p.pape_usuario';
+                    $resultado = $this->codegen_model->getSelect('est_facturas f',"f.fact_nombre, f.fact_valor, u.first_name, u.last_name, u.id",$where,$join3);
                       
-                      $facturas='';
-               
-                      foreach ($resultado as $value) 
-                      {
-                         $facturas .= $value->fact_nombre.' ==> '.$value->fact_valor.'<br>';          
-                      }
-
-                      $liquidacion->estampillas = $facturas;
-                  }
+                    $facturas='';
+                    $liquidador = '';
+                    foreach ($resultado as $value) 
+                    {
+                        $facturas .= $value->fact_nombre.' ==> '.$value->fact_valor.'<br>';
+                        /*
+                        * Valida que el valor no haya sido asignado
+                        * para asignarlo una sola vez
+                        */ 
+                        if($liquidador == '')
+                        {
+                            $liquidador = strtoupper($value->first_name)
+                                .' '.strtoupper($value->last_name)
+                                .'<br>'.$value->id;
+                        }                        
+                    }
+                    $liquidacion->liquidador = $liquidador;                    
+                    $liquidacion->estampillas = $facturas;
+                }
                   
-                  $datos['liquidaciones'] = $liquidaciones;
-                  $datos['fecha'] = $fecha;
-                  //Creación del PDF
-                  $this->load->library("Pdf");                  
-                  $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-                  $pdf->setPageOrientation('l');
+                $datos['liquidaciones'] = $liquidaciones;
+                $datos['fecha'] = $fecha;
+                //Creación del PDF
+                $this->load->library("Pdf");                  
+                $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+                $pdf->setPageOrientation('l');
 
-                  // set document information
-                  $pdf->SetCreator(PDF_CREATOR);
-                  $pdf->SetAuthor('turrisystem');
-                  $pdf->SetTitle('Listado de Impresiones');
-                  $pdf->SetSubject('Gobernación del Tolima');
-                  $pdf->SetKeywords('estampillas,gobernación');
-                  $pdf->SetPrintHeader(false);
-                  $pdf->SetPrintFooter(false);
-                  // set default monospaced font
-                  $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+                // set document information
+                $pdf->SetCreator(PDF_CREATOR);
+                $pdf->SetAuthor('turrisystem');
+                $pdf->SetTitle('Listado de Impresiones');
+                $pdf->SetSubject('Gobernación del Tolima');
+                $pdf->SetKeywords('estampillas,gobernación');
+                $pdf->SetPrintHeader(false);
+                $pdf->SetPrintFooter(false);
+                // set default monospaced font
+                $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
-                  // set margins
-                  $pdf->setPageUnit('mm');
-                  $pdf->SetMargins(15, 5, 20, true);
-                  $pdf->SetHeaderMargin(0);
-                  $pdf->SetFooterMargin(0);
+                // set margins
+                $pdf->setPageUnit('mm');
+                $pdf->SetMargins(10, 5, 20, true);
+                $pdf->SetHeaderMargin(0);
+                $pdf->SetFooterMargin(0);
       
-                  // set auto page breaks
-                  $pdf->SetAutoPageBreak(TRUE, 2);
+                // set auto page breaks
+                $pdf->SetAutoPageBreak(TRUE, 2);
 
-                  // set some language-dependent strings (optional)
-                  if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-                      require_once(dirname(__FILE__).'/lang/eng.php');
-                      $pdf->setLanguageArray($l);
-                  }
+                // set some language-dependent strings (optional)
+                if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+                    require_once(dirname(__FILE__).'/lang/eng.php');
+                    $pdf->setLanguageArray($l);
+                }
                
-                  // ---------------------------------------------------------
+                // ---------------------------------------------------------
             
-                  // set font
-                   $pdf->SetFont('times', 'BI', 10);
-                   $pdf->AddPage();                  
-                   $html = $this->load->view('generarpdf/generarpdf_impresiones', $datos, TRUE);  
+                // set font
+                $pdf->SetFont('times', 'BI', 10);
+                $pdf->AddPage();                  
+                $html = $this->load->view('generarpdf/generarpdf_impresiones', $datos, TRUE);  
                 
-                   $pdf->writeHTML($html, true, false, true, false, '');
+                $pdf->writeHTML($html, true, false, true, false, '');
            
 
-                  // ---------------------------------------------------------
-                  //para evitar el error de que se ha impreso algo antes de enviar
-                  //el PDF 
-                  ob_end_clean();
-                  //Close and output PDF document
-                  $pdf->Output('Impresiones_'.$fecha.'.pdf', 'I');
+                // ---------------------------------------------------------
+                //para evitar el error de que se ha impreso algo antes de enviar
+                //el PDF 
+                ob_end_clean();
+                //Close and output PDF document
+                $pdf->Output('Impresiones_'.$fecha.'.pdf', 'I');
 
-
-              }else
-                  {   
-                      $this->session->set_flashdata('errormessage', 'La fecha elegida no presenta registros!'); 
-                      redirect(base_url().'index.php/liquidaciones/consultar');  
-                  }
+            }else
+                {   
+                    $this->session->set_flashdata('errormessage', 'La fecha elegida no presenta registros!'); 
+                    redirect(base_url().'index.php/liquidaciones/consultar');  
+                }
 
              
-          } else {
-              redirect(base_url().'index.php/error_404');
-          }
+        } else 
+            {
+                redirect(base_url().'index.php/error_404');
+            }
                
-      } else{
-              redirect(base_url().'index.php/users/login');
-      } 
+    }else
+        {
+            redirect(base_url().'index.php/users/login');
+        } 
       
   }
 
