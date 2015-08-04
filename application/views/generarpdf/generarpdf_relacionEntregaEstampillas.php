@@ -317,7 +317,7 @@ Cordial saludo,
 <table><tr><td style="height: 15mm; color:white">espaciador</td></tr></table>
 <table><tr><td style="height: 15mm; color:white">espaciador</td></tr></table>
 
-<br>HEBERTH MESA APONTE<br>
+<br><?php echo strtoupper($usuario); ?><br>
 OPERARIO TTI<br>
 THOMAS GREG & SONS DE COLOMBIA S.A.<br>
 PROYECTO ESTAMPILLAS PRO<br>

@@ -1774,134 +1774,148 @@ function consultar()
 * Mike Ortiz
 */
 
-  function renderizarRelacionEstampillasPDF()
-  {
-      if ($this->ion_auth->logged_in()) 
-      {
-          
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) 
-          { 
-              $fecha = $_GET['fecha'];
-
-              //Extrae los id de las facturas para las que se han hecho impresiones  
-              //y las fechas de las impresiones            
-              $usuario = $this->ion_auth->user()->row();
-              $where = 'where pape_usuario = '.$usuario->id.' and DATE(i.impr_fecha) = "'.$_GET['fecha'].'"';              
-              $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
-
-              $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid, DATE(i.impr_fecha) as fecha",$where,$join);
-
-              if($facturas)
-              {
-
-              //se extrae el vector con los id de las facturas
-              //asociadas a las impresiones para la fecha suministrada              
-              $idFacturas = '(';
-              foreach ($facturas as $factura) 
-              {   
-                  if($factura->fecha == $fecha)
-                  {
-                      $idFacturas .= $factura->impr_facturaid.',';                                            
-
-                  }                  
-              }  
-              $idFacturas .= '0)';
-              $where = 'where fact_id in '.$idFacturas;                            
-              
-              //Extrae las facturas
-              $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"f.fact_valor, f.fact_estampillaid, f.fact_nombre",$where);
-             
-              $vectorIdEstampillas = [];
-              $vectorValorEstampillas = [];
-              
-                  
-                  foreach ($liquidaciones as $liquidacion) 
-                  {
-                                            
-                      //Selecciona los id de las estampillas
-                      //impresas y crea un arreglo por cada tipo de estampilla
-                      //inicializando el valor en cero y guardando el nombre de la estampilla
-                      if(!in_array($liquidacion->fact_estampillaid, $vectorIdEstampillas))
-                      {
-                          $vectorIdEstampillas[] = $liquidacion->fact_estampillaid;
-                          $vectorValorEstampillas[$liquidacion->fact_estampillaid]['valor'] = 0;
-                          $vectorValorEstampillas[$liquidacion->fact_estampillaid]['nombre'] = $liquidacion->fact_nombre;;
-                      }
-
-                      //acumula los valores por id de estampillas
-                      if(in_array($liquidacion->fact_estampillaid, $vectorIdEstampillas))
-                      {
-                          $vectorValorEstampillas[$liquidacion->fact_estampillaid]['valor'] += $liquidacion->fact_valor;
-                      } 
-                      
-                  }
-
-                  $datos['liquidaciones'] = $vectorValorEstampillas;
-                  $datos['fecha'] = $fecha;
-                  //Creación del PDF
-                  $this->load->library("Pdf");                  
-                  $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);                  
-
-                  // set document information
-                  $pdf->SetCreator(PDF_CREATOR);
-                  $pdf->SetAuthor('turrisystem');
-                  $pdf->SetTitle('Relacion Entrega Estampillas');
-                  $pdf->SetSubject('Gobernación del Tolima');
-                  $pdf->SetKeywords('estampillas,gobernación');
-                  $pdf->SetPrintHeader(false);
-                  $pdf->SetPrintFooter(false);
-                  // set default monospaced font
-                  $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-
-                  // set margins
-                  $pdf->setPageUnit('mm');
-                  $pdf->SetMargins(30, 10, 20, true);
-                  $pdf->SetHeaderMargin(0);
-                  $pdf->SetFooterMargin(0);
-      
-                  // set auto page breaks
-                  $pdf->SetAutoPageBreak(TRUE, 2);
-
-                  // set some language-dependent strings (optional)
-                  if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-                      require_once(dirname(__FILE__).'/lang/eng.php');
-                      $pdf->setLanguageArray($l);
-                  }
-               
-                  // ---------------------------------------------------------
+    function renderizarRelacionEstampillasPDF()
+    {
+        if ($this->ion_auth->logged_in()) 
+        {
             
-                  // set font
-                   $pdf->SetFont('helvetica', '', 10);
-                   $pdf->AddPage();                  
-                   $html = $this->load->view('generarpdf/generarpdf_relacionEntregaEstampillas', $datos, TRUE);  
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) 
+            { 
+                $fecha = $_GET['fecha'];
                 
-                   $pdf->writeHTML($html, true, false, true, false, '');
-           
+                /*
+                * Crea la consulta para el perfil de administrador sin filtrar por usuario
+                */
+                if($this->ion_auth->is_admin())
+                {
+                    //Extrae los id de las facturas para las que se han hecho impresiones  
+                    //y las fechas de las impresiones hechas por los usuarios liquidadores
+                    $usuario = $this->ion_auth->user()->row();
+                    $where = 'where DATE(i.impr_fecha) = "'.$_GET['fecha'].'"';              
+                    $join = '';
+                }else
+                    {
+                        /*
+                        * Crea la consulta para el perfil de liquidador con el id del usuario autenticado
+                        */
 
-                  // ---------------------------------------------------------
-                  //para evitar el error de que se ha impreso algo antes de enviar
-                  //el PDF 
-                  ob_end_clean();
-                  //Close and output PDF document
-                  $pdf->Output('Relacion_Entrega_Estampillas_'.$fecha.'.pdf', 'I');
-
-
-              }else
-                  {   
-                      $this->session->set_flashdata('errormessage', 'La fecha elegida no presenta registros!'); 
-                      redirect(base_url().'index.php/liquidaciones/consultar');  
-                  }
-
-             
-          } else {
-              redirect(base_url().'index.php/error_404');
-          }
-               
-      } else{
-              redirect(base_url().'index.php/users/login');
-      } 
+                        //Extrae los id de las facturas para las que se han hecho impresiones  
+                        //y las fechas de las impresiones hechas por el liquidador autenticado
+                        $usuario = $this->ion_auth->user()->row();
+                        $where = 'where p.pape_usuario = '.$usuario->id.' and DATE(i.impr_fecha) = "'.$_GET['fecha'].'"';              
+                        $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
+                    }
+  
+                $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid, DATE(i.impr_fecha) as fecha",$where,$join);
+  
+                if($facturas)
+                {
+                    //se extrae el vector con los id de las facturas
+                    //asociadas a las impresiones para la fecha suministrada              
+                    $idFacturas = '(';
+                    foreach ($facturas as $factura) 
+                    {   
+                        if($factura->fecha == $fecha)
+                        {
+                            $idFacturas .= $factura->impr_facturaid.',';                                            
       
-  }
+                        }                  
+                    }  
+                    $idFacturas .= '0)';
+                    $where = 'where fact_id in '.$idFacturas;                            
+                    
+                    //Extrae las facturas
+                    $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"f.fact_valor, f.fact_estampillaid, f.fact_nombre",$where);
+                   
+                    $vectorIdEstampillas = [];
+                    $vectorValorEstampillas = [];
+                                            
+                    foreach ($liquidaciones as $liquidacion) 
+                    {                                                  
+                        //Selecciona los id de las estampillas
+                        //impresas y crea un arreglo por cada tipo de estampilla
+                        //inicializando el valor en cero y guardando el nombre de la estampilla
+                        if(!in_array($liquidacion->fact_estampillaid, $vectorIdEstampillas))
+                        {
+                            $vectorIdEstampillas[] = $liquidacion->fact_estampillaid;
+                            $vectorValorEstampillas[$liquidacion->fact_estampillaid]['valor'] = 0;
+                            $vectorValorEstampillas[$liquidacion->fact_estampillaid]['nombre'] = $liquidacion->fact_nombre;;
+                        }
+      
+                        //acumula los valores por id de estampillas
+                        if(in_array($liquidacion->fact_estampillaid, $vectorIdEstampillas))
+                        {
+                            $vectorValorEstampillas[$liquidacion->fact_estampillaid]['valor'] += $liquidacion->fact_valor;
+                        }                             
+                    }
+      
+                    $datos['liquidaciones'] = $vectorValorEstampillas;
+                    $datos['fecha'] = $fecha;
+                    $datos['usuario'] = $usuario->first_name.' '.$usuario->last_name;
+                    //Creación del PDF
+                    $this->load->library("Pdf");                  
+                    $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);                  
+      
+                    // set document information
+                    $pdf->SetCreator(PDF_CREATOR);
+                    $pdf->SetAuthor('turrisystem');
+                    $pdf->SetTitle('Relacion Entrega Estampillas');
+                    $pdf->SetSubject('Gobernación del Tolima');
+                    $pdf->SetKeywords('estampillas,gobernación');
+                    $pdf->SetPrintHeader(false);
+                    $pdf->SetPrintFooter(false);
+                    // set default monospaced font
+                    $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+      
+                    // set margins
+                    $pdf->setPageUnit('mm');
+                    $pdf->SetMargins(30, 10, 20, true);
+                    $pdf->SetHeaderMargin(0);
+                    $pdf->SetFooterMargin(0);
+            
+                    // set auto page breaks
+                    $pdf->SetAutoPageBreak(TRUE, 2);
+      
+                    // set some language-dependent strings (optional)
+                    if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+                        require_once(dirname(__FILE__).'/lang/eng.php');
+                        $pdf->setLanguageArray($l);
+                    }
+                     
+                        // ---------------------------------------------------------
+                  
+                    // set font
+                    $pdf->SetFont('helvetica', '', 10);
+                    $pdf->AddPage();                  
+                    $html = $this->load->view('generarpdf/generarpdf_relacionEntregaEstampillas', $datos, TRUE);  
+                      
+                    $pdf->writeHTML($html, true, false, true, false, '');
+                 
+      
+                    // ---------------------------------------------------------
+                    //para evitar el error de que se ha impreso algo antes de enviar
+                    //el PDF 
+                    ob_end_clean();
+                    //Close and output PDF document
+                    $pdf->Output('Relacion_Entrega_Estampillas_'.$fecha.'.pdf', 'I');
+  
+  
+                }else
+                    {   
+                        $this->session->set_flashdata('errormessage', 'La fecha elegida no presenta registros!'); 
+                        redirect(base_url().'index.php/liquidaciones/consultar');  
+                    }
+  
+               
+            } else {
+                redirect(base_url().'index.php/error_404');
+            }
+                 
+        } else{
+                redirect(base_url().'index.php/users/login');
+        } 
+        
+    }
 
 
 /**
