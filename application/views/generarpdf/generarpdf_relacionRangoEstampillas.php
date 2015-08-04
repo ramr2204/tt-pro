@@ -131,7 +131,7 @@ Ibagué<br>
             	<td class="text-right" style="height: 5mm; width:30mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><?php echo $estampilla->valor;?><span style="color:white;">..</span></td>
+                        border-bottom: 0.5px solid black;"><?php echo round($estampilla->valor);?><span style="color:white;">..</span></td>
             	<td  style="height: 5mm; width:30mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
@@ -139,15 +139,22 @@ Ibagué<br>
             </tr>
         <?php }?>	
         <tr>
-            <td style="height: 5mm; width:80mm;border-top: 0.5px solid black;
+            <td class="text-center" style="height: 5mm; width:80mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;" colspan="2">
-            	TOTALES
+            	<strong>TOTALES</strong>
             </td>
-        	<td >
-        		<?php echo $total;?>
+        	<td class="text-center" style="height: 5mm; width:20mm;border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;">
+        		<strong><?php echo $total;?></strong>
         	</td>
+        	<td class="text-right" style="height: 5mm; width:30mm;border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;"><?php echo $valorTotal;?><span style="color:white;">..</span></td>
         </tr>
     </tbody>       
 </table>

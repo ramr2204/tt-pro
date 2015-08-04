@@ -2021,15 +2021,18 @@ function renderizarRangoImpresionesPDF()
                 * Calcula el total de estampillas impresas en el rango
                 */
                 $total = 0;
+                $valorTotal = 0;
                 foreach ($estampillas as $estampilla) 
                 {   
                     $total += $estampilla->cant;
+                    $valorTotal += $estampilla->valor;
                 }                
                 
                 $usuario = $this->ion_auth->user()->row();
                 $datos['usuario'] = $usuario->first_name.' '.$usuario->last_name;
                 $datos['estampillas'] = $estampillas;
-                $datos['total'] = $total;                
+                $datos['total'] = $total;      
+                $datos['valorTotal'] = $valorTotal;
                 
                 //Creación del PDF
                 $this->load->library("Pdf");                  
