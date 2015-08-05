@@ -123,8 +123,8 @@ var oTable = $('#tablaq').dataTable( {
 </div> 
 
 <div class="row">     
-    <div class="col-xs-12 col-sm-2 col-sm-offset-6">
-        Fecha:<div align="center" id="buscarfecha"></div>                
+    <div class="col-xs-12 col-sm-3 col-sm-offset-5">
+        Fecha (Generacion Estampilla):<div align="center" id="buscarfecha"></div>                
     </div>   
     <div class="col-xs-12 col-sm-4 btn-pdf">        
         <a class="btn btn-danger" id="btn-relacion" >
@@ -134,6 +134,10 @@ var oTable = $('#tablaq').dataTable( {
         <a class="btn btn-danger" id="btn-detalle">
         <i class="fa fa-file-pdf-o fa-1x"></i>
         Detalle
+        </a>
+        <a class="btn btn-danger" id="btn-rango">
+        <i class="fa fa-file-pdf-o fa-1x"></i>
+        Rango
         </a>
     </div>               
 </div>
@@ -178,6 +182,54 @@ var oTable = $('#tablaq').dataTable( {
          </div>
 
     </div>   
+</div>
+
+<!-- Modal Rango-->
+<div class="modal fade" id="m_rango" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Consultar por Rango (Fecha Generacion Estampilla)</h4>
+      </div>
+      <div class="modal-body">      
+          <div class="row">          
+              <div class="col-xs-12 col-sm-6">
+                  <div class="form-group">
+                      <label for="f_inicial">Fecha Inicial</label>
+                      <div class='input-group date' id='datetimepicker_inicial' data-date-format="YYYY-MM-DD">
+                          <input type='text' class="form-control" name="f_inicial" required="required"/>
+                          <span class="input-group-addon">
+                              <span class="glyphicon glyphicon-time"></span>
+                          </span>
+                      </div>                      
+                  </div>
+              </div>
+              <div class="col-xs-12 col-sm-6">
+                  <div class="form-group">
+                      <label for="f_final">Fecha Final</label>
+                      <div class='input-group date' id='datetimepicker_final' data-date-format="YYYY-MM-DD">
+                          <input type='text' class="form-control" name="f_final" required="required"/>
+                          <span class="input-group-addon">
+                              <span class="glyphicon glyphicon-time"></span>
+                          </span>
+                      </div>                       
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-danger" id="btn-consultar">
+            <i class="fa fa-file-pdf-o fa-1x"></i>        
+            Consultar Relacion
+        </a>     
+        <a class="btn btn-danger" id="btn-consultar-detalle">
+            <i class="fa fa-file-pdf-o fa-1x"></i>        
+            Consultar Detalle
+        </a> 
+      </div>
+    </div>
+  </div>
 </div>
 
 
