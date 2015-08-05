@@ -223,6 +223,10 @@ var oTable = $('#tablaq').dataTable( {
             <i class="fa fa-file-pdf-o fa-1x"></i>        
             Consultar Relacion
         </a>     
+        <a class="btn btn-danger" id="btn-consultar-detalle">
+            <i class="fa fa-file-pdf-o fa-1x"></i>        
+            Consultar Detalle
+        </a> 
       </div>
     </div>
   </div>

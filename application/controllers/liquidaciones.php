@@ -1646,8 +1646,39 @@ function consultar()
     {
           
         if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) 
-        { 
-            $fecha = $_GET['fecha'];
+        {             
+            $fecha_inicial = $_GET['fecha_I'];
+            $fecha_final = $_GET['fecha_F'];
+            
+            /*
+            * Valida que lleguen fechas
+            */
+            if($fecha_inicial == "" && $fecha_final == "")
+            {
+                $this->session->set_flashdata('errormessage', 'Debe Elegir un Rango de Fechas Valido!'); 
+                redirect(base_url().'index.php/liquidaciones/consultar');
+            }            
+            
+            /*
+            * Se Validan los valores que llegan para construir el where
+            */
+            $where = 'WHERE i.impr_estado = 1 ';
+            if($fecha_inicial != "" && $fecha_final != "")
+            {
+                $where .= ' AND date_format(i.impr_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial.'" AND "'.$fecha_final.'"';                               
+            }
+            if($fecha_inicial != "" && $fecha_final == "")
+            {
+                $where .= ' AND date_format(i.impr_fecha,"%Y-%m-%d") = "'.$fecha_inicial.'"'; 
+                //Bandera para la leyenda de la fecha
+                $fechaUnica = $fecha_inicial;                            
+            }
+            if($fecha_final != "" && $fecha_inicial == "")
+            {
+                $where .= ' AND date_format(i.impr_fecha,"%Y-%m-%d") = "'.$fecha_final.'"';  
+                //Bandera para la leyenda de la fecha
+                $fechaUnica = $fecha_final;            
+            } 
 
             /*
             * Crea la consulta para el perfil de administrador sin filtrar por usuario
@@ -1656,8 +1687,7 @@ function consultar()
             {
                 //Extrae los id de las facturas para las que se han hecho impresiones  
                 //y las fechas de las impresiones hechas por los usuarios liquidadores
-                $usuario = $this->ion_auth->user()->row();
-                $where = 'where DATE(i.impr_fecha) = "'.$_GET['fecha'].'"';              
+                $usuario = $this->ion_auth->user()->row();                
                 $join = '';
             }else
                 {
@@ -1668,9 +1698,9 @@ function consultar()
                     //Extrae los id de las facturas para las que se han hecho impresiones  
                     //y las fechas de las impresiones hechas por el liquidador autenticado
                     $usuario = $this->ion_auth->user()->row();
-                    $where = 'where p.pape_usuario = '.$usuario->id.' and DATE(i.impr_fecha) = "'.$_GET['fecha'].'"';              
+                    $where = ' AND p.pape_usuario = '.$usuario->id.' ';              
                     $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
-                }         
+                }                  
 
             $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid",$where,$join);
          
@@ -1757,10 +1787,20 @@ function consultar()
                             $liquidacion->numActo = 'N/A';
                             $liquidacion->valorActo = $liquidacion->liqu_valorsiniva;                            
                         }
-                }
-                  
+                }                                  
+
+                /*
+                * Valida que fecha llega a la vista para preparar la leyenda
+                */
+                if(isset($fechaUnica) && $fechaUnica != '')
+                {
+                    $datos['fecha'] = $fechaUnica;
+                }else
+                    {
+                        $datos['fecha'] = 'PERIODO COMPRENDIDO ENTRE LAS FECHAS'.$fecha_inicial.' Y '.$fecha_final;
+                    }
+
                 $datos['liquidaciones'] = $liquidaciones;
-                $datos['fecha'] = $fecha;
                 //Creación del PDF
                 $this->load->library("Pdf");                  
                 $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
@@ -1807,7 +1847,7 @@ function consultar()
                 //el PDF 
                 ob_end_clean();
                 //Close and output PDF document
-                $pdf->Output('Impresiones_'.$fecha.'.pdf', 'I');
+                $pdf->Output('Impresiones.pdf', 'I');
 
             }else
                 {   
