@@ -1795,7 +1795,7 @@ function consultar()
                 // ---------------------------------------------------------
             
                 // set font
-                $pdf->SetFont('times', 'BI', 10);
+                $pdf->SetFont('helvetica', '', 9);
                 $pdf->AddPage();                  
                 $html = $this->load->view('generarpdf/generarpdf_impresiones', $datos, TRUE);  
                 
