@@ -56,34 +56,55 @@
                     <td rowspan="<?php echo $liquidacion->cantEstampillas;?>" style="width:15mm;"><?php echo $liquidacion->numActo; ?></td>
             	    <td rowspan="<?php echo $liquidacion->cantEstampillas;?>" style="width:40mm;"><?php echo ucwords($liquidacion->liqu_nombrecontratista); ?><br><?php echo $liquidacion->liqu_nit;?></td>
                     <td rowspan="<?php echo $liquidacion->cantEstampillas;?>" style="width:20mm;"><?php echo $liquidacion->liqu_fecha; ?></td>                
-                    <td rowspan="<?php echo $liquidacion->cantEstampillas;?>" style="width:27mm;"><?php echo $liquidacion->valorActo; ?></td>  
-                    <?php
-                    /*
-                    * Valida si el usuario autenticado es administrador para
-                    * renderizar la informacion del liquidador que generó
-                    * la impresion
-                    */
-                    if($this->ion_auth->is_admin())
-                    {
-                        echo '<th style="text-align:left; width:20mm;">'.$liquidacion->liquidador.'</th>';
-                    }
-                    ?>              
-                    <td rowspan="<?php echo $liquidacion->cantEstampillas;?>" style="width:20mm;"><br><?php echo $liquidacion->liqu_valortotal; ?></td>     
-                </tr>
+                    <td rowspan="<?php echo $liquidacion->cantEstampillas;?>" style="width:27mm;"><?php echo $liquidacion->valorActo; ?></td>                
                 <!-- Datos de las Estampillas -->
                 <?php            
                 foreach ($liquidacion->estampillas as $estampilla) 
-                {              
-                ?> 
-                    <tr>
-            	        <td style="text-align:left; width:26mm;"><?php echo $estampilla['tipo']; ?></td>
-                        <td style="text-align:left; width:20mm;"><?php echo $estampilla['fecha_pago']; ?></td>
-                        <td style="text-align:right; width:20mm;"><?php echo round($estampilla['valor']); ?></td>
-                        <td style="text-align:center; width:16mm;"><?php echo $estampilla['rotulo']; ?></td>
-                        <td style="text-align:left; width:20mm;"><?php echo $estampilla['fecha_impr']; ?></td>                    
-                    </tr>
-                <?php
+                {    
+                    /*
+                    * Valida que sea la primer fila para que la informacion
+                    * de la primer estampilla quede contenida en el mismo tr
+                    * de la informacion de la liquidacion para ajustar
+                    * la maquetacion de la tabla con rowspan
+                    */          
+                    if($liquidacion->estampillas[0]['rotulo']==$estampilla['rotulo'])
+                    {                    
+                        imprimirInformacionEstampilla($estampilla);
+
+                        /*
+                        * Valida si el usuario autenticado es administrador para
+                        * renderizar la informacion del liquidador que generó
+                        * la impresion
+                        */
+                        if($this->ion_auth->is_admin())
+                        {
+                            echo '<td rowspan="'.$liquidacion->cantEstampillas.'" style="text-align:left; width:20mm;">'.$liquidacion->liquidador.'</td>';
+                        }
+                           
+                        echo '<td rowspan="'.$liquidacion->cantEstampillas.'" style="width:20mm;"><br>'.$liquidacion->liqu_valortotal.'</td>'
+                            .'</tr>';                                
+                    }else
+                        {
+                            echo '<tr>';
+                            imprimirInformacionEstampilla($estampilla);
+                            echo '</tr>';
+                        }
                 }                
-            }?>	
+            }   
+                ?>	
     </tbody>       
 </table>
+
+<?php 
+/*
+* Funcion de apoyo que imprime la informacion de la estampilla especificada
+*/
+function imprimirInformacionEstampilla($vectorEstampilla)
+{
+    echo '<td style="text-align:left; width:26mm;">'.$vectorEstampilla['tipo'].'</td>'
+        .'<td style="text-align:left; width:20mm;">'.$vectorEstampilla['fecha_pago'].'</td>'
+        .'<td style="text-align:right; width:20mm;">'.round($vectorEstampilla['valor']).'</td>'
+        .'<td style="text-align:center; width:16mm;">'.$vectorEstampilla['rotulo'].'</td>'
+        .'<td style="text-align:left; width:20mm;">'.$vectorEstampilla['fecha_impr'].'</td>';
+}
+?>
