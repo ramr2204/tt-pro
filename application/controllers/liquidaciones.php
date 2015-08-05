@@ -1694,10 +1694,9 @@ function consultar()
             }  
             $idLiquidaciones .= '0)';
             $whereIn = 'where l.liqu_id in '.$idLiquidaciones;
-            $join2 = ' INNER JOIN est_liquidaciones l ON l.liqu_id = f.fact_liquidacionid';
-            $join2 .= ' INNER JOIN est_pagos p ON p.pago_facturaid = f.fact_id';                        
+            $join2 = ' INNER JOIN est_liquidaciones l ON l.liqu_id = f.fact_liquidacionid';                                 
               
-            $campos = 'l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha, p.pago_fecha, f.fact_valor, f.fact_nombre';
+            $campos = 'l.liqu_contratoid,l.liqu_tramiteid,l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_valorsiniva,l.liqu_fecha';
             $where = $whereIn;
 
             $liquidaciones = $this->codegen_model->getSelect('est_facturas f',$campos,$where,$join2);
@@ -1709,17 +1708,22 @@ function consultar()
                 {
                     $where = 'where f.fact_liquidacionid = '.$liquidacion->liqu_id;  
                     $join3 = ' INNER JOIN est_impresiones i ON i.impr_facturaid=f.fact_id';
+                    $join3 .= ' INNER JOIN est_pagos pag ON pag.pago_facturaid=f.fact_id';
                     $join3 .= ' INNER JOIN est_papeles p ON i.impr_papelid=p.pape_id';
                     $join3 .= ' INNER JOIN users u ON u.id=p.pape_usuario';
-                    $resultado = $this->codegen_model->getSelect('est_facturas f',"f.fact_nombre, f.fact_valor, u.first_name, u.last_name, u.id",$where,$join3);
+                    $resultado = $this->codegen_model->getSelect('est_facturas f',"f.fact_nombre, f.fact_valor, u.first_name, u.last_name, u.id, i.impr_fecha, i.impr_codigopapel, pag.pago_fecha",$where,$join3);
                       
-                    $facturas='';
+                    $facturas=[];
                     $liquidador = '';
                     foreach ($resultado as $value) 
                     {
-                        $facturas .= $value->fact_nombre.' ==> '.$value->fact_valor.'<br>';
+                        $facturas[] = ['tipo'=>$value->fact_nombre,
+                            'rotulo'=>$value->impr_codigopapel,
+                            'valor'=>$value->fact_valor,
+                            'fecha_impr'=>$value->impr_fecha,
+                            'fecha_pago'=>$value->pago_fecha];
                         /*
-                        * Valida que el valor no haya sido asignado
+                        * Valida que el nombre del liquidador no haya sido asignado
                         * para asignarlo una sola vez
                         */ 
                         if($liquidador == '')
@@ -1731,6 +1735,21 @@ function consultar()
                     }
                     $liquidacion->liquidador = $liquidador;                    
                     $liquidacion->estampillas = $facturas;
+
+                    /*
+                    * Valida si la liquidacion fue de tramite o de contrato
+                    * para extraer el numero de contrato y el valor del acto
+                    */
+                    if($liquidacion->liqu_contratoid != 0)
+                    {
+                        $datosContrato = $this->codegen_model->getSelect('con_contratos c','c.cntr_numero, c.cntr_valor','WHERE cntr_id = '.$liquidacion->liqu_contratoid);
+                        $liquidacion->numActo = $datosContrato[0]->cntr_numero;
+                        $liquidacion->valorActo = $datosContrato[0]->cntr_valor;
+                    }else
+                        {                            
+                            $liquidacion->numActo = 'N/A';
+                            $liquidacion->valorActo = $liquidacion->liqu_valorsiniva;                            
+                        }
                 }
                   
                 $datos['liquidaciones'] = $liquidaciones;
@@ -1940,8 +1959,7 @@ function consultar()
                         $this->session->set_flashdata('errormessage', 'La fecha elegida no presenta registros!'); 
                         redirect(base_url().'index.php/liquidaciones/consultar');  
                     }
-  
-               
+
             } else {
                 redirect(base_url().'index.php/error_404');
             }

@@ -123,8 +123,8 @@ var oTable = $('#tablaq').dataTable( {
 </div> 
 
 <div class="row">     
-    <div class="col-xs-12 col-sm-2 col-sm-offset-6">
-        Fecha:<div align="center" id="buscarfecha"></div>                
+    <div class="col-xs-12 col-sm-3 col-sm-offset-5">
+        Fecha (Generacion Estampilla):<div align="center" id="buscarfecha"></div>                
     </div>   
     <div class="col-xs-12 col-sm-4 btn-pdf">        
         <a class="btn btn-danger" id="btn-relacion" >
@@ -190,7 +190,7 @@ var oTable = $('#tablaq').dataTable( {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Consultar por Rango</h4>
+        <h4 class="modal-title" id="myModalLabel">Consultar por Rango (Fecha Generacion Estampilla)</h4>
       </div>
       <div class="modal-body">      
           <div class="row">          
@@ -221,7 +221,7 @@ var oTable = $('#tablaq').dataTable( {
       <div class="modal-footer">
         <a class="btn btn-danger" id="btn-consultar">
             <i class="fa fa-file-pdf-o fa-1x"></i>        
-            Consultar
+            Consultar Relacion
         </a>     
       </div>
     </div>
