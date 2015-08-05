@@ -43,13 +43,116 @@ function inicial ()
 
   //Eventos informes vista consultar
   $('#btn-detalle').click(generarInformeDetallado);
-  $('#btn-relacion').click(generarInformeRelacion);      
+  $('#btn-relacion').click(generarInformeRelacion);
+  $('#btn-rango').click(solicitarRango);
+  $('#btn-consultar').click(generarInformeRango);
+  $('#btn-consultar-detalle').click(generarInformeRangoDetalle);
  
-  
-    
-
+  identificarVistaConsultaRango();
 }
 
+/*
+* Funcion de apoyo que solicita la generacion del informe
+* de impresiones por rango de fecha
+*/
+function generarInformeRangoDetalle(e)
+{
+    var fecha_inicial = $('#m_rango').find('[name="f_inicial"]').val();
+    var fecha_final = $('#m_rango').find('[name="f_final"]').val();
+    
+    /*
+    * Se valida numericamente que las fechas tengan valor
+    * distinto de vacio
+    */
+    if(fecha_inicial != '')
+    {
+        var fe_i = 1;
+    }else
+        {
+            var fe_i = 0;
+        }
+    
+    if(fecha_final != '')
+    {
+        var fe_f = 1;
+    }else
+        {
+            var fe_f = 0;
+        }
+
+    if((fe_i+fe_f) > 0)
+    {
+        window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final);
+    }
+}
+
+/*
+* Funcion de apoyo que solicita la generacion del informe
+* de impresiones por rango de fecha
+*/
+function generarInformeRango(e)
+{
+    var fecha_inicial = $('#m_rango').find('[name="f_inicial"]').val();
+    var fecha_final = $('#m_rango').find('[name="f_final"]').val();
+    
+    /*
+    * Se valida numericamente que las fechas tengan valor
+    * distinto de vacio
+    */
+    if(fecha_inicial != '')
+    {
+        var fe_i = 1;
+    }else
+        {
+            var fe_i = 0;
+        }
+    
+    if(fecha_final != '')
+    {
+        var fe_f = 1;
+    }else
+        {
+            var fe_f = 0;
+        }
+
+    if((fe_i+fe_f) > 0)
+    {
+        window.open(base_url+'index.php/liquidaciones/renderizarRangoImpresionesPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final);
+    }
+}
+
+/*
+* Funcion de apoyo que identifica si se encuentra
+* en la vista de consulta y tiene habilitado el rango
+*/
+function identificarVistaConsultaRango()
+{
+    var n = 0;
+    $('body').find('#btn-rango').each(function()
+        {
+            n++;     
+        });
+
+    if(n > 0)
+    {
+        //Evento para el timepicker del rango de impresiones
+        $('#datetimepicker_inicial').datetimepicker({
+            pickTime: false
+        });
+        $('#datetimepicker_final').datetimepicker({
+            pickTime: false
+        });
+    }
+}
+
+/*
+* Funcion que renderiza la modal para solicitar
+* el rango de fechas para el informe
+*/
+function solicitarRango(e)
+{
+    $('#m_rango').modal('show');
+}
 
 //Funcion que valida si se ha digitado
 //una fecha para generar el informe
@@ -62,7 +165,7 @@ function generarInformeDetallado (e)
     
     if(fecha != '')
     {
-        window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha='+fecha);  
+        window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha);  
     }    
     
 }

@@ -106,7 +106,8 @@
  * @author Nicola Asuni
  * @version 6.0.061
  */
-
+ini_set('memory_limit', '-1');
+ini_set('max_execution_time', 0);
 // TCPDF configuration
 require_once(dirname(__FILE__).'/tcpdf_autoconfig.php');
 // TCPDF static font methods and data

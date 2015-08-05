@@ -49,164 +49,21 @@
     
 <table><tr><td style="height: 12mm; color:white">espaciador</td></tr></table>
 
-
-
-
-
-
-
-
-
-
 <p>Ibagué, <?php 
+echo fechaEnLetras(date('Y-m-d'));
 
-$diaNumero = date('d');
-$diaNombre = date('l');
-$mesNumero = date('m');
-
-switch ($diaNombre) 
+/*
+* Valida que fecha llega a la vista para preparar la leyenda
+*/
+if(isset($fecha_u) && $fecha_u != '')
 {
-    case 'Sunday': $diaNombre = 'Domingo';        
-        break;
-
-    case 'Monday': $diaNombre = 'Lunes';        
-        break;
-
-    case 'Tuesday': $diaNombre = 'Martes';        
-        break;
-
-    case 'Wednesday': $diaNombre = 'Miercoles';        
-        break;
-
-    case 'Thursday': $diaNombre = 'Jueves';        
-        break;
-
-    case 'Friday': $diaNombre = 'Viernes';        
-        break;
-
-    case 'Saturday': $diaNombre = 'Sabado';        
-        break;
-        
-}
-
-switch ($mesNumero) 
-{
-    case '01': $mesNombre = 'Enero';        
-        break;
-
-    case '02': $mesNombre = 'Febrero';        
-        break;
-
-    case '03': $mesNombre = 'Marzo';        
-        break;
-
-    case '04': $mesNombre = 'Abril';        
-        break;
-
-    case '05': $mesNombre = 'Mayo';        
-        break;
-
-    case '06': $mesNombre = 'Junio';        
-        break;
-
-    case '07': $mesNombre = 'Julio';        
-        break;
-
-    case '08': $mesNombre = 'Agosto';        
-        break;
-
-    case '09': $mesNombre = 'Septiembre';        
-        break;
-
-    case '10': $mesNombre = 'Octubre';        
-        break;
-
-    case '11': $mesNombre = 'Noviembre';        
-        break;
-
-    case '12': $mesNombre = 'Diciembre';        
-        break;
-        
-}
-
-//separa la fecha en un arreglo segun la expresion regular
-preg_match('/(\d{4})-(\d{2})-(\d{2})/',$fecha,$partes);
-
-$diaNumeroImpresiones = $partes[3];
-$diaNombreImpresiones = date('l',strtotime($fecha));
-$mesNumeroImpresiones = $partes[2];
-$anioNumeroImpresiones = $partes[1];
-
-switch ($diaNombreImpresiones) 
-{
-    case 'Sunday': $diaNombreImpresiones = 'Domingo';        
-        break;
-
-    case 'Monday': $diaNombreImpresiones = 'Lunes';        
-        break;
-
-    case 'Tuesday': $diaNombreImpresiones = 'Martes';        
-        break;
-
-    case 'Wednesday': $diaNombreImpresiones = 'Miercoles';        
-        break;
-
-    case 'Thursday': $diaNombreImpresiones = 'Jueves';        
-        break;
-
-    case 'Friday': $diaNombreImpresiones = 'Viernes';        
-        break;
-
-    case 'Saturday': $diaNombreImpresiones = 'Sabado';        
-        break;
-        
-}
-
-switch ($mesNumeroImpresiones) 
-{
-    case '01': $mesNombreImpresiones = 'Enero';        
-        break;
-
-    case '02': $mesNombreImpresiones = 'Febrero';        
-        break;
-
-    case '03': $mesNombreImpresiones = 'Marzo';        
-        break;
-
-    case '04': $mesNombreImpresiones = 'Abril';        
-        break;
-
-    case '05': $mesNombreImpresiones = 'Mayo';        
-        break;
-
-    case '06': $mesNombreImpresiones = 'Junio';        
-        break;
-
-    case '07': $mesNombreImpresiones = 'Julio';        
-        break;
-
-    case '08': $mesNombreImpresiones = 'Agosto';        
-        break;
-
-    case '09': $mesNombreImpresiones = 'Septiembre';        
-        break;
-
-    case '10': $mesNombreImpresiones = 'Octubre';        
-        break;
-
-    case '11': $mesNombreImpresiones = 'Noviembre';        
-        break;
-
-    case '12': $mesNombreImpresiones = 'Diciembre';        
-        break;
-        
-}
-
-
-$fechaNombres = $diaNombreImpresiones.' '.$diaNumeroImpresiones.' de '.$mesNombreImpresiones.' de '.$anioNumeroImpresiones;
-
-echo  strtoupper($diaNumero.' de '.$mesNombre.' de '.date('Y'));
-
+    $leyendaFecha = fechaEnLetras($fecha_u,true);
+}else
+    {
+        $fecha_i_letras = fechaEnLetras($fecha_i,true);
+        $fecha_f_letras = fechaEnLetras($fecha_f,true);
+        $leyendaFecha = 'PERIODO COMPRENDIDO ENTRE '.$fecha_i_letras.' Y '.$fecha_f_letras;
+    }
 
 ?></p>
 
@@ -224,7 +81,7 @@ Ibagué<br>
    
 <p class="text-center">
 <b>RELACION ENTREGA DE ESTAMPILLAS</b><br>
-(<?php echo strtoupper($fechaNombres);?>)
+(<?php echo $leyendaFecha;?>)
 </p>
 
 
@@ -236,43 +93,69 @@ Ibagué<br>
             <td class="text-center" style="height: 5mm; width:50mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><b>Tipo Estampilla</b></td>
+                        border-bottom: 0.5px solid black;"><b>Tipo Estampilla</b></td>            
             <td class="text-center" style="height: 5mm; width:30mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;"><b>Nro. Consignación</b></td>
+            <td class="text-center" style="height: 5mm; width:20mm;border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;"><b>Cantidad</b></td>
             <td class="text-center" style="height: 5mm; width:30mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;"><b>Valor en $</b></td>
-            <td class="text-center" style="height: 5mm; width:40mm;border-top: 0.5px solid black;
+            <td class="text-center" style="height: 5mm; width:30mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;"><b>Observaciones</b></td>            
         </tr>
         <?php $n=0;
-        foreach ($liquidaciones as $liquidacion) {
+        foreach ($estampillas as $estampilla) {
         $n++;  
         ?>        	
             <tr>
             	<td  style="height: 5mm; width:50mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"> <?php echo $liquidacion['nombre']; ?></td>
-            	<td class="text-center" style="height: 5mm; width:30mm;border-top: 0.5px solid black;
+                        border-bottom: 0.5px solid black;"> <?php echo $estampilla->fact_nombre; ?></td>            	
+                <td class="text-center" style="height: 5mm; width:30mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;">EFECTIVO</td>
+                <td class="text-center" style="height: 5mm; width:20mm;border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;"> <?php echo $estampilla->cant; ?></td>
             	<td class="text-right" style="height: 5mm; width:30mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><?php echo $liquidacion['valor'];?><span style="color:white;">..</span></td>
-            	<td  style="height: 5mm; width:40mm;border-top: 0.5px solid black;
+                        border-bottom: 0.5px solid black;"><?php echo round($estampilla->valor);?><span style="color:white;">..</span></td>
+            	<td  style="height: 5mm; width:30mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;"></td>            	            	                 
             </tr>
         <?php }?>	
+        <tr>
+            <td class="text-center" style="height: 5mm; width:80mm;border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;" colspan="2">
+            	<strong>TOTALES</strong>
+            </td>
+        	<td class="text-center" style="height: 5mm; width:20mm;border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;">
+        		<strong><?php echo $total;?></strong>
+        	</td>
+        	<td class="text-right" style="height: 5mm; width:30mm;border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;"><strong><?php echo $valorTotal;?></strong><span style="color:white;">..</span></td>
+        </tr>
     </tbody>       
 </table>
 
@@ -300,9 +183,7 @@ Ibagué<br>
         break;
 
         default : $n = 1;            
-        break;
-       
-    
+        break;           
       }
 
       for ($i=1; $i <=$n ; $i++) 
@@ -330,3 +211,100 @@ PROYECTO ESTAMPILLAS PRO<br>
 Gobernación del Tolima<br>
 www.tolima.gov.co
 </div>
+
+<?php
+/*
+* Funcion de apoyo para extraer la fecha en letras segun los valores especificados
+*/
+function fechaEnLetras($fecha = '', $vDiaSemana = '')
+{
+	/*
+	* Separa la fecha en un arreglo segun la expresion regular
+	*/
+	//
+    preg_match('/(\d{4})-(\d{2})-(\d{2})/',$fecha, $partes);
+    $diaNumero = $partes[3];
+    $diaNombre = date('l',strtotime($fecha));
+    $mesNumero = $partes[2];
+    $anioNumero = $partes[1];
+
+	switch ($diaNombre) 
+    {
+        case 'Sunday': $diaNombre = 'Domingo';        
+            break;
+    
+        case 'Monday': $diaNombre = 'Lunes';        
+            break;
+    
+        case 'Tuesday': $diaNombre = 'Martes';        
+            break;
+    
+        case 'Wednesday': $diaNombre = 'Miercoles';        
+            break;
+    
+        case 'Thursday': $diaNombre = 'Jueves';        
+            break;
+    
+        case 'Friday': $diaNombre = 'Viernes';        
+            break;
+    
+        case 'Saturday': $diaNombre = 'Sabado';        
+            break;
+            
+    }
+
+    switch ($mesNumero) 
+    {
+        case '01': $mesNombre = 'Enero';        
+            break;
+    
+        case '02': $mesNombre = 'Febrero';        
+            break;
+    
+        case '03': $mesNombre = 'Marzo';        
+            break;
+    
+        case '04': $mesNombre = 'Abril';        
+            break;
+    
+        case '05': $mesNombre = 'Mayo';        
+            break;
+    
+        case '06': $mesNombre = 'Junio';        
+            break;
+    
+        case '07': $mesNombre = 'Julio';        
+            break;
+    
+        case '08': $mesNombre = 'Agosto';        
+            break;
+    
+        case '09': $mesNombre = 'Septiembre';        
+            break;
+    
+        case '10': $mesNombre = 'Octubre';        
+            break;
+    
+        case '11': $mesNombre = 'Noviembre';        
+            break;
+    
+        case '12': $mesNombre = 'Diciembre';        
+            break;
+            
+    }
+    
+    /*
+    * Valida el tipo de fecha requerida para retornar
+    */
+    if($vDiaSemana)
+    {
+        $fechaLetras = strtoupper($diaNombre.' '.$diaNumero.' de '.$mesNombre.' de '.$anioNumero);
+    }else
+        {
+            $fechaLetras = strtoupper($diaNumero.' de '.$mesNombre.' de '.$anioNumero);
+        }
+    return $fechaLetras;
+}
+
+
+?>
