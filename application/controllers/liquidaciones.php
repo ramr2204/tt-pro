@@ -1715,6 +1715,7 @@ function consultar()
                       
                     $facturas=[];
                     $liquidador = '';
+                    $cantEstampillas = 0;
                     foreach ($resultado as $value) 
                     {
                         $facturas[] = ['tipo'=>$value->fact_nombre,
@@ -1731,10 +1732,16 @@ function consultar()
                             $liquidador = strtoupper($value->first_name)
                                 .' '.strtoupper($value->last_name)
                                 .'<br>'.$value->id;
-                        }                        
-                    }
+                        }  
+                        /*
+                        * Cuenta la cantidad de estampillas para establecer
+                        * maquetacion en la renderizacion del listado
+                        */
+                        $cantEstampillas++;
+                    }             
                     $liquidacion->liquidador = $liquidador;                    
                     $liquidacion->estampillas = $facturas;
+                    $liquidacion->cantEstampillas = $cantEstampillas;
 
                     /*
                     * Valida si la liquidacion fue de tramite o de contrato

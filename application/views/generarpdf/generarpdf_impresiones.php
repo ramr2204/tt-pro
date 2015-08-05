@@ -15,13 +15,13 @@
 <table border="1" style="text-align:center;">
     <thead>
         <tr>
-            <th style="width:10mm;">No</th>
-            <th style="width:20mm;">Tipo Liquidación</th>
-            <th style="width:15mm;">No Acto</th>
-            <th style="width:40mm;">Contratista / NIT</th>
-            <th style="width:20mm;">Fecha Liquidacion</th>            
-            <th style="width:27mm;">Valor Acto</th>            
-            <th colspan="5" style="width:80mm;">Estampillas</th> 
+            <th rowspan="2" style="width:10mm;">No</th>
+            <th rowspan="2" style="width:20mm;text-align:center;">Tipo Liquidación</th>
+            <th rowspan="2" style="width:15mm;">No Acto</th>
+            <th rowspan="2" style="width:40mm;">Contratista / NIT</th>
+            <th rowspan="2" style="width:20mm;">Fecha Liquidacion</th>            
+            <th rowspan="2" style="width:27mm;">Valor Acto</th>            
+            <th colspan="5" style="width:102mm;">Estampillas</th> 
             <?php 
             /*
             * Valida si el usuario autenticado es administrador para
@@ -30,43 +30,60 @@
             */
             if($this->ion_auth->is_admin())
             {
-                echo '<th style="width:20mm;">Liquidador</th>';
+                echo '<th rowspan="2" style="width:20mm;">Liquidador</th>';
             }
             ?>
-            <th style="width:20mm;">Total</th>                                                    
+            <th rowspan="2" style="width:20mm;">Total</th>                                                    
+        </tr>
+        <tr>
+            <th style="text-align:center; width:26mm;">Tipo</th>
+            <th style="text-align:center; width:20mm;">Fecha Pago</th>
+            <th style="text-align:center; width:20mm;">Valor</th>
+            <th style="text-align:center; width:16mm;">Numero Rotulo</th>
+            <th style="text-align:center; width:20mm;">Fecha Impresion</th>
         </tr>
     </thead>
     <tbody>
         <?php
             $n = 0;
-            foreach ($liquidaciones as $liquidacion) {  
-            $n++; 
+            foreach ($liquidaciones as $liquidacion) 
+            {  
+                $n++; 
         ?>        	
-            <tr>
-            	<td style="width:10mm;"><?php echo $n; ?></td>
-            	<td style="width:20mm;"><?php echo $liquidacion->liqu_tipocontrato; ?></td>
-                <td style="width:15mm;"><?php echo $liquidacion->numActo; ?></td>
-            	<td style="width:40mm;"><?php echo ucwords($liquidacion->liqu_nombrecontratista); ?><br><?php echo $liquidacion->liqu_nit;?></td>
-                <td style="width:20mm;"><?php echo $liquidacion->liqu_fecha; ?></td>                
-                <td style="width:27mm;"><?php echo $liquidacion->valorActo; ?></td>                
-            	<td style="text-align:left; width:16mm;"><?php echo $liquidacion->estampillas[0]['tipo']; ?></td>
-                <td style="text-align:left; width:16mm;"><?php echo $liquidacion->estampillas[0]['rotulo']; ?></td>
-                <td style="text-align:left; width:16mm;"><?php echo $liquidacion->estampillas[0]['valor']; ?></td>
-                <td style="text-align:left; width:16mm;"><?php echo $liquidacion->estampillas[0]['fecha_impr']; ?></td>
-                <td style="text-align:left; width:16mm;"><?php echo $liquidacion->estampillas[0]['fecha_pago']; ?></td>
+                <tr>
+            	    <td rowspan="<?php echo $liquidacion->cantEstampillas;?>" style="width:10mm;"><?php echo $n; ?></td>
+            	    <td rowspan="<?php echo $liquidacion->cantEstampillas;?>" style="width:20mm;"><?php echo $liquidacion->liqu_tipocontrato; ?></td>
+                    <td rowspan="<?php echo $liquidacion->cantEstampillas;?>" style="width:15mm;"><?php echo $liquidacion->numActo; ?></td>
+            	    <td rowspan="<?php echo $liquidacion->cantEstampillas;?>" style="width:40mm;"><?php echo ucwords($liquidacion->liqu_nombrecontratista); ?><br><?php echo $liquidacion->liqu_nit;?></td>
+                    <td rowspan="<?php echo $liquidacion->cantEstampillas;?>" style="width:20mm;"><?php echo $liquidacion->liqu_fecha; ?></td>                
+                    <td rowspan="<?php echo $liquidacion->cantEstampillas;?>" style="width:27mm;"><?php echo $liquidacion->valorActo; ?></td>  
+                    <?php
+                    /*
+                    * Valida si el usuario autenticado es administrador para
+                    * renderizar la informacion del liquidador que generó
+                    * la impresion
+                    */
+                    if($this->ion_auth->is_admin())
+                    {
+                        echo '<th style="text-align:left; width:20mm;">'.$liquidacion->liquidador.'</th>';
+                    }
+                    ?>              
+                    <td rowspan="<?php echo $liquidacion->cantEstampillas;?>" style="width:20mm;"><br><?php echo $liquidacion->liqu_valortotal; ?></td>     
+                </tr>
+                <!-- Datos de las Estampillas -->
+                <?php            
+                foreach ($liquidacion->estampillas as $estampilla) 
+                {              
+                ?> 
+                    <tr>
+            	        <td style="text-align:left; width:26mm;"><?php echo $estampilla['tipo']; ?></td>
+                        <td style="text-align:left; width:20mm;"><?php echo $estampilla['fecha_pago']; ?></td>
+                        <td style="text-align:right; width:20mm;"><?php echo round($estampilla['valor']); ?></td>
+                        <td style="text-align:center; width:16mm;"><?php echo $estampilla['rotulo']; ?></td>
+                        <td style="text-align:left; width:20mm;"><?php echo $estampilla['fecha_impr']; ?></td>                    
+                    </tr>
                 <?php
-                /*
-                * Valida si el usuario autenticado es administrador para
-                * renderizar la informacion del liquidador que generó
-                * la impresion
-                */
-                if($this->ion_auth->is_admin())
-                {
-                    echo '<th style="text-align:left; width:20mm;">'.$liquidacion->liquidador.'</th>';
-                }
-                ?>        
-            	<td style="width:20mm;"><br><?php echo $liquidacion->liqu_valortotal; ?></td> 	
-            </tr>
-        <?php }?>	
+                }                
+            }?>	
     </tbody>       
 </table>
