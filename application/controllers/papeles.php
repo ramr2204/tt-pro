@@ -431,7 +431,6 @@ class Papeles extends MY_Controller {
 
                                    );
 
-
                             if ($this->codegen_model->add('est_papeles',$data) == TRUE) 
                             {
 
@@ -485,7 +484,7 @@ class Papeles extends MY_Controller {
             //extrae los datos del rango
             //de papeleria de donde se sacarán los codigos            
             $rangoOriginal = $this->codegen_model->getSelect('est_papeles','pape_cantidad'
-            .',pape_codigoinicial,pape_codigofinal,pape_id',
+            .',pape_codigoinicial,pape_codigofinal,pape_id,pape_observaciones',
             'where pape_usuario = '.$docuOldResponsable
             .' AND pape_id = '.$idRango);
                                  
@@ -582,30 +581,14 @@ class Papeles extends MY_Controller {
                 {                                     
                      $this->codegen_model->delete('est_papeles', 'pape_id', $idRango);
                 }                                            
-            }else
+            }elseif($rotulosRestantes > 0)
                 {
                     /*
                     * Si la cantidad de rotulos restantes es mayor que cero se crea
-                    * un registro con el fragmento de rotulos restantes al liquidador
+                    * un registro con el fragmento de rotulos restantes para el liquidador
                     * que entrega los rotulos
-                    */
-                    if($cantidadRestante > 0)
-                    {
-                        //modifica el rango original del liquidador que entrega                                      
-                        $this->codegen_model->edit('est_papeles',
-                        ['pape_cantidad'=>$cantidadRestante, 
-                        'pape_codigofinal'=>(int)$codigoinicial-1],
-                        'pape_id', $idRango); 
-
-                    }else
-                      {
-                           $this->codegen_model->delete('est_papeles', 'pape_id', $idRango); 
-                      }
-
-                    //crea el nuevo rango con el fragmento sobrante de codigos
-                    //asignado al liquidador que entrega
-                    $codigoInicialFragmento = (int)$codigofinal+1;
-                    $cantidadFragmento = (int)$rangoOriginal[0]->pape_codigofinal-$codigoInicialFragmento;
+                    */                   
+                    $codigoInicialFragmento = (int)$codigofinal+1;                    
 
                     $observaciones = 'Fragmento restante de la re-asignación del rango '
                         .$codigoinicial.'-'.$codigofinal.' al liquidador '.$newResponsablePapel;
@@ -615,16 +598,29 @@ class Papeles extends MY_Controller {
                               'pape_codigoinicial' => $codigoInicialFragmento,
                               'pape_codigofinal' => $rangoOriginal[0]->pape_codigofinal,
                               'pape_observaciones' => $observaciones,      
-                              'pape_cantidad' => $this->input->post('cantidad'),//calcular cantidad real
+                              'pape_cantidad' => $rotulosRestantes,
                               'pape_fecha' => date('Y-m-d H:i:s'),
                               'pape_estado'=> 1,
                               'pape_imprimidos'=> 0
                                   );
-
                     $this->codegen_model->add('est_papeles',$data);
+
+                    /*
+                    * Se Modifica la Informacion del rango original para 
+                    * ajustar el codigo final, la cantidad y se especifica
+                    * en las observaciones el cambio de valores por re-asignacion
+                    */
+                    $obsFragmento = $rangoOriginal[0]->pape_observaciones.' Se Modificó el Codigo Final y la Cantidad de Rotulos'
+                        .'del Rango Previo ('.$rangoOriginal[0]->pape_codigoinicial.'-'.$rangoOriginal[0]->pape_codigofinal
+                        .') por Reasignación de Rotulos al Usuario '.$newResponsablePapel.' comprendidos en el Rango ('
+                        .$codigoinicial.'-'.$codigofinal;
+                    
+                        $this->codegen_model->edit('est_papeles',
+                        ['pape_cantidad'=>$cantidadRestante, 
+                        'pape_codigofinal'=>(int)$codigoinicial-1],
+                        'pape_id', $idRango); 
+
                 }
-
-
           } else {
               redirect(base_url().'index.php/error_404');
           }
