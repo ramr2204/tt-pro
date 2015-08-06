@@ -245,8 +245,25 @@ class Contratistas extends MY_Controller {
       if ($this->ion_auth->logged_in()) {
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/manage') ) { 
+                
+                /*
+                * Se Valida si el usuario tiene la opcion de editar contratista
+                * para renderizar el boton de editar
+                */            
+                if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/edit')) 
+                {
+                    $this->load->library('datatables');
+                    $this->datatables->add_column('edit', '<div class="btn-toolbar">'
+                        .'<div class="btn-group">'
+                        .'<a href="'.base_url().'index.php/contratistas/edit/$1" class="btn btn-default btn-xs" title="Editar contratista"><i class="fa fa-pencil-square-o"></i></a>'
+                        .'</div>'
+                        .'</div>', 'c.cont_id');
+                }else 
+                    {             
+                        $this->load->library('datatables');     
+                        $this->datatables->add_column('edit', '', 'c.cont_id'); 
+                    }
               
-              $this->load->library('datatables');
               $this->datatables->select('c.cont_id,c.cont_nit,c.cont_nombre,r.regi_nombre,t.tpco_nombre,m.muni_nombre,d.depa_nombre,c.cont_direccion');
               $this->datatables->from('con_contratistas c');
               $this->datatables->join('par_municipios m', 'm.muni_id = c.cont_municipioid', 'left');
@@ -254,18 +271,6 @@ class Contratistas extends MY_Controller {
               $this->datatables->join('con_regimenes r', 'r.regi_id = c.cont_regimenid', 'left');
               $this->datatables->join('con_tiposcontratistas t', 't.tpco_id = c.cont_tipocontratistaid', 'left');
 
-              if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/edit')) {
-                  
-                  $this->datatables->add_column('edit', '<div class="btn-toolbar">
-                                                           <div class="btn-group">
-                                                              <a href="'.base_url().'index.php/contratistas/edit/$1" class="btn btn-default btn-xs" title="Editar contratista"><i class="fa fa-pencil-square-o"></i></a>
-                                                           </div>
-                                                         </div>', 'c.cont_id');
-
-              }  else {
-                  
-                  $this->datatables->add_column('edit', '', 'c.cont_id'); 
-              }
               
               echo $this->datatables->generate();
 
