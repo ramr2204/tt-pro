@@ -1806,9 +1806,9 @@ class Ion_auth_model extends CI_Model
 		$validate=FALSE;
 		$this->db->select('usme_id');
         $this->db->from('adm_usuarios_menus um');
-        $this->db->join('adm_menus m',"m.menu_id=um.usme_menuid and m.menu_ruta="."'".$check_menu."' and m.menu_estadoid=1",'inner');
+        $this->db->join('adm_menus me',"me.menu_id=um.usme_menuid and me.menu_ruta="."'".$check_menu."' and me.menu_estadoid=1",'inner');
         $this->db->join('users u','u.id=um.usme_usuarioid and u.id='.$id.' and u.active=1','inner');
-        $this->db->join('adm_modulos mo','mo.modu_id=m.menu_moduloid and mo.modu_estadoid=1 and u.active=1','inner');
+        $this->db->join('adm_modulos mo','mo.modu_id=me.menu_moduloid and mo.modu_estadoid=1 and u.active=1','inner');
         $this->db->join('adm_aplicaciones a','a.apli_id=mo.modu_aplicacionid and a.apli_estadoid=1 and u.active=1','inner');
         $this->db->join('adm_procesos p','p.proc_id=a.apli_procesoid and p.proc_estadoid=1 and u.active=1','inner');
         $validate = ($this->db->count_all_results()===1) ? TRUE : FALSE ;
@@ -1820,20 +1820,20 @@ public function get_menus($id = 0)
 	{
         if ($id!=0) {
         	if ($this->ion_auth->is_admin()) {
-        		$this->db->select('p.proc_id, p.proc_nombre, a.apli_id, a.apli_nombre, a.apli_procesoid, mo.modu_id, mo.modu_nombre, mo.modu_aplicacionid, m.menu_id, m.menu_nombre, m.menu_moduloid, m.menu_ruta');
-                $this->db->from('adm_menus m');
+        		$this->db->select('p.proc_id, p.proc_nombre, a.apli_id, a.apli_nombre, a.apli_procesoid, mo.modu_id, mo.modu_nombre, mo.modu_aplicacionid, me.menu_id, me.menu_nombre, me.menu_moduloid, me.menu_ruta');
+                $this->db->from('adm_menus me');
                 $this->db->join('users u','u.id=u.id and u.id='.$id.' and u.active=1','inner');
-                $this->db->join('adm_modulos mo','mo.modu_id=m.menu_moduloid and mo.modu_estadoid=1','inner');
+                $this->db->join('adm_modulos mo','mo.modu_id=me.menu_moduloid and mo.modu_estadoid=1','inner');
                 $this->db->join('adm_aplicaciones a','a.apli_id=mo.modu_aplicacionid and a.apli_estadoid=1','inner');
                 $this->db->join('adm_procesos p','p.proc_id=a.apli_procesoid and p.proc_estadoid=1','inner');
 
         	} else {	
 
-                $this->db->select('p.proc_id, p.proc_nombre, a.apli_id, a.apli_nombre, a.apli_procesoid, mo.modu_id, mo.modu_nombre, mo.modu_aplicacionid, m.menu_id, m.menu_nombre, m.menu_moduloid, m.menu_ruta');
+                $this->db->select('p.proc_id, p.proc_nombre, a.apli_id, a.apli_nombre, a.apli_procesoid, mo.modu_id, mo.modu_nombre, mo.modu_aplicacionid, me.menu_id, me.menu_nombre, me.menu_moduloid, me.menu_ruta');
                 $this->db->from('adm_usuarios_menus um');
-                $this->db->join('adm_menus m',"m.menu_id=um.usme_menuid and m.menu_estadoid=1",'inner');
+                $this->db->join('adm_menus me',"me.menu_id=um.usme_menuid and me.menu_estadoid=1",'inner');
                 $this->db->join('users u','u.id=um.usme_usuarioid and u.id='.$id.' and u.active=1','inner');
-                $this->db->join('adm_modulos mo','mo.modu_id=m.menu_moduloid and mo.modu_estadoid=1 and u.active=1','inner');
+                $this->db->join('adm_modulos mo','mo.modu_id=me.menu_moduloid and mo.modu_estadoid=1 and u.active=1','inner');
                 $this->db->join('adm_aplicaciones a','a.apli_id=mo.modu_aplicacionid and a.apli_estadoid=1 and u.active=1','inner');
                 $this->db->join('adm_procesos p','p.proc_id=a.apli_procesoid and p.proc_estadoid=1 and u.active=1','inner');
 
