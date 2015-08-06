@@ -490,23 +490,28 @@ class Contratos extends MY_Controller {
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/manage') ) { 
               
-              $this->load->library('datatables');
+            /*
+            * Se Valida si el usuario tiene la opcion de editar contratos
+            * para renderizar el boton de editar
+            */ 
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/edit')) 
+            {                  
+                $this->load->library('datatables');
+                $this->datatables->add_column('edit', '<div class="btn-toolbar">
+                    <div class="btn-group">
+                    <a href="'.base_url().'index.php/contratos/edit/$1" class="btn btn-default btn-xs agrega" title="Editar contrato" id="$1"><i class="fa fa-pencil-square-o"></i></a>
+                    </div>
+                    </div>', 'c.cntr_id');
+            }else 
+                {
+                    $this->load->library('datatables');
+                    $this->datatables->add_column('edit', '', 'c.cntr_id'); 
+                }
+              
               $this->datatables->select('c.cntr_id,c.cntr_numero,co.cont_nit,co.cont_nombre,c.cntr_fecha_firma,c.cntr_objeto,c.cntr_valor,c.cntr_vigencia');
               $this->datatables->from('con_contratos c');
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
 
-              if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/edit')) {
-                  
-                  $this->datatables->add_column('edit', '<div class="btn-toolbar">
-                                                           <div class="btn-group">
-                                                              <a href="'.base_url().'index.php/contratos/edit/$1" class="btn btn-default btn-xs agrega" title="Editar contrato" id="$1"><i class="fa fa-pencil-square-o"></i></a>
-                                                           </div>
-                                                         </div>', 'c.cntr_id');
-
-              }  else {
-                  
-                  $this->datatables->add_column('edit', '', 'c.cntr_id'); 
-              }
               
               echo $this->datatables->generate();
 
