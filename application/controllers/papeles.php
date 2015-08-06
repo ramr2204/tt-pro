@@ -512,17 +512,41 @@ class Papeles extends MY_Controller {
             /*
             * Valida si los codigos inicial y final suministrados para reasignar
             * se encuentran en el rango de codigos disponibles
+            * y valida que el codigo inicial suministrado sea igual al codigo
+            * inicial disponible para re-asignar
             */
             if(($codigofinal <= $rangoOriginal[0]->pape_codigofinal) && ($codigofinal >= $rotuloInicialDisponible))
             {
                 if(($codigoinicial <= $rangoOriginal[0]->pape_codigofinal) && ($codigoinicial >= $rotuloInicialDisponible))
                 {
                     /*
-                    * Se calcula la cantidad de posibles rotulos restantes
-                    * para saber si es mayor a cero, crear un Rango restante
-                    * y asignarlo al liquidador que entrega
-                    */            
-                    $rotulosRestantes = $cantidadNetaDisponible - $cantidadNetaReasignar;
+                    * Valida que el rotulo final suministrado sea mayor o igual
+                    * al rotulo inicial suministrado
+                    */
+                    if($codigofinal >= $codigoinicial)
+                    {
+                        /*
+                        * Valida que el codigo inicial suministrado sea igual
+                        * al codigo inicial disponible
+                        */
+                        if($codigoinicial == $rotuloInicialDisponible)
+                        {
+                            /*
+                            * Se calcula la cantidad de posibles rotulos restantes
+                            * para saber si es mayor a cero, crear un Rango restante
+                            * y asignarlo al liquidador que entrega
+                            */            
+                            $rotulosRestantes = $cantidadNetaDisponible - $cantidadNetaReasignar;
+                        }else
+                            {
+                                $this->session->set_flashdata('errormessage','El Codigo Inicial Suminstrado No Puede Ser Distinto al Codigo Inicial del Rango Disponible! ('.$rotuloInicialDisponible.'-'.$rangoOriginal[0]->pape_codigofinal.')');
+                                redirect(base_url().'index.php/papeles/getReassign');
+                            }
+                    }else
+                        {
+                            $this->session->set_flashdata('errormessage','El Codigo Final Suminstrado No Puede Ser Menor que el Codigo Inicial Suminstrado!');
+                            redirect(base_url().'index.php/papeles/getReassign');
+                        }
                 }else
                     {
                         $this->session->set_flashdata('errormessage','El Codigo Inicial Suminstrado No se encuentra dentro del Rango Disponible a Re-Asingar! ('.$rotuloInicialDisponible.'-'.$rangoOriginal[0]->pape_codigofinal.')');
@@ -533,6 +557,16 @@ class Papeles extends MY_Controller {
                     $this->session->set_flashdata('errormessage','El Codigo Final Suminstrado No se encuentra dentro del Rango Disponible a Re-Asingar! ('.$rotuloInicialDisponible.'-'.$rangoOriginal[0]->pape_codigofinal.')');
                     redirect(base_url().'index.php/papeles/getReassign');                    
                 }
+
+            /*
+            * Valida que la cantidad suministrada de rotulos a re-asignar
+            * sea valida
+            */             
+            if($cantidad != $cantidadNetaReasignar)
+            {
+                $this->session->set_flashdata('errormessage','La Cantidad Suminstrada para Re-Asignar No corresponde a la Cantidad de Rotulos en el Rango Suminstrado para Re-Asingar! ('.$codigoinicial.'-'.$codigofinal.')');
+                redirect(base_url().'index.php/papeles/getReassign'); 
+            }
             
             echo $rotulosRestantes;exit();
 
@@ -550,15 +584,11 @@ class Papeles extends MY_Controller {
                 }                                            
             }else
                 {
-                    //valida si el codigo inicial del rango re-asignado
-                    //es igual al codigo inicial del rango original
-                    //si es igual (resta == 0) se debe eliminar el registro original
-                    //porque ya no tendria asignada papeleria el que entrega,
-                    //si no es igual se actualiza el codigo final y la cantidad
-                    //en el rango original para dejar registro de la papeleria
-                    //que utilizó            
-                    $cantidadRestante = (int)$codigoinicial-(int)$rangoOriginal[0]->pape_codigoinicial;
-
+                    /*
+                    * Si la cantidad de rotulos restantes es mayor que cero se crea
+                    * un registro con el fragmento de rotulos restantes al liquidador
+                    * que entrega los rotulos
+                    */
                     if($cantidadRestante > 0)
                     {
                         //modifica el rango original del liquidador que entrega                                      
