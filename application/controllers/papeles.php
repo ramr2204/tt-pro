@@ -418,6 +418,11 @@ class Papeles extends MY_Controller {
                                $this->input->post('codigoinicial'), 
                                $this->input->post('codigofinal'),
                                $this->input->post('newResponsablePapel'));                            
+                            
+                            $obsRotulosReasignados = 'Rotulos Re-Asignados del Usuario '
+                                .$this->input->post('oldResponsablePapel')
+                                .'comprendidos en el Rango ('.$this->input->post('codigoinicial')
+                                .'-'.$this->input->post('codigofinal');
 
                             $data = array(
                                       'pape_usuario' => $this->input->post('docuNewResponsable'),
@@ -565,22 +570,39 @@ class Papeles extends MY_Controller {
             {
                 $this->session->set_flashdata('errormessage','La Cantidad Suminstrada para Re-Asignar No corresponde a la Cantidad de Rotulos en el Rango Suminstrado para Re-Asingar! ('.$codigoinicial.'-'.$codigofinal.')');
                 redirect(base_url().'index.php/papeles/getReassign'); 
-            }
-            
-            echo $rotulosRestantes;exit();
+            }                        
 
             /*
             * Valida si quedan rotulos restantes o no
             */
             if($rotulosRestantes == 0)
             {                                                               
-                //valida si los codigos a re-asignar son iguales a los
-                //codigos del rango, entonces se borrará
-                //el registro para el liquidador que entrega
+                /*
+                * valida si los codigos a re-asignar son iguales a los
+                * codigos del rango, entonces se borrará
+                * el registro para el liquidador que entrega
+                */
                 if($rangoOriginal[0]->pape_codigoinicial == $codigoinicial && $rangoOriginal[0]->pape_codigofinal == $codigofinal)
                 {                                     
                      $this->codegen_model->delete('est_papeles', 'pape_id', $idRango);
-                }                                            
+                }else
+                    {
+                        /*
+                        * Se Modifica la Informacion del rango original para 
+                        * ajustar el codigo final, la cantidad y se especifica
+                        * en las observaciones el cambio de valores por re-asignacion
+                        */
+                        $obsOriginal = $rangoOriginal[0]->pape_observaciones.'. Se Modificó el Codigo Final y la Cantidad de Rotulos'
+                            .'del Rango Previo ('.$rangoOriginal[0]->pape_codigoinicial.'-'.$rangoOriginal[0]->pape_codigofinal
+                            .') por Reasignación de Rotulos al Usuario '.$newResponsablePapel.' comprendidos en el Rango ('
+                            .$codigoinicial.'-'.$codigofinal.')';
+                        
+                        $this->codegen_model->edit('est_papeles',
+                            ['pape_cantidad'=>$rotulosImpresos,
+                            'pape_codigofinal'=>(int)$codigoinicial-1,
+                            'pape_observaciones'=>$obsOriginal],
+                            'pape_id', $idRango);
+                    }                                       
             }elseif($rotulosRestantes > 0)
                 {
                     /*
@@ -590,14 +612,14 @@ class Papeles extends MY_Controller {
                     */                   
                     $codigoInicialFragmento = (int)$codigofinal+1;                    
 
-                    $observaciones = 'Fragmento restante de la re-asignación del rango '
+                    $observacionesFragmento = 'Fragmento restante de la re-asignación del rango '
                         .$codigoinicial.'-'.$codigofinal.' al liquidador '.$newResponsablePapel;
 
                     $data = array(
                               'pape_usuario' => $docuOldResponsable,
                               'pape_codigoinicial' => $codigoInicialFragmento,
                               'pape_codigofinal' => $rangoOriginal[0]->pape_codigofinal,
-                              'pape_observaciones' => $observaciones,      
+                              'pape_observaciones' => $observacionesFragmento,      
                               'pape_cantidad' => $rotulosRestantes,
                               'pape_fecha' => date('Y-m-d H:i:s'),
                               'pape_estado'=> 1,
@@ -610,16 +632,16 @@ class Papeles extends MY_Controller {
                     * ajustar el codigo final, la cantidad y se especifica
                     * en las observaciones el cambio de valores por re-asignacion
                     */
-                    $obsFragmento = $rangoOriginal[0]->pape_observaciones.' Se Modificó el Codigo Final y la Cantidad de Rotulos'
+                    $obsOriginal = $rangoOriginal[0]->pape_observaciones.'. Se Modificó el Codigo Final y la Cantidad de Rotulos'
                         .'del Rango Previo ('.$rangoOriginal[0]->pape_codigoinicial.'-'.$rangoOriginal[0]->pape_codigofinal
                         .') por Reasignación de Rotulos al Usuario '.$newResponsablePapel.' comprendidos en el Rango ('
-                        .$codigoinicial.'-'.$codigofinal;
+                        .$codigoinicial.'-'.$codigofinal.')';
                     
-                        $this->codegen_model->edit('est_papeles',
-                        ['pape_cantidad'=>$cantidadRestante, 
-                        'pape_codigofinal'=>(int)$codigoinicial-1],
-                        'pape_id', $idRango); 
-
+                    $this->codegen_model->edit('est_papeles',
+                        ['pape_cantidad'=>$rotulosImpresos,
+                        'pape_codigofinal'=>(int)$codigoinicial-1,
+                        'pape_observaciones'=>$obsOriginal],
+                        'pape_id', $idRango);
                 }
           } else {
               redirect(base_url().'index.php/error_404');
@@ -629,8 +651,6 @@ class Papeles extends MY_Controller {
               redirect(base_url().'index.php/users/login');
       }  
   }
-
-
 
   //Función que extrae el rango disponible del liquidador
   //al que se le retirará papeleria y se reasignará a 
