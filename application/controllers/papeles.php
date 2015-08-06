@@ -421,14 +421,15 @@ class Papeles extends MY_Controller {
                             
                             $obsRotulosReasignados = 'Rotulos Re-Asignados del Usuario '
                                 .$this->input->post('oldResponsablePapel')
-                                .'comprendidos en el Rango ('.$this->input->post('codigoinicial')
-                                .'-'.$this->input->post('codigofinal');
+                                .' comprendidos en el Rango ('.$this->input->post('codigoinicial')
+                                .'-'.$this->input->post('codigofinal').')'
+                                .'. '.$this->input->post('observaciones');
 
                             $data = array(
                                       'pape_usuario' => $this->input->post('docuNewResponsable'),
                                       'pape_codigoinicial' => $this->input->post('codigoinicial'),
                                       'pape_codigofinal' => $this->input->post('codigofinal'),
-                                      'pape_observaciones' => $this->input->post('observaciones'),      
+                                      'pape_observaciones' => $obsRotulosReasignados,      
                                       'pape_cantidad' => $this->input->post('cantidad'),
                                       'pape_fecha' => date('Y-m-d H:i:s'),
                                       'pape_estado'=> 1,
@@ -502,10 +503,10 @@ class Papeles extends MY_Controller {
 
             /*
             * Se calcula el numero de rotulo inicial del rango disponible
-            * incrementando en 1 la cantidad de rotulos impresos del rango original.
+            * sumando al codigo inicial del rango original la cantidad de rotulos impresos.
             * Nota: el rotulo final disponible siempre será el rotulo final del rango original
             */
-            $rotuloInicialDisponible = (int)$rotulosImpresos->contador + 1;
+            $rotuloInicialDisponible = (int)$rotulosImpresos->contador + (int)$rangoOriginal[0]->pape_codigoinicial;
             
             /*
             * Se calcula la cantidad Neta a reasignar segun el rango
@@ -543,22 +544,22 @@ class Papeles extends MY_Controller {
                             $rotulosRestantes = $cantidadNetaDisponible - $cantidadNetaReasignar;
                         }else
                             {
-                                $this->session->set_flashdata('errormessage','El Codigo Inicial Suminstrado No Puede Ser Distinto al Codigo Inicial del Rango Disponible! ('.$rotuloInicialDisponible.'-'.$rangoOriginal[0]->pape_codigofinal.')');
+                                $this->session->set_flashdata('errormessage','El Codigo Inicial Suministrado No Puede Ser Distinto al Codigo Inicial del Rango Disponible! ('.$rotuloInicialDisponible.'-'.$rangoOriginal[0]->pape_codigofinal.')');
                                 redirect(base_url().'index.php/papeles/getReassign');
                             }
                     }else
                         {
-                            $this->session->set_flashdata('errormessage','El Codigo Final Suminstrado No Puede Ser Menor que el Codigo Inicial Suminstrado!');
+                            $this->session->set_flashdata('errormessage','El Codigo Final Suministrado No Puede Ser Menor que el Codigo Inicial Suminstrado!');
                             redirect(base_url().'index.php/papeles/getReassign');
                         }
                 }else
                     {
-                        $this->session->set_flashdata('errormessage','El Codigo Inicial Suminstrado No se encuentra dentro del Rango Disponible a Re-Asingar! ('.$rotuloInicialDisponible.'-'.$rangoOriginal[0]->pape_codigofinal.')');
+                        $this->session->set_flashdata('errormessage','El Codigo Inicial Suministrado No se encuentra dentro del Rango Disponible a Re-Asingar! ('.$rotuloInicialDisponible.'-'.$rangoOriginal[0]->pape_codigofinal.')');
                         redirect(base_url().'index.php/papeles/getReassign');
                     }
             }else
                 {
-                    $this->session->set_flashdata('errormessage','El Codigo Final Suminstrado No se encuentra dentro del Rango Disponible a Re-Asingar! ('.$rotuloInicialDisponible.'-'.$rangoOriginal[0]->pape_codigofinal.')');
+                    $this->session->set_flashdata('errormessage','El Codigo Final Suministrado No se encuentra dentro del Rango Disponible a Re-Asingar! ('.$rotuloInicialDisponible.'-'.$rangoOriginal[0]->pape_codigofinal.')');
                     redirect(base_url().'index.php/papeles/getReassign');                    
                 }
 
@@ -583,7 +584,7 @@ class Papeles extends MY_Controller {
                 * el registro para el liquidador que entrega
                 */
                 if($rangoOriginal[0]->pape_codigoinicial == $codigoinicial && $rangoOriginal[0]->pape_codigofinal == $codigofinal)
-                {                                     
+                {                                    
                      $this->codegen_model->delete('est_papeles', 'pape_id', $idRango);
                 }else
                     {
@@ -592,13 +593,13 @@ class Papeles extends MY_Controller {
                         * ajustar el codigo final, la cantidad y se especifica
                         * en las observaciones el cambio de valores por re-asignacion
                         */
-                        $obsOriginal = $rangoOriginal[0]->pape_observaciones.'. Se Modificó el Codigo Final y la Cantidad de Rotulos'
+                        $obsOriginal = $rangoOriginal[0]->pape_observaciones.'. Se Modificó el Codigo Final y la Cantidad de Rotulos '
                             .'del Rango Previo ('.$rangoOriginal[0]->pape_codigoinicial.'-'.$rangoOriginal[0]->pape_codigofinal
                             .') por Reasignación de Rotulos al Usuario '.$newResponsablePapel.' comprendidos en el Rango ('
                             .$codigoinicial.'-'.$codigofinal.')';
                         
                         $this->codegen_model->edit('est_papeles',
-                            ['pape_cantidad'=>$rotulosImpresos,
+                            ['pape_cantidad'=>$rotulosImpresos->contador,
                             'pape_codigofinal'=>(int)$codigoinicial-1,
                             'pape_observaciones'=>$obsOriginal],
                             'pape_id', $idRango);
@@ -632,13 +633,13 @@ class Papeles extends MY_Controller {
                     * ajustar el codigo final, la cantidad y se especifica
                     * en las observaciones el cambio de valores por re-asignacion
                     */
-                    $obsOriginal = $rangoOriginal[0]->pape_observaciones.'. Se Modificó el Codigo Final y la Cantidad de Rotulos'
+                    $obsOriginal = $rangoOriginal[0]->pape_observaciones.'. Se Modificó el Codigo Final y la Cantidad de Rotulos '
                         .'del Rango Previo ('.$rangoOriginal[0]->pape_codigoinicial.'-'.$rangoOriginal[0]->pape_codigofinal
                         .') por Reasignación de Rotulos al Usuario '.$newResponsablePapel.' comprendidos en el Rango ('
                         .$codigoinicial.'-'.$codigofinal.')';
                     
                     $this->codegen_model->edit('est_papeles',
-                        ['pape_cantidad'=>$rotulosImpresos,
+                        ['pape_cantidad'=>$rotulosImpresos->contador,
                         'pape_codigofinal'=>(int)$codigoinicial-1,
                         'pape_observaciones'=>$obsOriginal],
                         'pape_id', $idRango);
