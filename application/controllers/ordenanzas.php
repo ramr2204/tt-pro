@@ -280,11 +280,13 @@ class Ordenanzas extends MY_Controller {
               $this->load->library('datatables'); 
               $this->datatables->select('orde_id,orde_numero,orde_fecha,orde_iniciovigencia,orde_rutadocumento');
               $this->datatables->from('est_ordenanzas');
+              $this->datatables->edit_column('orde_rutadocumento','<a href="'.base_url().'$1" target="_blank"><img src="'.base_url().'$1" class="file-preview-image" alt="ordenanza" title="ordenanza" height="120mm"></a>','orde_rutadocumento');
+
               $this->datatables->add_column('edit', '<div class="btn-toolbar">'
                         .'<div class="btn-group text-center">'
-                        .'<a href="'.base_url().'index.php/contratistas/edit/$1" class="btn btn-default btn-xs" title="Ver"><i class="fa fa-search"></i> Ver</a>'
+                        .'<a href="'.base_url().'index.php/contratistas/edit/$1" class="btn btn-default btn-xs" title="Ver Detalles"><i class="fa fa-search"></i> Ver</a>'
                         .'</div>'
-                        .'</div>', 'c.cont_id');
+                        .'</div>', 'orde_id');
               echo $this->datatables->generate();
             }else
                 {

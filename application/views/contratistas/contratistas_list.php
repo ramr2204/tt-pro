@@ -3,13 +3,12 @@
 /**
 *   Nombre:            admin template
 *   Ruta:              /application/views/contratistas/contratistas_list.php
-*   Descripcion:       tabla que mustra todos los contratistas existentes
+*   Descripcion:       tabla que muestra todos los contratistas existentes
 *   Fecha Creacion:    20/may/2014
 *   @author           Iván Viña <ivandariovinam@gmail.com>
 *   @version          2014-05-20
 *
 */
-
 ?>
 
 <script type="text/javascript" language="javascript" charset="utf-8">
