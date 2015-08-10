@@ -9,7 +9,7 @@
 *
 */
 
-class Ordenanzas extends MY_Controller {
+class Items extends MY_Controller {
     
   function __construct() 
   {
@@ -39,7 +39,7 @@ class Ordenanzas extends MY_Controller {
                 $this->data['errormessage']=$this->session->flashdata('errormessage');
                 $this->data['infomessage']=$this->session->flashdata('infomessage');
                 //template data
-                $this->template->set('title', 'Administrar Ordenanzas');
+                $this->template->set('title', 'Administrar Items');
                 $this->data['style_sheets']= array(
                             'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
                         );
@@ -48,7 +48,7 @@ class Ordenanzas extends MY_Controller {
                         'js/plugins/dataTables/dataTables.bootstrap.js',
                         'js/jquery.dataTables.defaults.js'
                        );            
-                $this->template->load($this->config->item('admin_template'),'ordenanzas/ordenanzas_list', $this->data);
+                $this->template->load($this->config->item('admin_template'),'items/items_list', $this->data);
             }else 
                 {
                     redirect(base_url().'index.php/error_404');
@@ -69,17 +69,8 @@ class Ordenanzas extends MY_Controller {
             if ($this->ion_auth->is_admin()) 
             {
                 $this->data['successmessage'] = $this->session->flashdata('message');             
-                $this->template->set('title', 'Nueva Ordenanza');
-                $this->data['style_sheets'] = array(
-                        'css/chosen.css' => 'screen'
-                    );
-                $this->data['javascripts']= array(
-                        'js/chosen.jquery.min.js'
-                    );
-                $this->data['municipios']  = $this->codegen_model->getMunicipios();
-                $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
-                $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
-                $this->template->load($this->config->item('admin_template'),'contratistas/contratistas_add', $this->data);             
+                $this->template->set('title', 'Nuevo Item');                            
+                $this->template->load($this->config->item('admin_template'),'items/items_add', $this->data);             
             }else 
                 {
                     redirect(base_url().'index.php/error_404');
@@ -88,83 +79,107 @@ class Ordenanzas extends MY_Controller {
             {
                 redirect(base_url().'index.php/users/login');
             }
-
   }	
 
-  /*
-  * Funcion que administra el registro de una
-  * nueva ordenanza
-  */
-  function save()
-  {
+    /*
+    * Funcion que administra el registro de una
+    * nueva ordenanza
+    */
+    function save()
+    {
         if ($this->ion_auth->logged_in()) 
         {
             if ($this->ion_auth->is_admin()) 
             {
                 $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
-                $this->form_validation->set_rules('nit', 'NIT', 'required|numeric|trim|xss_clean|max_length[100]|is_unique[con_contratistas.cont_nit]');   
-                $this->form_validation->set_rules('telefono', 'Telefono', 'numeric|trim|xss_clean|max_length[15]');
-                $this->form_validation->set_rules('direccion', 'Dirección', 'trim|xss_clean|max_length[256]');
-                $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
-                $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
-                $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|greater_than[0]'); 
+                $this->form_validation->set_rules('tabla', 'Tabla', 'required|trim|xss_clean|max_length[128]');   
+                $this->form_validation->set_rules('key', 'Key', 'required|trim|xss_clean|max_length[128]');                
 
-                  if ($this->form_validation->run() == false) {
-
-                  $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
-              } else {    
-
-                  $data = array(
-                        'cont_nombre' => $this->input->post('nombre'),
-                        'cont_tipocontratistaid' => $this->input->post('tipocontratistaid'),
-                        'cont_nit' => $this->input->post('nit'),
-                        'cont_direccion' => $this->input->post('direccion'),
-                        'cont_municipioid' => $this->input->post('municipioid'),
-                        'cont_regimenid' => $this->input->post('regimenid'),
-                        'cont_telefono' => $this->input->post('telefono'),
-                        'cont_fecha' => date('Y-m-d')
-
-                     );
+                if ($this->form_validation->run() == false) 
+                {                    
+                    $this->session->set_flashdata('errormessage', (validation_errors() ? validation_errors(): false));
+                    redirect(base_url().'index.php/items/add');
+                }else 
+                    {    
+                        $data = array(
+                            'itod_nombre' => $this->input->post('nombre'),
+                            'itod_tabla' => $this->input->post('tabla'),
+                            'itod_campoid' => $this->input->post('key'),
+                            'itod_descripcion' => $this->input->post('descripcion')                            
+                           );
                  
-                        if ($this->codegen_model->add('con_contratistas',$data) == TRUE) {
-
-                      $this->session->set_flashdata('message', 'El contratista se ha creado con éxito');
-                      redirect(base_url().'index.php/contratistas/add');
-                        } else {
-
-                              $this->data['errormessage'] = 'No se pudo registrar el contratista';
-
-                        }
-
-                  }
-            }else 
-                    {
-                        redirect(base_url().'index.php/error_404');
+                        if ($this->codegen_model->add('est_itemordenanza',$data) == TRUE) 
+                        {
+                            $this->session->set_flashdata('message', 'El Item se ha creado con éxito');
+                            redirect(base_url().'index.php/items/add');
+                        }else 
+                            {
+                            	$this->session->set_flashdata('errormessage', 'No se pudo registrar el Item');
+                                redirect(base_url().'index.php/items/add');                                
+                            }
                     }
+            }else 
+                {
+                    redirect(base_url().'index.php/error_404');
+                }
         }else
             {
                 redirect(base_url().'index.php/users/login');
             }
+    }
+
+    
+    /*
+    * Funcion que renderiza la vista para editar
+    * el item especificado
+    */
+	function edit()
+    {    
+        if ($this->ion_auth->logged_in()) 
+        {
+            if ($this->ion_auth->is_admin()) 
+            {  
+                $idItem = $this->uri->segment(3);
+                /*
+                * Valida que llegue 
+                */
+                if ($idItem == '')
+                {
+                    $this->session->set_flashdata('infomessage', 'Debe elegir un Item para editar');
+                    redirect(base_url().'index.php/items');
+                }
+
+                /*
+                * Valida que el item exista
+                */
+                $this->data['item'] = $this->codegen_model->get('est_itemordenanza','itod_id,itod_nombre,itod_tabla,itod_campoid,itod_descripcion','itod_id = '.$idItem,1,NULL,true);
+                if(count($this->data['item']) <= 0)
+                {
+                    $this->session->set_flashdata('errormessage', 'No existe el Item Suministrado!');
+                    redirect(base_url().'index.php/items');
+                }else
+                    {
+                        $this->data['successmessage'] = $this->session->flashdata('successmessage');                                                                
+                        $this->template->set('title', 'Editar Item');
+                        $this->template->load($this->config->item('admin_template'),'items/items_edit', $this->data);
+                    }                
+            }else 
+                {
+                    redirect(base_url().'index.php/error_404');
+                }
+        }else 
+            {
+                redirect(base_url().'index.php/users/login');
+            }       
   }
 
-
-	function edit()
-  {    
-      if ($this->ion_auth->logged_in()) {
-
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/edit')) {  
-
-              $idregimen = ($this->uri->segment(3)) ? $this->uri->segment(3) : $this->input->post('id') ;
-              if ($idregimen==''){
-                  $this->session->set_flashdata('infomessage', 'Debe elegir un contratista para editar');
-                  redirect(base_url().'index.php/contratistas');
-              }
-              $resultado = $this->codegen_model->get('con_contratistas','cont_nit','cont_id = '.$idregimen,1,NULL,true);
-       
-              foreach ($resultado as $key => $value) {
-                  $aplilo[$key]=$value;
-              }
-             
+    /*
+    * Funcion que administra la modificacion del item
+    * especificado
+    */
+    function update()
+    {
+        
               if ($aplilo['cont_nit']==$this->input->post('nit')) {
                   
                   $this->form_validation->set_rules('nit', 'NIT', 'required|trim|xss_clean|max_length[100]');
@@ -181,7 +196,7 @@ class Ordenanzas extends MY_Controller {
               $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
               $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|greater_than[0]');   
 
-              if ($this->form_validation->run() == false) {
+                 if ($this->form_validation->run() == false) {
                   
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);
                             
@@ -208,30 +223,9 @@ class Ordenanzas extends MY_Controller {
                       $this->data['errormessage'] = 'No se pudo registrar el aplilo';
 
                 	}
-              }   
-                  $this->data['style_sheets']= array(
-                        'css/chosen.css' => 'screen'
-                        );
-                  $this->data['javascripts']= array(
-                        'js/chosen.jquery.min.js'
-                        );    
-                  $this->data['successmessage']=$this->session->flashdata('successmessage');
-                  $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                	$this->data['result'] = $this->codegen_model->get('con_contratistas','cont_id,cont_nombre,cont_nit,cont_direccion,cont_telefono,cont_municipioid,cont_regimenid,cont_tributarioid, cont_tipocontratistaid','cont_id = '.$idregimen,1,NULL,true);
-                  $this->data['municipios']  = $this->codegen_model->getMunicipios();
-                  $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
-                  $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
-                  $this->template->set('title', 'Editar contratista');
-                  $this->template->load($this->config->item('admin_template'),'contratistas/contratistas_edit', $this->data);
-                        
-          }else {
-              redirect(base_url().'index.php/error_404');
-          }
-      } else {
-          redirect(base_url().'index.php/users/login');
-      }
-        
-  }
+              }
+              $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
+    }
 	
   function delete()
   {
@@ -291,7 +285,7 @@ class Ordenanzas extends MY_Controller {
     
     /*
     * Funcion de apoyo que renderiza la datatable
-    * de la informacion principal de la ordenanza
+    * de los items para ordenanzas
     */
     function datatable ()
     {
@@ -300,15 +294,13 @@ class Ordenanzas extends MY_Controller {
             if ($this->ion_auth->is_admin()) 
             {                                 
               $this->load->library('datatables'); 
-              $this->datatables->select('orde_id,orde_numero,orde_fecha,orde_iniciovigencia,orde_rutadocumento');
-              $this->datatables->from('est_ordenanzas');
-              $this->datatables->edit_column('orde_rutadocumento','<a href="'.base_url().'$1" target="_blank"><img src="'.base_url().'$1" class="file-preview-image" alt="ordenanza" title="ordenanza" height="120mm"></a>','orde_rutadocumento');
-
+              $this->datatables->select('itod_id,itod_nombre');
+              $this->datatables->from('est_itemordenanza');
               $this->datatables->add_column('edit', '<div class="btn-toolbar">'
                         .'<div class="btn-group text-center">'
-                        .'<a href="'.base_url().'index.php/contratistas/edit/$1" class="btn btn-default btn-xs" title="Ver Detalles"><i class="fa fa-search"></i> Ver</a>'
+                        .'<a href="'.base_url().'index.php/items/edit/$1" class="btn btn-default btn-xs" title="Editar"><i class="fa fa-pencil-square-o"></i> Editar</a>'
                         .'</div>'
-                        .'</div>', 'orde_id');
+                        .'</div>', 'itod_id');
               echo $this->datatables->generate();
             }else
                 {
