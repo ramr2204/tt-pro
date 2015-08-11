@@ -76,7 +76,7 @@ class Ordenanzas extends MY_Controller {
                 $this->data['javascripts']= array(
                         'js/chosen.jquery.min.js'
                     );
-                $this->data['municipios']  = $this->codegen_model->getMunicipios();
+                $this->data['items']  = $this->codegen_model->getItems();
                 $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
                 $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
                 $this->template->load($this->config->item('admin_template'),'contratistas/contratistas_add', $this->data);             

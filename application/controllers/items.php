@@ -21,7 +21,7 @@ class Items extends MY_Controller {
 	}	
 	
 	function index()
-  {
+    {
 		  $this->manage();
 	}
     
@@ -240,62 +240,6 @@ class Items extends MY_Controller {
             {
                 redirect(base_url().'index.php/users/login');
             }  
-    }
-	
-  function delete()
-  {
-      if ($this->ion_auth->logged_in()) {
-
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/delete')) {  
-              if ($this->input->post('id')==''){
-                  $this->session->set_flashdata('infomessage', 'Debe elegir un contratista para eliminar');
-                  redirect(base_url().'index.php/contratistas');
-              }
-              if (!$this->codegen_model->depend('con_contratos','cntr_contratistaid',$this->input->post('id'))) {
-
-                  $this->codegen_model->delete('con_contratistas','cont_id',$this->input->post('id'));
-                  $this->session->set_flashdata('successmessage', 'El contratista se ha eliminado con éxito');
-                  redirect(base_url().'index.php/contratistas');  
-
-              } else {
-
-                  $this->session->set_flashdata('errormessage', 'El contratista se encuentra en uso, no es posible eliminarlo.');
-                  redirect(base_url().'index.php/contratistas/edit/'.$this->input->post('id'));
-
-              }
-                         
-          } else {
-              redirect(base_url().'index.php/error_404');       
-          } 
-      } else {
-          redirect(base_url().'index.php/users/login');
-      }
-  }
-    
-    function detalles ()
-    {
-        if ($this->ion_auth->logged_in()) 
-        {          
-            if ($this->ion_auth->is_admin()) 
-            {                                 
-              $this->load->library('datatables'); 
-              $this->datatables->select('orde_id,orde_numero,orde_fecha,orde_iniciovigencia,orde_rutadocumento');
-              $this->datatables->from('est_ordenanzas');
-              $this->datatables->add_column('edit', '<div class="btn-toolbar">'
-                        .'<div class="btn-group">'
-                        .'<a href="'.base_url().'index.php/contratistas/edit/$1" class="btn btn-default btn-xs" title="Editar contratista"><i class="fa fa-pencil-square-o"></i></a>'
-                        .'</div>'
-                        .'</div>', 'c.cont_id');
-
-              echo $this->datatables->generate();
-            }else
-                {
-                    redirect(base_url().'index.php/error_404');
-                }               
-        }else
-            {
-                redirect(base_url().'index.php/users/login');
-            }           
     }
     
     /*
