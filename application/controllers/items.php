@@ -141,7 +141,7 @@ class Items extends MY_Controller {
             {  
                 $idItem = $this->uri->segment(3);
                 /*
-                * Valida que llegue 
+                * Valida que llegue id del item
                 */
                 if ($idItem == '')
                 {
@@ -179,52 +179,67 @@ class Items extends MY_Controller {
     */
     function update()
     {
-        
-              if ($aplilo['cont_nit']==$this->input->post('nit')) {
-                  
-                  $this->form_validation->set_rules('nit', 'NIT', 'required|trim|xss_clean|max_length[100]');
-              
-              } else {
+    	if ($this->ion_auth->logged_in()) 
+        {
+            if ($this->ion_auth->is_admin()) 
+            {  
+                $idItem = $this->uri->segment(3);
 
-                  $this->form_validation->set_rules('nit', 'NIT', 'required|trim|xss_clean|max_length[100]|is_unique[con_contratistas.cont_nit]');
-              
-              }
-              $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]');   
-              $this->form_validation->set_rules('direccion', 'Dirección', 'trim|xss_clean|max_length[256]');
-              $this->form_validation->set_rules('telefono', 'Telefono', 'numeric|trim|xss_clean|max_length[15]');
-              $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
-              $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
-              $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|greater_than[0]');   
+                /*
+                * Valida que llegue id del item
+                */
+                if ($idItem == '')
+                {
+                    $this->session->set_flashdata('infomessage', 'Debe elegir un Item para editar');
+                    redirect(base_url().'index.php/items');
+                }
 
-                 if ($this->form_validation->run() == false) {
-                  
-                  $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);
-                            
-              } else {                            
-                  
-                  $data = array(
-                        'cont_nombre' => $this->input->post('nombre'),
-                        'cont_nit' => $this->input->post('nit'),
-                        'cont_direccion' => $this->input->post('direccion'),
-                        'cont_municipioid' => $this->input->post('municipioid'),
-                        'cont_regimenid' => $this->input->post('regimenid'),
-                        'cont_telefono' => $this->input->post('telefono'),
-                        'cont_tipocontratistaid' => $this->input->post('tipocontratistaid')
+                /*
+                * Valida que el item exista
+                */
+                $vItem = $this->codegen_model->get('est_itemordenanza','itod_id,itod_nombre,itod_tabla,itod_campoid,itod_descripcion','itod_id = '.$idItem,1,NULL,true);
+                if(count($vItem) <= 0)
+                {
+                    $this->session->set_flashdata('errormessage', 'No existe el Item Suministrado!');
+                    redirect(base_url().'index.php/items');
+                }else
+                    {
+                        $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
+                        $this->form_validation->set_rules('tabla', 'Tabla', 'required|trim|xss_clean|max_length[128]');   
+                        $this->form_validation->set_rules('key', 'Key', 'required|trim|xss_clean|max_length[128]');
+                    	
+                        if($this->form_validation->run() == false) 
+                        {
+                        	$this->session->set_flashdata('errormessage', (validation_errors() ? validation_errors(): false));
+                            redirect(base_url().'index.php/items/edit/$idItem');
+                        }else
+                            {
+                                $data = array(
+                                    'itod_nombre' => $this->input->post('nombre'),
+                                    'itod_tabla' => $this->input->post('tabla'),
+                                    'itod_campoid' => $this->input->post('key'),
+                                    'itod_descripcion' => $this->input->post('descripcion')                            
+                                    );
 
-                     );
-                           
-                	if ($this->codegen_model->edit('con_contratistas',$data,'cont_id',$idregimen) == TRUE) {
-
-                      $this->session->set_flashdata('successmessage', 'El contratista se ha editado con éxito');
-                      redirect(base_url().'index.php/contratistas/edit/'.$idregimen);
-                      
-                	} else {
-                				  
-                      $this->data['errormessage'] = 'No se pudo registrar el aplilo';
-
-                	}
-              }
-              $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
+                	            if($this->codegen_model->edit('est_itemordenanza',$data,'itod_id',$idItem) == TRUE) 
+                	            {           
+                                    $this->session->set_flashdata('successmessage', 'El Item se ha editado con éxito');
+                                    redirect(base_url().'index.php/items/edit/'.$idItem);                                  
+                	            }else
+                	                {                            				 
+                                        $this->session->set_flashdata('errormessage', 'No se Pudo editar el Item.');
+                                        redirect(base_url().'index.php/items/edit/'.$idItem);
+                	                }
+                            }
+                    }              
+            }else 
+                {
+                    redirect(base_url().'index.php/error_404');
+                }
+        }else 
+            {
+                redirect(base_url().'index.php/users/login');
+            }  
     }
 	
   function delete()

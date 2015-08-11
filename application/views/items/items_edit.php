@@ -19,7 +19,7 @@
                            <div class="panel panel-default">
                             <div class="panel-heading"><h1>Editar Item</h1></div>
                              <div class="panel-body">
-                              <?php echo form_open(base_url().'index.php/items/edit/<?php echo $result->itod_id; ?>'); ?>
+                              <?php echo form_open(base_url().'index.php/items/update/'.$item->itod_id); ?>
 
                                     <div class="form-group">
                                            <label for="nombre">Nombre</label>
