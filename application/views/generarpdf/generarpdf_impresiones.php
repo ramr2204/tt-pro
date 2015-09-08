@@ -9,6 +9,8 @@
 *   @version          2015-01-13
 *
 */
+ini_set('memory_limit', '-1');
+ini_set('max_execution_time', 0);
 ?>
 <p><h1 style="text-align: center;">Sistema Estampillas-Pro, Impresiones <?php echo $fecha; ?></h1></p>
 
@@ -52,7 +54,7 @@
         <?php
             $n = 0;
             foreach ($liquidaciones as $liquidacion) 
-            {  
+            {
                 $n++; 
                 $cantRowspan = $liquidacion->cantEstampillas;
                 $totalEstampillas += $liquidacion->cantEstampillas;
@@ -124,7 +126,7 @@
                     echo '</tr>';                        
                 }                
             }   
-                ?>	
+                ?>            
     </tbody>       
 </table>
 

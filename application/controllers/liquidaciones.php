@@ -1648,7 +1648,17 @@ function consultar()
         if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) 
         {             
             $fecha_inicial = $_GET['fecha_I'];
-            $fecha_final = $_GET['fecha_F'];
+
+            /*
+            * Valida si llega la fecha final o no
+            */
+            if(isset($_GET['fecha_F']))
+            {
+                $fecha_final = $_GET['fecha_F'];              
+            }else
+                {
+                    $fecha_final = "";
+                }
             
             /*
             * Valida que lleguen fechas
@@ -1698,7 +1708,7 @@ function consultar()
                     //Extrae los id de las facturas para las que se han hecho impresiones  
                     //y las fechas de las impresiones hechas por el liquidador autenticado
                     $usuario = $this->ion_auth->user()->row();
-                    $where = ' AND p.pape_usuario = '.$usuario->id.' ';              
+                    $where .= ' AND p.pape_usuario = '.$usuario->id.' ';              
                     $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
                 }                  
 
@@ -1721,7 +1731,7 @@ function consultar()
             foreach ($liquidaciones as $liquidacion) 
             {
                 $idLiquidaciones .= $liquidacion->fact_liquidacionid.',';
-            }  
+            }
             $idLiquidaciones .= '0)';
             $whereIn = 'where l.liqu_id in '.$idLiquidaciones;
             $join2 = ' INNER JOIN est_liquidaciones l ON l.liqu_id = f.fact_liquidacionid';                                 
@@ -1847,7 +1857,17 @@ function consultar()
                 //el PDF 
                 ob_end_clean();
                 //Close and output PDF document
-                $pdf->Output('Impresiones.pdf', 'I');
+
+                /*
+                * Valida que fecha llega a la vista para preparar la leyenda
+                */
+                if(isset($fechaUnica) && $fechaUnica != '')
+                {
+                    $pdf->Output('Impresiones_'.date('Y-m-d').'.pdf', 'I');
+                }else
+                    {
+                        $pdf->Output('Impresiones_PERIODO_COMPRENDIDO_ENTRE_LAS_FECHAS_'.$fecha_inicial.'_Y_'.$fecha_final.'.pdf', 'I');                        
+                    }                
 
             }else
                 {   
@@ -2025,10 +2045,9 @@ function consultar()
 function renderizarRangoImpresionesPDF()
 {
     if ($this->ion_auth->logged_in()) 
-    {
-            
+    {            
         if ($this->ion_auth->is_admin()) 
-        { 
+        {
             $fecha_inicial = $_GET['fecha_I'];
             $fecha_final = $_GET['fecha_F'];
             

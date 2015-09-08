@@ -162,7 +162,7 @@ function generarInformeDetallado (e)
     e.preventDefault();  
 
     var fecha = $('#buscarfecha').find(':text').val();
-    
+   
     if(fecha != '')
     {
         window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha);  

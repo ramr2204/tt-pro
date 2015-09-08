@@ -1,15 +1,15 @@
 <?php if( ! defined('BASEPATH') ) exit('No direct script access allowed');
 /**
-*   Nombre:            contratistas
-*   Ruta:              /application/controllers/contratistas.php
-*   Descripcion:       controlador de contratistas
-*   Fecha Creacion:    20/may/2014
-*   @author            Iván Viña <ivandariovinam@gmail.com>
-*   @version           2014-05-20
+*   Nombre:            Ordenanzas
+*   Ruta:              /application/controllers/ordenanzas.php
+*   Descripcion:       controlador de ordenanzas
+*   Fecha Creacion:    10/Ago/2015
+*   @author            Mike Ortiz <engineermikeortiz@gmail.com>
+*   @version           2015-08-10
 *
 */
 
-class Contratistas extends MY_Controller {
+class Ordenanzas extends MY_Controller {
     
   function __construct() 
   {
@@ -24,55 +24,92 @@ class Contratistas extends MY_Controller {
   {
 		  $this->manage();
 	}
-
+    
+    /*
+    * Funcion de apoyo que renderiza vista que contiene
+    * de la informacion principal de la ordenanza
+    */
 	function manage()
-  {
-      if ($this->ion_auth->logged_in()){
-
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/manage')){
-
-              $this->data['successmessage']=$this->session->flashdata('successmessage');
-              $this->data['errormessage']=$this->session->flashdata('errormessage');
-              $this->data['infomessage']=$this->session->flashdata('infomessage');
-              //template data
-              $this->template->set('title', 'Administrar contratistas');
-              $this->data['style_sheets']= array(
+    {
+        if ($this->ion_auth->logged_in())
+        {
+            if ($this->ion_auth->is_admin())
+            {
+                $this->data['successmessage']=$this->session->flashdata('successmessage');
+                $this->data['errormessage']=$this->session->flashdata('errormessage');
+                $this->data['infomessage']=$this->session->flashdata('infomessage');
+                //template data
+                $this->template->set('title', 'Administrar Ordenanzas');
+                $this->data['style_sheets']= array(
                             'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
                         );
-              $this->data['javascripts']= array(
+                $this->data['javascripts']= array(
                         'js/jquery.dataTables.min.js',
                         'js/plugins/dataTables/dataTables.bootstrap.js',
                         'js/jquery.dataTables.defaults.js'
-                       );
-            
-              $this->template->load($this->config->item('admin_template'),'contratistas/contratistas_list', $this->data);
-
-          } else {
-              redirect(base_url().'index.php/error_404');
-          }
-
-      } else {
-              redirect(base_url().'index.php/users/login');
-      }
-
-  }
+                       );            
+                $this->template->load($this->config->item('admin_template'),'ordenanzas/ordenanzas_list', $this->data);
+            }else 
+                {
+                    redirect(base_url().'index.php/error_404');
+                }
+        }else 
+            {
+                redirect(base_url().'index.php/users/login');
+            }
+    }
 	
-  function add()
-  {        
-      if ($this->ion_auth->logged_in()) {
+    /*
+    * Funcion que renderiza la vista para agregar ordenanzas
+    */
+    function add()
+    {        
+        if ($this->ion_auth->logged_in()) 
+        {
+            if ($this->ion_auth->is_admin()) 
+            {
+                $this->data['successmessage'] = $this->session->flashdata('message');             
+                $this->template->set('title', 'Nueva Ordenanza');
+                $this->data['style_sheets'] = array(
+                        'css/chosen.css' => 'screen'
+                    );
+                $this->data['javascripts']= array(
+                        'js/chosen.jquery.min.js'
+                    );
+                $this->data['items']  = $this->codegen_model->getItems();
+                $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
+                $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
+                $this->template->load($this->config->item('admin_template'),'contratistas/contratistas_add', $this->data);             
+            }else 
+                {
+                    redirect(base_url().'index.php/error_404');
+                }
+        }else
+            {
+                redirect(base_url().'index.php/users/login');
+            }
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/add')) {
+  }	
 
-              $this->data['successmessage']=$this->session->flashdata('message');  
-        		  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
-              $this->form_validation->set_rules('nit', 'NIT', 'required|numeric|trim|xss_clean|max_length[100]|is_unique[con_contratistas.cont_nit]');   
-              $this->form_validation->set_rules('telefono', 'Telefono', 'numeric|trim|xss_clean|max_length[15]');
-              $this->form_validation->set_rules('direccion', 'Dirección', 'trim|xss_clean|max_length[256]');
-              $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
-              $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
-              $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|greater_than[0]'); 
+  /*
+  * Funcion que administra el registro de una
+  * nueva ordenanza
+  */
+  function save()
+  {
+        if ($this->ion_auth->logged_in()) 
+        {
+            if ($this->ion_auth->is_admin()) 
+            {
+                $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
+                $this->form_validation->set_rules('nit', 'NIT', 'required|numeric|trim|xss_clean|max_length[100]|is_unique[con_contratistas.cont_nit]');   
+                $this->form_validation->set_rules('telefono', 'Telefono', 'numeric|trim|xss_clean|max_length[15]');
+                $this->form_validation->set_rules('direccion', 'Dirección', 'trim|xss_clean|max_length[256]');
+                $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
+                $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
+                $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|greater_than[0]'); 
 
-              if ($this->form_validation->run() == false) {
+                  if ($this->form_validation->run() == false) {
 
                   $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
               } else {    
@@ -89,39 +126,26 @@ class Contratistas extends MY_Controller {
 
                      );
                  
-    			        if ($this->codegen_model->add('con_contratistas',$data) == TRUE) {
+                        if ($this->codegen_model->add('con_contratistas',$data) == TRUE) {
 
                       $this->session->set_flashdata('message', 'El contratista se ha creado con éxito');
                       redirect(base_url().'index.php/contratistas/add');
-    			        } else {
+                        } else {
 
-    				          $this->data['errormessage'] = 'No se pudo registrar el contratista';
+                              $this->data['errormessage'] = 'No se pudo registrar el contratista';
 
-    			        }
+                        }
 
-    		      }
-              $this->template->set('title', 'Nueva aplicación');
-              $this->data['style_sheets']= array(
-                        'css/chosen.css' => 'screen'
-                    );
-              $this->data['javascripts']= array(
-                        'js/chosen.jquery.min.js'
-                    );  
-              $this->template->set('title', 'Nuevo contratista');
-              $this->data['municipios']  = $this->codegen_model->getMunicipios();
-              $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
-              $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
-              $this->template->load($this->config->item('admin_template'),'contratistas/contratistas_add', $this->data);
-             
-          } else {
-              redirect(base_url().'index.php/error_404');
-          }
-
-      } else {
-          redirect(base_url().'index.php/users/login');
-      }
-
-  }	
+                  }
+            }else 
+                    {
+                        redirect(base_url().'index.php/error_404');
+                    }
+        }else
+            {
+                redirect(base_url().'index.php/users/login');
+            }
+  }
 
 
 	function edit()
@@ -239,47 +263,60 @@ class Contratistas extends MY_Controller {
       }
   }
     
- 
-  function datatable ()
-  {
-      if ($this->ion_auth->logged_in()) {
-          
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/manage') ) { 
-                
-                /*
-                * Se Valida si el usuario tiene la opcion de editar contratista
-                * para renderizar el boton de editar
-                */            
-                if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/edit')) 
-                {
-                    $this->load->library('datatables');
-                    $this->datatables->add_column('edit', '<div class="btn-toolbar">'
+    function detalles ()
+    {
+        if ($this->ion_auth->logged_in()) 
+        {          
+            if ($this->ion_auth->is_admin()) 
+            {                                 
+              $this->load->library('datatables'); 
+              $this->datatables->select('orde_id,orde_numero,orde_fecha,orde_iniciovigencia,orde_rutadocumento');
+              $this->datatables->from('est_ordenanzas');
+              $this->datatables->add_column('edit', '<div class="btn-toolbar">'
                         .'<div class="btn-group">'
-                        .'<a href="'.base_url().'index.php/ordenanzas/detalles/$1" class="btn btn-default btn-xs" title="Editar contratista"><i class="fa fa-pencil-square-o"></i></a>'
+                        .'<a href="'.base_url().'index.php/contratistas/edit/$1" class="btn btn-default btn-xs" title="Editar contratista"><i class="fa fa-pencil-square-o"></i></a>'
                         .'</div>'
                         .'</div>', 'c.cont_id');
-                }else 
-                    {             
-                        $this->load->library('datatables');     
-                        $this->datatables->add_column('edit', '', 'c.cont_id');
-                    }
-              
-              $this->datatables->select('c.cont_id,c.cont_nit,c.cont_nombre,r.regi_nombre,t.tpco_nombre,m.muni_nombre,d.depa_nombre,c.cont_direccion');
-              $this->datatables->from('con_contratistas c');
-              $this->datatables->join('par_municipios m', 'm.muni_id = c.cont_municipioid', 'left');
-              $this->datatables->join('par_departamentos d', 'd.depa_id = m.muni_departamentoid', 'left');
-              $this->datatables->join('con_regimenes r', 'r.regi_id = c.cont_regimenid', 'left');
-              $this->datatables->join('con_tiposcontratistas t', 't.tpco_id = c.cont_tipocontratistaid', 'left');
 
-              
               echo $this->datatables->generate();
+            }else
+                {
+                    redirect(base_url().'index.php/error_404');
+                }               
+        }else
+            {
+                redirect(base_url().'index.php/users/login');
+            }           
+    }
+    
+    /*
+    * Funcion de apoyo que renderiza la datatable
+    * de la informacion principal de la ordenanza
+    */
+    function datatable ()
+    {
+        if ($this->ion_auth->logged_in()) 
+        {          
+            if ($this->ion_auth->is_admin()) 
+            {                                 
+              $this->load->library('datatables'); 
+              $this->datatables->select('orde_id,orde_numero,orde_fecha,orde_iniciovigencia,orde_rutadocumento');
+              $this->datatables->from('est_ordenanzas');
+              $this->datatables->edit_column('orde_rutadocumento','<a href="'.base_url().'$1" target="_blank"><img src="'.base_url().'$1" class="file-preview-image" alt="ordenanza" title="ordenanza" height="120mm"></a>','orde_rutadocumento');
 
-          } else {
-              redirect(base_url().'index.php/error_404');
-          }
-               
-      } else{
-              redirect(base_url().'index.php/users/login');
-      }           
-  }
+              $this->datatables->add_column('edit', '<div class="btn-toolbar">'
+                        .'<div class="btn-group text-center">'
+                        .'<a href="'.base_url().'index.php/contratistas/edit/$1" class="btn btn-default btn-xs" title="Ver Detalles"><i class="fa fa-search"></i> Ver</a>'
+                        .'</div>'
+                        .'</div>', 'orde_id');
+              echo $this->datatables->generate();
+            }else
+                {
+                    redirect(base_url().'index.php/error_404');
+                }               
+        }else
+            {
+                redirect(base_url().'index.php/users/login');
+            }           
+    }
 }

@@ -152,6 +152,12 @@ class Codegen_model extends CI_Model
         return $query->result();
     }
 
+    function getItems()
+    {
+        $query = $this->db->query("SELECT m.muni_id,m.muni_nombre,d.depa_nombre FROM par_municipios m  LEFT JOIN par_departamentos d ON d.depa_id=m.muni_departamentoid");
+        return $query->result();
+    }
+
     function depend($table,$field,$ID)
     {
         $this->db->where($field, $ID);
