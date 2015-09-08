@@ -22,7 +22,17 @@
                              <div class="panel-body">
                               <?php echo form_open_multipart('pagos/doadd', array('id' => 'cargarTxtPagos')); ?>
 
-                              
+                                    <div class="form-group">
+                                        <label for="bancoid">Banco</label>
+                                        <select class="form-control" id="bancoid" name="bancoid" required="required" >
+                                            <option value="0">Seleccione...</option>
+                                            <?php  foreach($bancos as $id => $valor) { ?>
+                                                <option value="<?php echo $id; ?>"><?php echo $valor; ?></option>
+                                            <?php   } ?>
+                                        </select>
+                                           <?php echo form_error('bancoid','<span class="text-danger">','</span>'); ?>
+                                    </div>
+
                                     <div class="form-group">
                                         <label for="archivo">Formato (txt)</label>
                                         <input id="file" type="file" class="file" name="archivo" multiple=false>

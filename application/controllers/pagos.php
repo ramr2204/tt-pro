@@ -69,8 +69,7 @@ class Pagos extends MY_Controller {
                
               //carga las librerias para los estilos
               //y funcionalidad del boton de carga de 
-              //archivos
-
+              //archivos              
               $this->data['style_sheets']= array(
                         'css/chosen.css' => 'screen',
                         'css/plugins/bootstrap/fileinput.css' => 'screen'
@@ -79,7 +78,29 @@ class Pagos extends MY_Controller {
                         'js/chosen.jquery.min.js',
                         'js/plugins/bootstrap/fileinput.min.js'
                     );    
-              
+
+              /*
+              * Consulta los bancos para renderizar
+              */
+              $bancos = $this->codegen_model->getSelect('par_bancos',"banc_id,banc_nombre");
+              $vectorBancos = array();
+              foreach ($bancos as $banco) 
+              {
+                  $vectorBancos[$banco->banc_id] = $banco->banc_nombre;
+              }
+
+              /*
+              * Valida si hay bancos para cargar el archivo de conciliacion
+              * de pagos
+              */
+              if(count($vectorBancos) < 1)
+              {
+                  $this->session->set_flashdata('errormessage', 'No hay Bancos Registrados para Realizar la Conciliacion!');
+                  redirect(base_url().'index.php/liquidaciones/liquidar');
+              }
+
+              $this->data['bancos'] = $vectorBancos;
+
               $this->template->set('title', 'Cargar archivo de pagos');
               $this->template->load($this->config->item('admin_template'),'pagos/pagos_add', $this->data);
              
