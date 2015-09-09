@@ -90,7 +90,7 @@ class Pagos extends MY_Controller {
               foreach ($bancos as $banco) 
               {
                   $vectorBancos[$banco->banc_id] = $banco->banc_nombre;
-              }
+              }              
 
               /*
               * Valida si hay bancos para cargar el archivo de conciliacion
@@ -117,32 +117,55 @@ class Pagos extends MY_Controller {
 
   }	
 
-  function doadd()
-  {
-      if ($this->ion_auth->logged_in()) {
+    function doadd()
+    {
+        if ($this->ion_auth->logged_in()) {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/add')) {
+
+                $fecha = $this->input->post('f_conciliacion');
+                $banco = $this->input->post('bancoid');
+
+                /*
+                * Valida que la fecha no llegue vacia
+                */
+                if($fecha != '')
+                {
+                    /*
+                    * Valida que el banco no llegue vacio
+                    */
+                    if($banco == 0)
+                    {
+                        $this->session->set_flashdata('errormessage', 'Debe Seleccionar un Banco para Realizar la Conciliación!');
+                        redirect(base_url().'index.php/pagos/add');
+                    }
+                }else
+                    {
+                        $this->session->set_flashdata('errormessage', 'Debe Seleccionar una Fecha para Realizar la Conciliación!');
+                        redirect(base_url().'index.php/pagos/add');
+                    }
                
-              $path = 'uploads/pagos/'.date('d-m-Y');
-               if(!is_dir($path)) { //create the folder if it's not already exists
+                $path = 'uploads/pagos/'.date('d-m-Y');
+                if(!is_dir($path)) 
+                { //create the folder if this does not exists
                    mkdir($path,0777,TRUE);      
-               }
-               $config['upload_path'] = $path;
-               $config['allowed_types'] = 'txt';
-               $config['remove_spaces']=TRUE;
-               $config['max_size']    = '2048';
-               $config['overwrite']    = TRUE;
+                }
+                
+                $config['upload_path'] = $path;
+                $config['allowed_types'] = 'txt|dat|';
+                $config['remove_spaces']=TRUE;
+                $config['max_size']    = '2048';
+                $config['overwrite']    = TRUE;
 
-               //inicializa la variable que guardara los mensajes de :
-               //información
-               $msjInfo='';       
+                //inicializa la variable que guardará los mensajes de :
+                //información
+                $msjInfo='';
 
+                $this->load->library('upload');
+                $this->upload->initialize($config);  
 
-               $this->load->library('upload');
-               $this->upload->initialize($config);  
-
-               if ($this->upload->do_upload("archivo")) {
-         
+                if ($this->upload->do_upload("archivo")) 
+                {         
                     $file_data= $this->upload->data();
                     $success=0;
                     $error=0;
@@ -150,39 +173,118 @@ class Pagos extends MY_Controller {
                     $path2 = $path."/".$file_data['raw_name'].".txt";
                     $string = file_get_contents($path2);
                     $file = fopen($path2,"r");
-                    while(!feof($file)) {
-                        $linea = fgets($file);
-                        $explode = explode(',', $linea);
 
-                        $resultado = $this->codegen_model->get('est_pagos','pago_id','pago_facturaid = '."'$explode[0]'",1,NULL,true);
-                        if (!$resultado) {                               
-                            $data = array(
-                               'pago_facturaid' => $explode[0],
-                               'pago_fecha' => $explode[1],
-                              'pago_valor' => $explode[2],
-                               'pago_metodo' => 'Archivo'
-                            );
-                           //acá hay que hacer las validaciones
-         
-         
-                           if ($this->codegen_model->add('est_pagos',$data) == TRUE) {
-                               $success++;
-                            } else {
-                               $error++;
-                           }
-                       }else 
-                           {                 
-                                //valida que no sea una linea en blanco
-                                //o sin codigo para no almacenar el mensaje vacio
-                                 if($explode[0])
-                                {
-                                      $msjInfo .= 'El pago de la factura No. '.$explode[0]. ' ya fue registrado.<br>';
-                                 }                                
-                            }
-         
+                    /*
+                    * Se crea un vector para almacenar los datos
+                    * de los distintos pagos
+                    */
+                    $vectorPagos = array();
+                    while(!feof($file)) 
+                    {
+                        $linea = fgets($file);
+                        
+                        /*
+                        * Valida con la expresion regular si la linea
+                        * inicia con 06, lo que indica que es un registro de pagos
+                        */
+                        $patron = '/^06.*/';                       
+
+                        if(preg_match($patron, $linea))
+                        {
+                            /*
+                            * Se extrae el id de la factura según las posiciones
+                            * en la cadena
+                            */
+                            $idFactura = substr($linea,36,10);
+
+                            /*
+                            * Se eliminan los 0 de relleno de la izquierda
+                            */
+                            $idFactura = ltrim($idFactura, '0');
+
+                            /*
+                            * Se extrae el valor del pago según las posiciones
+                            * en la cadena
+                            */
+                            $valorPago = substr($linea,51,12);
+
+                            /*
+                            * Se eliminan los 0 de relleno de la izquierda
+                            */
+                            $valorPago = ltrim($valorPago, '0');
+
+                            /*
+                            * Se registra el pago en el vector
+                            */
+                            $vectorPagos[$idFactura] = $valorPago;
+                        }
                     }
+
+                    /*
+                    * Valida si hubo por lo menos un pago en el archivo                    
+                    */
+                    if(count($vectorPagos) > 0)
+                    {
+                        foreach($vectorPagos as $factura => $valor)
+                        {
+                            /*
+                            * Valida que exista una factura para el identificador
+                            */
+                            $where = 'WHERE fact_id = '.$factura;
+                            $vFactura = $this->codegen_model->getSelect('est_facturas',"fact_id", $where);
+                            if(count($vFactura) > 0)
+                            {
+                                /*
+                                * Valida si ya se creó un pago para la factura
+                                */
+                                $where = 'WHERE pago_facturaid = '.$factura;
+                                $vPago = $this->codegen_model->getSelect('est_pagos',"pago_facturaid");
+
+                                if(count($vPago) > 0)
+                                {
+                                    /*
+                                    * Si existe el pago se actualizan los datos
+                                    */
+                                    $data = array();
+                                    $data[] = ;
+                                    $this->codegen_model->edit('est_pagos',$data,'banc_id',$idpago)
+                                }else
+                                    {
+                                        /*
+                                        * Si no existe el pago se crea la instancia para el pago
+                                        */
+                                    }
+                            }
+                        }
+                    }
+
+                    print_r($vectorPagos);exit();
+                            $resultado = $this->codegen_model->get('est_pagos','pago_id','pago_facturaid = '."'$explode[0]'",1,NULL,true);
+                            if (!$resultado) {                               
+                                $data = array(
+                                'pago_facturaid' => $explode[0],
+                                'pago_fecha' => $explode[1],
+                                'pago_valor' => $explode[2],
+                                'pago_metodo' => 'Archivo'
+                                );}
+                            //acá hay que hacer las validaciones
          
-                    fclose($file);               
+         
+                        //     if ($this->codegen_model->add('est_pagos',$data) == TRUE) {
+                        //         $success++;
+                        //      } else {
+                        //         $error++;
+                        //     }
+                        // }else 
+                        //     {                 
+                        //          //valida que no sea una linea en blanco
+                        //          //o sin codigo para no almacenar el mensaje vacio
+                        //           if($explode[0])
+                        //          {
+                        //                $msjInfo .= 'El pago de la factura No. '.$explode[0]. ' ya fue registrado.<br>';
+                        //           }                                
+                        //      }
+                                                                                                                                                                                                         
          
                    //Valida si la cantidad de pagos en error o exito
                    //se alteraron para cargar el mensaje de exito
@@ -194,7 +296,7 @@ class Pagos extends MY_Controller {
          
                } else {
                      $err = $this->upload->display_errors(); 
-                    $this->session->set_flashdata('errormessage', $err);                                                                
+                     $this->session->set_flashdata('errormessage', $err);                                                                
                              
                 }  
                           
