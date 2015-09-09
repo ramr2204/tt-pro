@@ -72,10 +72,13 @@ class Pagos extends MY_Controller {
               //archivos              
               $this->data['style_sheets']= array(
                         'css/chosen.css' => 'screen',
+                        'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen',
                         'css/plugins/bootstrap/fileinput.css' => 'screen'
                     );
               $this->data['javascripts']= array(
                         'js/chosen.jquery.min.js',
+                        'js/plugins/bootstrap/moment.js',
+                        'js/plugins/bootstrap/bootstrap-datetimepicker.js',
                         'js/plugins/bootstrap/fileinput.min.js'
                     );    
 

@@ -24,7 +24,7 @@
 
                                     <div class="form-group">
                                         <label for="bancoid">Banco</label>
-                                        <select class="form-control" id="bancoid" name="bancoid" required="required" >
+                                        <select class="form-control chosen" id="bancoid" name="bancoid" required="required" >
                                             <option value="0">Seleccione...</option>
                                             <?php  foreach($bancos as $id => $valor) { ?>
                                                 <option value="<?php echo $id; ?>"><?php echo $valor; ?></option>
@@ -34,13 +34,23 @@
                                     </div>
 
                                     <div class="form-group">
+                                        <label for="f_inicial">Fecha Pago</label>
+                                        <div class='input-group date' id='datetimepicker_conciliacion' data-date-format="YYYY-MM-DD">
+                                            <input type='text' class="form-control" name="f_conciliacion" required="required"/>
+                                            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-time"></span>
+                                            </span>
+                                        </div>                      
+                                    </div>
+
+                                    <div class="form-group">
                                         <label for="archivo">Formato (txt)</label>
                                         <input id="file" type="file" class="file" name="archivo" multiple=false>
                                     </div>
 
                                     <div class="pull-right">
                                      <?php  echo anchor('bancos', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
-                                    <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
+                                    <button type="submit" class="btn btn-success" id="btn-conciliacion"><i class="fa fa-floppy-o"></i> Guardar</button>
                                     </div>
                                 <?php echo form_close();?>
                               

@@ -28,27 +28,57 @@ var base_url;
 
 function inicial () 
 {
-  base_url=$('#base').val();
+    base_url=$('#base').val();
 
-  //Eventos Ingresar Papeleria
-	$('.responsable').keyup(solicitarUsuarios);
+    //Eventos Ingresar Papeleria
+    $('.responsable').keyup(solicitarUsuarios);
 	$('.responsable').focusout(cargarId);
 	$('#codigoinicial').focusout(solicitarCodigos);
 
-  //Eventos Reasignar Papeleria
-  $('#btn-confirmarReassign').click(establecerDatosElegidos);
+    //Eventos Reasignar Papeleria
+    $('#btn-confirmarReassign').click(establecerDatosElegidos);
 
-  //Eventos Importar Contratos
-  $('#cargaImportacion').click(iniciarCarga);
+    //Eventos Importar Contratos
+    $('#cargaImportacion').click(iniciarCarga);    
 
-  //Eventos informes vista consultar
-  $('#btn-detalle').click(generarInformeDetallado);
-  $('#btn-relacion').click(generarInformeRelacion);
-  $('#btn-rango').click(solicitarRango);
-  $('#btn-consultar').click(generarInformeRango);
-  $('#btn-consultar-detalle').click(generarInformeRangoDetalle);
+    //Eventos informes vista consultar
+    $('#btn-detalle').click(generarInformeDetallado);
+    $('#btn-relacion').click(generarInformeRelacion);
+    $('#btn-rango').click(solicitarRango);
+    $('#btn-consultar').click(generarInformeRango);
+    $('#btn-consultar-detalle').click(generarInformeRangoDetalle);
  
-  identificarVistaConsultaRango();
+    //Solicita la identificacion de vistas
+    //con controles timepicker
+    //(consulta rango, cargar archivo pago)
+    identificarVistaDatetimepicker();
+
+    //Solicita la identificacion de vistas
+    //con controles chosen
+    identificarVistaChosen();
+}
+
+/*
+* Funcion de apoyo que identifica si se está
+* en una vista con controles chosen
+*/
+function identificarVistaChosen()
+{
+    /*
+    * Valida si en la vista hay clases
+    * chosen
+    */
+    var n = 0;
+    $('body').find('.chosen').each(function()
+        {
+            n++;     
+        });
+
+    if(n > 0)
+    {
+        //Evento para los select con chosen
+        $('.chosen').chosen({no_results_text: "No se encuentra"});
+    }
 }
 
 /*
@@ -125,12 +155,26 @@ function generarInformeRango(e)
 * Funcion de apoyo que identifica si se encuentra
 * en la vista de consulta y tiene habilitado el rango
 */
-function identificarVistaConsultaRango()
+function identificarVistaDatetimepicker()
 {
+    /*
+    * Valida si es la vista de rango de fecha
+    * para impresiones
+    */
     var n = 0;
     $('body').find('#btn-rango').each(function()
         {
             n++;     
+        });
+
+    /*
+    * Valida si es la vista de cargue de
+    * archivo para conciliacion de pago
+    */
+    var c = 0;
+    $('body').find('#btn-conciliacion').each(function()
+        {
+            c++;     
         });
 
     if(n > 0)
@@ -142,6 +186,15 @@ function identificarVistaConsultaRango()
         $('#datetimepicker_final').datetimepicker({
             pickTime: false
         });
+    }
+
+    if(c > 0)
+    {
+        //Evento para el timepicker de la fecha del archivo
+        //de conciliacion de pagos
+        $('#datetimepicker_conciliacion').datetimepicker({
+            pickTime: false
+        });        
     }
 }
 
