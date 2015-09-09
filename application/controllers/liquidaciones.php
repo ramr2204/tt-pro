@@ -1697,7 +1697,7 @@ function consultar()
             {
                 //Extrae los id de las facturas para las que se han hecho impresiones  
                 //y las fechas de las impresiones hechas por los usuarios liquidadores
-                $usuario = $this->ion_auth->user()->row();                
+                $usuario = $this->ion_auth->user()->row();
                 $join = '';
             }else
                 {

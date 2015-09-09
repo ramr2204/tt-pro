@@ -155,20 +155,14 @@ class Pagos extends MY_Controller {
                 $config['allowed_types'] = 'txt|dat|';
                 $config['remove_spaces']=TRUE;
                 $config['max_size']    = '2048';
-                $config['overwrite']    = TRUE;
-
-                //inicializa la variable que guardará los mensajes de :
-                //información
-                $msjInfo='';
+                $config['overwrite']    = TRUE;                            
 
                 $this->load->library('upload');
                 $this->upload->initialize($config);  
 
                 if ($this->upload->do_upload("archivo")) 
                 {         
-                    $file_data= $this->upload->data();
-                    $success=0;
-                    $error=0;
+                    $file_data= $this->upload->data();                   
 
                     $path2 = $path."/".$file_data['raw_name'].".txt";
                     $string = file_get_contents($path2);
@@ -221,12 +215,26 @@ class Pagos extends MY_Controller {
                     }
 
                     /*
+                    * Se cierra el archivo
+                    */
+                    fclose($file);
+
+                    /*
                     * Valida si hubo por lo menos un pago en el archivo                    
                     */
                     if(count($vectorPagos) > 0)
                     {
+                        //cantidad conciliaciones correctas
+                        //e incorrectas
+                        $cantCorrectas = 0;
+                        $cantIncorrectas = 0;
+                        $cantAlertas = 0;
+                        $mensajeSuccess = '';
+                        $mensajeError = '';
                         foreach($vectorPagos as $factura => $valor)
                         {
+                            $errorLinea = 'Error:';
+                            $alertaLinea = 'Alerta:';
                             /*
                             * Valida que exista una factura para el identificador
                             */
@@ -238,23 +246,76 @@ class Pagos extends MY_Controller {
                                 * Valida si ya se creó un pago para la factura
                                 */
                                 $where = 'WHERE pago_facturaid = '.$factura;
-                                $vPago = $this->codegen_model->getSelect('est_pagos',"pago_facturaid");
+                                $vPago = $this->codegen_model->getSelect('est_pagos',"pago_id ,pago_facturaid, pago_valor", $where);
 
                                 if(count($vPago) > 0)
                                 {
                                     /*
-                                    * Si existe el pago se actualizan los datos
+                                    * Valida que el pago no tenga conciliacion registrada
                                     */
-                                    $data = array();
-                                    $data[] = ;
-                                    $this->codegen_model->edit('est_pagos',$data,'banc_id',$idpago)
+                                    if($vPago[0]->pago_valorconciliacion != null)
+                                    {
+                                        /*
+                                        * Se cuenta un error en conciliacion
+                                        */
+                                        $cantIncorrectas++;
+
+                                        /*
+                                        * Se especifica el error
+                                        */
+                                        $errorLinea .= '<br>La Factura con Id ('.$factura.') ya Ha sido Conciliada.';
+                                    }else
+                                        {
+                                            /*
+                                            * Se solicita el calculo de valores para conciliacion con el objeto
+                                            * de pago existente
+                                            */                                                                                           
+                                            $data = $this->calcularDatosConciliacion($fecha, $banco, $valor, $vPago);
+
+                                            /*
+                                            * Valida el estado de la conciliacion para crear o no Alerta
+                                            */
+                                            if($data['pago_estadoconciliacion'] == 2 || $data['pago_estadoconciliacion'] == 3)
+                                            {
+                                                /*
+                                                * Se cuenta una alerta
+                                                */
+                                                $cantAlertas++;
+
+                                                /*
+                                                * Se especifica la alerta
+                                                */
+                                                $alertaLinea .= '<br>La Conciliación para la Factura con Id ('.$factura.') se Resolvió con estado ['.$data['pago_descconciliacion'].'].';
+                                            }else
+                                                {
+                                                    /*
+                                                    * Se cuenta un éxito en conciliacion
+                                                    */
+                                                    $cantCorrectas++;
+                                                }
+        
+                                            /*
+                                            * Se Actualiza el registro del pago
+                                            */
+                                            $this->codegen_model->edit('est_pagos',$data,'pago_id',$vPago[0]->pago_id);                                            
+                                        }
                                 }else
                                     {
                                         /*
+                                        * Se solicita el calculo de valores para conciliacion con el id
+                                        * de factura del pago
+                                        */                                                                                           
+                                        $data = $this->calcularDatosConciliacion($fecha, $banco, $valor, '', $factura);
+
+                                        /*
                                         * Si no existe el pago se crea la instancia para el pago
                                         */
+                                        $this->codegen_model->add('est_pagos',$data);
                                     }
-                            }
+                            }else
+                                {
+
+                                }
                         }
                     }
 
@@ -318,6 +379,102 @@ class Pagos extends MY_Controller {
       }
 
   }
+
+
+    /**
+    * Funcion de Apoyo que genera el arreglo
+    * de datos para asignar a los campos de conciliacion
+    * de pago de estampillas
+    * @param 
+    */
+    function calcularDatosConciliacion($fecha, $banco, $valor, $objPago = '', $factura = '')
+    {
+        $data = array();
+        $usuario = $this->ion_auth->user()->row();
+        $data['pago_userconciliacion'] = $usuario->id;
+        $data['pago_valorconciliacion'] = $valor;
+        $data['pago_fechaconciliacion'] = $fecha;
+        $data['pago_bancoconciliacion'] = $banco;
+
+        /*
+        * Valida si llegó el objeto de pago para asignar el valor
+        * a la variable $pagoRegistrado para la comparación
+        */
+        if($objPago == '')
+        {
+            /*
+            * Si no llega un objeto de pago es porque
+            * no se ha creado un registro de pago
+            * entonces se debe crear uno
+            */
+            $pagoRegistrado = 0;
+
+            /*
+            * Valida que la factura no llegue vacia
+            */
+            if($factura != '')
+            {
+                $data['pago_facturaid'] = $factura;
+            }else
+                {
+                    echo 'Debe especificar un id de factura para crear el registro de pago';
+                    exit();
+                }
+        }else
+            {
+                $pagoRegistrado = $objPago[0]->pago_valor;
+            }        
+
+        /*
+        * Valida si el valor del pago registrado es igual
+        * al valor del pago reportado por el banco para
+        * registrar el estado de la conciliacion
+        */
+
+        /** ESTADOS DE CONCILIACION
+        ************************************************
+        ** 1 paz y salvo
+        ** 2 diferencia pagó mas
+        ** 3 diferencia pagó menos
+        ************************************************
+        **/
+        if((float)$pagoRegistrado != (float)$valor)
+        {
+            /*
+            * Valida si valor de pago registrado es mayor
+            * al valor de pago reportado por el banco
+            */
+            $data['pago_diferenciaconciliacion'] = (float)$pagoRegistrado - (float)$valor;                                        
+            if($data['pago_diferenciaconciliacion'] > 0)
+            {
+                /*
+                * Si es mayor establece el estado en 2
+                */
+                $data['pago_estadoconciliacion'] = 2;
+                $data['pago_descconciliacion'] = 'Diferencia pagó mas';
+            }else
+                {
+                    /*
+                    * Si es menor establece el estado en 3
+                    */
+                    $data['pago_estadoconciliacion'] = 3;
+                    $data['pago_descconciliacion'] = 'Diferencia pagó menos';
+
+                    /*
+                    * Se convierte la diferencia en un valor positivo
+                    */
+                    $data['pago_diferenciaconciliacion'] = $data['pago_diferenciaconciliacion'] * (-1);
+                }                                        
+        }else
+            {
+                /*
+                * Si es igual establece el estado en 1
+                */
+                $data['pago_estadoconciliacion'] = 1;
+                $data['pago_descconciliacion'] = 'Paz y Salvo';
+            }  
+        return $data;
+    }
 
 	function edit()
   {    
