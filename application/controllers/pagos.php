@@ -63,10 +63,11 @@ class Pagos extends MY_Controller {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/add')) {
 
-              $this->data['successmessage']=$this->session->flashdata('successmessage');
-              $this->data['errormessage']=$this->session->flashdata('errormessage');
-              $this->data['infomessage']=$this->session->flashdata('infomessage');
-               
+              $this->data['successmessage'] = $this->session->flashdata('successmessage');
+              $this->data['errormessage'] = $this->session->flashdata('errormessage');
+              $this->data['infomessage'] = $this->session->flashdata('infomessage');
+              $this->data['warnigmessage'] = $this->session->flashdata('warnigmessage');
+              print_r($this->data) ;exit();
               //carga las librerias para los estilos
               //y funcionalidad del boton de carga de 
               //archivos              
@@ -119,10 +120,10 @@ class Pagos extends MY_Controller {
 
     function doadd()
     {
-        if ($this->ion_auth->logged_in()) {
-
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/add')) {
-
+        if ($this->ion_auth->logged_in()) 
+        {
+           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/add')) 
+           {
                 $fecha = $this->input->post('f_conciliacion');
                 $banco = $this->input->post('bancoid');
 
@@ -229,7 +230,7 @@ class Pagos extends MY_Controller {
                         $cantCorrectas = 0;
                         $cantIncorrectas = 0;
                         $cantAlertas = 0;
-                        $mensajeSuccess = '';
+                        $mensajeAlerta = '';
                         $mensajeError = '';
                         foreach($vectorPagos as $factura => $valor)
                         {
@@ -246,7 +247,7 @@ class Pagos extends MY_Controller {
                                 * Valida si ya se creó un pago para la factura
                                 */
                                 $where = 'WHERE pago_facturaid = '.$factura;
-                                $vPago = $this->codegen_model->getSelect('est_pagos',"pago_id ,pago_facturaid, pago_valor", $where);
+                                $vPago = $this->codegen_model->getSelect('est_pagos',"pago_id ,pago_facturaid, pago_valor, pago_valorconciliacion", $where);
 
                                 if(count($vPago) > 0)
                                 {
@@ -306,6 +307,17 @@ class Pagos extends MY_Controller {
                                         * de factura del pago
                                         */                                                                                           
                                         $data = $this->calcularDatosConciliacion($fecha, $banco, $valor, '', $factura);
+                                                                               
+                                        /*
+                                        * Se cuenta una alerta
+                                        */
+                                        $cantAlertas++;
+
+                                        /*
+                                        * Se especifica la alerta
+                                        */
+                                        $alertaLinea .= '<br>La Conciliación para la Factura con Id ('.$factura.') se Resolvió con estado ['.$data['pago_descconciliacion'].'].'
+                                            .'<br>No se Había Registrado Pago para esta factura!';
 
                                         /*
                                         * Si no existe el pago se crea la instancia para el pago
@@ -314,70 +326,60 @@ class Pagos extends MY_Controller {
                                     }
                             }else
                                 {
+                                    /*
+                                    * Se cuenta un error en conciliacion
+                                    */
+                                    $cantIncorrectas++;
 
+                                    /*
+                                    * Se especifica el error
+                                    */
+                                    $errorLinea .= '<br>La Factura con Id ('.$factura.') no Existe en la Base de Datos.';
                                 }
+
+                            $mensajeAlerta .= $alertaLinea.'<br>';
+                            $mensajeError .= $errorLinea.'<br>';
                         }
+
+                        /*
+                        * Valida las cantidades de cada notificacion para enviar o no los string
+                        * de la descripcion
+                        */
+                        if($cantCorrectas > 0)
+                        {
+                            $this->session->set_flashdata('successmessage', 'Se Conciliaron con éxito ['.$cantCorrectas.'] Facturas de Pago!');
+                        }
+
+                        if($cantIncorrectas > 0)
+                        {
+                            $this->session->set_flashdata('errormessage', 'No se pudo Realizar la Conciliación de ['.$cantIncorrectas.'] Facturas!<br>'.$mensajeError);
+                        }
+
+                        if($cantAlertas > 0)
+                        {
+                            $this->session->set_flashdata('warnigmessage', 'Se Realizó la Conciliación de ['.$cantAlertas.'] Facturas con las Siguientes Especificaciones!<br>'.$mensajeAlerta);
+                        }
+
+                        redirect(base_url().'index.php/pagos/add');
+                    }else
+                        {
+                            $this->session->set_flashdata('errormessage', 'El Archivo no contiene registros de pago para Conciliación');
+                            redirect(base_url().'index.php/pagos/add');
+                        }         
+                }else
+                    {
+                        $err = $this->upload->display_errors(); 
+                        $this->session->set_flashdata('errormessage', $err);
+                        redirect(base_url().'index.php/pagos/add');
                     }
-
-                    print_r($vectorPagos);exit();
-                            $resultado = $this->codegen_model->get('est_pagos','pago_id','pago_facturaid = '."'$explode[0]'",1,NULL,true);
-                            if (!$resultado) {                               
-                                $data = array(
-                                'pago_facturaid' => $explode[0],
-                                'pago_fecha' => $explode[1],
-                                'pago_valor' => $explode[2],
-                                'pago_metodo' => 'Archivo'
-                                );}
-                            //acá hay que hacer las validaciones
-         
-         
-                        //     if ($this->codegen_model->add('est_pagos',$data) == TRUE) {
-                        //         $success++;
-                        //      } else {
-                        //         $error++;
-                        //     }
-                        // }else 
-                        //     {                 
-                        //          //valida que no sea una linea en blanco
-                        //          //o sin codigo para no almacenar el mensaje vacio
-                        //           if($explode[0])
-                        //          {
-                        //                $msjInfo .= 'El pago de la factura No. '.$explode[0]. ' ya fue registrado.<br>';
-                        //           }                                
-                        //      }
-                                                                                                                                                                                                         
-         
-                   //Valida si la cantidad de pagos en error o exito
-                   //se alteraron para cargar el mensaje de exito
-                   if($error > 0 || $success > 0)
-                   {
-                       $this->session->set_flashdata('successmessage', 'Se cargaron '.$success.' pagos con éxito y '.$error. ' con errores');                                                               
-                   }
-                                
-         
-               } else {
-                     $err = $this->upload->display_errors(); 
-                     $this->session->set_flashdata('errormessage', $err);                                                                
-                             
-                }  
-                          
-              //carga el mensaje de información si existe
-               if($msjInfo != '')
-                {                            
-                    $this->session->set_flashdata('infomessage', $msjInfo);
-               } 
-                    
-                         
-              redirect(base_url().'index.php/pagos/add');
-
-          } else {
-              redirect(base_url().'index.php/error_404');
-          }
-
-      } else {
-          redirect(base_url().'index.php/users/login');
-      }
-
+            }else 
+                {
+                    redirect(base_url().'index.php/error_404');
+                }
+        }else 
+            {
+                redirect(base_url().'index.php/users/login');
+            }
   }
 
 
