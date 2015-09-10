@@ -8,20 +8,22 @@
 *   @version           2014-05-20
 *
 */
+
+require_once dirname(__FILE__) . '/pagos.php';
  
 class Liquidaciones extends MY_Controller {
     
   function __construct() 
   {
       parent::__construct();
-	    $this->load->library('form_validation','Pdf');		
-		  $this->load->helper(array('form','url','codegen_helper'));
+	  $this->load->library('form_validation','Pdf');		
+	  $this->load->helper(array('form','url','codegen_helper'));
       $this->load->model('liquidaciones_model','',TRUE);
       $this->load->model('codegen_model','',TRUE);
 	}	
 	
 	function index()
-  {
+    {
 		  $this->liquidar();
 	}
 
@@ -570,21 +572,61 @@ class Liquidaciones extends MY_Controller {
                         }
                    
                     
-                      $idfactura=$this->input->post('facturaid'.$i);
-                      $config['file_name']=$idfactura.'_'.date("F_d_Y");
-                      $this->upload->initialize($config);
+                    $idfactura=$this->input->post('facturaid'.$i);
+                    $config['file_name']=$idfactura.'_'.date("F_d_Y");
+                    $this->upload->initialize($config);
 
-                      if ($pago != 'flag') {
-                        $datos = array(
-                                 'pago_facturaid' => $idfactura,
-                                 'pago_fecha' => $_POST['fecha_pago_'.$i],
-                                 'pago_valor' => $pago,
-                                 'pago_metodo' => 'manual',
-                               );
-                        $this->codegen_model->add('est_pagos',$datos);
+                    if ($pago != 'flag') 
+                    {
+                        /*
+                        * Valida si ya se creó un pago para la factura
+                        */
+                        $where = 'WHERE pago_facturaid = '.$idfactura;
+                        $vPago = $this->codegen_model->getSelect('est_pagos',"pago_id, pago_valor, pago_valorconciliacion, pago_fechaconciliacion, pago_bancoconciliacion", $where);
+
+                        if(count($vPago) > 0)
+                        {
+                            /*
+                            * Valida si el pago tiene conciliacion registrada
+                            */
+                            if($vPago[0]->pago_valorconciliacion != null)
+                            {
+                                /*
+                                * Se solicita el calculo de valores para conciliacion con el objeto
+                                * de pago existente asignandole el valor que llega del formulario
+                                */
+                                $vPago[0]->pago_valor = $pago;
+                                $datos = Pagos::calcularDatosConciliacion($vPago[0]->pago_fechaconciliacion, $vPago[0]->pago_bancoconciliacion, $vPago[0]->pago_valorconciliacion, $vPago, '', true);
+
+                                /*
+                                * Se Agregan los datos del pago manual
+                                */
+                                $datos['pago_facturaid'] = $idfactura;
+                                $datos['pago_fecha'] = $_POST['fecha_pago_'.$i];
+                                $datos['pago_valor'] = $pago;
+                                $datos['pago_metodo'] = 'manual';                                         
+
+                                /*
+                                * Se Actualiza el registro del pago
+                                */
+                                $this->codegen_model->edit('est_pagos',$datos,'pago_id',$vPago[0]->pago_id);                                        
+                            }
+                        }else
+                            {
+                                /*
+                                * Si no hay un pago creado se crea el registro
+                                */
+                                $datos = array(
+                                         'pago_facturaid' => $idfactura,
+                                         'pago_fecha' => $_POST['fecha_pago_'.$i],
+                                         'pago_valor' => $pago,
+                                         'pago_metodo' => 'manual',
+                                       );
+                                $this->codegen_model->add('est_pagos',$datos);                                
+                            }
                       }
                       
-                      
+
                       $this->form_validation->set_rules('facturaid'.$i, 'factura id '.$i, 'trim|xss_clean|numeric|integer|greater_than[0]'); 
                       if ($this->form_validation->run() == false) {
                           $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
@@ -1169,7 +1211,7 @@ function consultar()
   {
       if ($this->ion_auth->logged_in()){
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar')){
 
               $this->data['successmessage']=$this->session->flashdata('successmessage');
               $this->data['errormessage']=$this->session->flashdata('errormessage');
@@ -1213,22 +1255,20 @@ function consultar()
   { 
       if ($this->ion_auth->logged_in()) {
           
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar') ) {
               
 
               /**
-              * Valida si es administrador para mostrar todas las impresiones
-              */
-              if($this->ion_auth->is_admin())
+              * Valida si es administrador o Usuario conciliación para mostrar todas las impresiones
+              */              
+              $usuario = $this->ion_auth->user()->row();
+              if($this->ion_auth->is_admin() || $usuario->perfilid == 5)
               {
-                  //Extrae los id de las facturas para las que se han hecho impresiones              
-                  $usuario = $this->ion_auth->user()->row();
                   $where = '';              
                   $join = 'join est_papeles p on p.pape_id = i.impr_papelid';  
               }else
                   {
-                      //Extrae los id de las facturas para las que se han hecho impresiones              
-                      $usuario = $this->ion_auth->user()->row();
+                      //Extrae los id de las facturas para las que se han hecho impresiones
                       $where = 'where pape_usuario = '.$usuario->id;              
                       $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
                   }              
@@ -1645,7 +1685,7 @@ function consultar()
     if ($this->ion_auth->logged_in()) 
     {
           
-        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) 
+        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar') ) 
         {             
             $fecha_inicial = $_GET['fecha_I'];
 
@@ -1691,13 +1731,14 @@ function consultar()
             } 
 
             /*
-            * Crea la consulta para el perfil de administrador sin filtrar por usuario
-            */
-            if($this->ion_auth->is_admin())
+            * Crea la consulta para el perfil de administrador o Usuario conciliación
+            * para mostrar todas las impresiones
+            */              
+            $usuario = $this->ion_auth->user()->row();            
+            if($this->ion_auth->is_admin() || $usuario->perfilid == 5)
             {
                 //Extrae los id de las facturas para las que se han hecho impresiones  
-                //y las fechas de las impresiones hechas por los usuarios liquidadores
-                $usuario = $this->ion_auth->user()->row();                
+                //y las fechas de las impresiones hechas por los usuarios liquidadores               
                 $join = '';
             }else
                 {
@@ -1706,8 +1747,7 @@ function consultar()
                     */
 
                     //Extrae los id de las facturas para las que se han hecho impresiones  
-                    //y las fechas de las impresiones hechas por el liquidador autenticado
-                    $usuario = $this->ion_auth->user()->row();
+                    //y las fechas de las impresiones hechas por el liquidador autenticado                    
                     $where .= ' AND p.pape_usuario = '.$usuario->id.' ';              
                     $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
                 }                  
@@ -1900,18 +1940,19 @@ function consultar()
         if ($this->ion_auth->logged_in()) 
         {
             
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) 
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar') ) 
             { 
                 $fecha = $_GET['fecha'];
                 
                 /*
-                * Crea la consulta para el perfil de administrador sin filtrar por usuario
+                * Crea la consulta para el perfil de administrador o Usuario conciliacion
+                * para no filtrar por usuario
                 */
-                if($this->ion_auth->is_admin())
+                $usuario = $this->ion_auth->user()->row();
+                if($this->ion_auth->is_admin() || $usuario->perfilid == 5)
                 {
                     //Extrae los id de las facturas para las que se han hecho impresiones  
-                    //y las fechas de las impresiones hechas por los usuarios liquidadores
-                    $usuario = $this->ion_auth->user()->row();
+                    //y las fechas de las impresiones hechas por los usuarios liquidadores                    
                     $where = 'where DATE(i.impr_fecha) = "'.$_GET['fecha'].'"';              
                     $join = '';
                 }else
@@ -1921,8 +1962,7 @@ function consultar()
                         */
 
                         //Extrae los id de las facturas para las que se han hecho impresiones  
-                        //y las fechas de las impresiones hechas por el liquidador autenticado
-                        $usuario = $this->ion_auth->user()->row();
+                        //y las fechas de las impresiones hechas por el liquidador autenticado                        
                         $where = 'where p.pape_usuario = '.$usuario->id.' and DATE(i.impr_fecha) = "'.$_GET['fecha'].'"';              
                         $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
                     }
@@ -2046,7 +2086,12 @@ function renderizarRangoImpresionesPDF()
 {
     if ($this->ion_auth->logged_in()) 
     {            
-        if ($this->ion_auth->is_admin()) 
+        /*
+        * Extrae el objeto del usuario autenticado para validar
+        * si es usuario conciliacion
+        */
+        $usuario = $this->ion_auth->user()->row();
+        if ($this->ion_auth->is_admin() || $usuario->perfilid == 5) 
         {
             $fecha_inicial = $_GET['fecha_I'];
             $fecha_final = $_GET['fecha_F'];

@@ -255,7 +255,7 @@ class Contratistas extends MY_Controller {
                     $this->load->library('datatables');
                     $this->datatables->add_column('edit', '<div class="btn-toolbar">'
                         .'<div class="btn-group">'
-                        .'<a href="'.base_url().'index.php/ordenanzas/detalles/$1" class="btn btn-default btn-xs" title="Editar contratista"><i class="fa fa-pencil-square-o"></i></a>'
+                        .'<a href="'.base_url().'index.php/contratistas/edit/$1" class="btn btn-default btn-xs" title="Editar contratista"><i class="fa fa-pencil-square-o"></i></a>'
                         .'</div>'
                         .'</div>', 'c.cont_id');
                 }else 

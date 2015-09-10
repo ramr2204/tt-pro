@@ -241,7 +241,7 @@
               echo '<div class="alert alert-dismissable alert-success"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>'. $successmessage.'</div>';
             }
           }
-        if (isset($walnigmessage)) {
+        if (isset($warnigmessage)) {
           
           if ($warnigmessage)
             {
