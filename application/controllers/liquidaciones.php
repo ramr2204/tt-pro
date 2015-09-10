@@ -597,7 +597,7 @@ class Liquidaciones extends MY_Controller {
                                 */
                                 $vPago[0]->pago_valor = $pago;
                                 $datos = Pagos::calcularDatosConciliacion($vPago[0]->pago_fechaconciliacion, $vPago[0]->pago_bancoconciliacion, $vPago[0]->pago_valorconciliacion, $vPago, '', true);
-                                
+
                                 /*
                                 * Se Agregan los datos del pago manual
                                 */
@@ -1211,7 +1211,7 @@ function consultar()
   {
       if ($this->ion_auth->logged_in()){
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar')){
 
               $this->data['successmessage']=$this->session->flashdata('successmessage');
               $this->data['errormessage']=$this->session->flashdata('errormessage');
@@ -1255,22 +1255,20 @@ function consultar()
   { 
       if ($this->ion_auth->logged_in()) {
           
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar') ) {
               
 
               /**
-              * Valida si es administrador para mostrar todas las impresiones
-              */
-              if($this->ion_auth->is_admin())
+              * Valida si es administrador o Usuario conciliación para mostrar todas las impresiones
+              */              
+              $usuario = $this->ion_auth->user()->row();
+              if($this->ion_auth->is_admin() || $usuario->perfilid == 5)
               {
-                  //Extrae los id de las facturas para las que se han hecho impresiones              
-                  $usuario = $this->ion_auth->user()->row();
                   $where = '';              
                   $join = 'join est_papeles p on p.pape_id = i.impr_papelid';  
               }else
                   {
-                      //Extrae los id de las facturas para las que se han hecho impresiones              
-                      $usuario = $this->ion_auth->user()->row();
+                      //Extrae los id de las facturas para las que se han hecho impresiones
                       $where = 'where pape_usuario = '.$usuario->id;              
                       $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
                   }              
@@ -1687,7 +1685,7 @@ function consultar()
     if ($this->ion_auth->logged_in()) 
     {
           
-        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) 
+        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar') ) 
         {             
             $fecha_inicial = $_GET['fecha_I'];
 
@@ -1733,13 +1731,14 @@ function consultar()
             } 
 
             /*
-            * Crea la consulta para el perfil de administrador sin filtrar por usuario
-            */
-            if($this->ion_auth->is_admin())
+            * Crea la consulta para el perfil de administrador o Usuario conciliación
+            * para mostrar todas las impresiones
+            */              
+            $usuario = $this->ion_auth->user()->row();            
+            if($this->ion_auth->is_admin() || $usuario->perfilid == 5)
             {
                 //Extrae los id de las facturas para las que se han hecho impresiones  
-                //y las fechas de las impresiones hechas por los usuarios liquidadores
-                $usuario = $this->ion_auth->user()->row();
+                //y las fechas de las impresiones hechas por los usuarios liquidadores               
                 $join = '';
             }else
                 {
@@ -1748,8 +1747,7 @@ function consultar()
                     */
 
                     //Extrae los id de las facturas para las que se han hecho impresiones  
-                    //y las fechas de las impresiones hechas por el liquidador autenticado
-                    $usuario = $this->ion_auth->user()->row();
+                    //y las fechas de las impresiones hechas por el liquidador autenticado                    
                     $where .= ' AND p.pape_usuario = '.$usuario->id.' ';              
                     $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
                 }                  
@@ -1942,18 +1940,19 @@ function consultar()
         if ($this->ion_auth->logged_in()) 
         {
             
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) 
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar') ) 
             { 
                 $fecha = $_GET['fecha'];
                 
                 /*
-                * Crea la consulta para el perfil de administrador sin filtrar por usuario
+                * Crea la consulta para el perfil de administrador o Usuario conciliacion
+                * para no filtrar por usuario
                 */
-                if($this->ion_auth->is_admin())
+                $usuario = $this->ion_auth->user()->row();
+                if($this->ion_auth->is_admin() || $usuario->perfilid == 5)
                 {
                     //Extrae los id de las facturas para las que se han hecho impresiones  
-                    //y las fechas de las impresiones hechas por los usuarios liquidadores
-                    $usuario = $this->ion_auth->user()->row();
+                    //y las fechas de las impresiones hechas por los usuarios liquidadores                    
                     $where = 'where DATE(i.impr_fecha) = "'.$_GET['fecha'].'"';              
                     $join = '';
                 }else
@@ -1963,8 +1962,7 @@ function consultar()
                         */
 
                         //Extrae los id de las facturas para las que se han hecho impresiones  
-                        //y las fechas de las impresiones hechas por el liquidador autenticado
-                        $usuario = $this->ion_auth->user()->row();
+                        //y las fechas de las impresiones hechas por el liquidador autenticado                        
                         $where = 'where p.pape_usuario = '.$usuario->id.' and DATE(i.impr_fecha) = "'.$_GET['fecha'].'"';              
                         $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
                     }
@@ -2088,7 +2086,12 @@ function renderizarRangoImpresionesPDF()
 {
     if ($this->ion_auth->logged_in()) 
     {            
-        if ($this->ion_auth->is_admin()) 
+        /*
+        * Extrae el objeto del usuario autenticado para validar
+        * si es usuario conciliacion
+        */
+        $usuario = $this->ion_auth->user()->row();
+        if ($this->ion_auth->is_admin() || $usuario->perfilid == 5) 
         {
             $fecha_inicial = $_GET['fecha_I'];
             $fecha_final = $_GET['fecha_F'];
