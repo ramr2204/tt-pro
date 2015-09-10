@@ -61,13 +61,36 @@ class Pagos extends MY_Controller {
   {        
       if ($this->ion_auth->logged_in()) {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/add')) {
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/add')) {            
 
               $this->data['successmessage'] = $this->session->flashdata('successmessage');
               $this->data['errormessage'] = $this->session->flashdata('errormessage');
               $this->data['infomessage'] = $this->session->flashdata('infomessage');
               $this->data['warnigmessage'] = $this->session->flashdata('warnigmessage');
-              print_r($this->data) ;exit();
+
+              /*
+              * Valida si están seteadas las variables de sesion
+              * alertas o errores para para asignarlas al vector data
+              */
+              session_start();
+              if(isset($_SESSION['errores']) && $_SESSION['errores'] != '')
+              {
+                  $this->data['errormessage'] .= $_SESSION['errores'];
+                  /*
+                  * Se limpia la variable de sesion
+                  */
+                  $_SESSION['errores'] = '';
+              }
+
+              if(isset($_SESSION['alertas']) && $_SESSION['alertas'] != '')
+              {
+                  $this->data['warnigmessage'] .= $_SESSION['alertas'];
+                  /*
+                  * Se limpia la variable de sesion
+                  */
+                  $_SESSION['alertas'] = '';
+              }
+              
               //carga las librerias para los estilos
               //y funcionalidad del boton de carga de 
               //archivos              
@@ -234,8 +257,8 @@ class Pagos extends MY_Controller {
                         $mensajeError = '';
                         foreach($vectorPagos as $factura => $valor)
                         {
-                            $errorLinea = 'Error:';
-                            $alertaLinea = 'Alerta:';
+                            $alertaLinea = '';
+                            $errorLinea = '';
                             /*
                             * Valida que exista una factura para el identificador
                             */
@@ -264,7 +287,7 @@ class Pagos extends MY_Controller {
                                         /*
                                         * Se especifica el error
                                         */
-                                        $errorLinea .= '<br>La Factura con Id ('.$factura.') ya Ha sido Conciliada.';
+                                        $errorLinea .= 'Error:<br>La Factura con Id ('.$factura.') ya Ha sido Conciliada.';
                                     }else
                                         {
                                             /*
@@ -286,7 +309,7 @@ class Pagos extends MY_Controller {
                                                 /*
                                                 * Se especifica la alerta
                                                 */
-                                                $alertaLinea .= '<br>La Conciliación para la Factura con Id ('.$factura.') se Resolvió con estado ['.$data['pago_descconciliacion'].'].';
+                                                $alertaLinea .= 'Alerta:<br>La Conciliación para la Factura con Id ('.$factura.') se Resolvió con estado ['.$data['pago_descconciliacion'].'].';
                                             }else
                                                 {
                                                     /*
@@ -316,7 +339,7 @@ class Pagos extends MY_Controller {
                                         /*
                                         * Se especifica la alerta
                                         */
-                                        $alertaLinea .= '<br>La Conciliación para la Factura con Id ('.$factura.') se Resolvió con estado ['.$data['pago_descconciliacion'].'].'
+                                        $alertaLinea .= 'Alerta:<br>La Conciliación para la Factura con Id ('.$factura.') se Resolvió con estado ['.$data['pago_descconciliacion'].'].'
                                             .'<br>No se Había Registrado Pago para esta factura!';
 
                                         /*
@@ -334,11 +357,20 @@ class Pagos extends MY_Controller {
                                     /*
                                     * Se especifica el error
                                     */
-                                    $errorLinea .= '<br>La Factura con Id ('.$factura.') no Existe en la Base de Datos.';
+                                    $errorLinea .= 'Error:<br>La Factura con Id ('.$factura.') no Existe en la Base de Datos.';
                                 }
-
-                            $mensajeAlerta .= $alertaLinea.'<br>';
-                            $mensajeError .= $errorLinea.'<br>';
+                            
+                            /*
+                            * Si los mensajes llegan vacios no se agregan al mensaje
+                            */
+                            if($errorLinea != '')
+                            {
+                                $mensajeError .= $errorLinea.'<br>';                                
+                            }
+                            if($alertaLinea != '')
+                            {
+                                $mensajeAlerta .= $alertaLinea.'<br>';                                
+                            }
                         }
 
                         /*
@@ -349,16 +381,28 @@ class Pagos extends MY_Controller {
                         {
                             $this->session->set_flashdata('successmessage', 'Se Conciliaron con éxito ['.$cantCorrectas.'] Facturas de Pago!');
                         }
+                        
+
+                        /*
+                        * Valida si hubo errores o alertas para iniciar la sesion y enviar los mensajes
+                        * por la sesion
+                        */    
+                        if($cantIncorrectas > 0 || $cantAlertas > 0)
+                        {
+                            session_start();
+                        }
 
                         if($cantIncorrectas > 0)
                         {
-                            $this->session->set_flashdata('errormessage', 'No se pudo Realizar la Conciliación de ['.$cantIncorrectas.'] Facturas!<br>'.$mensajeError);
+                            $this->session->set_flashdata('errormessage', 'No se pudo Realizar la Conciliación de ['.$cantIncorrectas.'] Facturas!<br>');
+                            $_SESSION['errores'] = $mensajeError;
                         }
 
                         if($cantAlertas > 0)
                         {
-                            $this->session->set_flashdata('warnigmessage', 'Se Realizó la Conciliación de ['.$cantAlertas.'] Facturas con las Siguientes Especificaciones!<br>'.$mensajeAlerta);
-                        }
+                            $this->session->set_flashdata('warnigmessage', 'Se Realizó la Conciliación de ['.$cantAlertas.'] Facturas con las Siguientes Especificaciones!<br>');
+                            $_SESSION['alertas'] = $mensajeAlerta;
+                        }                        
 
                         redirect(base_url().'index.php/pagos/add');
                     }else
