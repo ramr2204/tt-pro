@@ -177,6 +177,16 @@ function identificarVistaDatetimepicker()
             c++;     
         });
 
+    /*
+    * Valida si es la vista de cargue agregar
+    * ordenanzas
+    */
+    var o = 0;
+    $('body').find('#btn-ordenanzasAdd').each(function()
+        {
+            o++;     
+        });
+
     if(n > 0)
     {
         //Evento para el timepicker del rango de impresiones
@@ -184,6 +194,17 @@ function identificarVistaDatetimepicker()
             pickTime: false
         });
         $('#datetimepicker_final').datetimepicker({
+            pickTime: false
+        });
+    }
+
+    if(o > 0)
+    {
+        //Evento para el timepicker del cargue de ordenanzas
+        $('#datetimepicker_fechaOrdenanza').datetimepicker({
+            pickTime: false
+        });
+        $('#datetimepicker_inicioOrdenanza').datetimepicker({
             pickTime: false
         });
     }

@@ -15,8 +15,8 @@ class Ordenanzas extends MY_Controller {
   {
       parent::__construct();
 	    $this->load->library('form_validation');		
-		  $this->load->helper(array('form','url','codegen_helper'));
-		  $this->load->model('codegen_model','',TRUE);
+		$this->load->helper(array('form','url','codegen_helper'));
+		$this->load->model('codegen_model','',TRUE);
 
 	}	
 	
@@ -68,18 +68,25 @@ class Ordenanzas extends MY_Controller {
         {
             if ($this->ion_auth->is_admin()) 
             {
-                $this->data['successmessage'] = $this->session->flashdata('message');             
+                $this->data['successmessage'] = $this->session->flashdata('successmessage');
+                $this->data['errormessage'] = $this->session->flashdata('errormessage');
+
                 $this->template->set('title', 'Nueva Ordenanza');
                 $this->data['style_sheets'] = array(
-                        'css/chosen.css' => 'screen'
+                        'css/chosen.css' => 'screen',
+                        'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen',
+                        'css/plugins/bootstrap/fileinput.css' => 'screen'
                     );
                 $this->data['javascripts']= array(
-                        'js/chosen.jquery.min.js'
+                        'js/chosen.jquery.min.js',
+                        'js/plugins/bootstrap/moment.js',
+                        'js/plugins/bootstrap/bootstrap-datetimepicker.js',
+                        'js/plugins/bootstrap/fileinput.min.js'
                     );
                 $this->data['items']  = $this->codegen_model->getItems();
                 $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
                 $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
-                $this->template->load($this->config->item('admin_template'),'contratistas/contratistas_add', $this->data);             
+                $this->template->load($this->config->item('admin_template'),'ordenanzas/ordenanzas_add', $this->data);             
             }else 
                 {
                     redirect(base_url().'index.php/error_404');
@@ -91,57 +98,102 @@ class Ordenanzas extends MY_Controller {
 
   }	
 
-  /*
-  * Funcion que administra el registro de una
-  * nueva ordenanza
-  */
-  function save()
-  {
+    /*
+    * Funcion que administra el registro de una
+    * nueva ordenanza
+    */
+    function save()
+    {
         if ($this->ion_auth->logged_in()) 
         {
             if ($this->ion_auth->is_admin()) 
-            {
-                $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
-                $this->form_validation->set_rules('nit', 'NIT', 'required|numeric|trim|xss_clean|max_length[100]|is_unique[con_contratistas.cont_nit]');   
-                $this->form_validation->set_rules('telefono', 'Telefono', 'numeric|trim|xss_clean|max_length[15]');
-                $this->form_validation->set_rules('direccion', 'Dirección', 'trim|xss_clean|max_length[256]');
-                $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
-                $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
-                $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|greater_than[0]'); 
+            {                
+                $this->form_validation->set_rules('orde_fecha', 'Fecha Pago', 'required|trim|xss_clean|required');   
+                $this->form_validation->set_rules('orde_iniciovigencia', 'Fecha Inicio Vigencia', 'trim|xss_clean|required');
+                $this->form_validation->set_rules('orde_numero', 'Número de Ordenanza', 'numeric|trim|xss_clean|required');
 
-                  if ($this->form_validation->run() == false) {
+                if($this->form_validation->run() == false) 
+                {
+                    $this->session->set_flashdata('errormessage', validation_errors());
+                    redirect(base_url().'index.php/ordenanzas/add');                            
+                }else
+                    {   
+                        /*
+                        * Valida que las fechas suministradas tengan formato valido
+                        */
+                        $fechaExpedicion = $this->input->post('orde_fecha');
+                        $fechaInicioVigencia = $this->input->post('orde_iniciovigencia');
 
-                  $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
-              } else {    
-
-                  $data = array(
-                        'cont_nombre' => $this->input->post('nombre'),
-                        'cont_tipocontratistaid' => $this->input->post('tipocontratistaid'),
-                        'cont_nit' => $this->input->post('nit'),
-                        'cont_direccion' => $this->input->post('direccion'),
-                        'cont_municipioid' => $this->input->post('municipioid'),
-                        'cont_regimenid' => $this->input->post('regimenid'),
-                        'cont_telefono' => $this->input->post('telefono'),
-                        'cont_fecha' => date('Y-m-d')
-
-                     );
-                 
-                        if ($this->codegen_model->add('con_contratistas',$data) == TRUE) {
-
-                      $this->session->set_flashdata('message', 'El contratista se ha creado con éxito');
-                      redirect(base_url().'index.php/contratistas/add');
-                        } else {
-
-                              $this->data['errormessage'] = 'No se pudo registrar el contratista';
-
+                        $patronFecha = '/^[0-9]{4,4}-[0-9]{2,2}-([0-9]{2,2})$/';
+                        $errorF = 'Error:<br>';
+                        if(!preg_match($patronFecha, $fechaExpedicion))
+                        {
+                            $errorF .= 'La Fecha de Expedición debe tener un formato correcto<br>';
+                        }
+                        if(!preg_match($patronFecha, $fechaInicioVigencia))
+                        {
+                            $errorF .= 'La Fecha de Inicio de Vigencia debe tener un formato correcto<br>';
                         }
 
-                  }
-            }else 
-                    {
-                        redirect(base_url().'index.php/error_404');
+                        if($errorF != 'Error:<br>')
+                        {
+                            $this->session->set_flashdata('errormessage', $errorF);
+                            redirect(base_url().'index.php/ordenanzas/add');
+                        }
+
+                        $path = 'uploads/ordenanzas/'.date('d-m-Y');
+                        if(!is_dir($path)) 
+                        { //create the folder if this does not exists
+                           mkdir($path,0777,TRUE);      
+                        }
+                
+                        $config['upload_path'] = $path;
+                        $config['allowed_types'] = 'jpeg|png|pdf';
+                        $config['remove_spaces']= TRUE;
+                        $config['max_size'] = '2048';
+                        $config['overwrite'] = TRUE;                            
+
+                        $this->load->library('upload');
+                        $this->upload->initialize($config);  
+
+                        if ($this->upload->do_upload("archivo")) 
+                        {
+                            /*
+                            * CREAR VALIDACION PARA NO PERMITIR REGISTRAR EL MISMO NUMERO 
+                            * DE ORDENANZA EL MISMO AÑO
+                            */
+
+                            /*
+                            * Se registran los datos de la ordenanza
+                            */                      
+                            $datos['orde_numero'] = $this->input->post('orde_numero');
+                            $datos['orde_fecha'] = $this->input->post('orde_fecha');
+                            $datos['orde_iniciovigencia'] = $this->input->post('orde_iniciovigencia');
+                            $datos['orde_rutadocumento'] = $path;
+                            $datos['orde_estado'] = 1;
+
+                            /*
+                            * Se Registra la Ordenanza
+                            */
+                            $this->codegen_model->add('est_ordenanzas',$datos);
+
+                            /*
+                            * Se redirecciona a la vista
+                            */
+                            $this->session->set_flashdata('successmessage', 'Se Cargó con éxito la Ordenanza Número ['.$datos['orde_numero'].'] con Fecha '.$datos['orde_fecha']);
+                            redirect(base_url().'index.php/ordenanzas/add');
+                        }else
+                            {
+                                $err = $this->upload->display_errors();
+                                $this->session->set_flashdata('errormessage', $err);
+                                redirect(base_url().'index.php/ordenanzas/add');
+                            }
                     }
-        }else
+            }else 
+                {
+                    redirect(base_url().'index.php/error_404');
+                }
+        }else 
             {
                 redirect(base_url().'index.php/users/login');
             }
@@ -306,7 +358,7 @@ class Ordenanzas extends MY_Controller {
 
               $this->datatables->add_column('edit', '<div class="btn-toolbar">'
                         .'<div class="btn-group text-center">'
-                        .'<a href="'.base_url().'index.php/contratistas/edit/$1" class="btn btn-default btn-xs" title="Ver Detalles"><i class="fa fa-search"></i> Ver</a>'
+                        .'<a href="'.base_url().'index.php/ordenanzas/edit/$1" class="btn btn-default btn-xs" title="Ver Detalles"><i class="fa fa-search"></i> Ver</a>'
                         .'</div>'
                         .'</div>', 'orde_id');
               echo $this->datatables->generate();
