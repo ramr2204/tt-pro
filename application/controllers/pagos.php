@@ -270,7 +270,7 @@ class Pagos extends MY_Controller {
                                 * Valida si ya se creó un pago para la factura
                                 */
                                 $where = 'WHERE pago_facturaid = '.$factura;
-                                $vPago = $this->codegen_model->getSelect('est_pagos',"pago_id ,pago_facturaid, pago_valor, pago_valorconciliacion", $where);
+                                $vPago = $this->codegen_model->getSelect('est_pagos',"pago_id , pago_valor, pago_valorconciliacion", $where);
 
                                 if(count($vPago) > 0)
                                 {
@@ -321,7 +321,7 @@ class Pagos extends MY_Controller {
                                             /*
                                             * Se Actualiza el registro del pago
                                             */
-                                            $this->codegen_model->edit('est_pagos',$data,'pago_id',$vPago[0]->pago_id);                                            
+                                            $this->codegen_model->edit('est_pagos',$data,'pago_id',$vPago[0]->pago_id);
                                         }
                                 }else
                                     {
@@ -339,8 +339,7 @@ class Pagos extends MY_Controller {
                                         /*
                                         * Se especifica la alerta
                                         */
-                                        $alertaLinea .= 'Alerta:<br>La Conciliación para la Factura con Id ('.$factura.') se Resolvió con estado ['.$data['pago_descconciliacion'].'].'
-                                            .'<br>No se Había Registrado Pago para esta factura!';
+                                        $alertaLinea .= 'Alerta:<br>La Conciliación para la Factura con Id ('.$factura.') se Resolvió con estado ['.$data['pago_descconciliacion'].'].';
 
                                         /*
                                         * Si no existe el pago se crea la instancia para el pago
@@ -433,14 +432,32 @@ class Pagos extends MY_Controller {
     * de pago de estampillas
     * @param 
     */
-    function calcularDatosConciliacion($fecha, $banco, $valor, $objPago = '', $factura = '')
+    function calcularDatosConciliacion($fecha, $banco, $valor, $objPago = '', $factura = '', $liquidador = false)
     {
-        $data = array();
-        $usuario = $this->ion_auth->user()->row();
-        $data['pago_userconciliacion'] = $usuario->id;
+        $data = array();        
         $data['pago_valorconciliacion'] = $valor;
         $data['pago_fechaconciliacion'] = $fecha;
         $data['pago_bancoconciliacion'] = $banco;
+
+        /*
+        * Valida si llegó la bandera de liquidador para asginar
+        * el id del liquidador en el vector y no modificar
+        * el id ya guardado de quien cargó el archivo plano
+        */
+        if($liquidador)
+        {
+            $liquidador = $this->ion_auth->user()->row();
+            $data['pago_liquidadorconciliacion'] = $liquidador->id;
+        }else
+            {
+                /*
+                * Si no llegó la bandera de liquidador indica
+                * que es conciliacion por archivo plano
+                * entonces asigna el id del usuario autenticado
+                */
+                $usuario = $this->ion_auth->user()->row();
+                $data['pago_userconciliacion'] = $usuario->id;
+            }
 
         /*
         * Valida si llegó el objeto de pago para asignar el valor
@@ -469,7 +486,7 @@ class Pagos extends MY_Controller {
         }else
             {
                 $pagoRegistrado = $objPago[0]->pago_valor;
-            }        
+            }
 
         /*
         * Valida si el valor del pago registrado es igual
@@ -477,13 +494,20 @@ class Pagos extends MY_Controller {
         * registrar el estado de la conciliacion
         */
 
-        /** ESTADOS DE CONCILIACION
-        ************************************************
+        /** ESTADOS DE CONCILIACION POR CARGUE DE ARCHIVO PLANO
+        *******************************************************
         ** 1 paz y salvo
         ** 2 diferencia pagó mas
         ** 3 diferencia pagó menos
-        ** 4 diferencia pagó menos (No se Había registrado pago para esa factura)
-        ************************************************
+        ** 4 diferencia pagó mas (No se Había registrado pago para esa factura)        
+        *******************************************************
+        **/
+        /** ESTADOS DE CONCILIACION POR CARGUE DE SOPORTE DEL LIQUIDADOR
+        *******************************************************
+        ** 5 paz y salvo (Cruce Liquidador)
+        ** 6 diferencia pagó mas (Cruce Liquidador)
+        ** 7 diferencia pagó menos (Cruce Liquidador)
+        *******************************************************
         **/
         if((float)$pagoRegistrado != (float)$valor)
         {
@@ -492,47 +516,93 @@ class Pagos extends MY_Controller {
             * al valor de pago reportado por el banco
             */
             $data['pago_diferenciaconciliacion'] = (float)$pagoRegistrado - (float)$valor;                                        
-            if($data['pago_diferenciaconciliacion'] > 0)
+            if($data['pago_diferenciaconciliacion'] < 0)
             {
                 /*
-                * Si es mayor establece el estado en 2
+                * Valida si la bandera liquidador es true para asignar el estado
+                * correspondiente para cruce de liquidador
                 */
-                $data['pago_estadoconciliacion'] = 2;
-                $data['pago_descconciliacion'] = 'Diferencia pagó mas';
+                if($liquidador)
+                {
+                    /*
+                    * Si es mayor y fué cruce por liquidador establece el estado en 6
+                    */
+                    $data['pago_estadoconciliacion'] = 6;
+                    $data['pago_descconciliacion'] = 'Diferencia pagó mas (Cruce Liquidador)';  
+                }else
+                    {
+                        /*
+                        * Valida si llegó la variable $factura lo que indica
+                        * que no se había registrado pago para esa factura
+                        */
+                        if(isset($data['pago_facturaid']))
+                        {
+                            /*
+                            * Si es menor y llegó el id de la factura establece el estado en 4
+                            */
+                            $data['pago_estadoconciliacion'] = 4;
+                            $data['pago_descconciliacion'] = 'Diferencia pagó mas (No se Había registrado pago para la Factura)';
+                        }else
+                            {
+                                /*
+                                * Si es mayor establece el estado en 2
+                                */
+                                $data['pago_estadoconciliacion'] = 2;
+                                $data['pago_descconciliacion'] = 'Diferencia pagó mas';                                
+                            }
+                    }
+                /*
+                * Se convierte la diferencia en un valor positivo
+                */
+                $data['pago_diferenciaconciliacion'] = $data['pago_diferenciaconciliacion'] * (-1);                
             }else
                 {
                     /*
-                    * Valida si llegó la variable $factura lo que indica
-                    * que no se había registrado pago para esa factura
+                    * Valida si la bandera liquidador es true para asignar el estado
+                    * correspondiente para cruce de liquidador
                     */
-                    if(isset($data['pago_facturaid']))
+                    if($liquidador)
                     {
                         /*
-                        * Si es menor y llegó el id de la factura establece el estado en 4
+                        * Si es menor y fué cruce por liquidador establece el estado en 7
                         */
-                        $data['pago_estadoconciliacion'] = 4;
-                        $data['pago_descconciliacion'] = 'Diferencia pagó menos (No se Había registrado pago para la Factura)';
+                        $data['pago_estadoconciliacion'] = 7;
+                        $data['pago_descconciliacion'] = 'Diferencia pagó menos (Cruce Liquidador)';  
                     }else
                         {
                             /*
                             * Si es menor establece el estado en 3
                             */
                             $data['pago_estadoconciliacion'] = 3;
-                            $data['pago_descconciliacion'] = 'Diferencia pagó menos';                            
-                        }
-
-                    /*
-                    * Se convierte la diferencia en un valor positivo
-                    */
-                    $data['pago_diferenciaconciliacion'] = $data['pago_diferenciaconciliacion'] * (-1);
+                            $data['pago_descconciliacion'] = 'Diferencia pagó menos';
+                        }                    
                 }                                      
         }else
             {
                 /*
-                * Si es igual establece el estado en 1
+                * Valida si la bandera liquidador es true para asignar el estado
+                * correspondiente para cruce de liquidador
                 */
-                $data['pago_estadoconciliacion'] = 1;
-                $data['pago_descconciliacion'] = 'Paz y Salvo';
+                if($liquidador)
+                {
+                    /*
+                    * Si es igual y fué cruce por liquidador establece el estado en 5
+                    */
+                    $data['pago_estadoconciliacion'] = 5;
+                    $data['pago_descconciliacion'] = 'Paz y Salvo (Cruce Liquidador)'; 
+
+                    /*
+                    * Se establece la diferencia de conciliacion en cero
+                    */
+                    $data['pago_diferenciaconciliacion'] = 0;
+                }else
+                    {
+                        /*
+                        * Si es igual establece el estado en 1
+                        */
+                        $data['pago_estadoconciliacion'] = 1;
+                        $data['pago_descconciliacion'] = 'Paz y Salvo';
+                    }
             }  
         return $data;
     }

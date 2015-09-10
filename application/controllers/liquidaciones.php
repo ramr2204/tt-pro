@@ -8,20 +8,22 @@
 *   @version           2014-05-20
 *
 */
+
+require_once dirname(__FILE__) . '/pagos.php';
  
 class Liquidaciones extends MY_Controller {
     
   function __construct() 
   {
       parent::__construct();
-	    $this->load->library('form_validation','Pdf');		
-		  $this->load->helper(array('form','url','codegen_helper'));
+	  $this->load->library('form_validation','Pdf');		
+	  $this->load->helper(array('form','url','codegen_helper'));
       $this->load->model('liquidaciones_model','',TRUE);
       $this->load->model('codegen_model','',TRUE);
 	}	
 	
 	function index()
-  {
+    {
 		  $this->liquidar();
 	}
 
@@ -570,32 +572,61 @@ class Liquidaciones extends MY_Controller {
                         }
                    
                     
-                      $idfactura=$this->input->post('facturaid'.$i);
-                      $config['file_name']=$idfactura.'_'.date("F_d_Y");
-                      $this->upload->initialize($config);
+                    $idfactura=$this->input->post('facturaid'.$i);
+                    $config['file_name']=$idfactura.'_'.date("F_d_Y");
+                    $this->upload->initialize($config);
 
-                      if ($pago != 'flag') 
-                      {
-                        // /*
-                        // * Valida si ya se creó un registro pago para la factura
-                        // */                                                
-                        // $where = 'WHERE pago_facturaid = '.$idfactura;
-                        // $vPago = $this->codegen_model->getSelect('est_pagos',"pago_id ,pago_facturaid, pago_valor, pago_valorconciliacion", $where);
+                    if ($pago != 'flag') 
+                    {
+                        /*
+                        * Valida si ya se creó un pago para la factura
+                        */
+                        $where = 'WHERE pago_facturaid = '.$idfactura;
+                        $vPago = $this->codegen_model->getSelect('est_pagos',"pago_id, pago_valor, pago_valorconciliacion, pago_fechaconciliacion, pago_bancoconciliacion", $where);
 
-                        // if(count($vPago) > 0)
-                        // {
-                            
-                        // }
-                        $datos = array(
-                                 'pago_facturaid' => $idfactura,
-                                 'pago_fecha' => $_POST['fecha_pago_'.$i],
-                                 'pago_valor' => $pago,
-                                 'pago_metodo' => 'manual',
-                               );
-                        $this->codegen_model->add('est_pagos',$datos);
+                        if(count($vPago) > 0)
+                        {
+                            /*
+                            * Valida si el pago tiene conciliacion registrada
+                            */
+                            if($vPago[0]->pago_valorconciliacion != null)
+                            {
+                                /*
+                                * Se solicita el calculo de valores para conciliacion con el objeto
+                                * de pago existente asignandole el valor que llega del formulario
+                                */
+                                $vPago[0]->pago_valor = $pago;
+                                $datos = Pagos::calcularDatosConciliacion($vPago[0]->pago_fechaconciliacion, $vPago[0]->pago_bancoconciliacion, $vPago[0]->pago_valorconciliacion, $vPago, '', true);
+                                
+                                /*
+                                * Se Agregan los datos del pago manual
+                                */
+                                $datos['pago_facturaid'] = $idfactura;
+                                $datos['pago_fecha'] = $_POST['fecha_pago_'.$i];
+                                $datos['pago_valor'] = $pago;
+                                $datos['pago_metodo'] = 'manual';                                         
+
+                                /*
+                                * Se Actualiza el registro del pago
+                                */
+                                $this->codegen_model->edit('est_pagos',$datos,'pago_id',$vPago[0]->pago_id);                                        
+                            }
+                        }else
+                            {
+                                /*
+                                * Si no hay un pago creado se crea el registro
+                                */
+                                $datos = array(
+                                         'pago_facturaid' => $idfactura,
+                                         'pago_fecha' => $_POST['fecha_pago_'.$i],
+                                         'pago_valor' => $pago,
+                                         'pago_metodo' => 'manual',
+                                       );
+                                $this->codegen_model->add('est_pagos',$datos);                                
+                            }
                       }
                       
-                      
+
                       $this->form_validation->set_rules('facturaid'.$i, 'factura id '.$i, 'trim|xss_clean|numeric|integer|greater_than[0]'); 
                       if ($this->form_validation->run() == false) {
                           $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
