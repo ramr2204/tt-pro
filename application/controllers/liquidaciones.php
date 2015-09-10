@@ -574,7 +574,18 @@ class Liquidaciones extends MY_Controller {
                       $config['file_name']=$idfactura.'_'.date("F_d_Y");
                       $this->upload->initialize($config);
 
-                      if ($pago != 'flag') {
+                      if ($pago != 'flag') 
+                      {
+                        // /*
+                        // * Valida si ya se creó un registro pago para la factura
+                        // */                                                
+                        // $where = 'WHERE pago_facturaid = '.$idfactura;
+                        // $vPago = $this->codegen_model->getSelect('est_pagos',"pago_id ,pago_facturaid, pago_valor, pago_valorconciliacion", $where);
+
+                        // if(count($vPago) > 0)
+                        // {
+                            
+                        // }
                         $datos = array(
                                  'pago_facturaid' => $idfactura,
                                  'pago_fecha' => $_POST['fecha_pago_'.$i],

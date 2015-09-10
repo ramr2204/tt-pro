@@ -482,6 +482,7 @@ class Pagos extends MY_Controller {
         ** 1 paz y salvo
         ** 2 diferencia pagó mas
         ** 3 diferencia pagó menos
+        ** 4 diferencia pagó menos (No se Había registrado pago para esa factura)
         ************************************************
         **/
         if((float)$pagoRegistrado != (float)$valor)
@@ -501,16 +502,30 @@ class Pagos extends MY_Controller {
             }else
                 {
                     /*
-                    * Si es menor establece el estado en 3
+                    * Valida si llegó la variable $factura lo que indica
+                    * que no se había registrado pago para esa factura
                     */
-                    $data['pago_estadoconciliacion'] = 3;
-                    $data['pago_descconciliacion'] = 'Diferencia pagó menos';
+                    if(isset($data['pago_facturaid']))
+                    {
+                        /*
+                        * Si es menor y llegó el id de la factura establece el estado en 4
+                        */
+                        $data['pago_estadoconciliacion'] = 4;
+                        $data['pago_descconciliacion'] = 'Diferencia pagó menos (No se Había registrado pago para la Factura)';
+                    }else
+                        {
+                            /*
+                            * Si es menor establece el estado en 3
+                            */
+                            $data['pago_estadoconciliacion'] = 3;
+                            $data['pago_descconciliacion'] = 'Diferencia pagó menos';                            
+                        }
 
                     /*
                     * Se convierte la diferencia en un valor positivo
                     */
                     $data['pago_diferenciaconciliacion'] = $data['pago_diferenciaconciliacion'] * (-1);
-                }                                        
+                }                                      
         }else
             {
                 /*
