@@ -280,7 +280,6 @@ class Contratos extends MY_Controller {
                                             
                   }
 
-
                   $contratos_nuevos=0;
                   $contratos_importados=0;
                   $contratos_falloimpotacion=0;

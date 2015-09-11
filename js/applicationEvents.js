@@ -39,7 +39,10 @@ function inicial ()
     $('#btn-confirmarReassign').click(establecerDatosElegidos);
 
     //Eventos Importar Contratos
-    $('#cargaImportacion').click(iniciarCarga);    
+    $('#cargaImportacion').click(iniciarCarga);
+
+    //Eventos Cargar Archivo conciliacion pagos
+    $('#form-conciliacion').submit(renderizarInicioCarga);
 
     //Eventos informes vista consultar
     $('#btn-detalle').click(generarInformeDetallado);
@@ -56,6 +59,25 @@ function inicial ()
     //Solicita la identificacion de vistas
     //con controles chosen
     identificarVistaChosen();
+}
+
+/*
+* Funcion de apoyo que valida si los campos
+* del formulario están diligenciados
+* para activar la carga del ladda
+*/
+function renderizarInicioCarga(e)
+{
+    $('#not_conciliacion').show(); 
+    $('.btn').attr('disabled','disabled');
+}
+
+//Funcion que activa el boton ladda
+//para simulacion de carga
+function iniciarCarga (e) 
+{    
+    var l = Ladda.create(this);
+    l.start();
 }
 
 /*
@@ -260,16 +282,6 @@ function generarInformeRelacion (e)
     }    
     
 }
-
-
-//Funcion que activa el boton ladda
-//para simulacion de carga
-function iniciarCarga (e) 
-{    
-    var l = Ladda.create(this);
-    l.start();        
-}
-
 
  //función que realiza el autocompletar
  //para el nombre del encargado de la papelería

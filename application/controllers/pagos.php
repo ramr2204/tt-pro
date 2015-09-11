@@ -97,7 +97,9 @@ class Pagos extends MY_Controller {
               $this->data['style_sheets']= array(
                         'css/chosen.css' => 'screen',
                         'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen',
-                        'css/plugins/bootstrap/fileinput.css' => 'screen'
+                        'css/plugins/bootstrap/fileinput.css' => 'screen',
+                        'css/animate.css' => 'screen',
+                        'css/applicationStyles.css' => 'screen'
                     );
               $this->data['javascripts']= array(
                         'js/chosen.jquery.min.js',

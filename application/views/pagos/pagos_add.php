@@ -20,7 +20,7 @@
                            <div class="panel panel-default">
                             <div class="panel-heading"><h1>Cargar un Nuevo Archivo de Pagos</h1></div>
                              <div class="panel-body">
-                              <?php echo form_open_multipart('pagos/doadd'); ?>
+                              <?php echo form_open_multipart('pagos/doadd',array('id'=>'form-conciliacion')); ?>
 
                                     <div class="form-group">
                                         <label for="bancoid">Banco</label>
@@ -49,8 +49,8 @@
                                     </div>
 
                                     <div class="pull-right">
-                                     <?php  echo anchor('bancos', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
-                                    <button type="submit" class="btn btn-success" id="btn-conciliacion"><i class="fa fa-floppy-o"></i> Guardar</button>
+                                        <?php  echo anchor('bancos', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
+                                        <button type="submit" id="btn-conciliacion" class="btn btn-success ladda-button" data-style="expand-right"><i class="fa fa-floppy-o"></i> <span class="ladda-label">Guardar</span></button>                                        
                                     </div>
                                 <?php echo form_close();?>
                               
@@ -64,6 +64,11 @@
             </div>
       </div>
 
+<div id="not_conciliacion" class="notificacion_carga">
+    <span id="not_animada" class="animated infinite fadeInDown">Realizando Conciliación . . .</span>    
+</div>
+
+<div class="pantalla_not"></div>
 
 <script type="text/javascript">
     $("#file").fileinput({
