@@ -616,7 +616,7 @@ function conciliacionesIndex()
 {
     if ($this->ion_auth->logged_in()) 
     {
-        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/add')) 
+        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/conciliacionesIndex')) 
         {
             $this->data['successmessage'] = $this->session->flashdata('successmessage');
             $this->data['errormessage'] = $this->session->flashdata('errormessage');
@@ -630,10 +630,13 @@ function conciliacionesIndex()
             $this->data['style_sheets']= array(
                             'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
                         );
+
             $this->data['javascripts']= array(
                     'js/jquery.dataTables.min.js',
                     'js/plugins/dataTables/dataTables.bootstrap.js',
-                    'js/jquery.dataTables.defaults.js'
+                    'js/jquery.dataTables.defaults.js',
+                    'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
+                    'js/accounting.min.js',
                     );      
 
             $this->template->load($this->config->item('admin_template'),'pagos/pagos_listadoConciliaciones', $this->data);
@@ -653,28 +656,56 @@ function conciliacionesIndex()
 function conciliacionesDataTable()
 {
     if ($this->ion_auth->logged_in()) 
-    {        
-        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/manage') ) 
-        {              
-            $this->load->library('datatables');
-            $this->datatables->select('b.banc_id,b.banc_nombre,b.banc_descripcion');
-            $this->datatables->from('par_pagos b');
+    {
+        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/conciliacionesIndex') ) 
+        {
+            /**
+            * Valida si es administrador o Usuario conciliación para mostrar todas las conciliaciones
+            */              
+            $usuario = $this->ion_auth->user()->row();
+            if($this->ion_auth->is_admin() || $usuario->perfilid == 5)
+            {
+                $where = '';
+                $join = 'join est_papeles p on p.pape_id = i.impr_papelid';  
+            }else
+                {
+                    //Extrae los id de las facturas para las que se han hecho conciliaciones
+                    $where = 'where pape_usuario = '.$usuario->id;              
+                    $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
+                }              
 
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/edit')) {
-                  
-                  $this->datatables->add_column('edit', '<div class="btn-toolbar">
-                                                           <div class="btn-group">
-                                                              <a href="'.base_url().'index.php/pagos/edit/$1" class="btn btn-default btn-xs" title="Editar tipo pago"><i class="fa fa-pencil-square-o"></i></a>
-                                                           </div>
-                                                         </div>', 'b.banc_id');
-
-            }else {
-                  
-                  $this->datatables->add_column('edit', '', 'b.banc_id'); 
-            }
+            $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid",$where,$join);
+         
+            //se extrae el vector con los id de las facturas
+            $idFacturas = '(';
+            foreach ($facturas as $factura) 
+            {
+                $idFacturas .= $factura->impr_facturaid.',';
+            }  
+            $idFacturas .= '0)';
+            $where = 'where fact_id in '.$idFacturas;                            
               
-              echo $this->datatables->generate();
+            //Extrae los id de las liquidaciones
+            $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"distinct f.fact_liquidacionid",$where);
 
+            //se extrae el vector con los id de las liquidaciones
+            $idLiquidaciones = '(';
+            foreach ($liquidaciones as $liquidacion) 
+            {
+                $idLiquidaciones .= $liquidacion->fact_liquidacionid.',';
+            }  
+            $idLiquidaciones .= '0)';
+            $whereIn = 'l.liqu_id in '.$idLiquidaciones;
+
+            $this->load->library('datatables');
+            $this->datatables->select('l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha, p.pago_fecha, f.fact_valor, f.fact_nombre');              
+            $this->datatables->from('est_facturas f');  
+            $this->datatables->join('est_liquidaciones l', 'l.liqu_id = f.fact_liquidacionid', 'left');
+            $this->datatables->join('est_pagos p', 'p.pago_facturaid = f.fact_id', 'left');
+            $this->datatables->whereString($whereIn);
+                           
+            $this->datatables->add_column('facturas','edess');            
+            echo $this->datatables->generate();
         }else
             {
                 redirect(base_url().'index.php/error_404');

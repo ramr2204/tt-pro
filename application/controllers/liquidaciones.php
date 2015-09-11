@@ -604,6 +604,7 @@ class Liquidaciones extends MY_Controller {
                                 $datos['pago_facturaid'] = $idfactura;
                                 $datos['pago_fecha'] = $_POST['fecha_pago_'.$i];
                                 $datos['pago_valor'] = $pago;
+                                $datos['pago_liquidadorpago'] = $pago;
                                 $datos['pago_metodo'] = 'manual';                                         
 
                                 /*
@@ -620,6 +621,7 @@ class Liquidaciones extends MY_Controller {
                                          'pago_facturaid' => $idfactura,
                                          'pago_fecha' => $_POST['fecha_pago_'.$i],
                                          'pago_valor' => $pago,
+                                         'pago_liquidadorpago' => $pago,
                                          'pago_metodo' => 'manual',
                                        );
                                 $this->codegen_model->add('est_pagos',$datos);                                

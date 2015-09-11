@@ -221,7 +221,7 @@ function identificarVistaDatetimepicker()
     }
 
     if(o > 0)
-    {
+    {alert('ssss');
         //Evento para el timepicker del cargue de ordenanzas
         $('#datetimepicker_fechaOrdenanza').datetimepicker({
             pickTime: false
