@@ -608,6 +608,82 @@ class Pagos extends MY_Controller {
             }  
         return $data;
     }
+  
+/*
+* Funcion que permite renderizar la vista de listado de conciliaciones
+*/
+function conciliacionesIndex()
+{
+    if ($this->ion_auth->logged_in()) 
+    {
+        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/add')) 
+        {
+            $this->data['successmessage'] = $this->session->flashdata('successmessage');
+            $this->data['errormessage'] = $this->session->flashdata('errormessage');
+            $this->data['infomessage'] = $this->session->flashdata('infomessage');
+            $this->data['warnigmessage'] = $this->session->flashdata('warnigmessage');
+
+            $this->template->set('title', 'Listado de Conciliaciones');
+
+            //carga las librerias para los estilos
+            //y funcionalidad del datatable
+            $this->data['style_sheets']= array(
+                            'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
+                        );
+            $this->data['javascripts']= array(
+                    'js/jquery.dataTables.min.js',
+                    'js/plugins/dataTables/dataTables.bootstrap.js',
+                    'js/jquery.dataTables.defaults.js'
+                    );      
+
+            $this->template->load($this->config->item('admin_template'),'pagos/pagos_listadoConciliaciones', $this->data);
+        }else
+            {
+                redirect(base_url().'index.php/error_404');
+            }
+    }else
+        {
+            redirect(base_url().'index.php/users/login');
+        }
+}
+
+/*
+* Funcion de apoyo para renderizar el listado de conciliaciones
+*/
+function conciliacionesDataTable()
+{
+    if ($this->ion_auth->logged_in()) 
+    {        
+        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/manage') ) 
+        {              
+            $this->load->library('datatables');
+            $this->datatables->select('b.banc_id,b.banc_nombre,b.banc_descripcion');
+            $this->datatables->from('par_pagos b');
+
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/edit')) {
+                  
+                  $this->datatables->add_column('edit', '<div class="btn-toolbar">
+                                                           <div class="btn-group">
+                                                              <a href="'.base_url().'index.php/pagos/edit/$1" class="btn btn-default btn-xs" title="Editar tipo pago"><i class="fa fa-pencil-square-o"></i></a>
+                                                           </div>
+                                                         </div>', 'b.banc_id');
+
+            }else {
+                  
+                  $this->datatables->add_column('edit', '', 'b.banc_id'); 
+            }
+              
+              echo $this->datatables->generate();
+
+        }else
+            {
+                redirect(base_url().'index.php/error_404');
+            }               
+    }else
+        {
+            redirect(base_url().'index.php/users/login');
+        }             
+}
 
 	function edit()
   {    
