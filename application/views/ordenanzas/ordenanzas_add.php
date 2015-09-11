@@ -46,7 +46,7 @@
                                     <input id="file" type="file" class="file" name="archivo" multiple=false>
                                 </div>
                                 <div class="pull-right">
-                                    <?php  echo anchor('contratistas', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
+                                    <?php  echo anchor('ordenanzas', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
                                     <button type="submit" class="btn btn-success" id="btn-ordenanzasAdd"><i class="fa fa-floppy-o"></i> Guardar</button>
                                 </div>
                                 <?php echo form_close();?>                              

@@ -164,10 +164,11 @@ class Ordenanzas extends MY_Controller {
                         }
                 
                         $config['upload_path'] = $path;
-                        $config['allowed_types'] = 'jpeg|png|pdf';
+                        $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
                         $config['remove_spaces']= TRUE;
                         $config['max_size'] = '2048';
-                        $config['overwrite'] = TRUE;                            
+                        $config['overwrite'] = TRUE;
+                        $config['file_name']='ordenanza_'.$this->input->post('orde_numero').'_'.$year;                      
 
                         $this->load->library('upload');
                         $this->upload->initialize($config);  
@@ -175,12 +176,18 @@ class Ordenanzas extends MY_Controller {
                         if($this->upload->do_upload("archivo")) 
                         {
                             /*
+                            * Establece la informacion para actualizar la liquidacion
+                            * en este caso la ruta de la copia del objeto del contrato
+                            */
+                            $file_datos= $this->upload->data();
+                            $datos['orde_rutadocumento'] = $path.'/'.$file_datos['orig_name'];
+
+                            /*
                             * Se registran los datos de la ordenanza
                             */                      
                             $datos['orde_numero'] = $this->input->post('orde_numero');
                             $datos['orde_fecha'] = $this->input->post('orde_fecha');
-                            $datos['orde_iniciovigencia'] = $this->input->post('orde_iniciovigencia');
-                            $datos['orde_rutadocumento'] = $path;
+                            $datos['orde_iniciovigencia'] = $this->input->post('orde_iniciovigencia');                            
                             $datos['orde_year'] = $year;
                             $datos['orde_estado'] = 1;
 
@@ -366,7 +373,7 @@ class Ordenanzas extends MY_Controller {
               $this->load->library('datatables'); 
               $this->datatables->select('orde_id,orde_numero,orde_fecha,orde_iniciovigencia,orde_rutadocumento');
               $this->datatables->from('est_ordenanzas');
-              $this->datatables->edit_column('orde_rutadocumento','<a href="'.base_url().'$1" target="_blank"><img src="'.base_url().'$1" class="file-preview-image" alt="ordenanza" title="ordenanza" height="120mm"></a>','orde_rutadocumento');
+              $this->datatables->edit_column('orde_rutadocumento','<a class="btn btn-success" href="'.base_url().'$1" target="_blank"><img src="'.base_url().'$1" class="file-preview-image" alt="Ver Ordenanza" title="ordenanza" height="120mm"></a>','orde_rutadocumento');
 
               $this->datatables->add_column('edit', '<div class="btn-toolbar">'
                         .'<div class="btn-group text-center">'
