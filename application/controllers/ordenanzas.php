@@ -141,6 +141,22 @@ class Ordenanzas extends MY_Controller {
                             redirect(base_url().'index.php/ordenanzas/add');
                         }
 
+                        /*
+                        * Valida que no haya una ordenanza con el mismo numero
+                        * en el mismo año
+                        */
+                        $year = explode('-', $this->input->post('orde_fecha'));
+                        $year = $year[0];
+
+                        $where = 'WHERE orde_numero = '.$this->input->post('orde_numero')
+                            .' AND orde_year ="'.$year.'"';
+                        $vOrdenanza = $this->codegen_model->getSelect('est_ordenanzas',"orde_id", $where);
+                        if(count($vOrdenanza) > 0)
+                        {
+                            $this->session->set_flashdata('errormessage', 'Ya Existe una Ordenanza con el Número ['.$this->input->post('orde_numero').'] para el Año ['.$year.']');
+                            redirect(base_url().'index.php/ordenanzas/add');
+                        }
+                        
                         $path = 'uploads/ordenanzas/'.date('d-m-Y');
                         if(!is_dir($path)) 
                         { //create the folder if this does not exists
@@ -156,13 +172,8 @@ class Ordenanzas extends MY_Controller {
                         $this->load->library('upload');
                         $this->upload->initialize($config);  
 
-                        if ($this->upload->do_upload("archivo")) 
+                        if($this->upload->do_upload("archivo")) 
                         {
-                            /*
-                            * CREAR VALIDACION PARA NO PERMITIR REGISTRAR EL MISMO NUMERO 
-                            * DE ORDENANZA EL MISMO AÑO
-                            */
-
                             /*
                             * Se registran los datos de la ordenanza
                             */                      
@@ -170,6 +181,7 @@ class Ordenanzas extends MY_Controller {
                             $datos['orde_fecha'] = $this->input->post('orde_fecha');
                             $datos['orde_iniciovigencia'] = $this->input->post('orde_iniciovigencia');
                             $datos['orde_rutadocumento'] = $path;
+                            $datos['orde_year'] = $year;
                             $datos['orde_estado'] = 1;
 
                             /*
