@@ -665,28 +665,39 @@ function conciliacionesDataTable()
             $usuario = $this->ion_auth->user()->row();
             if($this->ion_auth->is_admin() || $usuario->perfilid == 5)
             {
-                $where = '';
-                $join = 'join est_papeles p on p.pape_id = i.impr_papelid';  
+                $where = '';                
             }else
                 {
                     //Extrae los id de las facturas para las que se han hecho conciliaciones
-                    $where = 'where pape_usuario = '.$usuario->id;              
-                    $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
+                    $where = 'where pago_liquidadorpago = '.$usuario->id;                    
                 }              
-
-            $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid",$where,$join);
+            
+            /*
+            * Valida si se creó un where en la condicion anterior
+            * para concatenar con and o where
+            */
+            if($where == '')
+            {
+                $where .= ' WHERE pago_estadoconciliacion <> ""';
+            }else
+                {
+                    $where .= ' AND pago_estadoconciliacion <> ""';
+                }
+            
+            $facturas = $this->codegen_model->getSelect('est_pagos',"pago_facturaid, pago_userconciliacion, pago_valorconciliacion, pago_fechaconciliacion, pago_descconciliacion, pago_diferenciaconciliacion, pago_bancoconciliacion, pago_liquidadorconciliacion, pago_estadoconciliacion",$where);
          
             //se extrae el vector con los id de las facturas
             $idFacturas = '(';
             foreach ($facturas as $factura) 
             {
-                $idFacturas .= $factura->impr_facturaid.',';
+                $idFacturas .= $factura->pago_facturaid.',';
             }  
             $idFacturas .= '0)';
             $where = 'where fact_id in '.$idFacturas;                            
               
             //Extrae los id de las liquidaciones
-            $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"distinct f.fact_liquidacionid",$where);
+            $group = ' GROUP BY f.fact_liquidacionid';
+            $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"distinct f.fact_liquidacionid",$where, '', $group);
 
             //se extrae el vector con los id de las liquidaciones
             $idLiquidaciones = '(';
@@ -703,6 +714,8 @@ function conciliacionesDataTable()
             $this->datatables->join('est_liquidaciones l', 'l.liqu_id = f.fact_liquidacionid', 'left');
             $this->datatables->join('est_pagos p', 'p.pago_facturaid = f.fact_id', 'left');
             $this->datatables->whereString($whereIn);
+            $this->datatable->group_by('l.liqu_id');//Verificar agrupamiento***************
+
                            
             $this->datatables->add_column('facturas','edess');            
             echo $this->datatables->generate();
