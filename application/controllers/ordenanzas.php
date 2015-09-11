@@ -219,18 +219,25 @@ class Ordenanzas extends MY_Controller {
   }
 
 
-	function edit()
-  {    
-      if ($this->ion_auth->logged_in()) {
+function edit()
+{    
+    if ($this->ion_auth->logged_in()) 
+    {
+        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('ordenanzas/edit')) 
+        {  
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/edit')) {  
+            $idOrdenanza = $this->uri->segment(3);
+            
+            /*
+            * Valida que el id de la ordenanza no llegue vacio
+            */
+            if($idOrdenanza == '')
+            {
+                $this->session->set_flashdata('errormessage', 'Debe elegir una Ordenanza para Editar');
+                redirect(base_url().'index.php/ordenanzas');
+            }
 
-              $idregimen = ($this->uri->segment(3)) ? $this->uri->segment(3) : $this->input->post('id') ;
-              if ($idregimen==''){
-                  $this->session->set_flashdata('infomessage', 'Debe elegir un contratista para editar');
-                  redirect(base_url().'index.php/contratistas');
-              }
-              $resultado = $this->codegen_model->get('con_contratistas','cont_nit','cont_id = '.$idregimen,1,NULL,true);
+              $resultado = $this->codegen_model->get('con_contratistas','cont_nit','cont_id = '.$idOrdenanza,1,NULL,true);
        
               foreach ($resultado as $key => $value) {
                   $aplilo[$key]=$value;
@@ -377,7 +384,7 @@ class Ordenanzas extends MY_Controller {
 
               $this->datatables->add_column('edit', '<div class="btn-toolbar">'
                         .'<div class="btn-group text-center">'
-                        .'<a href="'.base_url().'index.php/ordenanzas/edit/$1" class="btn btn-default btn-xs" title="Ver Detalles"><i class="fa fa-search"></i> Ver</a>'
+                        .'<a href="'.base_url().'index.php/ordenanzas/edit/$1" class="btn btn-default btn-xs" title="Modificar"><i class="fa fa-pencil-square-o"></i> Editar</a>'
                         .'</div>'
                         .'</div>', 'orde_id');
               echo $this->datatables->generate();
