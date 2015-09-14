@@ -684,7 +684,7 @@ function conciliacionesDataTable()
                     $where .= ' AND pago_estadoconciliacion <> ""';
                 }
             
-            $facturas = $this->codegen_model->getSelect('est_pagos',"pago_facturaid, pago_userconciliacion, pago_valorconciliacion, pago_fechaconciliacion, pago_descconciliacion, pago_diferenciaconciliacion, pago_bancoconciliacion, pago_liquidadorconciliacion, pago_estadoconciliacion",$where);
+            $facturas = $this->codegen_model->getSelect('est_pagos',"pago_facturaid",$where);
          
             //se extrae el vector con los id de las facturas
             $idFacturas = '(';
@@ -709,13 +709,11 @@ function conciliacionesDataTable()
             $whereIn = 'l.liqu_id in '.$idLiquidaciones;
 
             $this->load->library('datatables');
-            $this->datatables->select('l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha, p.pago_fecha, f.fact_valor, f.fact_nombre');              
+            $this->datatables->select('l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_valortotal,p.pago_fecha, p.pago_valor, p.pago_fechaconciliacion, p.pago_valorconciliacion, p.pago_descconciliacion, p.pago_diferenciaconciliacion, p.pago_userconciliacion, p.pago_bancoconciliacion, f.fact_nombre');
             $this->datatables->from('est_facturas f');  
             $this->datatables->join('est_liquidaciones l', 'l.liqu_id = f.fact_liquidacionid', 'left');
-            $this->datatables->join('est_pagos p', 'p.pago_facturaid = f.fact_id', 'left');
-            $this->datatables->whereString($whereIn);
-            $this->datatable->group_by('l.liqu_id');//Verificar agrupamiento***************
-
+            $this->datatables->join('est_pagos p', 'p.pago_facturaid = f.fact_id', 'left');            
+            $this->datatables->where($whereIn);
                            
             $this->datatables->add_column('facturas','edess');            
             echo $this->datatables->generate();

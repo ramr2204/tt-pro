@@ -59,6 +59,33 @@ function inicial ()
     //Solicita la identificacion de vistas
     //con controles chosen
     identificarVistaChosen();
+
+    //Solicita la identificacion de la vista
+    //listado de conciliaciones para eliminar
+    //el css del container en esa vista
+    identificarVistaListadoConciliaciones();
+}
+
+/*
+* Funcion de apoyo que identifica si se está
+* en la vista listado de conciliaciones
+*/
+function identificarVistaListadoConciliaciones()
+{
+    /*
+    * Valida si en la vista hay clases
+    * chosen
+    */
+    var n = 0;
+    $('body').find('#tabla_conciliaciones').each(function()
+        {
+            n++;     
+        });
+
+    if(n > 0)
+    {        
+        $('body').find('#cont_contenidogeneral').removeClass('container');
+    }
 }
 
 /*
@@ -221,7 +248,7 @@ function identificarVistaDatetimepicker()
     }
 
     if(o > 0)
-    {alert('ssss');
+    {
         //Evento para el timepicker del cargue de ordenanzas
         $('#datetimepicker_fechaOrdenanza').datetimepicker({
             pickTime: false

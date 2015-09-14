@@ -1307,7 +1307,7 @@ function consultar()
               $this->datatables->from('est_facturas f');  
               $this->datatables->join('est_liquidaciones l', 'l.liqu_id = f.fact_liquidacionid', 'left');
               $this->datatables->join('est_pagos p', 'p.pago_facturaid = f.fact_id', 'left');
-              $this->datatables->whereString($whereIn);
+              $this->datatables->where($whereIn);
 
                            
 

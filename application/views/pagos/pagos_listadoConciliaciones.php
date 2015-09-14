@@ -16,7 +16,7 @@
 //generación de la tabla mediante json
 $(document).ready(function() {
 
-var oTable = $('#tablaq').dataTable( {
+var oTable = $('#tabla_conciliaciones').dataTable( {
 "bProcessing": true,
 "bServerSide": true,
 "sAjaxSource": "<?php echo base_url(); ?>index.php/pagos/conciliacionesDataTable",
@@ -32,26 +32,33 @@ var oTable = $('#tablaq').dataTable( {
                       { "sClass": "item2"},
                       { "sClass": "item2"},
                       { "sClass": "item8"},
+                      { "sClass": "item8"},
+                      { "sClass": "item8"},
+                      { "sClass": "item8"},
                       { "sClass": "center","bSortable": false,"bSearchable": false},
 
                     
             ],   
 "fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
     
-  var number= accounting.formatMoney(aData[4], "$", 2, ".", ","); // €4.999,99
-  $("td:eq(4)", nRow).html('<div class="">' + number + '</div>');  
+  var number= accounting.formatMoney(aData[3], "$", 2, ".", ","); // €4.999,99
+  $("td:eq(3)", nRow).html('<div class="">' + number + '</div>');
 
-  var liquidacion = aData[0];
+  number= accounting.formatMoney(aData[5], "$", 2, ".", ","); // €4.999,99
+  $("td:eq(5)", nRow).html('<div class="">' + number + '</div>');
 
-  $.ajax({
-      type: "POST",
-      dataType: "json",
-      data: {id : liquidacion},
-      url: base_url+"index.php/liquidaciones/extraerFacturas",
-      success: function(data) {              
-          $("td:eq(9)", nRow).html('<div class="text-left">' + data.estampillas + '</div>');                                        
-      }
-  });
+  number= accounting.formatMoney(aData[7], "$", 2, ".", ","); // €4.999,99
+  $("td:eq(7)", nRow).html('<div class="">' + number + '</div>');
+
+  /*
+  * Si la diferencia en la conciliacion está vacia se cambia por un cero
+  */
+  if(aData[9] == '')
+  {
+      aData[9] = 0;
+  }
+  number= accounting.formatMoney(aData[9], "$", 2, ".", ","); // €4.999,99  
+  $("td:eq(9)", nRow).html('<div class="">' + number + '</div>');
 
  },
   "fnDrawCallback": function( oSettings ) {
@@ -77,9 +84,7 @@ var oTable = $('#tablaq').dataTable( {
                                          sSelector: "#buscarfecha"
                                     },
                                     null,
-                                    null
-
-                                    
+                                    null                                    
                                  ]
                }
 
@@ -124,7 +129,7 @@ var oTable = $('#tablaq').dataTable( {
 
 <div class="row">     
     <div class="col-xs-12 col-sm-3 col-sm-offset-9">
-        Fecha (Generacion Estampilla):<div align="center" id="buscarfecha"></div>                
+        Fecha (Conciliación):<div align="center" id="buscarfecha"></div>                
     </div>                     
 </div>
             
@@ -134,21 +139,22 @@ var oTable = $('#tablaq').dataTable( {
      <div class="col-sm-12">    
    
          <div class="table-responsive">
-             <table class="table table-striped table-bordered table-hover" id="tablaq">
+             <table class="table table-striped table-bordered table-hover" id="tabla_conciliaciones">
                  <thead>
                      <tr>
                          <th>Id</th>
                          <th>Tipo Liquidación</th>
-                         <th>NIT</th>
                          <th>Contratista</th>
                          <th>Total</th>
-                         <th>Fecha Liquidacion</th>                             
-                         <th>Fecha Pago</th> 
-                         <th>Valor Factura</th> 
-                         <th>Concepto</th>
-                         <th>Estampillas</th>
-
-                         <th></th>                  
+                         <th>Fecha Pago</th>
+                         <th>Valor Pago</th>                             
+                         <th>Fecha Conciliacion</th> 
+                         <th>Valor Conciliacion</th> 
+                         <th>Estado</th>
+                         <th>Diferencia Conciliacion</th>
+                         <th>Usuario Conciliacion</th>
+                         <th>Banco Conciliacion</th>
+                         <th>Tipo</th>
                      </tr>
                  </thead>
                  <tbody></tbody>     
@@ -168,7 +174,7 @@ var oTable = $('#tablaq').dataTable( {
          </div>
 
     </div>   
-</div>
+	
 
 <!-- Modal Rango-->
 <div class="modal fade" id="m_rango" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
