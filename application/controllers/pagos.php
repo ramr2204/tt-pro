@@ -97,7 +97,9 @@ class Pagos extends MY_Controller {
               $this->data['style_sheets']= array(
                         'css/chosen.css' => 'screen',
                         'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen',
-                        'css/plugins/bootstrap/fileinput.css' => 'screen'
+                        'css/plugins/bootstrap/fileinput.css' => 'screen',
+                        'css/animate.css' => 'screen',
+                        'css/applicationStyles.css' => 'screen'
                     );
               $this->data['javascripts']= array(
                         'js/chosen.jquery.min.js',
@@ -606,6 +608,158 @@ class Pagos extends MY_Controller {
             }  
         return $data;
     }
+  
+/*
+* Funcion que permite renderizar la vista de listado de conciliaciones
+*/
+function conciliacionesIndex()
+{
+    if ($this->ion_auth->logged_in()) 
+    {
+        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/conciliacionesIndex')) 
+        {
+            $this->data['successmessage'] = $this->session->flashdata('successmessage');
+            $this->data['errormessage'] = $this->session->flashdata('errormessage');
+            $this->data['infomessage'] = $this->session->flashdata('infomessage');
+            $this->data['warnigmessage'] = $this->session->flashdata('warnigmessage');
+
+            $this->template->set('title', 'Listado de Conciliaciones');
+
+            //carga las librerias para los estilos
+            //y funcionalidad del datatable
+            $this->data['style_sheets']= array(
+                            'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen',
+                            'css/applicationStyles.css' => 'screen'
+                        );
+
+            $this->data['javascripts']= array(
+                    'js/jquery.dataTables.min.js',
+                    'js/plugins/dataTables/dataTables.bootstrap.js',
+                    'js/jquery.dataTables.defaults.js',
+                    'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
+                    'js/accounting.min.js',
+                    );      
+
+            $this->template->load($this->config->item('admin_template'),'pagos/pagos_listadoConciliaciones', $this->data);
+        }else
+            {
+                redirect(base_url().'index.php/error_404');
+            }
+    }else
+        {
+            redirect(base_url().'index.php/users/login');
+        }
+}
+
+/*
+* Funcion de apoyo para renderizar el listado de conciliaciones
+*/
+function conciliacionesDataTable()
+{
+    if ($this->ion_auth->logged_in()) 
+    {
+        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/conciliacionesIndex') ) 
+        {
+            /**
+            * Valida si es administrador o Usuario conciliación para mostrar todas las conciliaciones
+            */              
+            $usuario = $this->ion_auth->user()->row();
+            if($this->ion_auth->is_admin() || $usuario->perfilid == 5)
+            {
+                $where = '';                
+            }else
+                {
+                    //Extrae los id de las facturas para las que se han hecho conciliaciones
+                    $where = 'where pago_liquidadorpago = '.$usuario->id;                    
+                }              
+            
+            /*
+            * Valida si se creó un where en la condicion anterior
+            * para concatenar con and o where
+            */
+            if($where == '')
+            {
+                $where .= ' WHERE pago_estadoconciliacion <> ""';
+            }else
+                {
+                    $where .= ' AND pago_estadoconciliacion <> ""';
+                }
+            
+            $facturas = $this->codegen_model->getSelect('est_pagos',"pago_facturaid",$where);
+         
+            //se extrae el vector con los id de las facturas
+            $idFacturas = '(';
+            foreach ($facturas as $factura) 
+            {
+                $idFacturas .= $factura->pago_facturaid.',';
+            }  
+            $idFacturas .= '0)';
+            $where = 'where fact_id in '.$idFacturas;                            
+              
+            //Extrae los id de las liquidaciones
+            $group = ' GROUP BY f.fact_liquidacionid';
+            $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"distinct f.fact_liquidacionid",$where, '', $group);
+
+            //se extrae el vector con los id de las liquidaciones
+            $idLiquidaciones = '(';
+            foreach ($liquidaciones as $liquidacion) 
+            {
+                $idLiquidaciones .= $liquidacion->fact_liquidacionid.',';
+            }  
+            $idLiquidaciones .= '0)';
+            $whereIn = 'l.liqu_id in '.$idLiquidaciones;
+
+            $this->load->library('datatables');
+            $this->datatables->select('l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_valortotal,p.pago_fecha, p.pago_valor, p.pago_fechaconciliacion, p.pago_valorconciliacion, p.pago_descconciliacion, p.pago_diferenciaconciliacion, p.pago_userconciliacion, b.banc_nombre, f.fact_nombre');
+            $this->datatables->from('est_facturas f');  
+            $this->datatables->join('est_liquidaciones l', 'l.liqu_id = f.fact_liquidacionid', 'left');
+            $this->datatables->join('est_pagos p', 'p.pago_facturaid = f.fact_id', 'left');
+            $this->datatables->join('par_bancos b', 'p.pago_bancoconciliacion = b.banc_id', 'left');
+            $this->datatables->where($whereIn);
+            $this->datatables->where('p.pago_estadoconciliacion <> ""');
+                                           
+            echo $this->datatables->generate();
+        }else
+            {
+                redirect(base_url().'index.php/error_404');
+            }               
+    }else
+        {
+            redirect(base_url().'index.php/users/login');
+        }             
+}
+
+
+function extraerDatos()
+{
+    if ($this->ion_auth->logged_in()) 
+    {
+        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/conciliacionesIndex')) 
+        {  
+            $idLiquidacion = $this->input->post('idLiquidacion');
+            $idUsuario = $this->input->post('idUsuario');
+
+            /*
+            * Extrae el nombre del contratista
+            */            
+            $nomContratista = $this->codegen_model->getSelect('est_liquidaciones',"liqu_nombrecontratista",'WHERE liqu_id = '.$idLiquidacion);
+
+            /*
+            * Extrae el nombre del usuario que cargó
+            * el archivo de pagos para conciliación
+            */
+            $nomUsuario = $this->codegen_model->getSelect('users',"first_name,last_name",'WHERE id = '.$idUsuario);
+            
+            echo json_encode(array('usuario'=>$nomUsuario[0]->first_name.' '.$nomUsuario[0]->last_name, 'contratista'=>$nomContratista[0]->liqu_nombrecontratista));
+        }else
+            {
+                redirect(base_url().'index.php/error_404');       
+            } 
+    }else 
+        {
+            redirect(base_url().'index.php/users/login');
+        }
+}
 
 	function edit()
   {    

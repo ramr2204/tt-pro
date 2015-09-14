@@ -39,7 +39,10 @@ function inicial ()
     $('#btn-confirmarReassign').click(establecerDatosElegidos);
 
     //Eventos Importar Contratos
-    $('#cargaImportacion').click(iniciarCarga);    
+    $('#cargaImportacion').click(iniciarCarga);
+
+    //Eventos Cargar Archivo conciliacion pagos
+    $('#form-conciliacion').submit(renderizarInicioCarga);
 
     //Eventos informes vista consultar
     $('#btn-detalle').click(generarInformeDetallado);
@@ -56,6 +59,53 @@ function inicial ()
     //Solicita la identificacion de vistas
     //con controles chosen
     identificarVistaChosen();
+
+    //Solicita la identificacion de la vista
+    //listado de conciliaciones para eliminar
+    //el css del container en esa vista
+    identificarVistaListadoConciliaciones();
+}
+
+/*
+* Funcion de apoyo que identifica si se está
+* en la vista listado de conciliaciones
+*/
+function identificarVistaListadoConciliaciones()
+{
+    /*
+    * Valida si en la vista hay clases
+    * chosen
+    */
+    var n = 0;
+    $('body').find('#tabla_conciliaciones').each(function()
+        {
+            n++;     
+        });
+
+    if(n > 0)
+    {        
+        $('body').find('#cont_contenidogeneral').removeClass('container');
+        $('body').find('#cont_contenidogeneral').addClass('col-custom');
+    }
+}
+
+/*
+* Funcion de apoyo que valida si los campos
+* del formulario están diligenciados
+* para activar la carga del ladda
+*/
+function renderizarInicioCarga(e)
+{
+    $('#not_conciliacion').show(); 
+    $('.btn').attr('disabled','disabled');
+}
+
+//Funcion que activa el boton ladda
+//para simulacion de carga
+function iniciarCarga (e) 
+{    
+    var l = Ladda.create(this);
+    l.start();
 }
 
 /*
@@ -177,6 +227,16 @@ function identificarVistaDatetimepicker()
             c++;     
         });
 
+    /*
+    * Valida si es la vista de cargue agregar
+    * ordenanzas
+    */
+    var o = 0;
+    $('body').find('#btn-ordenanzasAdd').each(function()
+        {
+            o++;     
+        });
+
     if(n > 0)
     {
         //Evento para el timepicker del rango de impresiones
@@ -184,6 +244,17 @@ function identificarVistaDatetimepicker()
             pickTime: false
         });
         $('#datetimepicker_final').datetimepicker({
+            pickTime: false
+        });
+    }
+
+    if(o > 0)
+    {
+        //Evento para el timepicker del cargue de ordenanzas
+        $('#datetimepicker_fechaOrdenanza').datetimepicker({
+            pickTime: false
+        });
+        $('#datetimepicker_inicioOrdenanza').datetimepicker({
             pickTime: false
         });
     }
@@ -239,16 +310,6 @@ function generarInformeRelacion (e)
     }    
     
 }
-
-
-//Funcion que activa el boton ladda
-//para simulacion de carga
-function iniciarCarga (e) 
-{    
-    var l = Ladda.create(this);
-    l.start();        
-}
-
 
  //función que realiza el autocompletar
  //para el nombre del encargado de la papelería
