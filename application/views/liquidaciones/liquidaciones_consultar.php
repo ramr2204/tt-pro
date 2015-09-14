@@ -160,9 +160,7 @@ var oTable = $('#tablaq').dataTable( {
                          <th>Fecha Pago</th> 
                          <th>Valor Factura</th> 
                          <th>Concepto</th>
-                         <th>Estampillas</th>
-
-                         <th></th>                  
+                         <th>Estampillas</th>                             
                      </tr>
                  </thead>
                  <tbody></tbody>     

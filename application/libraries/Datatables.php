@@ -149,7 +149,7 @@
     * Mike Ortiz 2015-01-13
     */
     public function whereString($where)
-    {      
+    {
       $this->ci->db->where($where);
       return $this;
     }

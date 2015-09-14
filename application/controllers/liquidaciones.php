@@ -583,7 +583,11 @@ class Liquidaciones extends MY_Controller {
                         */
                         $where = 'WHERE pago_facturaid = '.$idfactura;
                         $vPago = $this->codegen_model->getSelect('est_pagos',"pago_id, pago_valor, pago_valorconciliacion, pago_fechaconciliacion, pago_bancoconciliacion", $where);
-
+                        
+                        /*
+                        * Se extrae el objeto del usuario autenticado
+                        */
+                        $usuario = $this->ion_auth->user()->row();
                         if(count($vPago) > 0)
                         {
                             /*
@@ -600,10 +604,11 @@ class Liquidaciones extends MY_Controller {
 
                                 /*
                                 * Se Agregan los datos del pago manual
-                                */
+                                */                                
                                 $datos['pago_facturaid'] = $idfactura;
                                 $datos['pago_fecha'] = $_POST['fecha_pago_'.$i];
                                 $datos['pago_valor'] = $pago;
+                                $datos['pago_liquidadorpago'] = $usuario->id;
                                 $datos['pago_metodo'] = 'manual';                                         
 
                                 /*
@@ -620,6 +625,7 @@ class Liquidaciones extends MY_Controller {
                                          'pago_facturaid' => $idfactura,
                                          'pago_fecha' => $_POST['fecha_pago_'.$i],
                                          'pago_valor' => $pago,
+                                         'pago_liquidadorpago' => $usuario->id,
                                          'pago_metodo' => 'manual',
                                        );
                                 $this->codegen_model->add('est_pagos',$datos);                                
@@ -1301,7 +1307,7 @@ function consultar()
               $this->datatables->from('est_facturas f');  
               $this->datatables->join('est_liquidaciones l', 'l.liqu_id = f.fact_liquidacionid', 'left');
               $this->datatables->join('est_pagos p', 'p.pago_facturaid = f.fact_id', 'left');
-              $this->datatables->whereString($whereIn);
+              $this->datatables->where($whereIn);
 
                            
 

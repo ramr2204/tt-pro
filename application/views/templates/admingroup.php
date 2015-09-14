@@ -214,7 +214,7 @@
 
 
 
- <div class="container">
+ <div class="container" id="cont_contenidogeneral">
 
       <div class="content">
         
@@ -271,7 +271,7 @@
           <center>
             <br/>
             <p style="font-size: 20px;">
-                Thomas Greg & Sons de Colombia S.A. © 2014
+                Thomas Greg & Sons de Colombia S.A. © <?php echo date('Y'); ?>
             </p>
 
           </center>
