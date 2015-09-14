@@ -35,12 +35,21 @@ var oTable = $('#tabla_conciliaciones').dataTable( {
                       { "sClass": "item8"},
                       { "sClass": "item8"},
                       { "sClass": "item8"},
-                      { "sClass": "center","bSortable": false,"bSearchable": false},
+                      { "sClass": "item8"},                      
 
                     
             ],   
 "fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
-    
+  
+  /*
+  * Valida si no llega la fecha del pago para colocar la cadena
+  * "NO SE HA PAGADO / NO SE HA ENTREGADO ESTAMPILLA"
+  */
+  if(aData[4] == '' || aData[4] == null)
+  {
+      $("td:eq(4)", nRow).html('<div class="text-left">NO SE HA PAGADO / NO SE HA ENTREGADO ESTAMPILLA</div>');
+  }
+
   var number= accounting.formatMoney(aData[3], "$", 2, ".", ","); // €4.999,99
   $("td:eq(3)", nRow).html('<div class="">' + number + '</div>');
 
@@ -59,6 +68,19 @@ var oTable = $('#tabla_conciliaciones').dataTable( {
   }
   number= accounting.formatMoney(aData[9], "$", 2, ".", ","); // €4.999,99  
   $("td:eq(9)", nRow).html('<div class="">' + number + '</div>');
+  
+  var idLiquidacion = aData[0];
+  var idUsuario = aData[10];
+  $.ajax({
+      type: "POST",
+      dataType: "json",
+      data: {idLiquidacion : idLiquidacion, idUsuario:idUsuario},
+      url: base_url+"index.php/pagos/extraerDatos",
+      success: function(data) {              
+          $("td:eq(10)", nRow).html('<div class="text-left">' + data.usuario + '</div>');
+          $("td:eq(2)", nRow).html('<div class="text-left">' + data.contratista + '<br>Nit:' + aData[2] + '</div>');
+      }
+  });
 
  },
   "fnDrawCallback": function( oSettings ) {
@@ -79,12 +101,17 @@ var oTable = $('#tabla_conciliaciones').dataTable( {
                                     null,
                                     null,
                                     null,
+                                    null,
                                     {
                                          type: "date",
                                          sSelector: "#buscarfecha"
                                     },
                                     null,
-                                    null                                    
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
                                  ]
                }
 
@@ -154,7 +181,7 @@ var oTable = $('#tabla_conciliaciones').dataTable( {
                          <th>Diferencia Conciliacion</th>
                          <th>Usuario Conciliacion</th>
                          <th>Banco Conciliacion</th>
-                         <th>Tipo</th>
+                         <th>Tipo Estampilla</th>
                      </tr>
                  </thead>
                  <tbody></tbody>     
@@ -168,58 +195,14 @@ var oTable = $('#tabla_conciliaciones').dataTable( {
                          <th></th>
                          <th></th>       
                          <th></th>                  
+                         <th></th>
+                         <th></th>
+                         <th></th>
+                         <th></th>       
+                         <th></th>                  
                      </tr>
                  </tfoot>
              </table>
          </div>
 
-    </div>   
-	
-
-<!-- Modal Rango-->
-<div class="modal fade" id="m_rango" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Consultar por Rango (Fecha Generacion Estampilla)</h4>
-      </div>
-      <div class="modal-body">      
-          <div class="row">          
-              <div class="col-xs-12 col-sm-6">
-                  <div class="form-group">
-                      <label for="f_inicial">Fecha Inicial</label>
-                      <div class='input-group date' id='datetimepicker_inicial' data-date-format="YYYY-MM-DD">
-                          <input type='text' class="form-control" name="f_inicial" required="required"/>
-                          <span class="input-group-addon">
-                              <span class="glyphicon glyphicon-time"></span>
-                          </span>
-                      </div>                      
-                  </div>
-              </div>
-              <div class="col-xs-12 col-sm-6">
-                  <div class="form-group">
-                      <label for="f_final">Fecha Final</label>
-                      <div class='input-group date' id='datetimepicker_final' data-date-format="YYYY-MM-DD">
-                          <input type='text' class="form-control" name="f_final" required="required"/>
-                          <span class="input-group-addon">
-                              <span class="glyphicon glyphicon-time"></span>
-                          </span>
-                      </div>                       
-                  </div>
-              </div>
-          </div>
-      </div>
-      <div class="modal-footer">
-        <a class="btn btn-danger" id="btn-consultar">
-            <i class="fa fa-file-pdf-o fa-1x"></i>        
-            Consultar Relacion
-        </a>     
-        <a class="btn btn-danger" id="btn-consultar-detalle">
-            <i class="fa fa-file-pdf-o fa-1x"></i>        
-            Consultar Detalle
-        </a> 
-      </div>
-    </div>
-  </div>
-</div>
+    </div>   	

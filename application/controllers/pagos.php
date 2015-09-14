@@ -628,7 +628,8 @@ function conciliacionesIndex()
             //carga las librerias para los estilos
             //y funcionalidad del datatable
             $this->data['style_sheets']= array(
-                            'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
+                            'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen',
+                            'css/applicationStyles.css' => 'screen'
                         );
 
             $this->data['javascripts']= array(
@@ -709,13 +710,14 @@ function conciliacionesDataTable()
             $whereIn = 'l.liqu_id in '.$idLiquidaciones;
 
             $this->load->library('datatables');
-            $this->datatables->select('l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_valortotal,p.pago_fecha, p.pago_valor, p.pago_fechaconciliacion, p.pago_valorconciliacion, p.pago_descconciliacion, p.pago_diferenciaconciliacion, p.pago_userconciliacion, p.pago_bancoconciliacion, f.fact_nombre');
+            $this->datatables->select('l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_valortotal,p.pago_fecha, p.pago_valor, p.pago_fechaconciliacion, p.pago_valorconciliacion, p.pago_descconciliacion, p.pago_diferenciaconciliacion, p.pago_userconciliacion, b.banc_nombre, f.fact_nombre');
             $this->datatables->from('est_facturas f');  
             $this->datatables->join('est_liquidaciones l', 'l.liqu_id = f.fact_liquidacionid', 'left');
-            $this->datatables->join('est_pagos p', 'p.pago_facturaid = f.fact_id', 'left');            
+            $this->datatables->join('est_pagos p', 'p.pago_facturaid = f.fact_id', 'left');
+            $this->datatables->join('par_bancos b', 'p.pago_bancoconciliacion = b.banc_id', 'left');
             $this->datatables->where($whereIn);
-                           
-            $this->datatables->add_column('facturas','edess');            
+            $this->datatables->where('p.pago_estadoconciliacion <> ""');
+                                           
             echo $this->datatables->generate();
         }else
             {
@@ -725,6 +727,38 @@ function conciliacionesDataTable()
         {
             redirect(base_url().'index.php/users/login');
         }             
+}
+
+
+function extraerDatos()
+{
+    if ($this->ion_auth->logged_in()) 
+    {
+        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('pagos/conciliacionesIndex')) 
+        {  
+            $idLiquidacion = $this->input->post('idLiquidacion');
+            $idUsuario = $this->input->post('idUsuario');
+
+            /*
+            * Extrae el nombre del contratista
+            */            
+            $nomContratista = $this->codegen_model->getSelect('est_liquidaciones',"liqu_nombrecontratista",'WHERE liqu_id = '.$idLiquidacion);
+
+            /*
+            * Extrae el nombre del usuario que cargó
+            * el archivo de pagos para conciliación
+            */
+            $nomUsuario = $this->codegen_model->getSelect('users',"first_name,last_name",'WHERE id = '.$idUsuario);
+            
+            echo json_encode(array('usuario'=>$nomUsuario[0]->first_name.' '.$nomUsuario[0]->last_name, 'contratista'=>$nomContratista[0]->liqu_nombrecontratista));
+        }else
+            {
+                redirect(base_url().'index.php/error_404');       
+            } 
+    }else 
+        {
+            redirect(base_url().'index.php/users/login');
+        }
 }
 
 	function edit()

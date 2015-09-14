@@ -85,6 +85,7 @@ function identificarVistaListadoConciliaciones()
     if(n > 0)
     {        
         $('body').find('#cont_contenidogeneral').removeClass('container');
+        $('body').find('#cont_contenidogeneral').addClass('col-custom');
     }
 }
 

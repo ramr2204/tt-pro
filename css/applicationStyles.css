@@ -47,3 +47,9 @@
     opacity: 0.5;
     display: none;
 }
+
+.col-custom
+{
+    margin-left: 20px;
+    margin-right: 20px;
+}
