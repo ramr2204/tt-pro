@@ -1226,12 +1226,14 @@ function consultar()
               //template data
               $this->template->set('title', 'Listado de Liquidaciones');
               $this->data['style_sheets']= array(
+                            'css/chosen.css' => 'screen',
                             'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen',
                             'css/plugins/bootstrap/fileinput.css' => 'screen',
                             'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen',
                             'css/applicationStyles.css' => 'screen'
                         );
               $this->data['javascripts']= array(
+                        'js/chosen.jquery.min.js',
                         'js/jquery.dataTables.min.js',
                         'js/plugins/dataTables/dataTables.bootstrap.js',
                         'js/jquery.dataTables.defaults.js',
@@ -1242,6 +1244,20 @@ function consultar()
                         'js/plugins/bootstrap/fileinput.min.js',
                         'js/plugins/bootstrap/bootstrap-switch.min.js'                        
                        );
+
+              /*
+              * Extrae el listado de tipos de estampilla
+              */
+              $tiposEstampilla = $this->codegen_model->getSelect('est_estampillas',"estm_id,estm_nombre");
+              $vTiposEst = array();
+              if(count($tiposEstampilla) > 0)
+              {
+                  foreach($tiposEstampilla as $tipoE)
+                  {
+                      $vTiposEst[$tipoE->estm_id] = $tipoE->estm_nombre;
+                  }
+              }
+              $this->data['estampillas'] = $vTiposEst;
                                               
               $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_consultar', $this->data);
               
@@ -1694,7 +1710,8 @@ function consultar()
         if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar') ) 
         {             
             $fecha_inicial = $_GET['fecha_I'];
-
+            $tipoEst = $_GET['est'];
+            
             /*
             * Valida si llega la fecha final o no
             */
@@ -1734,7 +1751,7 @@ function consultar()
                 $where .= ' AND date_format(i.impr_fecha,"%Y-%m-%d") = "'.$fecha_final.'"';  
                 //Bandera para la leyenda de la fecha
                 $fechaUnica = $fecha_final;            
-            } 
+            }            
 
             /*
             * Crea la consulta para el perfil de administrador o Usuario conciliación
@@ -1767,7 +1784,7 @@ function consultar()
                 $idFacturas .= $factura->impr_facturaid.',';
             }  
             $idFacturas .= '0)';
-            $where = 'where fact_id in '.$idFacturas;                            
+            $where = 'where fact_id in '.$idFacturas;            
               
             //Extrae los id de las liquidaciones
             $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"distinct f.fact_liquidacionid",$where);
@@ -1784,12 +1801,18 @@ function consultar()
               
             $campos = 'l.liqu_contratoid,l.liqu_tramiteid,l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_valorsiniva,l.liqu_fecha';
             $where = $whereIn;
+            $group = 'GROUP BY l.liqu_id';
 
-            $liquidaciones = $this->codegen_model->getSelect('est_facturas f',$campos,$where,$join2);
+            $liquidaciones = $this->codegen_model->getSelect('est_facturas f',$campos,$where,$join2, $group);
               
             if($liquidaciones)
-            {
-                  
+            {             
+                /*
+                * Vector para almacenar las liquidaciones
+                * que si tuvieron resultados, para enviarlas
+                * a la vista
+                */     
+                $vLiquidaciones = array();
                 foreach ($liquidaciones as $liquidacion) 
                 {
                     $where = 'where f.fact_liquidacionid = '.$liquidacion->liqu_id;  
@@ -1797,53 +1820,75 @@ function consultar()
                     $join3 .= ' INNER JOIN est_pagos pag ON pag.pago_facturaid=f.fact_id';
                     $join3 .= ' INNER JOIN est_papeles p ON i.impr_papelid=p.pape_id';
                     $join3 .= ' INNER JOIN users u ON u.id=p.pape_usuario';
-                    $resultado = $this->codegen_model->getSelect('est_facturas f',"f.fact_nombre, f.fact_valor, u.first_name, u.last_name, u.id, i.impr_fecha, i.impr_codigopapel, pag.pago_fecha",$where,$join3);
-                      
-                    $facturas=[];
-                    $liquidador = '';
-                    $cantEstampillas = 0;
-                    foreach ($resultado as $value) 
-                    {
-                        $facturas[] = ['tipo'=>$value->fact_nombre,
-                            'rotulo'=>$value->impr_codigopapel,
-                            'valor'=>$value->fact_valor,
-                            'fecha_impr'=>$value->impr_fecha,
-                            'fecha_pago'=>$value->pago_fecha];
-                        /*
-                        * Valida que el nombre del liquidador no haya sido asignado
-                        * para asignarlo una sola vez
-                        */ 
-                        if($liquidador == '')
-                        {
-                            $liquidador = strtoupper($value->first_name)
-                                .' '.strtoupper($value->last_name)
-                                .'<br>'.$value->id;
-                        }  
-                        /*
-                        * Cuenta la cantidad de estampillas para establecer
-                        * maquetacion en la renderizacion del listado
-                        */
-                        $cantEstampillas++;
-                    }             
-                    $liquidacion->liquidador = $liquidador;                    
-                    $liquidacion->estampillas = $facturas;
-                    $liquidacion->cantEstampillas = $cantEstampillas;
 
                     /*
-                    * Valida si la liquidacion fue de tramite o de contrato
-                    * para extraer el numero de contrato y el valor del acto
+                    * Se valida si llegó tipo de estampilla para construir
+                    * la consulta con la restriccion
                     */
-                    if($liquidacion->liqu_contratoid != 0)
+                    if($tipoEst != 0)
                     {
-                        $datosContrato = $this->codegen_model->getSelect('con_contratos c','c.cntr_numero, c.cntr_valor','WHERE cntr_id = '.$liquidacion->liqu_contratoid);
-                        $liquidacion->numActo = $datosContrato[0]->cntr_numero;
-                        $liquidacion->valorActo = $datosContrato[0]->cntr_valor;
-                    }else
-                        {                            
-                            $liquidacion->numActo = 'N/A';
-                            $liquidacion->valorActo = $liquidacion->liqu_valorsiniva;                            
-                        }
-                }                                  
+                        $where .= ' AND f.fact_estampillaid = '.$tipoEst;
+                    }
+                    $resultado = $this->codegen_model->getSelect('est_facturas f',"f.fact_nombre, f.fact_valor, u.first_name, u.last_name, u.id, i.impr_fecha, i.impr_codigopapel, pag.pago_fecha",$where,$join3);
+                     
+                    /*
+                    * Valida si hubo resultado para incluir o no la liquidacion
+                    * en el grupo para el informe
+                    */
+                    if(count($resultado) > 0)
+                    {
+                        /*
+                        * Agrega el objeto de la liquidacion al vector
+                        * que irá a la vista
+                        */
+                        $vLiquidaciones[] = $liquidacion;
+
+                        $facturas=[];
+                        $liquidador = '';
+                        $cantEstampillas = 0;
+                        foreach ($resultado as $value) 
+                        {
+                            $facturas[] = ['tipo'=>$value->fact_nombre,
+                                'rotulo'=>$value->impr_codigopapel,
+                                'valor'=>$value->fact_valor,
+                                'fecha_impr'=>$value->impr_fecha,
+                                'fecha_pago'=>$value->pago_fecha];
+                            /*
+                            * Valida que el nombre del liquidador no haya sido asignado
+                            * para asignarlo una sola vez
+                            */ 
+                            if($liquidador == '')
+                            {
+                                $liquidador = strtoupper($value->first_name)
+                                    .' '.strtoupper($value->last_name)
+                                    .'<br>'.$value->id;
+                            }  
+                            /*
+                            * Cuenta la cantidad de estampillas para establecer
+                            * maquetacion en la renderizacion del listado
+                            */
+                            $cantEstampillas++;
+                        }             
+                        $liquidacion->liquidador = $liquidador;                    
+                        $liquidacion->estampillas = $facturas;
+                        $liquidacion->cantEstampillas = $cantEstampillas;
+    
+                        /*
+                        * Valida si la liquidacion fue de tramite o de contrato
+                        * para extraer el numero de contrato y el valor del acto
+                        */
+                        if($liquidacion->liqu_contratoid != 0)
+                        {
+                            $datosContrato = $this->codegen_model->getSelect('con_contratos c','c.cntr_numero, c.cntr_valor','WHERE cntr_id = '.$liquidacion->liqu_contratoid);
+                            $liquidacion->numActo = $datosContrato[0]->cntr_numero;
+                            $liquidacion->valorActo = $datosContrato[0]->cntr_valor;
+                        }else
+                            {                            
+                                $liquidacion->numActo = 'N/A';
+                                $liquidacion->valorActo = $liquidacion->liqu_valorsiniva;                            
+                            }
+                    }
+                }
 
                 /*
                 * Valida que fecha llega a la vista para preparar la leyenda
@@ -1856,7 +1901,7 @@ function consultar()
                         $datos['fecha'] = 'PERIODO COMPRENDIDO ENTRE LAS FECHAS'.$fecha_inicial.' Y '.$fecha_final;
                     }
 
-                $datos['liquidaciones'] = $liquidaciones;
+                $datos['liquidaciones'] = $vLiquidaciones;
                 //Creación del PDF
                 $this->load->library("Pdf");                  
                 $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);

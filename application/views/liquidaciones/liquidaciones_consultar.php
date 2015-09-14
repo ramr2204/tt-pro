@@ -123,22 +123,39 @@ var oTable = $('#tablaq').dataTable( {
 </div> 
 
 <div class="row">     
-    <div class="col-xs-12 col-sm-3 col-sm-offset-5">
+    <div class="col-xs-12 col-sm-3 col-custom-chosen">
         Fecha (Generacion Estampilla):<div align="center" id="buscarfecha"></div>                
-    </div>   
-    <div class="col-xs-12 col-sm-4 btn-pdf">        
-        <a class="btn btn-danger" id="btn-relacion" >
-        <i class="fa fa-file-pdf-o fa-1x"></i>
-        Relación
-        </a>
-        <a class="btn btn-danger" id="btn-detalle">
-        <i class="fa fa-file-pdf-o fa-1x"></i>
-        Detalle
-        </a>
-        <a class="btn btn-danger" id="btn-rango">
-        <i class="fa fa-file-pdf-o fa-1x"></i>
-        Rango
-        </a>
+    </div>
+    <div class="col-xs-12 col-sm-4 btn-pdf">
+        <div class="form-group">
+            <label for="tipoEst">Tipo Estampilla (Detalle)</label>
+            <select class="form-control chosen" id="tipoEst">
+                <option value="0">Seleccione...</option>
+                <?php  foreach($estampillas as $id => $valor) { ?>
+                    <option value="<?php echo $id; ?>"><?php echo $valor; ?></option>
+                <?php   } ?>
+            </select>                
+        </div>
+    </div>
+    <div class="col-xs-12 col-sm-5 btn-pdf">        
+        <div class="btn-group group-custom-chosen">
+            <a class="btn btn-danger" id="btn-relacion" >
+                <i class="fa fa-file-pdf-o fa-1x"></i>
+                Relación
+            </a>        
+            <a class="btn btn-success" id="btn-detalle-excel">
+                <i class="fa fa-file-excel-o fa-1x"></i>
+                Detalle-Excel
+            </a>
+            <a class="btn btn-danger" id="btn-detalle-pdf">
+              <i class="fa fa-file-pdf-o fa-1x"></i>
+              Detalle-PDF
+            </a>        
+            <a class="btn btn-danger" id="btn-rango">
+                <i class="fa fa-file-pdf-o fa-1x"></i>
+                Rango
+            </a>
+        </div>
     </div>               
 </div>
             

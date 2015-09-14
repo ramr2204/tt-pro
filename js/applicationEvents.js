@@ -45,7 +45,7 @@ function inicial ()
     $('#form-conciliacion').submit(renderizarInicioCarga);
 
     //Eventos informes vista consultar
-    $('#btn-detalle').click(generarInformeDetallado);
+    $('#btn-detalle-pdf').click(generarInformeDetallado);
     $('#btn-relacion').click(generarInformeRelacion);
     $('#btn-rango').click(solicitarRango);
     $('#btn-consultar').click(generarInformeRango);
@@ -286,10 +286,11 @@ function generarInformeDetallado (e)
     e.preventDefault();  
 
     var fecha = $('#buscarfecha').find(':text').val();
-   
+    var tipoEst = $('#tipoEst').val();
+
     if(fecha != '')
     {
-        window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha);  
+        window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha+'&est='+tipoEst);  
     }    
     
 }
