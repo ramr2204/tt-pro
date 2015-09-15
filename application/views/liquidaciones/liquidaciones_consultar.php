@@ -234,14 +234,20 @@ var oTable = $('#tablaq').dataTable( {
           </div>
       </div>
       <div class="modal-footer">
-        <a class="btn btn-danger" id="btn-consultar">
-            <i class="fa fa-file-pdf-o fa-1x"></i>        
-            Consultar Relacion
-        </a>     
-        <a class="btn btn-danger" id="btn-consultar-detalle">
-            <i class="fa fa-file-pdf-o fa-1x"></i>        
-            Consultar Detalle
-        </a> 
+        <div class="btn-group">
+            <a class="btn btn-danger" id="btn-consultar">
+                <i class="fa fa-file-pdf-o fa-1x"></i>        
+                Consultar Relacion
+            </a>     
+            <a class="btn btn-success" id="btn-consultar-detalle-excel" documento="excel">
+                <i class="fa fa-file-excel-o fa-1x"></i>
+                Consultar Detalle-Excel
+            </a>
+            <a class="btn btn-danger" id="btn-consultar-detalle-pdf" documento="pdf">
+                <i class="fa fa-file-pdf-o fa-1x"></i>        
+                Consultar Detalle-PDF
+            </a>
+        </div>
       </div>
     </div>
   </div>

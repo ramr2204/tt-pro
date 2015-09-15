@@ -1708,7 +1708,7 @@ function consultar()
     {
           
         if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar') ) 
-        {             
+        {
             $fecha_inicial = $_GET['fecha_I'];
             $tipoEst = $_GET['est'];
             
@@ -1993,7 +1993,6 @@ function consultar()
 * de las liquidaciones de la fecha especificada
 * Mike Ortiz
 */
-
 function renderizarExcel()
 {
     if ($this->ion_auth->logged_in()) 
