@@ -354,8 +354,8 @@ function edit()
                         /*
                         * Valida si el archivo fue cargado
                         * para modificarlo o no
-                        */        
-                        if (isset($_FILES['upload_field_name']) && is_uploaded_file($_FILES['archivo']['tmp_name'])) 
+                        */
+                        if (isset($_FILES['archivo']) && is_uploaded_file($_FILES['archivo']['tmp_name'])) 
                         {
                             $path = 'uploads/ordenanzas';
                             if(!is_dir($path)) 

@@ -48,7 +48,7 @@
                                 </div>
                                 <div class="pull-right">
                                     <?php  echo anchor('ordenanzas', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
-                                    <button type="submit" class="btn btn-success" id="btn-ordenanzasAdd"><i class="fa fa-floppy-o"></i> Guardar</button>
+                                    <button type="submit" class="btn btn-success" id="btn-ordenanzasAdd"><i class="fa fa-floppy-o"></i> Guardar Cambios</button>
                                 </div>
                                 <?php echo form_close();?>                              
                         </div>
