@@ -46,6 +46,8 @@ function inicial ()
 
     //Eventos informes vista consultar
     $('#btn-detalle-pdf').click(generarInformeDetallado);
+    $('#btn-detalle-excel').click(generarInformeDetallado);
+
     $('#btn-relacion').click(generarInformeRelacion);
     $('#btn-rango').click(solicitarRango);
     $('#btn-consultar').click(generarInformeRango);
@@ -290,9 +292,19 @@ function generarInformeDetallado (e)
 
     if(fecha != '')
     {
-        window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha+'&est='+tipoEst);  
+        /*
+        * Valida cual boton generó el evento si pdf o excel
+        * para redireccionar respectivamente
+        */
+        var tipoInforme = $(this).attr('documento');
+        if(tipoInforme == 'pdf')
+        {
+            window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha+'&est='+tipoEst);
+        }else if(tipoInforme == 'excel')
+            {
+                window.open(base_url+'index.php/liquidaciones/renderizarExcel?fecha_I='+fecha+'&est='+tipoEst);
+            }
     }    
-    
 }
 
 

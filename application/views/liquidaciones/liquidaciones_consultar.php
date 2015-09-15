@@ -139,15 +139,15 @@ var oTable = $('#tablaq').dataTable( {
     </div>
     <div class="col-xs-12 col-sm-5 btn-pdf">        
         <div class="btn-group group-custom-chosen">
-            <a class="btn btn-danger" id="btn-relacion" >
+            <a class="btn btn-danger" id="btn-relacion">
                 <i class="fa fa-file-pdf-o fa-1x"></i>
                 Relación
             </a>        
-            <a class="btn btn-success" id="btn-detalle-excel">
+            <a class="btn btn-success" id="btn-detalle-excel" documento="excel">
                 <i class="fa fa-file-excel-o fa-1x"></i>
                 Detalle-Excel
             </a>
-            <a class="btn btn-danger" id="btn-detalle-pdf">
+            <a class="btn btn-danger" id="btn-detalle-pdf" documento="pdf">
               <i class="fa fa-file-pdf-o fa-1x"></i>
               Detalle-PDF
             </a>        
