@@ -155,7 +155,7 @@ class Ordenanzas extends MY_Controller {
                             redirect(base_url().'index.php/ordenanzas/add');
                         }
                         
-                        $path = 'uploads/ordenanzas/'.date('d-m-Y');
+                        $path = 'uploads/ordenanzas';
                         if(!is_dir($path)) 
                         { //create the folder if this does not exists
                            mkdir($path,0777,TRUE);      
@@ -237,33 +237,33 @@ function edit()
             /*
             * Valida que la ordenanza exista
             */
-            $where = 'WHERE orde_numero = '.$this->input->post('orde_numero');            
-            $vOrdenanza = $this->codegen_model->getSelect('est_ordenanzas',"orde_id", $where);
-
-
-
-
-
+            $where = 'WHERE orde_id = '.$idOrdenanza;            
+            $vOrdenanza = $this->codegen_model->getSelect('est_ordenanzas',"*", $where);
+            
+            if(count($vOrdenanza) <= 0)
+            {
+                $this->session->set_flashdata('errormessage', 'La Ordenanza Suministrada no Existe!');
+                redirect(base_url().'index.php/ordenanzas');
+            }
 
             $this->data['successmessage'] = $this->session->flashdata('successmessage');
             $this->data['errormessage'] = $this->session->flashdata('errormessage');
+            $this->data['ordenanza'] = $vOrdenanza[0];
 
-                $this->template->set('title', 'Nueva Ordenanza');
-                $this->data['style_sheets'] = array(
-                        'css/chosen.css' => 'screen',
-                        'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen',
-                        'css/plugins/bootstrap/fileinput.css' => 'screen'
-                    );
-                $this->data['javascripts']= array(
-                        'js/chosen.jquery.min.js',
-                        'js/plugins/bootstrap/moment.js',
-                        'js/plugins/bootstrap/bootstrap-datetimepicker.js',
-                        'js/plugins/bootstrap/fileinput.min.js'
-                    );
+            $this->template->set('title', 'Editar Ordenanza');
+            $this->data['style_sheets'] = array(
+                    'css/chosen.css' => 'screen',
+                    'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen',
+                    'css/plugins/bootstrap/fileinput.css' => 'screen'
+                );
+            $this->data['javascripts']= array(
+                    'js/chosen.jquery.min.js',
+                    'js/plugins/bootstrap/moment.js',
+                    'js/plugins/bootstrap/bootstrap-datetimepicker.js',
+                    'js/plugins/bootstrap/fileinput.min.js'
+                );
                 
-                $this->template->load($this->config->item('admin_template'),'ordenanzas/ordenanzas_add', $this->data);             
-
-              
+            $this->template->load($this->config->item('admin_template'),'ordenanzas/ordenanzas_edit', $this->data);              
                         
         }else
             {
@@ -274,7 +274,152 @@ function edit()
             redirect(base_url().'index.php/users/login');
         }        
   }
-	
+  
+    /*
+    * Funcion que administra el registro de una
+    * nueva ordenanza
+    */
+    function update()
+    {
+        if ($this->ion_auth->logged_in()) 
+        {
+            if ($this->ion_auth->is_admin()) 
+            {
+                /*
+                * Valida que la ordenanza suministrada exista                        
+                */
+                $idOrdenanza = $this->input->post('id');
+                $where = 'WHERE orde_id = '.$idOrdenanza;            
+                $vOrdenanza = $this->codegen_model->getSelect('est_ordenanzas',"*", $where);
+
+                if(count($vOrdenanza) <= 0)
+                {
+                    $this->session->set_flashdata('errormessage', 'La Ordenanza Suministrada no Existe!');
+                    redirect(base_url().'index.php/ordenanzas');
+                }
+
+                $this->form_validation->set_rules('orde_fecha', 'Fecha Pago', 'required|trim|xss_clean|required');   
+                $this->form_validation->set_rules('orde_iniciovigencia', 'Fecha Inicio Vigencia', 'trim|xss_clean|required');
+                $this->form_validation->set_rules('orde_numero', 'Número de Ordenanza', 'numeric|trim|xss_clean|required');
+
+                if($this->form_validation->run() == false) 
+                {
+                    $this->session->set_flashdata('errormessage', validation_errors());
+                    redirect(base_url().'index.php/ordenanzas/edit/'.$idOrdenanza);                            
+                }else
+                    {   
+                        /*
+                        * Valida que las fechas suministradas tengan formato valido
+                        */
+                        $fechaExpedicion = $this->input->post('orde_fecha');
+                        $fechaInicioVigencia = $this->input->post('orde_iniciovigencia');
+
+                        $patronFecha = '/^[0-9]{4,4}-[0-9]{2,2}-([0-9]{2,2})$/';
+                        $errorF = 'Error:<br>';
+                        if(!preg_match($patronFecha, $fechaExpedicion))
+                        {
+                            $errorF .= 'La Fecha de Expedición debe tener un formato correcto<br>';
+                        }
+                        if(!preg_match($patronFecha, $fechaInicioVigencia))
+                        {
+                            $errorF .= 'La Fecha de Inicio de Vigencia debe tener un formato correcto<br>';
+                        }
+
+                        if($errorF != 'Error:<br>')
+                        {
+                            $this->session->set_flashdata('errormessage', $errorF);
+                            redirect(base_url().'index.php/ordenanzas/edit/'.$idOrdenanza);
+                        }                                                
+                        
+                        /*
+                        * Valida si el numero de ordenanza y año suministrados
+                        * son los mismos para verificar o no que no se repita
+                        * el mismo numero de ordenanza en el mismo año
+                        */                        
+                        $year = explode('-', $this->input->post('orde_fecha'));
+                        $year = $year[0];
+
+                        if($vOrdenanza[0]->orde_numero != $this->input->post('orde_numero') || $vOrdenanza[0]->orde_year != $year)
+                        {
+                            $where = 'WHERE orde_numero = '.$this->input->post('orde_numero')
+                                .' AND orde_year ="'.$year.'"';
+                            $vOrdenanza = $this->codegen_model->getSelect('est_ordenanzas',"orde_id", $where);
+                            if(count($vOrdenanza) > 0)
+                            {
+                                $this->session->set_flashdata('errormessage', 'Ya Existe una Ordenanza con el Número ['.$this->input->post('orde_numero').'] para el Año ['.$year.']');
+                                redirect(base_url().'index.php/ordenanzas/edit/'.$idOrdenanza);
+                            }                            
+                        }
+
+                        /*
+                        * Valida si el archivo fue cargado
+                        * para modificarlo o no
+                        */
+                        if (isset($_FILES['archivo']) && is_uploaded_file($_FILES['archivo']['tmp_name'])) 
+                        {
+                            $path = 'uploads/ordenanzas';
+                            if(!is_dir($path)) 
+                            { //create the folder if this does not exists
+                               mkdir($path,0777,TRUE);      
+                            }
+                    
+                            $config['upload_path'] = $path;
+                            $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
+                            $config['remove_spaces']= TRUE;
+                            $config['max_size'] = '2048';
+                            $config['overwrite'] = TRUE;
+                            $config['file_name']='ordenanza_'.$this->input->post('orde_numero').'_'.$year;                      
+    
+                            $this->load->library('upload');
+                            $this->upload->initialize($config);
+                            
+                            if($this->upload->do_upload("archivo")) 
+                            {
+                                /*
+                                * Establece la informacion para actualizar la liquidacion
+                                * en este caso la ruta de la copia del objeto del contrato
+                                */
+                                $file_datos= $this->upload->data();
+                                $datos['orde_rutadocumento'] = $path.'/'.$file_datos['orig_name'];
+                            }else
+                                {
+                                    $err = $this->upload->display_errors();
+                                    $this->session->set_flashdata('errormessage', $err);
+                                    redirect(base_url().'index.php/ordenanzas/edit/'.$idOrdenanza);
+                                }                          
+                        }                                                
+
+                        /*
+                        * Se registran los datos de la ordenanza
+                        */                      
+                        $datos['orde_numero'] = $this->input->post('orde_numero');
+                        $datos['orde_fecha'] = $this->input->post('orde_fecha');
+                        $datos['orde_iniciovigencia'] = $this->input->post('orde_iniciovigencia');                            
+                        $datos['orde_year'] = $year;
+                        $datos['orde_estado'] = 1;
+
+                        /*
+                        * Se Actualiza la Ordenanza
+                        */
+                        $this->codegen_model->edit('est_ordenanzas',$datos,'orde_id',$idOrdenanza);
+
+                        /*
+                        * Se redirecciona a la vista
+                        */
+                        $this->session->set_flashdata('successmessage', 'Se Modificó con éxito la Ordenanza Número ['.$datos['orde_numero'].'] con Fecha '.$datos['orde_fecha']);
+                        redirect(base_url().'index.php/ordenanzas/edit/'.$idOrdenanza);
+                    }
+            }else 
+                {
+                    redirect(base_url().'index.php/error_404');
+                }
+        }else 
+            {
+                redirect(base_url().'index.php/users/login');
+            }
+  }
+
+
   function delete()
   {
       if ($this->ion_auth->logged_in()) {
