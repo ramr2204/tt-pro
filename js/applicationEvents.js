@@ -45,11 +45,14 @@ function inicial ()
     $('#form-conciliacion').submit(renderizarInicioCarga);
 
     //Eventos informes vista consultar
-    $('#btn-detalle').click(generarInformeDetallado);
+    $('#btn-detalle-pdf').click(generarInformeDetallado);
+    $('#btn-detalle-excel').click(generarInformeDetallado);
+
     $('#btn-relacion').click(generarInformeRelacion);
     $('#btn-rango').click(solicitarRango);
     $('#btn-consultar').click(generarInformeRango);
-    $('#btn-consultar-detalle').click(generarInformeRangoDetalle);
+    $('#btn-consultar-detalle-pdf').click(generarInformeRangoDetalle);
+    $('#btn-consultar-detalle-excel').click(generarInformeRangoDetalle);
  
     //Solicita la identificacion de vistas
     //con controles timepicker
@@ -139,6 +142,7 @@ function generarInformeRangoDetalle(e)
 {
     var fecha_inicial = $('#m_rango').find('[name="f_inicial"]').val();
     var fecha_final = $('#m_rango').find('[name="f_final"]').val();
+    var tipoEst = $('#tipoEst').val();
     
     /*
     * Se valida numericamente que las fechas tengan valor
@@ -162,7 +166,18 @@ function generarInformeRangoDetalle(e)
 
     if((fe_i+fe_f) > 0)
     {
-        window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final);
+        /*
+        * Valida cual boton generó el evento si pdf o excel
+        * para redireccionar respectivamente
+        */
+        var tipoInforme = $(this).attr('documento');
+        if(tipoInforme == 'pdf')
+        {
+            window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst);
+        }else if(tipoInforme == 'excel')
+            {
+                window.open(base_url+'index.php/liquidaciones/renderizarExcel?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst);
+            }
     }
 }
 
@@ -286,12 +301,23 @@ function generarInformeDetallado (e)
     e.preventDefault();  
 
     var fecha = $('#buscarfecha').find(':text').val();
-   
+    var tipoEst = $('#tipoEst').val();
+
     if(fecha != '')
     {
-        window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha);  
+        /*
+        * Valida cual boton generó el evento si pdf o excel
+        * para redireccionar respectivamente
+        */
+        var tipoInforme = $(this).attr('documento');
+        if(tipoInforme == 'pdf')
+        {
+            window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha+'&est='+tipoEst);
+        }else if(tipoInforme == 'excel')
+            {
+                window.open(base_url+'index.php/liquidaciones/renderizarExcel?fecha_I='+fecha+'&est='+tipoEst);
+            }
     }    
-    
 }
 
 

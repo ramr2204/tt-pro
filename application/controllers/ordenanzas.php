@@ -83,9 +83,7 @@ class Ordenanzas extends MY_Controller {
                         'js/plugins/bootstrap/bootstrap-datetimepicker.js',
                         'js/plugins/bootstrap/fileinput.min.js'
                     );
-                $this->data['items']  = $this->codegen_model->getItems();
-                $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
-                $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
+                
                 $this->template->load($this->config->item('admin_template'),'ordenanzas/ordenanzas_add', $this->data);             
             }else 
                 {
@@ -225,7 +223,6 @@ function edit()
     {
         if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('ordenanzas/edit')) 
         {  
-
             $idOrdenanza = $this->uri->segment(3);
             
             /*
@@ -237,78 +234,45 @@ function edit()
                 redirect(base_url().'index.php/ordenanzas');
             }
 
-              $resultado = $this->codegen_model->get('con_contratistas','cont_nit','cont_id = '.$idOrdenanza,1,NULL,true);
-       
-              foreach ($resultado as $key => $value) {
-                  $aplilo[$key]=$value;
-              }
-             
-              if ($aplilo['cont_nit']==$this->input->post('nit')) {
-                  
-                  $this->form_validation->set_rules('nit', 'NIT', 'required|trim|xss_clean|max_length[100]');
+            /*
+            * Valida que la ordenanza exista
+            */
+            $where = 'WHERE orde_numero = '.$this->input->post('orde_numero');            
+            $vOrdenanza = $this->codegen_model->getSelect('est_ordenanzas',"orde_id", $where);
+
+
+
+
+
+
+            $this->data['successmessage'] = $this->session->flashdata('successmessage');
+            $this->data['errormessage'] = $this->session->flashdata('errormessage');
+
+                $this->template->set('title', 'Nueva Ordenanza');
+                $this->data['style_sheets'] = array(
+                        'css/chosen.css' => 'screen',
+                        'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen',
+                        'css/plugins/bootstrap/fileinput.css' => 'screen'
+                    );
+                $this->data['javascripts']= array(
+                        'js/chosen.jquery.min.js',
+                        'js/plugins/bootstrap/moment.js',
+                        'js/plugins/bootstrap/bootstrap-datetimepicker.js',
+                        'js/plugins/bootstrap/fileinput.min.js'
+                    );
+                
+                $this->template->load($this->config->item('admin_template'),'ordenanzas/ordenanzas_add', $this->data);             
+
               
-              } else {
-
-                  $this->form_validation->set_rules('nit', 'NIT', 'required|trim|xss_clean|max_length[100]|is_unique[con_contratistas.cont_nit]');
-              
-              }
-              $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]');   
-              $this->form_validation->set_rules('direccion', 'Dirección', 'trim|xss_clean|max_length[256]');
-              $this->form_validation->set_rules('telefono', 'Telefono', 'numeric|trim|xss_clean|max_length[15]');
-              $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
-              $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
-              $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|greater_than[0]');   
-
-              if ($this->form_validation->run() == false) {
-                  
-                  $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);
-                            
-              } else {                            
-                  
-                  $data = array(
-                        'cont_nombre' => $this->input->post('nombre'),
-                        'cont_nit' => $this->input->post('nit'),
-                        'cont_direccion' => $this->input->post('direccion'),
-                        'cont_municipioid' => $this->input->post('municipioid'),
-                        'cont_regimenid' => $this->input->post('regimenid'),
-                        'cont_telefono' => $this->input->post('telefono'),
-                        'cont_tipocontratistaid' => $this->input->post('tipocontratistaid')
-
-                     );
-                           
-                	if ($this->codegen_model->edit('con_contratistas',$data,'cont_id',$idregimen) == TRUE) {
-
-                      $this->session->set_flashdata('successmessage', 'El contratista se ha editado con éxito');
-                      redirect(base_url().'index.php/contratistas/edit/'.$idregimen);
-                      
-                	} else {
-                				  
-                      $this->data['errormessage'] = 'No se pudo registrar el aplilo';
-
-                	}
-              }   
-                  $this->data['style_sheets']= array(
-                        'css/chosen.css' => 'screen'
-                        );
-                  $this->data['javascripts']= array(
-                        'js/chosen.jquery.min.js'
-                        );    
-                  $this->data['successmessage']=$this->session->flashdata('successmessage');
-                  $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                	$this->data['result'] = $this->codegen_model->get('con_contratistas','cont_id,cont_nombre,cont_nit,cont_direccion,cont_telefono,cont_municipioid,cont_regimenid,cont_tributarioid, cont_tipocontratistaid','cont_id = '.$idregimen,1,NULL,true);
-                  $this->data['municipios']  = $this->codegen_model->getMunicipios();
-                  $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
-                  $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
-                  $this->template->set('title', 'Editar contratista');
-                  $this->template->load($this->config->item('admin_template'),'contratistas/contratistas_edit', $this->data);
                         
-          }else {
-              redirect(base_url().'index.php/error_404');
-          }
-      } else {
-          redirect(base_url().'index.php/users/login');
-      }
-        
+        }else
+            {
+                redirect(base_url().'index.php/error_404');
+            }
+    }else
+        {
+            redirect(base_url().'index.php/users/login');
+        }        
   }
 	
   function delete()
