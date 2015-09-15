@@ -20,7 +20,7 @@ class Liquidaciones extends MY_Controller {
 	  $this->load->helper(array('form','url','codegen_helper'));
       $this->load->model('liquidaciones_model','',TRUE);
       $this->load->model('codegen_model','',TRUE);
-	}	
+	}
 	
 	function index()
     {
