@@ -149,7 +149,7 @@ class Liquidaciones extends MY_Controller {
                   $valorsiniva = (float)$contrato->cntr_valor/(((float)$contrato->regi_iva/100)+1);
 
                   //Formatea el resultado del calculo de valor sin iva
-                  //para que redondee por decimales y centenares
+                  //para que redondee por decimales y unidades de mil
                   //ej valorsiniva=204519396.55172 ->decimales -> 204519397 ->centenas ->204519400
                   $sinIvaRedondeoDecimales = round($valorsiniva);
                   $sinIvaRedondeoCentenas = round($sinIvaRedondeoDecimales, -2);  
