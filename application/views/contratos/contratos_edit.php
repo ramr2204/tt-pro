@@ -102,6 +102,22 @@
                                      </div>
 
                                      <div class="col-md-12 column">
+                                      <div class="form-group">
+                                           <label for="cntr_municipio_origen">Municipio Origen del Contrato</label>
+                                           <select class="form-control" id="cntr_municipio_origen" name="cntr_municipio_origen" required="required" >
+                                           <option value="0">Seleccione...</option>
+                                             <?php  foreach($municipios as $row) { ?>
+                                                <?php if ($row->muni_id==$result->cntr_municipio_origen) { ?>                                                    
+                                                    <option selected value="<?php echo $row->muni_id; ?>"><?php echo $row->muni_nombre; ?></option>
+                                                    <?php } else { ?>
+                                                    <option value="<?php echo $row->muni_id; ?>"><?php echo $row->muni_nombre; ?></option>
+                                                    <?php } ?>                                             
+                                             <?php   } ?>
+                                           </select>
+                                           <?php echo form_error('cntr_municipio_origen','<span class="text-danger">','</span>'); ?>
+                                    </div>
+
+                                     <div class="col-md-12 column">
 
                                           <div class="form-group">
                                            <label for="objeto">Objeto</label>
@@ -169,7 +185,8 @@
     //style selects
     var config = {
       '#contratistaid'  : {disable_search_threshold: 10},
-      '#tipocontratoid'  : {disable_search_threshold: 10}
+      '#tipocontratoid'  : {disable_search_threshold: 10},
+      '#cntr_municipio_origen'  : {disable_search_threshold: 10}
     }
     for (var selector in config) {
         $(selector).chosen(config[selector]);

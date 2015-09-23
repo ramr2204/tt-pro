@@ -140,7 +140,6 @@ class Liquidaciones extends MY_Controller {
               $estampillas = $this->liquidaciones_model->getestampillas($contrato->cntr_tipocontratoid);  
               $this->data['estampillas'] = [];
 
-
               //valida el valor del porcentaje según el regimen
               //del contratista para realizar un calcúlo acertado
 
