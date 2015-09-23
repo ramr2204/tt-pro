@@ -7,7 +7,7 @@ class Liquidaciones_model extends CI_Model {
 
     
     function get($id){
-        $this->db->select('c.cntr_id,c.cntr_numero,co.cont_nit,co.cont_nombre,c.cntr_fecha_firma,c.cntr_objeto,c.cntr_valor,c.cntr_vigencia,re.regi_nombre,re.regi_iva,ti.tico_iva,ti.tico_nombre,cu.cuan_minima,cu.cuan_menor,tc.tpco_nombre,c.cntr_tipocontratoid');
+        $this->db->select('c.cntr_id,c.cntr_numero,co.cont_nit,co.cont_nombre,c.cntr_fecha_firma,c.cntr_objeto,c.cntr_valor,c.cntr_vigencia, cntr_municipio_origen,re.regi_nombre,re.regi_iva,ti.tico_iva,ti.tico_nombre,cu.cuan_minima,cu.cuan_menor,tc.tpco_nombre,c.cntr_tipocontratoid');
         $this->db->from('con_contratos c');
         $this->db->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
         $this->db->join('con_tiposcontratos ti', 'ti.tico_id = c.cntr_tipocontratoid', 'left');
