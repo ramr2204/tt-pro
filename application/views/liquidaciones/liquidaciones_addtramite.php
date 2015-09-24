@@ -54,10 +54,17 @@
                                              <?php   } ?>
                                            </select>
                                            <?php echo form_error('tramiteid','<span class="text-danger">','</span>'); ?>
-                                    </div>
-                                         
-
+                                    </div>                                         
                                      </div>
+
+                                    <div id="contene_placaVehiculo" style="display:none;">
+                                        <div class="row panel-body">
+                                            <div class="col-md-4"> <label for="placa">Placa del Vehiculo</label> </div>
+                                            <div class="col-md-8"> <input class="form-control" id="placa" type="text" name="placa" value="<?php echo set_value('placa'); ?>" maxlength="8" /></div>
+                                            <?php echo form_error('placa','<span class="text-danger">','</span>'); ?>
+                                        </div>
+                                    </div>
+
                                      <div class="col-md-12 column">
 
                                           <div class="form-group">
@@ -88,12 +95,28 @@
   <script type="text/javascript">
     //style selects
     var config = {
-      '#tramiteid'  : {disable_search_threshold: 10}
+      '#tramiteid'  : {disable_search_threshold: 10,no_results_text: "No se encuentra"}
     }
     for (var selector in config) {
-        $(selector).chosen(config[selector]);
+        $(selector).chosen(config[selector]).change(switchPlacaVehiculo);
     }
 
+    /*
+    * Funcion de apoyo que muestra u oculta el input
+    * de placa de vehiculo
+    */
+    function switchPlacaVehiculo(e)
+    {
+        var tipoTramite = $(this).val();
+    
+        if(tipoTramite == 16)
+        {
+            $('#contene_placaVehiculo').slideDown(300);                
+        }else
+            {
+                $('#contene_placaVehiculo').slideUp(300);                
+            }
+    }
   </script>
   <script type="text/javascript">
       $( "#documento" ).change(function() {

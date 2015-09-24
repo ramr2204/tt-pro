@@ -253,7 +253,7 @@ class Generarpdf extends CI_controller {
 
           if ($this->uri->segment(3)==''){
                redirect(base_url().'index.php/error_404');
-          } 
+          }
 
 
           //verifica que el usuario que llama el metodo
