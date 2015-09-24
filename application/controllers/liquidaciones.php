@@ -1094,6 +1094,7 @@ function verliquidartramite()
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
 
               $this->data['successmessage']=$this->session->flashdata('message');  
+              $this->data['infomessage']= $this->session->flashdata('infomessage');  
 
               $this->form_validation->set_rules('encontrado', 'encontrado','required|trim|xss_clean|numeric');
               $this->form_validation->set_rules('documento', 'Documento',  'required|trim|xss_clean');  
@@ -1101,32 +1102,54 @@ function verliquidartramite()
               $this->form_validation->set_rules('tramiteid', 'Trámite','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('observaciones', 'Observaciones','trim|xss_clean'); 
               
-              if ($this->form_validation->run() == false) {
-
-                  $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
-              } else {    
-                                   
-
-                  $data = array(
+            if ($this->form_validation->run() == false) 
+            {
+                $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
+            }else 
+                {   
+                    $data = array(
                         'litr_tramiteid' => $this->input->post('tramiteid'),
                         'litr_tramitadorid' => $this->input->post('documento'),
                         'litr_tramitadornombre' => $this->input->post('nombre'),
                         'litr_fechaliquidacion' => date("Y-m-d H:i:s"),
                         'litr_estadolocalid' => 0,
                         'litr_observaciones' => $this->input->post('observaciones')
-                     );
-                 
-                  if ($this->codegen_model->add('est_liquidartramites',$data) == TRUE) {
-                      $id=$this->db->insert_id();
-                      $this->session->set_flashdata('message','La liquidación se realizó con éxito');
-                      $this->session->set_flashdata('accion', 'creado');
-                      redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
-                  } else {
+                        );
 
-                      $this->data['errormessage'] = 'No se pudo realizar la liquidación';
-                  }
+                    /*
+                    * Valida si el tramite suministrado es 16
+                    * certificado de paz y salvo de impuesto de vehiculos
+                    * se valida que llegue una placa
+                    */
+                    if($this->input->post('tramiteid') == 16)
+                    {
+                        $this->form_validation->set_rules('placa', 'Placa del Vehiculo','required|trim|xss_clean');
+                        if ($this->form_validation->run() == false) 
+                        {
+                            $this->session->set_flashdata('infomessage', validation_errors());
+                            redirect(base_url().'index.php/liquidaciones/addtramite');                            
+                        }else
+                            {
+                                /*
+                                * Se incluye el numero de la placa para registrarlo
+                                * en el tramite
+                                */
+                                $data[]
+                            }
+                    }                                       
+                     
+                    if ($this->codegen_model->add('est_liquidartramites',$data) == TRUE) 
+                    {
+                        $id=$this->db->insert_id();
+                        $this->session->set_flashdata('message','La liquidación se realizó con éxito');
+                        $this->session->set_flashdata('accion', 'creado');
+                        redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
+                    }else 
+                        {
+                            $this->data['errormessage'] = 'No se pudo realizar la liquidación';
+                        }
+                }
 
-              }
               $this->template->set('title', 'Liquidar trámites');
               $this->data['style_sheets']= array(
                         'css/chosen.css' => 'screen'
