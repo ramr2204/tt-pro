@@ -828,6 +828,16 @@ function verliquidartramite()
               
               $this->data['result'] = $this->liquidaciones_model->getliquidartramite($idliquidacion);
               $tramite = $this->data['result'];
+              
+              /*
+              * Valida si la liquidacion del tramite tiene el numero de placa
+              * para concatenarlo con el nombre del tramitador
+              */
+              if($tramite->litr_placaVehiculo != '')
+              {
+                  $this->data['result']->litr_tramitadornombre = $tramite->litr_tramitadornombre.' - Numero de Placa ('.$tramite->litr_placaVehiculo.')';
+              }
+
               $parametros=$this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo','para_id = 1',1,NULL,true);
               $this->data['estampillas'] = $this->liquidaciones_model->getestampillastramites($this->data['result']->litr_tramiteid);
 
@@ -1134,7 +1144,7 @@ function verliquidartramite()
                                 * Se incluye el numero de la placa para registrarlo
                                 * en el tramite
                                 */
-                                $data[]
+                                $data['litr_placaVehiculo'] = $this->input->post('placa');
                             }
                     }                                       
                      
