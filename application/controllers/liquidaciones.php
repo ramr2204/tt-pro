@@ -175,8 +175,15 @@ class Liquidaciones extends MY_Controller {
                 * y el municipio del contrato es distinto a Ibagué
                 * para no liquidar la estampilla
                 */
-                if(($value->estm_id == 4 && $contrato->cntr_municipio_origen == 1028) || $value->estm_id != 4)
-                {
+                /************************
+                *
+                * SE COMENTA ESTA VALIDACION MIENTRAS EL INGENIERO EVELIO
+                * DEFINE CUANDO DEBE SER HABILITADA
+                * SOLO SE DEBE MODIFICAR EL MUNICIPIO DE ORIGEN AL ID DEL MUNICIPIO
+                * QUE EL INGE EVELIO DIGA QUE NO SE DEBE COBRAR LA ESTAMPILLA PRO HOSPITALES
+                */
+                //if(($value->estm_id == 4 && $contrato->cntr_municipio_origen != 1028) || $value->estm_id != 4)
+                //{
                     //Realiza la validación para los contratos de tipo
                     //consultoria o concesión y que el valor del contrato
                     //sea >= 10 SMMLV para aplicar la estampilla pro grandeza de colombia                
@@ -208,7 +215,7 @@ class Liquidaciones extends MY_Controller {
     
                              array_push($this->data['estampillas'], $value);
                         }                    
-                }
+                //}
             }
 
               $this->data['est_totalestampilla']=$totalestampilla;
