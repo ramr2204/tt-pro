@@ -164,7 +164,7 @@
                 */
                 if($result->liqu_soporteobjeto != '')
                 {
-                    echo "<a href='".base_url().$result->liqu_soporteobjeto."' target='_blank'><img src='".base_url().$result->liqu_soporteobjeto."' class='file-preview-image' alt='Objeto Contrato' title='Ver Objeto Contrato'>"
+                    echo "<a class='btn btn-success' href='".base_url().$result->liqu_soporteobjeto."' target='_blank'><img src='".base_url().$result->liqu_soporteobjeto."' class='file-preview-image' alt='Objeto Contrato' title='Ver Objeto Contrato'>"
                         ."</a>";
                 }else
                     {
