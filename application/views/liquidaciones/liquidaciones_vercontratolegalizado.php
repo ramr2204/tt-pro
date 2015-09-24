@@ -150,7 +150,31 @@
 <?php $x++; ?>
 <?php } ?>
 
- </tbody>   
+</tbody>
+<tfoot>
+      <tr>
+        <th colspan="5">
+            <div class="col-xs-12 col-sm-7 text-right">        
+                <label>VER OBJETO CONTRATO</label>     
+            </div>
+            <div class="col-xs-12 col-sm-5 text-right">
+                <?php
+                /*
+                * Valida si hay registrado un objeto de contrato
+                */
+                if($result->liqu_soporteobjeto != '')
+                {
+                    echo "<a href='".base_url().$result->liqu_soporteobjeto."' target='_blank'><img src='".base_url().$result->liqu_soporteobjeto."' class='file-preview-image' alt='Objeto Contrato' title='Ver Objeto Contrato'>"
+                        ."</a>";
+                }else
+                    {
+                        echo "<label class='label label-danger'>NO SE REGISTRO UN OBJETO PARA ESTE CONTRATO</label>";
+                    }
+                ?>
+            </div>            
+        </th>
+     </tr>
+</tfoot>
 </table>
   <?php //echo form_open_multipart("liquidaciones/cargar_comprobante",'role="form"');?>
 <?php //echo form_close();?>
