@@ -62,15 +62,13 @@ class Contratos extends MY_Controller {
   {        
       if ($this->ion_auth->logged_in()) {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/add')) {
-
-
-           
-
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/add')) {
 
               $this->data['successmessage']=$this->session->flashdata('message');  
               $valor=str_replace('.','',$this->input->post('valor'));
               $vigencia=explode("-", $this->input->post('fecha'));
+              
+              $this->form_validation->set_rules('cntr_municipio_origen', 'Municipio Origen','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('contratistaid', 'contratista','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('tipocontratoid', 'Tipo de contrato','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('fecha', 'Fecha',  'required|trim|xss_clean');  
@@ -91,6 +89,7 @@ class Contratos extends MY_Controller {
                         'cntr_objeto' => $this->input->post('objeto'),
                         'cntr_valor' => $valor,
                         'cntr_vigencia' => $vigencia[0],
+                        'cntr_municipio_origen' => $this->input->post('cntr_municipio_origen')
                      );
                  
                   if ($this->codegen_model->add('con_contratos',$data) == TRUE) {
@@ -118,6 +117,7 @@ class Contratos extends MY_Controller {
               $this->template->set('title', 'Ingreso manual de contrato');
               $this->data['tiposcontratos']  = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
               $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
+              $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 29');
               $this->template->load($this->config->item('admin_template'),'contratos/contratos_add', $this->data);
              
           } else {
@@ -145,6 +145,8 @@ class Contratos extends MY_Controller {
               
               //$valor=str_replace('.','',$this->input->post('valor'));
               $vigencia=explode("-", $this->input->post('fecha'));
+
+              $this->form_validation->set_rules('cntr_municipio_origen', 'Municipio Origen','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('contratistaid', 'contratista','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('tipocontratoid', 'Tipo de contrato','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('fecha', 'Fecha',  'required|trim|xss_clean');  
@@ -166,6 +168,7 @@ class Contratos extends MY_Controller {
                         'cntr_objeto' => $this->input->post('objeto'),
                         'cntr_valor' => $this->input->post('valor'),
                         'cntr_vigencia' => $vigencia[0],
+                        'cntr_municipio_origen' => $this->input->post('cntr_municipio_origen')
                      ); 
                 	if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idcontrato) == TRUE) {
 
@@ -191,9 +194,10 @@ class Contratos extends MY_Controller {
 
                   $this->data['successmessage']=$this->session->flashdata('successmessage');
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                	$this->data['result'] = $this->codegen_model->get('con_contratos','cntr_id,cntr_contratistaid,cntr_tipocontratoid,cntr_fecha_firma,cntr_numero,cntr_objeto,cntr_valor','cntr_id = '.$idcontrato,1,NULL,true);
+                	$this->data['result'] = $this->codegen_model->get('con_contratos','cntr_id,cntr_contratistaid,cntr_municipio_origen,cntr_tipocontratoid,cntr_fecha_firma,cntr_numero,cntr_objeto,cntr_valor','cntr_id = '.$idcontrato,1,NULL,true);
                   $this->data['tiposcontratos']  = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
                   $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
+                  $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 29');
                   $this->template->set('title', 'Editar contrato');
                   $this->template->load($this->config->item('admin_template'),'contratos/contratos_edit', $this->data);
                         
