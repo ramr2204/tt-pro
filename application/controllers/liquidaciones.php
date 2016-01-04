@@ -232,7 +232,7 @@ class Liquidaciones extends MY_Controller {
           redirect(base_url().'index.php/users/login');
       }
 
-  }	
+  } 
 
  
   function procesarliquidacion()
@@ -1531,7 +1531,7 @@ function consultar()
                                     'impr_papelid' => $papeles->pape_id,
                                     'impr_facturaid' => $ObjetoFactura[0]->fact_id,
                                     'impr_observaciones' => 'Correcta',
-                                    'impr_fecha' => date('Y-m-d H:i:s',now()),
+                                    'impr_fecha' => date('Y-m-d H:i:s'),
                                     'impr_codigo' => $codigo,
                                     'impr_estampillaid' => $codificacion,
                                     'impr_estadoContintencia' => 'NO',
