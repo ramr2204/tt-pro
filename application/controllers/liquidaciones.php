@@ -852,7 +852,7 @@ function verliquidartramite()
               foreach ($estampillas as $key => $value) {
                 
                  $totalestampilla[$value->estm_id] = (($salarioMinimoDiario*$value->estr_porcentaje)/100);
-                 $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
+                 $totalestampilla[$value->estm_id] = Liquidaciones::ceiling($totalestampilla[$value->estm_id], 1000);                 
                  $valortotal+=$totalestampilla[$value->estm_id];
               }
               $this->data['idtramite']=$idliquidacion;
@@ -871,6 +871,15 @@ function verliquidartramite()
       }
 
   } 
+
+  /*
+  * Funcion de apoyo que redondea hacia arriba
+  * la cifra dada dependiendo del grado de redondeo
+  */
+  function ceiling($number, $significance = 1)
+  {
+        return ( is_numeric($number) && is_numeric($significance) ) ? (ceil($number/$significance)*$significance) : false;
+  }
  
  function procesarliquidaciontramite()
   {        
@@ -913,6 +922,7 @@ function verliquidartramite()
                           'fact_estampillaid' => $this->input->post('idestampilla'.$i),
                           'fact_rutaimagen' => $this->input->post('rutaimagen'.$i),
                           );
+
                           $this->codegen_model->add('est_facturas',$data);
 
                           /**
