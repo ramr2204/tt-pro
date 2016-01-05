@@ -1399,24 +1399,26 @@ function consultar()
   {
     if ($this->ion_auth->logged_in())
     {
-          //verifica que el usuario que llama el metodo
-          //tenga perfil de liquidador
-          $usuarioLogueado=$this->ion_auth->user()->row();
+            //verifica que el usuario que llama el metodo
+            //tenga perfil de liquidador
+            $usuarioLogueado=$this->ion_auth->user()->row();
 
-          if ($usuarioLogueado->perfilid==4)
-          {
-              $validacionPapeleriaAsignada = $this->codegen_model->getSelect('est_papeles',
-                  'pape_codigoinicial, pape_codigofinal', ' where pape_usuario = '.$usuarioLogueado->id);
-
+            if ($usuarioLogueado->perfilid==4)
+            {
+                /*
+                * Valida que el usuario tenga papeleria asignada
+                */          
+                $validacionPapeleriaAsignada = $this->codegen_model->getSelect('est_papeles',
+                    'pape_codigoinicial, pape_codigofinal', ' where pape_usuario = '.$usuarioLogueado->id);
                
-              if($validacionPapeleriaAsignada)
-              {
+                if($validacionPapeleriaAsignada)
+                {
 
-                  if ($this->uri->segment(3)=='')
-                  {
-                      redirect(base_url().'index.php/error_404');
+                    if ($this->uri->segment(3)=='')
+                    {
+                        redirect(base_url().'index.php/error_404');
                   
-                  } else 
+                    } else 
                        {
                            $idFactura = $this->uri->segment(3);
 
@@ -1464,9 +1466,9 @@ function consultar()
                                }
                        
 
-                           //extrae los posibles rangos de papeleria asignados
+                           //extrae el posible rango de papeleria asignado
                            //al usuario que se encuentra logueado que debe ser
-                           //un liquidador, en los que pueda estar el nuevo 
+                           //un liquidador, en el que pueda estar el nuevo 
                            //codigo a asignar
                    
                            $papeles = $this->codegen_model->get('est_papeles','pape_id'
@@ -1488,15 +1490,15 @@ function consultar()
 
                                while ($nousado==0)
                                {
-                                   $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso.' AND impr_papelid = '.$papeles->pape_id,1,NULL,true);                                 
+                                    $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso.' AND impr_papelid = '.$papeles->pape_id,1,NULL,true);                                 
 
-                                   if (!$combrobacionImpresiones) 
-                                   {
+                                    if (!$combrobacionImpresiones) 
+                                    {
                                        $nousado=1;
-                                   } else
-                                       {
-                                       $nuevoingreso++;
-                                       }
+                                    }else
+                                        {
+                                           $nuevoingreso++;
+                                        }
                                 }
 
                                 //verifica si no se encuentra asignada papeleria
@@ -1559,134 +1561,18 @@ function consultar()
                                     {
                                         $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Ya se ha impreso la Estampilla No.'.$impresiones->impr_codigopapel.' !');
                                         redirect(base_url().'index.php/liquidaciones/liquidar'); 
-                                    }
-                                
-                            } else
+                                    }                                
+                            }else
                                 {   
-
-                                    //extrae los posibles rangos de papeleria asignados
-                                    //al usuario que se encuentra logueado que debe ser
-                                    //un liquidador
-                   
-                                    $papelesAsignados = $this->codegen_model->getSelect('est_papeles','pape_id'
-                                    .',pape_codigoinicial,pape_codigofinal',                                    
-                                    ' where pape_usuario = '.$usuarioLogueado->id, '', '',
-                                    'order by pape_codigoinicial');
-
-                                    foreach ($papelesAsignados as $value) 
-                                    {
-                                         if($nuevoingreso < (int)$value->pape_codigoinicial)
-                                         {
-                                              $nuevoingreso = (int)$value->pape_codigoinicial;
-
-
-                                              //comprueba si ya se está usando el codigo del papel
-                                              //en alguna impresión y ademas que no se salga del rango
-                                              //si sale del rango va y compara con el rango siguiente
-                                              $nousado=0;
-
-                                              while ($nousado==0 && $nuevoingreso <= (int)$value->pape_codigofinal)
-                                              {
-                                                  $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso,1,NULL,true);
-    
-                                                  if (!$combrobacionImpresiones) 
-                                                  {
-                                                      $nousado=1;
-                                                  } else
-                                                      {
-                                                      $nuevoingreso++;
-                                                      }                                                  
-                                              }
-
-                                              //valida si ya se encontró un codigo para asignar
-                                              //y rompe el ciclo foreach
-                                              if($nousado == 1)
-                                              {
-                                                 $idRangoCodigo = $value->pape_id;
-                                                 break;
-                                              }
-
-                                         }
-                                    }
-
-
-                                    if($nousado == 1)
-                                    {
-                                         //verifica si no se encuentra asignada papeleria
-                                         //a esa factura en la tabla de impresiones
-                                         //para crear el registro de la impresion
-                                         $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado,impr_codigopapel','impr_facturaid = '.$ObjetoFactura[0]->fact_id,1,NULL,true);
-                                         if (!$impresiones)
-                                         {
-                                              
-                                              do{  
-  
-                                                  $c=0;
-                                                  $m=0;           
-                                                  $codificacion = $this->generadorIdEstampilla($ObjetoFactura[0]->fact_estampillaid, $ObjetoFactura[0]->liqu_nit);                                               
-                                         
-                                                  $codes=$this->codegen_model->getSelect('est_impresiones','impr_estampillaid');
-
-                                                  foreach ($codes as $code) 
-                                                  {
-                                                       if($codificacion != $code->impr_estampillaid)
-                                                       {
-                                                        $c++;          
-                                                       }
-                                                       $m++;
-                                                  }                                                                                                                               
-
-                                               }while($c != $m);
-
-                                              $data = array(
-                                              'impr_codigopapel' => $nuevoingreso,
-                                              'impr_papelid' => $idRangoCodigo,
-                                              'impr_facturaid' => $ObjetoFactura[0]->fact_id,
-                                              'impr_observaciones' => 'Correcta',
-                                              'impr_fecha' => date('Y-m-d H:i:s',now()),
-                                              'impr_codigo' => $codigo,
-                                              'impr_estampillaid' => $codificacion,
-                                              'impr_estado' => '1'
-                                              );
-    
-                                              //extrae la cantidad actual impresa para el rango
-                                              //de papeleria de donde se sacará el consecutivo
-                                              //luego aumenta ese valor y lo actualiza en la bd
-                                              $cantidadImpresa = $this->codegen_model->getSelect('est_papeles','pape_imprimidos',
-                                              'where pape_usuario = '.$usuarioLogueado->id
-                                              .' AND pape_id = '.$idRangoCodigo);
-                                 
-                                              $cantidadNeta=(int)$cantidadImpresa[0]->pape_imprimidos;
-                                                            
-                                              $this->codegen_model->edit('est_papeles',
-                                              ['pape_imprimidos'=>$cantidadNeta+1],
-                                              'pape_id', $idRangoCodigo);
-                              
-                                              $this->codegen_model->add('est_impresiones',$data);
-
-                                              redirect(base_url().'index.php/generarpdf/generar_estampilla/'.$idFactura); 
-
-                                          }else
-                                              {
-                                                  $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Ya se ha impreso la Estampilla No.'.$impresiones->impr_codigopapel.' !');
-                                                  redirect(base_url().'index.php/liquidaciones/liquidar'); 
-                                              } 
-                                    }else
-                                        {
-                                             $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Usted no tiene papeleria disponible para realizar esta impresión!');
-                                             redirect(base_url().'index.php/liquidaciones/liquidar');       
-                                        }                                                                  
+                                    $this->session->set_flashdata('errormessage', '<strong>Error!</strong> El Número de Rotulo a Imprimir no está Asignado a Usted!');
+                                        redirect(base_url().'index.php/liquidaciones/liquidar'); 
                                 }
-
-                        }     
-
-
+                        }
               }else
                 {
                      $this->session->set_flashdata('errormessage', '<strong>Error!</strong> No se puede imprimir, usted no tiene asignada papeleria!');
                      redirect(base_url().'index.php/liquidaciones/liquidar');  
                 }
-
           }else 
               {
                   redirect(base_url().'index.php/error_404');

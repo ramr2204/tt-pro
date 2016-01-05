@@ -73,7 +73,8 @@ class Impresiones extends MY_Controller {
               if ($this->form_validation->run() == false) {
 
                   $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
-              } else {    
+              } else 
+                {    
 
                    $resultado = $this->codegen_model->get('est_tiposanulaciones','tisa_id',"tisa_nombre = '".$this->input->post('tipoanulacion')."'",1,NULL,true);
 
@@ -96,57 +97,59 @@ class Impresiones extends MY_Controller {
                    //para actualizar el estado del contrato y el estado de la impresion
                     $result= $this->codegen_model->get('est_impresiones','impr_id,impr_facturaid',"impr_codigopapel = '".$this->input->post('codigopapel')."'",1,NULL,true);
 
-                  if ($result) {                                                                    
+                    if ($result) 
+                    {
 
                        //Sobre escribe el id de la factura que se habia generado con ese papel
                        //por cero (0) y actualiza el estado de impresión a 2
                        $data = array(
-                         'impr_codigopapel' => $this->input->post('codigopapel'),
-                         'impr_observaciones' => $this->input->post('observaciones'),
-                         'impr_tipoanulacionid' => $tipoanulacionid,
-                         'impr_facturaid' => 0,
-                         'impr_estado' => 2,
-                      );
+                            'impr_codigopapel' => $this->input->post('codigopapel'),
+                            'impr_observaciones' => $this->input->post('observaciones'),
+                            'impr_tipoanulacionid' => $tipoanulacionid,
+                            'impr_facturaid' => 0,
+                            'impr_estado' => 2,
+                        );
 
-                      if ($this->codegen_model->edit('est_impresiones',$data,'impr_id',$result->impr_id) == TRUE) {
-                          
-                          $this->session->set_flashdata('successmessage', 'La anulación se ha creado con éxito');
-                          redirect(base_url().'index.php/impresiones');
-                      } else {  
-                          $this->data['errormessage'] = 'No se pudo registrar la anulación';
-                      }
-                    
-                  } else {
+                        if($this->codegen_model->edit('est_impresiones',$data,'impr_id',$result->impr_id) == TRUE) 
+                        {                        
+                            $this->session->set_flashdata('successmessage', 'La anulación se ha creado con éxito');
+                            redirect(base_url().'index.php/impresiones');
+                        }else 
+                            {  
+                                $this->data['errormessage'] = 'No se pudo registrar la anulación';
+                            }                    
+                    }else 
+                        {
+                            //En caso de no existir una factura ni contrato asignado al papel que se
+                            //va a anular se crea solamente la anulación con el codigo del papel respectivo
+                            $papeles = $this->codegen_model->get('est_papeles','pape_id,pape_codigoinicial,pape_codigofinal, pape_imprimidos','pape_codigoinicial <= '.$this->input->post('codigopapel').' AND pape_codigofinal >= '.$this->input->post('codigopapel'),1,NULL,true);
+                            $data = array(
+                                'impr_codigopapel' => $this->input->post('codigopapel'),
+                                'impr_observaciones' => $this->input->post('observaciones'),
+                                'impr_tipoanulacionid' => $tipoanulacionid,
+                                'impr_estado' => 2,
+                                'impr_fecha' => date('Y-m-d H:i:s',now()),
+                                'impr_papelid' => $papeles->pape_id
+                            );
+                        
+                           
+                            if($this->codegen_model->add('est_impresiones',$data) == TRUE) 
+                            {
+                                //Descuenta del total de la papeleria asignada al liquidador
+                                //debido a la anulación
+                                $nuevoTotal = ((int)$papeles->pape_imprimidos)+1;
+                                $data = array('pape_imprimidos' => $nuevoTotal);
+        
+                                $this->codegen_model->edit('est_papeles',$data,'pape_id',$papeles->pape_id);
+                                $this->session->set_flashdata('message', 'La anulación se ha creado con éxito');
+                                redirect(base_url().'index.php/impresiones');
+                            }else 
+                                {
+                                    $this->data['errormessage'] = 'No se pudo registrar la anulación';
+                                }
+                        }
 
-                      //En caso de no existir una factura ni contrato asignado al papel que se
-                      //va a anular se crea solamente la anulación con el codigo del papel respectivo
-                      $papeles = $this->codegen_model->get('est_papeles','pape_id,pape_codigoinicial,pape_codigofinal, pape_imprimidos','pape_codigoinicial <= '.$this->input->post('codigopapel').' AND pape_codigofinal >= '.$this->input->post('codigopapel'),1,NULL,true);
-                      $data = array(
-                        'impr_codigopapel' => $this->input->post('codigopapel'),
-                        'impr_observaciones' => $this->input->post('observaciones'),
-                        'impr_tipoanulacionid' => $tipoanulacionid,
-                        'impr_estado' => 2,
-                        'impr_fecha' => date('Y-m-d H:i:s',now()),
-                        'impr_papelid' => $papeles->pape_id
-                     );
-                    
-                       
-                     if ($this->codegen_model->add('est_impresiones',$data) == TRUE) {
-                         
-                         //Descuenta del total de la papeleria asignada al liquidador
-                         //debido a la anulación
-                         $nuevoTotal = ((int)$papeles->pape_imprimidos)+1;
-                         $data = array('pape_imprimidos' => $nuevoTotal);
-
-                         $this->codegen_model->edit('est_papeles',$data,'pape_id',$papeles->pape_id);
-                         $this->session->set_flashdata('message', 'La anulación se ha creado con éxito');
-                         redirect(base_url().'index.php/impresiones');
-                      } else {
-                         $this->data['errormessage'] = 'No se pudo registrar la anulación';
-                      }
-                  }
-
-    		      }
+    		    }
                 
               $this->template->set('title', 'Nueva anulación');
               $this->data['javascripts']= array(
