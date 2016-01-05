@@ -36,7 +36,7 @@
                     <td style="height: 19mm; width: 26mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><br><br><img id="logo_gobernador" src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima2.jpg" style="height: 13mm; width: 25mm;" ></td>
+                        border-bottom: 0.5px solid black;"><br><br><img id="logo_gobernador" src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima2.png" style="height: 13mm; width: 25mm;" ></td>
                 </tr>
  
                 <tr>
@@ -237,7 +237,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:10;"><small> "Unidos por la grandeza del Tolima"<br>Edificio de la Gobernación del Tolima<br>Carrera 3 Calles 10 y 11, Piso 9<br>Código Postal 730006</small></td>
+                        font-size:10;"><small> "Soluciones que Transforman"<br>Edificio de la Gobernación del Tolima<br>Carrera 3 Calles 10 y 11, Piso 9<br>Código Postal 730006</small></td>
 
                     <td class="text-center" colspan="2" style="height: 15mm; width: 38.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;

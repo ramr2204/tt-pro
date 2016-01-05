@@ -279,7 +279,7 @@ var oTable = $('#tablaq').dataTable( {
       </div>
       <div class="modal-footer">
       <div class="text-center">
-        <small> "Unidos por la grandeza del Tolima"<br>
+        <small> "Soluciones que Transforman"<br>
       Edificio de la Gobernación del Tolima, carrera 3 calle 10 y 11, 9 piso <br>
       Teléfonos 2610758 - 2611111 -Ext. 209 - 305<br>
       dcontratos@outlook.com </small>
