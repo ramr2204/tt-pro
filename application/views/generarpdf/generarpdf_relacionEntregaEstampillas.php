@@ -41,7 +41,7 @@
                         font-size:9;"><br><br>GOBERNACIÓN DEL TOLIMA <br><span style="font-size:8px;">SECRETARIA DE HACIENDA<br>DIRECCION FINANCIERA DE RENTAS E INGRESOS</span></td>
 
                     <td style="height: 19mm; width: 26mm; 
-                        border-bottom: 0.5px solid black;"><br><br><img id="logo_gobernador" src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima2.jpg" style="height: 13mm; width: 25mm;" ></td>
+                        border-bottom: 0.5px solid black;"><br><br><img id="logo_gobernador" src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima2.png" style="height: 13mm; width: 25mm;" ></td>
      
         </tr>
     </tbody>
@@ -326,7 +326,7 @@ PROYECTO ESTAMPILLAS PRO<br>
 
 <div class="text-center" style="font-size:8px;">
 <br>
-“Unidos por la Grandeza del Tolima”<br>
+“Soluciones que Transforman”<br>
 Gobernación del Tolima<br>
 www.tolima.gov.co
 </div>
