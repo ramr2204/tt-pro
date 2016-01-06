@@ -59,7 +59,7 @@ class DocumentosNormativos extends MY_Controller {
     }
 	
     /*
-    * Funcion que renderiza la vista para agregar ordenanzas
+    * Funcion que renderiza la vista para agregar documentos normativos
     */
     function add()
     {        
@@ -192,7 +192,7 @@ class DocumentosNormativos extends MY_Controller {
                         if($this->upload->do_upload("archivo")) 
                         {
                             /*
-                            * Se registran los datos de la ordenanza
+                            * Se registran los datos del documento normativo
                             */
                             $datos = $this->input->post(NULL,true);                            
                             $datos['docnor_year'] = $year;                            
@@ -229,70 +229,78 @@ class DocumentosNormativos extends MY_Controller {
             {
                 redirect(base_url().'index.php/users/login');
             }
-  }
+    }
 
 
-function edit()
-{    
-    if ($this->ion_auth->logged_in()) 
-    {
-        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('ordenanzas/edit')) 
-        {  
-            $idOrdenanza = $this->uri->segment(3);
-            
-            /*
-            * Valida que el id de la ordenanza no llegue vacio
-            */
-            if($idOrdenanza == '')
-            {
-                $this->session->set_flashdata('errormessage', 'Debe elegir una Ordenanza para Editar');
-                redirect(base_url().'index.php/ordenanzas');
-            }
-
-            /*
-            * Valida que la ordenanza exista
-            */
-            $where = 'WHERE orde_id = '.$idOrdenanza;            
-            $vOrdenanza = $this->codegen_model->getSelect('est_ordenanzas',"*", $where);
-            
-            if(count($vOrdenanza) <= 0)
-            {
-                $this->session->set_flashdata('errormessage', 'La Ordenanza Suministrada no Existe!');
-                redirect(base_url().'index.php/ordenanzas');
-            }
-
-            $this->data['successmessage'] = $this->session->flashdata('successmessage');
-            $this->data['errormessage'] = $this->session->flashdata('errormessage');
-            $this->data['ordenanza'] = $vOrdenanza[0];
-
-            $this->template->set('title', 'Editar Ordenanza');
-            $this->data['style_sheets'] = array(
-                    'css/chosen.css' => 'screen',
-                    'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen',
-                    'css/plugins/bootstrap/fileinput.css' => 'screen'
-                );
-            $this->data['javascripts']= array(
-                    'js/chosen.jquery.min.js',
-                    'js/plugins/bootstrap/moment.js',
-                    'js/plugins/bootstrap/bootstrap-datetimepicker.js',
-                    'js/plugins/bootstrap/fileinput.min.js'
-                );
+    /*
+    * Funcion que renderiza la vista para modificar un documento normativo
+    */
+    function edit()
+    {    
+        if ($this->ion_auth->logged_in()) 
+        {
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('documentosNormativos/edit')) 
+            {  
+                $idDocumentoN = $this->uri->segment(3);
                 
-            $this->template->load($this->config->item('admin_template'),'ordenanzas/ordenanzas_edit', $this->data);              
-                        
+                /*
+                * Valida que el id del documento normativo no llegue vacio
+                */
+                if($idDocumentoN == '')
+                {
+                    $this->session->set_flashdata('errormessage', 'Debe elegir una Documento Normativo para Editar');
+                    redirect(base_url().'index.php/documentosNormativos');
+                }
+    
+                /*
+                * Valida que el documento normativo exista
+                */
+                $where = 'WHERE docnor_id = '.$idDocumentoN;            
+                $vDocumentoN = $this->codegen_model->getSelect('est_documentosnorma',"*", $where);
+                
+                if(count($vDocumentoN) <= 0)
+                {
+                    $this->session->set_flashdata('errormessage', 'El Documento Normativo Suministrado no Existe!');
+                    redirect(base_url().'index.php/documentosNormativos');
+                }
+    
+                $this->data['successmessage'] = $this->session->flashdata('successmessage');
+                $this->data['errormessage'] = $this->session->flashdata('errormessage');
+                $this->data['documentoN'] = $vDocumentoN[0];
+    
+                $this->template->set('title', 'Editar Documento Normativo');
+                $this->data['style_sheets'] = array(
+                        'css/chosen.css' => 'screen',
+                        'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen',
+                        'css/plugins/bootstrap/fileinput.css' => 'screen'
+                    );
+                $this->data['javascripts']= array(
+                        'js/chosen.jquery.min.js',
+                        'js/plugins/bootstrap/moment.js',
+                        'js/plugins/bootstrap/bootstrap-datetimepicker.js',
+                        'js/plugins/bootstrap/fileinput.min.js'
+                    );
+
+                /*
+                * Extrae los tipos de Documento Normativo para enviar a la vista
+                */                
+                $this->data['tiposDocumentoN'] = $this->codegen_model->getSelect('tipos_docnormativos',"tidocn_id,tidocn_nombre");
+                    
+                $this->template->load($this->config->item('admin_template'),'documentosNormativos/documentosNormativos_edit', $this->data);              
+                            
+            }else
+                {
+                    redirect(base_url().'index.php/error_404');
+                }
         }else
             {
-                redirect(base_url().'index.php/error_404');
-            }
-    }else
-        {
-            redirect(base_url().'index.php/users/login');
-        }        
+                redirect(base_url().'index.php/users/login');
+            }        
   }
   
     /*
-    * Funcion que administra el registro de una
-    * nueva ordenanza
+    * Funcion que administra la modificacion de un
+    * documento normativo
     */
     function update()
     {
@@ -301,33 +309,34 @@ function edit()
             if ($this->ion_auth->is_admin()) 
             {
                 /*
-                * Valida que la ordenanza suministrada exista                        
+                * Valida que el documento normativo suministrado exista                        
                 */
-                $idOrdenanza = $this->input->post('id');
-                $where = 'WHERE orde_id = '.$idOrdenanza;            
-                $vOrdenanza = $this->codegen_model->getSelect('est_ordenanzas',"*", $where);
+                $idDocumentoN = $this->input->post('docnor_id');
+                $where = 'WHERE docnor_id = '.$idDocumentoN;            
+                $vDocumentoN = $this->codegen_model->getSelect('est_documentosnorma',"*", $where);
 
-                if(count($vOrdenanza) <= 0)
+                if(count($vDocumentoN) <= 0)
                 {
-                    $this->session->set_flashdata('errormessage', 'La Ordenanza Suministrada no Existe!');
-                    redirect(base_url().'index.php/ordenanzas');
+                    $this->session->set_flashdata('errormessage', 'El Documento Normativo Suministrado no Existe!');
+                    redirect(base_url().'index.php/documentosNormativos');
                 }
 
-                $this->form_validation->set_rules('orde_fecha', 'Fecha Pago', 'required|trim|xss_clean|required');   
-                $this->form_validation->set_rules('orde_iniciovigencia', 'Fecha Inicio Vigencia', 'trim|xss_clean|required');
-                $this->form_validation->set_rules('orde_numero', 'Número de Ordenanza', 'numeric|trim|xss_clean|required');
+                $this->form_validation->set_rules('docnor_fecha', 'Fecha Documento', 'required|trim|xss_clean|required');   
+                $this->form_validation->set_rules('docnor_iniciovigencia', 'Fecha Inicio Vigencia', 'trim|xss_clean|required');
+                $this->form_validation->set_rules('docnor_numero', 'Número de Documento', 'numeric|trim|xss_clean|required');
+                $this->form_validation->set_rules('docnor_tipo', 'Tipo de Documento', 'numeric|trim|xss_clean|required');
 
                 if($this->form_validation->run() == false) 
                 {
                     $this->session->set_flashdata('errormessage', validation_errors());
-                    redirect(base_url().'index.php/ordenanzas/edit/'.$idOrdenanza);                            
+                    redirect(base_url().'index.php/documentosNormativos/edit/'.$idDocumentoN);                            
                 }else
                     {   
                         /*
                         * Valida que las fechas suministradas tengan formato valido
                         */
-                        $fechaExpedicion = $this->input->post('orde_fecha');
-                        $fechaInicioVigencia = $this->input->post('orde_iniciovigencia');
+                        $fechaExpedicion = $this->input->post('docnor_fecha');
+                        $fechaInicioVigencia = $this->input->post('docnor_iniciovigencia');
 
                         $patronFecha = '/^[0-9]{4,4}-[0-9]{2,2}-([0-9]{2,2})$/';
                         $errorF = 'Error:<br>';
@@ -343,28 +352,48 @@ function edit()
                         if($errorF != 'Error:<br>')
                         {
                             $this->session->set_flashdata('errormessage', $errorF);
-                            redirect(base_url().'index.php/ordenanzas/edit/'.$idOrdenanza);
-                        }                                                
+                            redirect(base_url().'index.php/documentosNormativos/edit/'.$idDocumentoN);
+                        }
+
+                        /*
+                        * Valida que el tipo de documento normativo seleccionado exista
+                        */
+                        $where = 'WHERE tidocn_id = '.$this->input->post('docnor_tipo');
+                        $vTipoDoc = $this->codegen_model->getSelect('tipos_docnormativos',"tidocn_id,tidocn_nombre", $where);
+                        if(count($vTipoDoc) == 0)
+                        {
+                            $this->session->set_flashdata('errormessage', 'El Tipo de Documento Normativo Suministrado es Invalido!');
+                            redirect(base_url().'index.php/documentosNormativos/edit/'.$idDocumentoN);
+                        }
                         
                         /*
-                        * Valida si el numero de ordenanza y año suministrados
+                        * Valida si el numero de Documento Normativo, tipo y año suministrados
                         * son los mismos para verificar o no que no se repita
-                        * el mismo numero de ordenanza en el mismo año
+                        * el mismo numero de Documento Normativo en el mismo año
                         */                        
-                        $year = explode('-', $this->input->post('orde_fecha'));
+                        $year = explode('-', $this->input->post('docnor_fecha'));
                         $year = $year[0];
 
-                        if($vOrdenanza[0]->orde_numero != $this->input->post('orde_numero') || $vOrdenanza[0]->orde_year != $year)
+                        if($vDocumentoN[0]->docnor_numero != $this->input->post('docnor_numero') || $vDocumentoN[0]->docnor_year != $year || $vDocumentoN[0]->docnor_tipo != $this->input->post('docnor_tipo'))
                         {
-                            $where = 'WHERE orde_numero = '.$this->input->post('orde_numero')
-                                .' AND orde_year ="'.$year.'"';
-                            $vOrdenanza = $this->codegen_model->getSelect('est_ordenanzas',"orde_id", $where);
-                            if(count($vOrdenanza) > 0)
+                            $where = 'WHERE docnor_numero = '.$this->input->post('docnor_numero')
+                            .' AND docnor_year ="'.$year.'"'
+                            .' AND docnor_tipo = '.$vTipoDoc[0]->tidocn_id;
+
+                            $vDocumento = $this->codegen_model->getSelect('est_documentosnorma',"docnor_id", $where);
+                            if(count($vDocumento) > 0)
                             {
-                                $this->session->set_flashdata('errormessage', 'Ya Existe una Ordenanza con el Número ['.$this->input->post('orde_numero').'] para el Año ['.$year.']');
-                                redirect(base_url().'index.php/ordenanzas/edit/'.$idOrdenanza);
+                                $this->session->set_flashdata('errormessage', 'Ya Existe una '. $vTipoDoc[0]->tidocn_nombre .' con el Número ['.$this->input->post('docnor_numero').'] para el Año ['.$year.']');
+                                redirect(base_url().'index.php/documentosNormativos/edit/'.$idDocumentoN);
                             }                            
                         }
+
+                        /*
+                        * Se registran los datos del documento normativo
+                        */
+                        $datos = $this->input->post(NULL,true);                            
+                        $datos['docnor_year'] = $year;
+                        unset($datos['docnor_id']);
 
                         /*
                         * Valida si el archivo fue cargado
@@ -372,7 +401,7 @@ function edit()
                         */
                         if (isset($_FILES['archivo']) && is_uploaded_file($_FILES['archivo']['tmp_name'])) 
                         {
-                            $path = 'uploads/ordenanzas';
+                            $path = 'uploads/documentosNormativos';
                             if(!is_dir($path)) 
                             { //create the folder if this does not exists
                                mkdir($path,0777,TRUE);      
@@ -383,7 +412,7 @@ function edit()
                             $config['remove_spaces']= TRUE;
                             $config['max_size'] = '2048';
                             $config['overwrite'] = TRUE;
-                            $config['file_name']='ordenanza_'.$this->input->post('orde_numero').'_'.$year;                      
+                            $config['file_name']= $vTipoDoc[0]->tidocn_nombre.'_'.$this->input->post('docnor_numero').'_'.$year;                      
     
                             $this->load->library('upload');
                             $this->upload->initialize($config);
@@ -391,38 +420,29 @@ function edit()
                             if($this->upload->do_upload("archivo")) 
                             {
                                 /*
-                                * Establece la informacion para actualizar la liquidacion
-                                * en este caso la ruta de la copia del objeto del contrato
+                                * Establece la informacion para actualizar el documento normativo
+                                * en este caso la ruta de la copia del documento
                                 */
                                 $file_datos= $this->upload->data();
-                                $datos['orde_rutadocumento'] = $path.'/'.$file_datos['orig_name'];
+                                $datos['docnor_rutadocumento'] = $path.'/'.$file_datos['orig_name'];
                             }else
                                 {
                                     $err = $this->upload->display_errors();
                                     $this->session->set_flashdata('errormessage', $err);
-                                    redirect(base_url().'index.php/ordenanzas/edit/'.$idOrdenanza);
+                                    redirect(base_url().'index.php/documentosNormativos/edit/'.$idDocumentoN);
                                 }                          
-                        }                                                
+                        }                        
 
                         /*
-                        * Se registran los datos de la ordenanza
-                        */                      
-                        $datos['orde_numero'] = $this->input->post('orde_numero');
-                        $datos['orde_fecha'] = $this->input->post('orde_fecha');
-                        $datos['orde_iniciovigencia'] = $this->input->post('orde_iniciovigencia');                            
-                        $datos['orde_year'] = $year;
-                        $datos['orde_estado'] = 1;
-
-                        /*
-                        * Se Actualiza la Ordenanza
+                        * Se Actualiza el documento normativo
                         */
-                        $this->codegen_model->edit('est_ordenanzas',$datos,'orde_id',$idOrdenanza);
+                        $this->codegen_model->edit('est_documentosnorma',$datos,'docnor_id',$idDocumentoN);
 
                         /*
                         * Se redirecciona a la vista
                         */
-                        $this->session->set_flashdata('successmessage', 'Se Modificó con éxito la Ordenanza Número ['.$datos['orde_numero'].'] con Fecha '.$datos['orde_fecha']);
-                        redirect(base_url().'index.php/ordenanzas/edit/'.$idOrdenanza);
+                        $this->session->set_flashdata('successmessage', 'Se Modificó con éxito la '. $vTipoDoc[0]->tidocn_nombre .' Número ['.$datos['docnor_numero'].'] con Fecha '.$datos['docnor_fecha']);
+                        redirect(base_url().'index.php/documentosNormativos/edit/'.$idDocumentoN);
                     }
             }else 
                 {
