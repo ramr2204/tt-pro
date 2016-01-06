@@ -1528,12 +1528,17 @@ function consultar()
                                       }while($c != $m);
                                     
                                     /*
-                                    * Valida que exista un contrato en estado 1 (con estampillas por imprimir)
+                                    * Valida que exista un contrato en estado 1 (activo | con estampillas por imprimir)
                                     * para registrar la impresión
                                     */
                                     $where = 'WHERE conpap_estado = 1';
-
                                     $vContratoE = $this->codegen_model->getSelect('est_contratopapeles',"conpap_id", $where);
+
+                                    if(count($vContratoE) == 0)
+                                    {
+                                        $this->session->set_flashdata('errormessage', 'No Existe un Contrato de Estampillas Activo, Debe Solicitar el Registro de un Contrato para Realizar la Impresión!');
+                                        redirect(base_url().'index.php/liquidaciones/liquidar');
+                                    }
 
                                     $data = array(
                                     'impr_codigopapel' => str_pad($nuevoingreso, 4, '0', STR_PAD_LEFT),
