@@ -252,6 +252,16 @@ function identificarVistaDatetimepicker()
             o++;     
         });
 
+    /*
+    * Valida si es la vista de creación de contrato estampillas    
+    */
+    var cE = 0;
+    $('body').find('#btn-conpapAdd').each(function()
+        {
+            cE++;     
+        });
+
+
     if(n > 0)
     {
         //Evento para el timepicker del rango de impresiones
@@ -279,6 +289,15 @@ function identificarVistaDatetimepicker()
         //Evento para el timepicker de la fecha del archivo
         //de conciliacion de pagos
         $('#datetimepicker_conciliacion').datetimepicker({
+            pickTime: false
+        });        
+    }
+
+    if(cE > 0)
+    {
+        //Evento para el timepicker de la fecha del archivo
+        //de conciliacion de pagos
+        $('#datetimepicker_fechaContratoE').datetimepicker({
             pickTime: false
         });        
     }

@@ -2,7 +2,7 @@
 
 /**
 *   Nombre:            admin template
-*   Ruta:              /application/views/contratosestampillas/ordenanzas_list.php
+*   Ruta:              /application/views/contratosestampillas/contratosestampillas_list.php
 *   Descripcion:       tabla que muestra todos los contratos existentes
 *   Fecha Creacion:    05/Ene/2016
 *   @author           Mike Ortiz <engineermikeortiz@gmail.com>
@@ -23,8 +23,9 @@
             "sServerMethod": "POST",
             "aoColumns": [ 
                 { "sClass": "center"}, /*id 0*/                 
-                { "sClass": "item" },  
-                { "sClass": "item" },
+                { "sClass": "center" },  
+                { "sClass": "center" },
+                { "sClass": "center" },
                 { "sClass": "item" }
             ],    
         });
