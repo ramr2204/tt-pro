@@ -182,7 +182,7 @@ class DocumentosNormativos extends MY_Controller {
                         $config['upload_path'] = $path;
                         $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
                         $config['remove_spaces']= TRUE;
-                        $config['max_size'] = '2048';
+                        $config['max_size'] = '3000';
                         $config['overwrite'] = TRUE;
                         $config['file_name'] = $vTipoDoc[0]->tidocn_nombre.'_'.$this->input->post('docnor_numero').'_'.$year;                      
 
@@ -410,7 +410,7 @@ class DocumentosNormativos extends MY_Controller {
                             $config['upload_path'] = $path;
                             $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
                             $config['remove_spaces']= TRUE;
-                            $config['max_size'] = '2048';
+                            $config['max_size'] = '3000';
                             $config['overwrite'] = TRUE;
                             $config['file_name']= $vTipoDoc[0]->tidocn_nombre.'_'.$this->input->post('docnor_numero').'_'.$year;                      
     
