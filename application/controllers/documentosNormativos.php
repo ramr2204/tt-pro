@@ -1,33 +1,32 @@
 <?php if( ! defined('BASEPATH') ) exit('No direct script access allowed');
 /**
-*   Nombre:            Ordenanzas
-*   Ruta:              /application/controllers/ordenanzas.php
-*   Descripcion:       controlador de ordenanzas
-*   Fecha Creacion:    10/Ago/2015
+*   Nombre:            documentosNormativos
+*   Ruta:              /application/controllers/documentosNormativos.php
+*   Descripcion:       controlador de documentos normativos
+*   Fecha Creacion:    06/Ene/2016
 *   @author            Mike Ortiz <engineermikeortiz@gmail.com>
-*   @version           2015-08-10
+*   @version           2016-01-06
 *
 */
 
-class Ordenanzas extends MY_Controller {
+class DocumentosNormativos extends MY_Controller {
     
-  function __construct() 
-  {
+    function __construct() 
+    {
       parent::__construct();
 	    $this->load->library('form_validation');		
 		$this->load->helper(array('form','url','codegen_helper'));
 		$this->load->model('codegen_model','',TRUE);
-
 	}	
 	
 	function index()
-  {
+    {
 		  $this->manage();
 	}
     
     /*
     * Funcion de apoyo que renderiza vista que contiene
-    * de la informacion principal de la ordenanza
+    * de la informacion principal de los documentos normativos
     */
 	function manage()
     {
@@ -39,7 +38,7 @@ class Ordenanzas extends MY_Controller {
                 $this->data['errormessage']=$this->session->flashdata('errormessage');
                 $this->data['infomessage']=$this->session->flashdata('infomessage');
                 //template data
-                $this->template->set('title', 'Administrar Ordenanzas');
+                $this->template->set('title', 'Administrar Documentos Normativos');
                 $this->data['style_sheets']= array(
                             'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
                         );
@@ -47,13 +46,13 @@ class Ordenanzas extends MY_Controller {
                         'js/jquery.dataTables.min.js',
                         'js/plugins/dataTables/dataTables.bootstrap.js',
                         'js/jquery.dataTables.defaults.js'
-                       );            
-                $this->template->load($this->config->item('admin_template'),'ordenanzas/ordenanzas_list', $this->data);
+                       );
+                $this->template->load($this->config->item('admin_template'),'documentosNormativos/documentosNormativos_list', $this->data);
             }else 
                 {
                     redirect(base_url().'index.php/error_404');
                 }
-        }else 
+        }else
             {
                 redirect(base_url().'index.php/users/login');
             }
@@ -71,7 +70,7 @@ class Ordenanzas extends MY_Controller {
                 $this->data['successmessage'] = $this->session->flashdata('successmessage');
                 $this->data['errormessage'] = $this->session->flashdata('errormessage');
 
-                $this->template->set('title', 'Nueva Ordenanza');
+                $this->template->set('title', 'Nuevo Documento');
                 $this->data['style_sheets'] = array(
                         'css/chosen.css' => 'screen',
                         'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen',
@@ -83,8 +82,13 @@ class Ordenanzas extends MY_Controller {
                         'js/plugins/bootstrap/bootstrap-datetimepicker.js',
                         'js/plugins/bootstrap/fileinput.min.js'
                     );
+
+                /*
+                * Extrae los tipos de Documento Normativo para enviar a la vista
+                */                
+                $this->data['tiposDocumentoN'] = $this->codegen_model->getSelect('tipos_docnormativos',"tidocn_id,tidocn_nombre");                
                 
-                $this->template->load($this->config->item('admin_template'),'ordenanzas/ordenanzas_add', $this->data);             
+                $this->template->load($this->config->item('admin_template'),'documentosNormativos/documentosNormativos_add', $this->data);             
             }else 
                 {
                     redirect(base_url().'index.php/error_404');
@@ -97,8 +101,8 @@ class Ordenanzas extends MY_Controller {
   }	
 
     /*
-    * Funcion que administra el registro de una
-    * nueva ordenanza
+    * Funcion que administra el registro de un
+    * nuevo documento normativo
     */
     function save()
     {
@@ -106,21 +110,22 @@ class Ordenanzas extends MY_Controller {
         {
             if ($this->ion_auth->is_admin()) 
             {                
-                $this->form_validation->set_rules('orde_fecha', 'Fecha Pago', 'required|trim|xss_clean|required');   
-                $this->form_validation->set_rules('orde_iniciovigencia', 'Fecha Inicio Vigencia', 'trim|xss_clean|required');
-                $this->form_validation->set_rules('orde_numero', 'Número de Ordenanza', 'numeric|trim|xss_clean|required');
+                $this->form_validation->set_rules('docnor_fecha', 'Fecha Documento', 'required|trim|xss_clean|required');   
+                $this->form_validation->set_rules('docnor_iniciovigencia', 'Fecha Inicio Vigencia', 'trim|xss_clean|required');
+                $this->form_validation->set_rules('docnor_numero', 'Número de Documento', 'numeric|trim|xss_clean|required');
+                $this->form_validation->set_rules('docnor_tipo', 'Tipo de Documento', 'numeric|trim|xss_clean|required');
 
                 if($this->form_validation->run() == false) 
                 {
                     $this->session->set_flashdata('errormessage', validation_errors());
-                    redirect(base_url().'index.php/ordenanzas/add');                            
+                    redirect(base_url().'index.php/documentosNormativos/add');                            
                 }else
                     {   
                         /*
                         * Valida que las fechas suministradas tengan formato valido
                         */
-                        $fechaExpedicion = $this->input->post('orde_fecha');
-                        $fechaInicioVigencia = $this->input->post('orde_iniciovigencia');
+                        $fechaExpedicion = $this->input->post('docnor_fecha');
+                        $fechaInicioVigencia = $this->input->post('docnor_iniciovigencia');
 
                         $patronFecha = '/^[0-9]{4,4}-[0-9]{2,2}-([0-9]{2,2})$/';
                         $errorF = 'Error:<br>';
@@ -136,26 +141,39 @@ class Ordenanzas extends MY_Controller {
                         if($errorF != 'Error:<br>')
                         {
                             $this->session->set_flashdata('errormessage', $errorF);
-                            redirect(base_url().'index.php/ordenanzas/add');
+                            redirect(base_url().'index.php/documentosNormativos/add');
                         }
 
                         /*
-                        * Valida que no haya una ordenanza con el mismo numero
+                        * Valida que el tipo de documento normativo seleccionado exista
+                        */
+                        $where = 'WHERE tidocn_id = '.$this->input->post('docnor_tipo');
+                        $vTipoDoc = $this->codegen_model->getSelect('tipos_docnormativos',"tidocn_id,tidocn_nombre", $where);
+                        if(count($vTipoDoc) == 0)
+                        {
+                            $this->session->set_flashdata('errormessage', 'El Tipo de Documento Normativo Suministrado es Invalido!');
+                            redirect(base_url().'index.php/documentosNormativos/add');
+                        }
+
+                        /*
+                        * Valida que no haya una documento del mismo tipo con el mismo numero
                         * en el mismo año
                         */
-                        $year = explode('-', $this->input->post('orde_fecha'));
+                        $year = explode('-', $this->input->post('docnor_fecha'));
                         $year = $year[0];
 
-                        $where = 'WHERE orde_numero = '.$this->input->post('orde_numero')
-                            .' AND orde_year ="'.$year.'"';
-                        $vOrdenanza = $this->codegen_model->getSelect('est_ordenanzas',"orde_id", $where);
-                        if(count($vOrdenanza) > 0)
+                        $where = 'WHERE docnor_numero = '.$this->input->post('docnor_numero')
+                            .' AND docnor_year ="'.$year.'"'
+                            .' AND docnor_tipo = '.$vTipoDoc[0]->tidocn_id;
+
+                        $vDocumento = $this->codegen_model->getSelect('est_documentosnorma',"docnor_id", $where);
+                        if(count($vDocumento) > 0)
                         {
-                            $this->session->set_flashdata('errormessage', 'Ya Existe una Ordenanza con el Número ['.$this->input->post('orde_numero').'] para el Año ['.$year.']');
-                            redirect(base_url().'index.php/ordenanzas/add');
+                            $this->session->set_flashdata('errormessage', 'Ya Existe una '. $vTipoDoc[0]->tidocn_nombre .' con el Número ['.$this->input->post('docnor_numero').'] para el Año ['.$year.']');
+                            redirect(base_url().'index.php/documentosNormativos/add');
                         }
                         
-                        $path = 'uploads/ordenanzas';
+                        $path = 'uploads/documentosNormativos';
                         if(!is_dir($path)) 
                         { //create the folder if this does not exists
                            mkdir($path,0777,TRUE);      
@@ -166,7 +184,7 @@ class Ordenanzas extends MY_Controller {
                         $config['remove_spaces']= TRUE;
                         $config['max_size'] = '2048';
                         $config['overwrite'] = TRUE;
-                        $config['file_name']='ordenanza_'.$this->input->post('orde_numero').'_'.$year;                      
+                        $config['file_name'] = $vTipoDoc[0]->tidocn_nombre.'_'.$this->input->post('docnor_numero').'_'.$year;                      
 
                         $this->load->library('upload');
                         $this->upload->initialize($config);  
@@ -174,36 +192,33 @@ class Ordenanzas extends MY_Controller {
                         if($this->upload->do_upload("archivo")) 
                         {
                             /*
-                            * Establece la informacion para actualizar la liquidacion
-                            * en este caso la ruta de la copia del objeto del contrato
+                            * Se registran los datos de la ordenanza
+                            */
+                            $datos = $this->input->post(NULL,true);                            
+                            $datos['docnor_year'] = $year;                            
+
+                            /*
+                            * Establece la informacion para actualizar el documento normativo
+                            * en este caso la ruta de la copia del documento
                             */
                             $file_datos= $this->upload->data();
-                            $datos['orde_rutadocumento'] = $path.'/'.$file_datos['orig_name'];
+                            $datos['docnor_rutadocumento'] = $path.'/'.$file_datos['orig_name'];
 
                             /*
-                            * Se registran los datos de la ordenanza
-                            */                      
-                            $datos['orde_numero'] = $this->input->post('orde_numero');
-                            $datos['orde_fecha'] = $this->input->post('orde_fecha');
-                            $datos['orde_iniciovigencia'] = $this->input->post('orde_iniciovigencia');                            
-                            $datos['orde_year'] = $year;
-                            $datos['orde_estado'] = 1;
-
-                            /*
-                            * Se Registra la Ordenanza
+                            * Se Registra el Documento Normativo
                             */
-                            $this->codegen_model->add('est_ordenanzas',$datos);
+                            $this->codegen_model->add('est_documentosnorma',$datos);
 
                             /*
                             * Se redirecciona a la vista
                             */
-                            $this->session->set_flashdata('successmessage', 'Se Cargó con éxito la Ordenanza Número ['.$datos['orde_numero'].'] con Fecha '.$datos['orde_fecha']);
-                            redirect(base_url().'index.php/ordenanzas/add');
+                            $this->session->set_flashdata('successmessage', 'Se Cargó con éxito la '. $vTipoDoc[0]->tidocn_nombre .' Número ['.$datos['docnor_numero'].'] con Fecha '.$datos['docnor_fecha']);
+                            redirect(base_url().'index.php/documentosNormativos/add');
                         }else
                             {
                                 $err = $this->upload->display_errors();
                                 $this->session->set_flashdata('errormessage', $err);
-                                redirect(base_url().'index.php/ordenanzas/add');
+                                redirect(base_url().'index.php/documentosNormativos/add');
                             }
                     }
             }else 
@@ -486,16 +501,16 @@ function edit()
         {          
             if ($this->ion_auth->is_admin()) 
             {                                 
-              $this->load->library('datatables'); 
-              $this->datatables->select('orde_id,orde_numero,orde_fecha,orde_iniciovigencia,orde_rutadocumento');
-              $this->datatables->from('est_ordenanzas');
-              $this->datatables->edit_column('orde_rutadocumento','<a class="btn btn-success" href="'.base_url().'$1" target="_blank"><img src="'.base_url().'$1" class="file-preview-image" alt="Ver Ordenanza" title="ordenanza" height="120mm"></a>','orde_rutadocumento');
+                $this->load->library('datatables'); 
+                $this->datatables->select('docnor_id,docnor_tipo,docnor_numero,docnor_fecha,docnor_iniciovigencia,docnor_rutadocumento');
+                $this->datatables->from('est_documentosnorma');
+                $this->datatables->edit_column('docnor_rutadocumento','<a class="btn btn-success" href="'.base_url().'$1" target="_blank"><img src="'.base_url().'$1" class="file-preview-image" alt="Ver Documento" title="documento" height="120mm"></a>','docnor_rutadocumento');
 
-              $this->datatables->add_column('edit', '<div class="btn-toolbar">'
-                        .'<div class="btn-group text-center">'
-                        .'<a href="'.base_url().'index.php/ordenanzas/edit/$1" class="btn btn-default btn-xs" title="Modificar"><i class="fa fa-pencil-square-o"></i> Editar</a>'
-                        .'</div>'
-                        .'</div>', 'orde_id');
+                $this->datatables->add_column('edit', '<div class="btn-toolbar">'
+                    .'<div class="btn-group text-center">'
+                    .'<a href="'.base_url().'index.php/documentosNormativos/edit/$1" class="btn btn-default btn-xs" title="Modificar"><i class="fa fa-pencil-square-o"></i> Editar</a>'
+                    .'</div>'
+                    .'</div>', 'docnor_id');
               echo $this->datatables->generate();
             }else
                 {
