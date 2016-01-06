@@ -68,6 +68,23 @@ class Codegen_model extends CI_Model
     
         return FALSE;       
     }
+
+
+    /*
+    * Funcion de apoyo que realiza actualizacion
+    * en la base de datos especificando condicion
+    */
+    function editWhere($table,$data,$where)
+    {        
+        $this->db->where($where);
+        $this->db->update($table, $data);
+
+        if ($this->db->affected_rows() >= 0)
+        {
+            return TRUE;
+        }    
+        return FALSE;       
+    }
     
     function delete($table,$fieldID,$ID)
     {

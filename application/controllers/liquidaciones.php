@@ -1527,6 +1527,13 @@ function consultar()
 
                                       }while($c != $m);
                                     
+                                    /*
+                                    * Valida que exista un contrato en estado 1 (con estampillas por imprimir)
+                                    * para registrar la impresión
+                                    */
+                                    $where = 'WHERE conpap_estado = 1';
+
+                                    $vContratoE = $this->codegen_model->getSelect('est_contratopapeles',"conpap_id", $where);
 
                                     $data = array(
                                     'impr_codigopapel' => str_pad($nuevoingreso, 4, '0', STR_PAD_LEFT),
@@ -1537,7 +1544,8 @@ function consultar()
                                     'impr_codigo' => $codigo,
                                     'impr_estampillaid' => $codificacion,
                                     'impr_estadoContintencia' => 'NO',
-                                    'impr_estado' => '1'
+                                    'impr_estado' => '1',
+                                    'impr_contratopapel' =>''
                                     );
     
                                     //extrae la cantidad actual impresa para el rango

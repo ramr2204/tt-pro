@@ -26,8 +26,54 @@
                 { "sClass": "center" },  
                 { "sClass": "center" },
                 { "sClass": "center" },
-                { "sClass": "item" }
-            ],    
+                { "sClass": "item" },
+                { "sClass": "center" }
+            ],
+            "fnRowCallback":function( nRow, aData, iDataIndex ) {
+                
+                /*
+                * Arreglo con descripcion de estados de contratos
+                * de estampillas para establecer en la tabla
+                * en la columna estado
+                */
+                var estados = ['Inactivo','Activo','Completado'];
+                var estado = aData[5];
+                var ancla = '';
+
+                if(estado == 0)
+                {
+                    ancla = '<a href="'+<?php echo json_encode(base_url().'contratoEstampillas/state/'); ?>+ aData[6] +'"'
+                        +' class="btn btn-danger">'
+                        +'<i class="fa fa-times"></i> '
+                        +estados[estado]+'</a>';
+                }else if(estado == 1)
+                    {
+                        ancla = '<a href="'+<?php echo json_encode(base_url().'contratoEstampillas/state/'); ?>+ aData[6] +'"'
+                            +' class="btn btn-success">'
+                            +'<i class="fa fa-check"></i> '
+                            +estados[estado]+'</a>';
+                    }else if(estado == 2)
+                        {
+                            ancla = '<a href="#" class="btn btn-warning">'
+                                +'<i class="fa fa-ban"></i> '
+                                +estados[estado]+'</a>';
+                        }                
+
+                $('td:eq(5)', nRow).html(ancla);
+
+            // $.ajax({
+            //    type: "POST",
+            //    dataType: "html",
+            //    data: {papelid : aData[0]},
+            //    url: "<?php echo base_url(); ?>index.php/papeles/contarpapeles",
+            //    success: function(data) {
+            //      var restante=cantidad-data;
+            //      $('td:eq(5)', nRow).html(data);
+            //      $('td:eq(6)', nRow).html(restante);
+            //    }
+            //  });
+          
+         }
         });
 
         oTable.fnSearchHighlighting();
@@ -54,6 +100,7 @@
                         <th>Cantidad Estampillas Contratadas</th>
                         <th>Cantidad Estampillas Impresas</th>
                         <th>Detalles</th>     
+                        <th>Estado</th>     
                     </tr>
                 </thead>
                 <tbody></tbody>     

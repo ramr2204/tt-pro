@@ -146,6 +146,15 @@ class ContratoEstampillas extends MY_Controller {
                             $this->session->set_flashdata('errormessage', 'Ya Existe un Contrato de Estampillas con el Número ['.$this->input->post('conpap_numero').'] para el Año ['.$year.']');
                             redirect(base_url().'index.php/contratoEstampillas/add');
                         }                                                                                                                                   
+                        
+                        /*
+                        * Inabilita los otros contratos que estén en estado 1
+                        * para que quede el contrato creado como activo para
+                        * contar las estampillas
+                        */
+                        $this->codegen_model->editWhere('est_contratopapeles',
+                            ['conpap_estado' => 0],
+                            'conpap_estado = 1');
 
                         /*
                         * Se registran los datos del contrato de estampillas
@@ -153,10 +162,7 @@ class ContratoEstampillas extends MY_Controller {
                         $datos = $this->input->post(NULL, TRUE);
                         $datos['conpap_year'] = $year;
                         $datos['conpap_estado'] = 1;                                                
-
-                        /*
-                        * Se Registra la Ordenanza
-                        */
+                        
                         $this->codegen_model->add('est_contratopapeles',$datos);
 
                         /*
@@ -175,7 +181,90 @@ class ContratoEstampillas extends MY_Controller {
             }
     }
 
-        
+
+    /*
+    * Funcion de apoyo que cambia el estado de un contrato de estampillas
+    * suministrado
+    */
+    function state()
+    {
+        if ($this->ion_auth->logged_in()) 
+        {          
+            if ($this->ion_auth->is_admin()) 
+            {
+                /*
+                * Valida que se suministre un id de contrato en la URI
+                */
+                $idcontrato = ($this->uri->segment(3)) ? $this->uri->segment(3) : '';
+                if($idcontrato == '')
+                {
+                    $this->session->set_flashdata('errormessage', 'Debe elegir un Contrato de Estampillas para modificar el Estado');
+                    redirect(base_url().'index.php/contratoEstampillas/index');
+                }else
+                    {
+                        /*
+                        * Valida que el contrato suministrado exista                        
+                        */
+                        $where = 'WHERE conpap_id = '.$idcontrato;                            
+                        $vContratoE = $this->codegen_model->getSelect('est_contratopapeles',"conpap_id,conpap_estado", $where);                        
+                        
+                        if(count($vContratoE) > 0)
+                        {
+                            /*
+                            * Valida que el contrato no tenga
+                            * estado 2 (Completado) el cual no se puede modificar
+                            */
+                            if($vContratoE[0]->conpap_estado == 2)
+                            {
+                                $this->session->set_flashdata('errormessage', 'El Contrato de Estampillas Suministrado ya ha sido Completado, no se puede Modificar el estado!');
+                                redirect(base_url().'index.php/contratoEstampillas/index');
+                            }                            
+                        }else
+                            {
+                                $this->session->set_flashdata('errormessage', 'El Contrato de Estampillas Suministrado no ha sido Registrado, no se puede Modificar el estado!');
+                                redirect(base_url().'index.php/contratoEstampillas/index');
+                            }
+                        
+                        /*
+                        * Valida si el contrato de estampillas está activo
+                        * para notificar que no se puede inactivar a menos
+                        * que active otro contrato
+                        */
+                        if($vContratoE[0]->conpap_estado == 1)
+                        {
+                            $this->session->set_flashdata('errormessage', 'El Contrato de Estampillas Suministrado está activo, no se puede Modificar el estado, si desea inactivar el Contrato debe Activar otro!');
+                            redirect(base_url().'index.php/contratoEstampillas/index');
+                        }                        
+                        
+                        /*
+                        * Inabilita todos los contratos que estén en estado 1
+                        * para que quede el contrato suministrado como activo para
+                        * contar las estampillas
+                        */
+                        $this->codegen_model->editWhere('est_contratopapeles',
+                            ['conpap_estado' => 0],
+                            'conpap_estado = 1');
+
+                        /*
+                        * Habilita el contrato suministrado
+                        */
+                        $this->codegen_model->edit('est_contratopapeles',
+                            ['conpap_estado' => 1],
+                            'conpap_id', $vContratoE[0]->conpap_id);
+                        
+                        $this->session->set_flashdata('successmessage', 'El Contrato de Estampillas Suministrado se Activó Exitosamente!');
+                        redirect(base_url().'index.php/contratoEstampillas/index');
+                    }
+            }else
+                {
+                    redirect(base_url().'index.php/error_404');
+                }               
+        }else
+            {
+                redirect(base_url().'index.php/users/login');
+            }
+    }
+
     /*
     * Funcion de apoyo que renderiza la datatable
     * de la informacion principal de los contratos de estampillas
@@ -187,7 +276,7 @@ class ContratoEstampillas extends MY_Controller {
             if ($this->ion_auth->is_admin()) 
             {                                 
                 $this->load->library('datatables'); 
-                $this->datatables->select('conpap_numero,conpap_fecha,conpap_cantidad,conpap_impresos,conpap_observaciones');
+                $this->datatables->select('conpap_numero,conpap_fecha,conpap_cantidad,conpap_impresos,conpap_observaciones,conpap_estado,conpap_id');
                 $this->datatables->from('est_contratopapeles');              
 
                 echo $this->datatables->generate();
