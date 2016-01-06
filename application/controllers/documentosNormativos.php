@@ -452,68 +452,11 @@ class DocumentosNormativos extends MY_Controller {
             {
                 redirect(base_url().'index.php/users/login');
             }
-  }
-
-
-  function delete()
-  {
-      if ($this->ion_auth->logged_in()) {
-
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/delete')) {  
-              if ($this->input->post('id')==''){
-                  $this->session->set_flashdata('infomessage', 'Debe elegir un contratista para eliminar');
-                  redirect(base_url().'index.php/contratistas');
-              }
-              if (!$this->codegen_model->depend('con_contratos','cntr_contratistaid',$this->input->post('id'))) {
-
-                  $this->codegen_model->delete('con_contratistas','cont_id',$this->input->post('id'));
-                  $this->session->set_flashdata('successmessage', 'El contratista se ha eliminado con éxito');
-                  redirect(base_url().'index.php/contratistas');  
-
-              } else {
-
-                  $this->session->set_flashdata('errormessage', 'El contratista se encuentra en uso, no es posible eliminarlo.');
-                  redirect(base_url().'index.php/contratistas/edit/'.$this->input->post('id'));
-
-              }
-                         
-          } else {
-              redirect(base_url().'index.php/error_404');       
-          } 
-      } else {
-          redirect(base_url().'index.php/users/login');
-      }
-  }
-    
-    function detalles ()
-    {
-        if ($this->ion_auth->logged_in()) 
-        {          
-            if ($this->ion_auth->is_admin()) 
-            {                                 
-              $this->load->library('datatables'); 
-              $this->datatables->select('orde_id,orde_numero,orde_fecha,orde_iniciovigencia,orde_rutadocumento');
-              $this->datatables->from('est_ordenanzas');
-              $this->datatables->add_column('edit', '<div class="btn-toolbar">'
-                        .'<div class="btn-group">'
-                        .'<a href="'.base_url().'index.php/contratistas/edit/$1" class="btn btn-default btn-xs" title="Editar contratista"><i class="fa fa-pencil-square-o"></i></a>'
-                        .'</div>'
-                        .'</div>', 'c.cont_id');
-
-              echo $this->datatables->generate();
-            }else
-                {
-                    redirect(base_url().'index.php/error_404');
-                }               
-        }else
-            {
-                redirect(base_url().'index.php/users/login');
-            }           
     }
-    
+        
     /*
     * Funcion de apoyo que renderiza la datatable
-    * de la informacion principal de la ordenanza
+    * de la informacion principal de los documentos normativos
     */
     function datatable ()
     {
@@ -522,15 +465,16 @@ class DocumentosNormativos extends MY_Controller {
             if ($this->ion_auth->is_admin()) 
             {                                 
                 $this->load->library('datatables'); 
-                $this->datatables->select('docnor_id,docnor_tipo,docnor_numero,docnor_fecha,docnor_iniciovigencia,docnor_rutadocumento');
-                $this->datatables->from('est_documentosnorma');
-                $this->datatables->edit_column('docnor_rutadocumento','<a class="btn btn-success" href="'.base_url().'$1" target="_blank"><img src="'.base_url().'$1" class="file-preview-image" alt="Ver Documento" title="documento" height="120mm"></a>','docnor_rutadocumento');
+                $this->datatables->select('dc.docnor_id,tdc.tidocn_nombre,dc.docnor_numero,dc.docnor_fecha,dc.docnor_iniciovigencia,dc.docnor_rutadocumento');
+                $this->datatables->from('est_documentosnorma dc');
+                $this->datatables->join('tipos_docnormativos tdc', 'tdc.tidocn_id = dc.docnor_tipo', 'left');
+                $this->datatables->edit_column('dc.docnor_rutadocumento','<a class="btn btn-success" href="'.base_url().'$1" target="_blank"><img src="'.base_url().'$1" class="file-preview-image" alt="Ver Documento" title="documento" height="120mm"></a>','dc.docnor_rutadocumento');
 
                 $this->datatables->add_column('edit', '<div class="btn-toolbar">'
                     .'<div class="btn-group text-center">'
                     .'<a href="'.base_url().'index.php/documentosNormativos/edit/$1" class="btn btn-default btn-xs" title="Modificar"><i class="fa fa-pencil-square-o"></i> Editar</a>'
                     .'</div>'
-                    .'</div>', 'docnor_id');
+                    .'</div>', 'dc.docnor_id');
               echo $this->datatables->generate();
             }else
                 {
