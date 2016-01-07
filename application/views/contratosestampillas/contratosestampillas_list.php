@@ -11,6 +11,21 @@
 */
 
 ?>
+<style type="text/css">
+  
+    .item2{
+        width: 160px;
+        height: 15px;    
+        overflow: hidden;
+        text-align: center;        
+    }   
+    .cantidades{
+        width: 100px;
+        height: 15px;    
+        overflow: hidden;
+        text-align: center;        
+    }     
+</style>
 
 <script type="text/javascript" language="javascript" charset="utf-8">
     //generación de la tabla mediante json
@@ -22,12 +37,13 @@
             "sAjaxSource": "<?php echo base_url(); ?>index.php/contratoEstampillas/dataTable",
             "sServerMethod": "POST",
             "aoColumns": [ 
-                { "sClass": "center"}, /*id 0*/                 
-                { "sClass": "center" },  
-                { "sClass": "center" },
-                { "sClass": "center" },
+                { "sClass": "item2"},
+                { "sClass": "item2" },  
+                { "sClass": "cantidades" },
+                { "sClass": "cantidades" },
+                { "sClass": "cantidades" },
                 { "sClass": "item" },
-                { "sClass": "center" }
+                { "sClass": "item2" }
             ],
             "fnRowCallback":function( nRow, aData, iDataIndex ) {
                 
@@ -37,18 +53,18 @@
                 * en la columna estado
                 */
                 var estados = ['Inactivo','Activo','Completado'];
-                var estado = aData[5];
+                var estado = aData[6];
                 var ancla = '';
 
                 if(estado == 0)
                 {
-                    ancla = '<a href="'+<?php echo json_encode(base_url().'contratoEstampillas/state/'); ?>+ aData[6] +'"'
+                    ancla = '<a href="'+<?php echo json_encode(base_url().'contratoEstampillas/state/'); ?>+ aData[7] +'"'
                         +' class="btn btn-danger">'
                         +'<i class="fa fa-times"></i> '
                         +estados[estado]+'</a>';
                 }else if(estado == 1)
                     {
-                        ancla = '<a href="'+<?php echo json_encode(base_url().'contratoEstampillas/state/'); ?>+ aData[6] +'"'
+                        ancla = '<a href="'+<?php echo json_encode(base_url().'contratoEstampillas/state/'); ?>+ aData[7] +'"'
                             +' class="btn btn-success">'
                             +'<i class="fa fa-check"></i> '
                             +estados[estado]+'</a>';
@@ -59,19 +75,15 @@
                                 +estados[estado]+'</a>';
                         }                
 
-                $('td:eq(5)', nRow).html(ancla);
+                $('td:eq(6)', nRow).html(ancla);
 
-            // $.ajax({
-            //    type: "POST",
-            //    dataType: "html",
-            //    data: {papelid : aData[0]},
-            //    url: "<?php echo base_url(); ?>index.php/papeles/contarpapeles",
-            //    success: function(data) {
-            //      var restante=cantidad-data;
-            //      $('td:eq(5)', nRow).html(data);
-            //      $('td:eq(6)', nRow).html(restante);
-            //    }
-            //  });
+                /*
+                * Calcula las estampillas restantes para impresion en el contrato
+                */
+                var totContrato = aData[2];
+                var totImpresas = aData[3];
+                var totRestantes = parseInt(totContrato) - parseInt(totImpresas);
+                $('td:eq(4)', nRow).html(totRestantes);
           
          }
         });
@@ -97,8 +109,9 @@
                     <tr>                        
                         <th>Número</th>
                         <th>Fecha Contrato</th>
-                        <th>Cantidad Estampillas Contratadas</th>
-                        <th>Cantidad Estampillas Impresas</th>
+                        <th>Estampillas Contratadas</th>
+                        <th>Estampillas Impresas</th>
+                        <th>Estampillas Disponibles</th>
                         <th>Detalles</th>     
                         <th>Estado</th>     
                     </tr>
