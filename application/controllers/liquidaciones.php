@@ -1608,7 +1608,7 @@ function consultar()
                                         $this->codegen_model->edit('est_contratopapeles',
                                             ['conpap_estado' => 2,
                                             'conpap_impresos' => $resultado->contador],
-                                            'conpap_id', $vContratoE[0]->conpap_id);                                                                            
+                                            'conpap_id', $vContratoE[0]->conpap_id);
                                     }else
                                         {
                                             /*
@@ -1620,6 +1620,15 @@ function consultar()
                                                 ['conpap_impresos' => $resultado->contador],
                                                 'conpap_id', $vContratoE[0]->conpap_id);          
                                         }
+
+                                    /*
+                                    * Extrae la cantidad impresa de estampillas
+                                    * de el rango para el contrato
+                                    */
+                                    $where = 'impr_estado = 1 AND impr_contratopapel = '.$vContratoE[0]->conpap_id
+                                        .' AND impr_papelid = '.$papeles->pape_id;
+                                    $resultado = $this->codegen_model->countwhere('est_impresiones',$where);
+                                    
 
                                     redirect(base_url().'index.php/generarpdf/generar_estampilla/'.$idFactura); 
 
