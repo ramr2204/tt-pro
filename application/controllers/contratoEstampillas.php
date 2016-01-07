@@ -276,7 +276,7 @@ class ContratoEstampillas extends MY_Controller {
             if ($this->ion_auth->is_admin()) 
             {                                 
                 $this->load->library('datatables'); 
-                $this->datatables->select('conpap_numero,conpap_fecha,conpap_cantidad,conpap_impresos,conpap_id,conpap_observaciones,conpap_estado,conpap_id');
+                $this->datatables->select('conpap_numero,conpap_fecha,conpap_cantidad,conpap_impresos,conpap_year,conpap_observaciones,conpap_estado,conpap_id');
                 $this->datatables->from('est_contratopapeles');              
 
                 echo $this->datatables->generate();
