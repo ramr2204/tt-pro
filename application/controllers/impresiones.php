@@ -174,7 +174,6 @@ class Impresiones extends MY_Controller {
       } else {
           redirect(base_url().'index.php/users/login');
       }
-
   }	
 
 
