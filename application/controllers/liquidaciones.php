@@ -1628,9 +1628,30 @@ function consultar()
                                     $where = 'impr_estado = 1 AND impr_contratopapel = '.$vContratoE[0]->conpap_id
                                         .' AND impr_papelid = '.$papeles->pape_id;
                                     $resultado = $this->codegen_model->countwhere('est_impresiones',$where);
-                                    
 
-                                    redirect(base_url().'index.php/generarpdf/generar_estampilla/'.$idFactura); 
+                                    /*
+                                    * Valida si ya está creado el rango como detalle del contrato
+                                    * para actualizar la cantidad impresa de ese rango
+                                    * si no está creado lo crea con cantidad 1
+                                    */
+                                    $where = 'WHERE detpap_rango = '. $papeles->pape_id .' AND detpap_contrato = '.$vContratoE[0]->conpap_id;
+                                    $vRangoPap = $this->codegen_model->getSelect('est_detconpap',"detpap_id", $where);
+                                    if(count($vRangoPap) > 0)
+                                    {
+                                        $this->codegen_model->edit('est_detconpap',
+                                            ['detpap_cantidad' => $resultado->contador],
+                                            'detpap_id', $vRangoPap[0]->detpap_id);
+                                    }else
+                                        {
+                                            $datos = array(
+                                                'detpap_contrato' => $vContratoE[0]->conpap_id,
+                                                'detpap_rango' => $papeles->pape_id,
+                                                'detpap_cantidad' => $resultado->contador
+                                                );
+                                            $this->codegen_model->add('est_detconpap',$datos);
+                                        }                                    
+
+                                    redirect(base_url().'index.php/generarpdf/generar_estampilla/'.$idFactura);                                     
 
                                 }else
                                     {
