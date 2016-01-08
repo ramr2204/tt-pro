@@ -57,62 +57,62 @@ class Papeles extends MY_Controller {
 
   }
 	
-  function add()
-  {  
-      if ($this->ion_auth->logged_in()) {
+    function add()
+    {  
+        if ($this->ion_auth->logged_in()) {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/add')) {
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/add')) {
 
-              $this->data['successmessage']=$this->session->flashdata('message');  
-        		  $this->form_validation->set_rules('codigoinicial', 'Código Inicial', 'required|xss_clean|max_length[7]|is_unique[est_papeles.pape_codigoinicial]');
-              $this->form_validation->set_rules('codigofinal', 'Código Final', 'required|xss_clean|max_length[7]|is_unique[est_papeles.pape_codigofinal]');   
-              $this->form_validation->set_rules('observaciones', 'Observaciones', 'xss_clean|max_length[480]');
-              $this->form_validation->set_rules('documentoRespPapel', 'Documento Responsable',  'required|numeric');
-              $this->form_validation->set_rules('cantidad', 'Cantidad Papeleria',  'required|numeric|is_natural_no_zero');
+                $this->data['successmessage']=$this->session->flashdata('message');  
+        		$this->form_validation->set_rules('codigoinicial', 'Código Inicial', 'required|xss_clean|max_length[7]|is_unique[est_papeles.pape_codigoinicial]');
+                $this->form_validation->set_rules('codigofinal', 'Código Final', 'required|xss_clean|max_length[7]|is_unique[est_papeles.pape_codigofinal]');   
+                $this->form_validation->set_rules('observaciones', 'Observaciones', 'xss_clean|max_length[480]');
+                $this->form_validation->set_rules('documentoRespPapel', 'Documento Responsable',  'required|numeric');
+                $this->form_validation->set_rules('cantidad', 'Cantidad Papeleria',  'required|numeric|is_natural_no_zero');
               
 
-              if ($this->form_validation->run() == false) {
-
-                  $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
-              } else 
+                if($this->form_validation->run() == false)
                 {
+                    $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
+                }else 
+                    {
 
-                      //Valida si alguno de los codigos de papeleria
-                      //ingresados se encuentra dentro de, por lo menos
-                      //uno de los rangos asignados actualmente
+                        //Valida si alguno de los codigos de papeleria
+                        //ingresados se encuentra dentro de, por lo menos
+                        //uno de los rangos asignados actualmente
+  
+                        $codigoUp=(int)$this->input->post('codigofinal');
+                        $codigoDown=(int)$this->input->post('codigoinicial');
+  
+                        $cadenaErrorPapelEnRango='null';
+  
+                        $campo='pape_codigoinicial, pape_codigofinal';
+                        $rangos=$this->codegen_model->getSelect('est_papeles',$campo);
+  
+                        foreach ($rangos as $value) 
+                        {
+                            $up=(int)$value->pape_codigofinal;
+                            $down=(int)$value->pape_codigoinicial;
+  
+                            if($codigoDown<=$up && $codigoDown>=$down)
+                            {
+                                 $cadenaErrorPapelEnRango='El codigo de papel Inicial -'.$codigoDown
+                                     .'- ya fue asignado. ';
+                            }
+  
+                            if ($codigoUp<=$up && $codigoUp>=$down) 
+                            {
+                                $cadenaErrorPapelEnRango.='El codigo de papel Final -'.$codigoUp
+                                  .'- ya fue asignado.';
+                            }
+                        }
 
-                      $codigoUp=(int)$this->input->post('codigofinal');
-                      $codigoDown=(int)$this->input->post('codigoinicial');
-
-                      $cadenaErrorPapelEnRango='null';
-
-                      $campo='pape_codigoinicial, pape_codigofinal';
-                      $rangos=$this->codegen_model->getSelect('est_papeles',$campo);
-
-                      foreach ($rangos as $value) 
-                      {
-                          $up=(int)$value->pape_codigofinal;
-                          $down=(int)$value->pape_codigoinicial;
-
-                          if($codigoDown<=$up && $codigoDown>=$down)
-                          {
-                               $cadenaErrorPapelEnRango='El codigo de papel Inicial -'.$codigoDown
-                                   .'- ya fue asignado. ';
-                          }
-
-                          if ($codigoUp<=$up && $codigoUp>=$down) 
-                          {
-                              $cadenaErrorPapelEnRango.='El codigo de papel Final -'.$codigoUp
-                                .'- ya fue asignado.';
-                          }
-                      }
-
-                      if($cadenaErrorPapelEnRango!='null')
-                      {
-                          $this->data['errormessage'] = $cadenaErrorPapelEnRango; 
+                        if($cadenaErrorPapelEnRango!='null')
+                        {
+                            $this->data['errormessage'] = $cadenaErrorPapelEnRango; 
                           
-                      }else
-                          {
+                        }else
+                            {
                                $data = array(
                                       'pape_usuario' => $this->input->post('documentoRespPapel'),
                                       'pape_codigoinicial' => $this->input->post('codigoinicial'),
@@ -140,8 +140,7 @@ class Papeles extends MY_Controller {
                                     $this->data['errormessage'] = 'No se pudo registrar la Papeleria';
 
                                 } 
-                          }
-
+                            }
     		         }
               $this->template->set('title', 'Nueva aplicación');
               $this->data['style_sheets']= array(
@@ -163,7 +162,6 @@ class Papeles extends MY_Controller {
       } else {
           redirect(base_url().'index.php/users/login');
       }
-
   }	
 
 
@@ -274,12 +272,15 @@ class Papeles extends MY_Controller {
       }
   }
   
-   function contarpapeles()
-  {
-     $resultado= $this->codegen_model->countwhere('est_impresiones','impr_papelid = '.$this->input->post('papelid'));
-     echo $resultado->contador;
-
-  }  
+    /*
+    * Funcion de apoyo que extrae de la tabla de impresiones
+    * la cantidad impresa para el id de la papeleria
+    */
+    function contarpapeles()
+    {
+        $resultado= $this->codegen_model->countwhere('est_impresiones','impr_papelid = '.$this->input->post('papelid'));
+        echo $resultado->contador;
+    }
  
   function datatable ()
   {

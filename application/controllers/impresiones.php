@@ -87,7 +87,7 @@ class Impresiones extends MY_Controller {
                      );
                       $this->codegen_model->add('est_tiposanulaciones',$datos); 
                       $tipoanulacionid=$this->db->insert_id();
-                  //////////////////////////////////////////////////
+                  
                    } else {
                       $tipoanulacionid=$resultado->tisa_id;
                    }
@@ -99,7 +99,6 @@ class Impresiones extends MY_Controller {
 
                     if ($result) 
                     {
-
                        //Sobre escribe el id de la factura que se habia generado con ese papel
                        //por cero (0) y actualiza el estado de impresión a 2
                        $data = array(
@@ -175,7 +174,6 @@ class Impresiones extends MY_Controller {
       } else {
           redirect(base_url().'index.php/users/login');
       }
-
   }	
 
 

@@ -1527,6 +1527,41 @@ function consultar()
 
                                       }while($c != $m);
                                     
+                                    /*
+                                    * Valida que exista un contrato en estado 1 (activo | con estampillas por imprimir)
+                                    * para registrar la impresión
+                                    */
+                                    $where = 'WHERE conpap_estado = 1';
+                                    $vContratoE = $this->codegen_model->getSelect('est_contratopapeles',"conpap_id,conpap_cantidad", $where);
+
+                                    if(count($vContratoE) == 0)
+                                    {
+                                        $this->session->set_flashdata('errormessage', 'No Existe un Contrato de Estampillas Activo, Debe Solicitar el Registro de un Contrato para Realizar la Impresión!');
+                                        redirect(base_url().'index.php/liquidaciones/liquidar');
+                                    }
+
+                                    /*
+                                    * Valida que el contrato aún tenga estampillas a imprimir 
+                                    * antes de registrar la impresion
+                                    */
+                                    $where = 'impr_estado = 1 AND impr_contratopapel = '.$vContratoE[0]->conpap_id;
+                                    $resultado = $this->codegen_model->countwhere('est_impresiones',$where);                                    
+                                    
+                                    if($vContratoE[0]->conpap_cantidad <= $resultado->contador)
+                                    {
+                                        /*
+                                        * Si ya se alcanzó la cantidad maxima se modifica el estado
+                                        * del contrato de estampillas a completado (2)
+                                        * y la cantidad de estampillas impresas encontradas
+                                        */
+                                        $this->codegen_model->edit('est_contratopapeles',
+                                            ['conpap_estado' => 2,
+                                            'conpap_impresos' => $resultado->contador],
+                                            'conpap_id', $vContratoE[0]->conpap_id);
+
+                                        $this->session->set_flashdata('errormessage', 'No Existe un Contrato de Estampillas Activo, Debe Solicitar el Registro de un Contrato para Realizar la Impresión!');
+                                        redirect(base_url().'index.php/liquidaciones/liquidar');                                        
+                                    }                                    
 
                                     $data = array(
                                     'impr_codigopapel' => str_pad($nuevoingreso, 4, '0', STR_PAD_LEFT),
@@ -1537,7 +1572,8 @@ function consultar()
                                     'impr_codigo' => $codigo,
                                     'impr_estampillaid' => $codificacion,
                                     'impr_estadoContintencia' => 'NO',
-                                    'impr_estado' => '1'
+                                    'impr_estado' => '1',
+                                    'impr_contratopapel' => $vContratoE[0]->conpap_id
                                     );
     
                                     //extrae la cantidad actual impresa para el rango
@@ -1555,7 +1591,67 @@ function consultar()
                               
                                     $this->codegen_model->add('est_impresiones',$data);
 
-                                    redirect(base_url().'index.php/generarpdf/generar_estampilla/'.$idFactura); 
+                                    /*
+                                    * Valida que el contrato aún tenga estampillas a imprimir
+                                    * despues de registrar la impresion
+                                    */
+                                    $where = 'impr_estado = 1 AND impr_contratopapel = '.$vContratoE[0]->conpap_id;
+                                    $resultado = $this->codegen_model->countwhere('est_impresiones',$where);                                    
+                                    
+                                    if($vContratoE[0]->conpap_cantidad <= $resultado->contador)
+                                    {
+                                        /*
+                                        * Si ya se alcanzó la cantidad maxima se modifica el estado
+                                        * del contrato de estampillas a completado (2)
+                                        * y actualiza la cantidad de estampillas impresas
+                                        */
+                                        $this->codegen_model->edit('est_contratopapeles',
+                                            ['conpap_estado' => 2,
+                                            'conpap_impresos' => $resultado->contador],
+                                            'conpap_id', $vContratoE[0]->conpap_id);
+                                    }else
+                                        {
+                                            /*
+                                            * Si no se ha alcanzado la cantidad maxima de estampillas
+                                            * para el contrato solamente actualiza la cantidad 
+                                            * de estampillas impresas
+                                            */
+                                            $this->codegen_model->edit('est_contratopapeles',
+                                                ['conpap_impresos' => $resultado->contador],
+                                                'conpap_id', $vContratoE[0]->conpap_id);          
+                                        }
+
+                                    /*
+                                    * Extrae la cantidad impresa de estampillas
+                                    * de el rango para el contrato
+                                    */
+                                    $where = 'impr_estado = 1 AND impr_contratopapel = '.$vContratoE[0]->conpap_id
+                                        .' AND impr_papelid = '.$papeles->pape_id;
+                                    $resultado = $this->codegen_model->countwhere('est_impresiones',$where);
+
+                                    /*
+                                    * Valida si ya está creado el rango como detalle del contrato
+                                    * para actualizar la cantidad impresa de ese rango
+                                    * si no está creado lo crea con cantidad 1
+                                    */
+                                    $where = 'WHERE detpap_rango = '. $papeles->pape_id .' AND detpap_contrato = '.$vContratoE[0]->conpap_id;
+                                    $vRangoPap = $this->codegen_model->getSelect('est_detconpap',"detpap_id", $where);
+                                    if(count($vRangoPap) > 0)
+                                    {
+                                        $this->codegen_model->edit('est_detconpap',
+                                            ['detpap_cantidad' => $resultado->contador],
+                                            'detpap_id', $vRangoPap[0]->detpap_id);
+                                    }else
+                                        {
+                                            $datos = array(
+                                                'detpap_contrato' => $vContratoE[0]->conpap_id,
+                                                'detpap_rango' => $papeles->pape_id,
+                                                'detpap_cantidad' => $resultado->contador
+                                                );
+                                            $this->codegen_model->add('est_detconpap',$datos);
+                                        }                                    
+
+                                    redirect(base_url().'index.php/generarpdf/generar_estampilla/'.$idFactura);                                     
 
                                 }else
                                     {
