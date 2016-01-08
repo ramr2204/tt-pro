@@ -244,12 +244,12 @@ function identificarVistaDatetimepicker()
 
     /*
     * Valida si es la vista de cargue agregar
-    * ordenanzas
+    * documentos normativos
     */
-    var o = 0;
-    $('body').find('#btn-ordenanzasAdd').each(function()
+    var docN = 0;
+    $('body').find('#btn-documentosNormativosAdd').each(function()
         {
-            o++;     
+            docN++;     
         });
 
     /*
@@ -273,13 +273,13 @@ function identificarVistaDatetimepicker()
         });
     }
 
-    if(o > 0)
+    if(docN > 0)
     {
         //Evento para el timepicker del cargue de ordenanzas
-        $('#datetimepicker_fechaOrdenanza').datetimepicker({
+        $('#datetimepicker_fechadocnor').datetimepicker({
             pickTime: false
         });
-        $('#datetimepicker_inicioOrdenanza').datetimepicker({
+        $('#datetimepicker_iniciodocnor').datetimepicker({
             pickTime: false
         });
     }
