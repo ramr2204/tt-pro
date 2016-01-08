@@ -29,7 +29,7 @@
                                 </div>                                
                                 <div class="form-group">
                                     <label for="conpap_numero">Número de Contrato</label>
-                                    <input class="form-control" id="conpap_numero" type="number" name="conpap_numero" required="required" maxlength="100" />
+                                    <input class="form-control" id="conpap_numero" type="text" name="conpap_numero" required="required" maxlength="100" />
                                     <?php echo form_error('conpap_numero','<span class="text-danger">','</span>'); ?>
                                 </div>
                                 <div class="form-group">

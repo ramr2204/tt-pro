@@ -104,7 +104,7 @@ class ContratoEstampillas extends MY_Controller {
             if ($this->ion_auth->is_admin()) 
             {                
                 $this->form_validation->set_rules('conpap_fecha', 'Fecha Contrato', 'required|trim|xss_clean|required');   
-                $this->form_validation->set_rules('conpap_numero', 'Número Contrato', 'numeric|trim|xss_clean|required');
+                $this->form_validation->set_rules('conpap_numero', 'Número Contrato', 'trim|xss_clean|required');
                 $this->form_validation->set_rules('conpap_cantidad', 'Cantidad Estampillas', 'numeric|trim|xss_clean|required');
 
                 if($this->form_validation->run() == false) 
@@ -125,11 +125,22 @@ class ContratoEstampillas extends MY_Controller {
                             $errorF .= 'La Fecha de Contrato debe tener un formato correcto<br>';
                         }                        
 
+                        /*
+                        * Valida que el numero de contrato suministrado cumpla con el patron
+                        * solo un "numero" para contratos y "numero-ADnumero" para adiciones                        
+                        */
+                        $patronNumContrato = '/^[0-9]+(-AD[0-9]+$)*$/';
+                        $numContrato = $this->input->post('conpap_numero');
+                        if(!preg_match($patronNumContrato, $numContrato))
+                        {
+                            $errorF .= 'El Número de Contrato debe tener un formato correcto [XXXX] o [XXX-ADXXX]<br>';
+                        }
+
                         if($errorF != 'Error:<br>')
                         {
                             $this->session->set_flashdata('errormessage', $errorF);
                             redirect(base_url().'index.php/contratoEstampillas/add');
-                        }
+                        }                        
 
                         /*
                         * Valida que no haya un contrato con el mismo numero
@@ -138,7 +149,7 @@ class ContratoEstampillas extends MY_Controller {
                         $year = explode('-', $this->input->post('conpap_fecha'));
                         $year = $year[0];
 
-                        $where = 'WHERE conpap_numero = '.$this->input->post('conpap_numero')
+                        $where = 'WHERE conpap_numero = "'. $this->input->post('conpap_numero') .'"'
                             .' AND conpap_year ="'.$year.'"';
                         $vContratoE = $this->codegen_model->getSelect('est_contratopapeles',"conpap_id", $where);
                         if(count($vContratoE) > 0)
@@ -161,7 +172,7 @@ class ContratoEstampillas extends MY_Controller {
                         */
                         $datos = $this->input->post(NULL, TRUE);
                         $datos['conpap_year'] = $year;
-                        $datos['conpap_estado'] = 1;                                                
+                        $datos['conpap_estado'] = 1;                        
                         
                         $this->codegen_model->add('est_contratopapeles',$datos);
 
