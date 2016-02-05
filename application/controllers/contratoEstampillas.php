@@ -300,4 +300,29 @@ class ContratoEstampillas extends MY_Controller {
                 redirect(base_url().'index.php/users/login');
             }           
     }
+
+    /*
+    * Funcion de apoyo que renderiza la vista con la cantidad
+    * de estampillas disponibles del contrato de estampillas activo
+    */
+    function saldoEstampillas ()
+    {
+        if ($this->ion_auth->logged_in()) 
+        {          
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratoEstampillas/saldoEstampillas')) 
+            {                                 
+                /*
+                * Extrae los datos del contrato de estampillas activo
+                */
+                $where = 'WHERE conpap_id = '.$idcontrato;                            
+                $vContratoE = $this->codegen_model->getSelect('est_contratopapeles',"conpap_id,conpap_estado", $where);
+            }else
+                {
+                    redirect(base_url().'index.php/error_404');
+                }               
+        }else
+            {
+                redirect(base_url().'index.php/users/login');
+            }           
+    }
 }
