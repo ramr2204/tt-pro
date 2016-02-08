@@ -314,8 +314,21 @@ class ContratoEstampillas extends MY_Controller {
                 /*
                 * Extrae los datos del contrato de estampillas activo
                 */
-                $where = 'WHERE conpap_id = '.$idcontrato;                            
-                $vContratoE = $this->codegen_model->getSelect('est_contratopapeles',"conpap_id,conpap_estado", $where);
+                $where = 'WHERE conpap_estado = 1';                            
+                $vContratoE = $this->codegen_model->getSelect('est_contratopapeles',"conpap_id,conpap_estado,conpap_cantidad,conpap_impresos", $where);
+
+                /*
+                * Valida si hay un contrato de estampillas activo
+                */
+                if(count($vContratoE) > 0)
+                {
+                    $this->data['saldo'] = (int)$vContratoE[0]->conpap_cantidad - (int)$vContratoE[0]->conpap_impresos;
+                    $this->template->load($this->config->item('admin_template'),'contratosestampillas/contratosestampillas_saldo', $this->data);
+                }else
+                    {
+                        $this->session->set_flashdata('errormessage', '<strong>Error!</strong> No existe un contrato con estampillas pendientes!');
+                        redirect(base_url().'index.php/liquidaciones/liquidar/');
+                    }
             }else
                 {
                     redirect(base_url().'index.php/error_404');
