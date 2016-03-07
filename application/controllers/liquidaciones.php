@@ -1420,6 +1420,11 @@ function consultar()
                   
                     } else 
                        {
+                           /*
+                           * Variable que determina si se debe trabajar con papelería de contingencia
+                           */
+                           $contingencia = 'NO';
+
                            $idFactura = $this->uri->segment(3);
 
                            $codigo='00000000';
@@ -1431,7 +1436,12 @@ function consultar()
                            //en las impresiones para el liquidador autenticado
                            $tablaJoin='est_papeles';
                            $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
-                           $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
+
+                           /*
+                           * Construye la consulta para trabajar con los rotulos normales o de contigencia
+                           * dependiendo del valor de la variable $contingencia
+                           */
+                           $where='est_papeles.pape_usuario ='. $usuarioLogueado->id .' AND est_impresiones.impr_estadoContintencia = "'. $contingencia .'"';
 
                            $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);                          
 
@@ -1444,7 +1454,7 @@ function consultar()
                                 //extrae el ultimo codigo de papeleria asignado al
                                 //liquidador para verificar que el ultimo impreso
                                 //no sea el ultimo asignado                           
-                                $where='pape_usuario ='.$usuarioLogueado->id;
+                                $where='pape_usuario ='.$usuarioLogueado->id .' AND est_papeles.pape_estadoContintencia = "'. $contingencia .'"';
 
                                 $maxAsignado = $this->codegen_model->max('est_papeles','pape_codigofinal',$where);
 
@@ -1460,7 +1470,7 @@ function consultar()
                                {
                                      //extrae el primer codigo de papeleria resgistrado
                                      //en los rangos de papel asginado al liquidador autenticado
-                                     $where='est_papeles.pape_usuario ='.$usuarioLogueado->id;
+                                     $where='est_papeles.pape_usuario ='. $usuarioLogueado->id .' AND est_papeles.pape_estadoContintencia = "'. $contingencia .'"';
                                      $primerCodigo = $this->codegen_model->min('est_papeles','pape_codigoinicial',$where);
                                      $nuevoingreso = (int)$primerCodigo['pape_codigoinicial'];
                                }
@@ -1476,6 +1486,7 @@ function consultar()
                            'pape_codigoinicial <= '.$nuevoingreso
                            .' AND pape_codigofinal >='
                            .$nuevoingreso
+                           .' AND est_papeles.impr_estadoContintencia = "'. $contingencia .'"'
                            .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true);
 
                            //verifica que exista un rango de papeleria asignado
@@ -1490,7 +1501,7 @@ function consultar()
 
                                while ($nousado==0)
                                {
-                                    $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso.' AND impr_papelid = '.$papeles->pape_id,1,NULL,true);                                 
+                                    $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso.' AND impr_papelid = '.$papeles->pape_id .' AND impr_estadoContintencia = "'. $contingencia .'"',1,NULL,true);                                 
 
                                     if (!$combrobacionImpresiones) 
                                     {
@@ -1571,7 +1582,7 @@ function consultar()
                                     'impr_fecha' => date('Y-m-d H:i:s'),
                                     'impr_codigo' => $codigo,
                                     'impr_estampillaid' => $codificacion,
-                                    'impr_estadoContintencia' => 'NO',
+                                    'impr_estadoContintencia' => $contingencia,
                                     'impr_estado' => '1',
                                     'impr_contratopapel' => $vContratoE[0]->conpap_id
                                     );
