@@ -58,7 +58,7 @@ class Impresiones extends MY_Controller {
   }
 	
   function add()
-  {        
+  {
       if ($this->ion_auth->logged_in()) {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('impresiones/add')) {
@@ -74,7 +74,18 @@ class Impresiones extends MY_Controller {
 
                   $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
               } else 
-                {    
+                {
+                    /*
+                    * Variable que determina si se debe trabajar con papelería de contingencia
+                    */
+                    $objContin = $this->codegen_model->get('adm_parametros','para_contingencia','para_id = 1',1,NULL,true);
+                    if($objContin->para_contingencia == 1)
+                    {
+                        $contingencia = 'SI';
+                    }else
+                        {
+                            $contingencia = 'NO';
+                        }
 
                    $resultado = $this->codegen_model->get('est_tiposanulaciones','tisa_id',"tisa_nombre = '".$this->input->post('tipoanulacion')."'",1,NULL,true);
 
@@ -95,7 +106,7 @@ class Impresiones extends MY_Controller {
                    //Verifica si el codigo de papel a eliminar esta asignado a un
                    //contrato en caso de estarlo realiza las operaciones necesarias
                    //para actualizar el estado del contrato y el estado de la impresion
-                    $result= $this->codegen_model->get('est_impresiones','impr_id,impr_facturaid',"impr_codigopapel = '".$this->input->post('codigopapel')."'",1,NULL,true);
+                    $result= $this->codegen_model->get('est_impresiones','impr_id,impr_facturaid','impr_codigopapel = "'.$this->input->post('codigopapel').'" AND impr_estadoContintencia = "'. $contingencia .'"',1,NULL,true);
 
                     if ($result) 
                     {
@@ -121,14 +132,15 @@ class Impresiones extends MY_Controller {
                         {
                             //En caso de no existir una factura ni contrato asignado al papel que se
                             //va a anular se crea solamente la anulación con el codigo del papel respectivo
-                            $papeles = $this->codegen_model->get('est_papeles','pape_id,pape_codigoinicial,pape_codigofinal, pape_imprimidos','pape_codigoinicial <= '.$this->input->post('codigopapel').' AND pape_codigofinal >= '.$this->input->post('codigopapel'),1,NULL,true);
+                            $papeles = $this->codegen_model->get('est_papeles','pape_id,pape_codigoinicial,pape_codigofinal, pape_imprimidos','pape_codigoinicial <= '.$this->input->post('codigopapel').' AND pape_codigofinal >= '.$this->input->post('codigopapel') .' AND pape_estadoContintencia = "'. $contingencia .'"',1,NULL,true);
                             $data = array(
                                 'impr_codigopapel' => $this->input->post('codigopapel'),
                                 'impr_observaciones' => $this->input->post('observaciones'),
                                 'impr_tipoanulacionid' => $tipoanulacionid,
                                 'impr_estado' => 2,
                                 'impr_fecha' => date('Y-m-d H:i:s',now()),
-                                'impr_papelid' => $papeles->pape_id
+                                'impr_papelid' => $papeles->pape_id,
+                                'impr_estadoContintencia' => $contingencia
                             );
                         
                            
