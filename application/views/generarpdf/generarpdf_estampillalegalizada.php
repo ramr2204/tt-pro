@@ -54,7 +54,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        color:red;"><?php echo $estampilla->impr_codigopapel; ?></td>
+                        color:red;"><?php echo $contingencia.str_pad($estampilla->impr_codigopapel, 4, '0', STR_PAD_LEFT); ?></td>
                 </tr>
 
                 <tr>
@@ -243,7 +243,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        color: red;"><br><br><br></td>
+                        color: red;"><br><br><br><?php if($contingencia != ''){echo $contingencia.str_pad($estampilla->impr_codigopapel, 4, '0', STR_PAD_LEFT);} ?></td>
                 </tr>   
             </table>
         

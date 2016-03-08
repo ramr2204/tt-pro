@@ -53,6 +53,12 @@ function inicial ()
     $('#btn-consultar').click(generarInformeRango);
     $('#btn-consultar-detalle-pdf').click(generarInformeRangoDetalle);
     $('#btn-consultar-detalle-excel').click(generarInformeRangoDetalle);
+
+    /*
+    * Evento para solicitar recargar el formulario de adicionar papelería
+    * con o sin la variable de contingencia
+    */
+    $('#chk_contingencia').click(solicitarRecargaPagina);
  
     //Solicita la identificacion de vistas
     //con controles timepicker
@@ -67,6 +73,22 @@ function inicial ()
     //listado de conciliaciones para eliminar
     //el css del container en esa vista
     identificarVistaListadoConciliaciones();
+}
+
+/*
+* Funcion que identifica si el checkbox de contingencia
+* está o no seleccionado para solicitar recargar
+* la pagina con los datos de contingencia
+*/
+function solicitarRecargaPagina(e)
+{
+    if($(this).is(':checked'))
+    {
+        window.location.assign(base_url+'index.php/papeles/add?contin=SI');
+    }else
+        {
+            window.location.assign(base_url+'index.php/papeles/add?contin=NO');
+        }
 }
 
 /*

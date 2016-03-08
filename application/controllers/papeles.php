@@ -69,11 +69,17 @@ class Papeles extends MY_Controller {
                 $this->form_validation->set_rules('observaciones', 'Observaciones', 'xss_clean|max_length[480]');
                 $this->form_validation->set_rules('documentoRespPapel', 'Documento Responsable',  'required|numeric');
                 $this->form_validation->set_rules('cantidad', 'Cantidad Papeleria',  'required|numeric|is_natural_no_zero');
-              
+      
                 /*
-                * Inicializa el estado de contingencia
+                * Valida si se recibe por get la variable contin
                 */
                 $contingencia = 'NO';
+                $this->data['contingencia'] = 'NO';
+                if(isset($_GET['contin']) && $_GET['contin'] == 'SI')
+                {
+                    $contingencia = 'SI';
+                    $this->data['contingencia'] = 'SI';
+                }                
 
                 if($this->form_validation->run() == false)
                 {
