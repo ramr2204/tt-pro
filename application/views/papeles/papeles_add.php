@@ -19,7 +19,22 @@
                            <div class="panel panel-default">
                             <div class="panel-heading"><h1>Ingreso de papelería para estampillas</h1></div>
                              <div class="panel-body">
-                              <?php echo form_open(current_url()); ?>
+                              <?php echo form_open(current_url()); ?>                              
+                                    <div class="checkbox">
+                                        <label>
+                                            <?php 
+                                                if($contingencia == 'SI')
+                                                {
+                                                    echo '<input type="checkbox" id="chk_contingencia" name="contingencia" value="SI" checked/> Rotulos de Contingencia';
+                                                }else
+                                                    {
+                                                        echo '<input type="checkbox" id="chk_contingencia" name="contingencia" value="SI"/> Rotulos de Contingencia';
+                                                    }
+                                            ?>                                            
+                                        </label>
+                                        <?php echo form_error('contingencia','<span class="text-danger">','</span>'); ?>
+                                    </div>                                    
+
                                     <div class="form-group">
                                            <label for="responsablePapel">Nombre Responsable</label>
                                            <input class="form-control responsable" id="responsable" type="text" name="responsablePapel" placeholder="Nombre" required autocomplete="off"/>

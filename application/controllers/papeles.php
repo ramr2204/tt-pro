@@ -64,18 +64,36 @@ class Papeles extends MY_Controller {
             if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/add')) {
 
                 $this->data['successmessage']=$this->session->flashdata('message');  
-        		$this->form_validation->set_rules('codigoinicial', 'Código Inicial', 'required|xss_clean|max_length[7]|is_unique[est_papeles.pape_codigoinicial]');
-                $this->form_validation->set_rules('codigofinal', 'Código Final', 'required|xss_clean|max_length[7]|is_unique[est_papeles.pape_codigofinal]');   
+        		$this->form_validation->set_rules('codigoinicial', 'Código Inicial', 'required|xss_clean|max_length[7]');
+                $this->form_validation->set_rules('codigofinal', 'Código Final', 'required|xss_clean|max_length[7]');   
                 $this->form_validation->set_rules('observaciones', 'Observaciones', 'xss_clean|max_length[480]');
                 $this->form_validation->set_rules('documentoRespPapel', 'Documento Responsable',  'required|numeric');
                 $this->form_validation->set_rules('cantidad', 'Cantidad Papeleria',  'required|numeric|is_natural_no_zero');
-              
+      
+                /*
+                * Valida si se recibe por get la variable contin
+                */
+                $contingencia = 'NO';
+                $this->data['contingencia'] = 'NO';
+                if(isset($_GET['contin']) && $_GET['contin'] == 'SI')
+                {
+                    $contingencia = 'SI';
+                    $this->data['contingencia'] = 'SI';
+                }                
 
                 if($this->form_validation->run() == false)
                 {
                     $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
                 }else 
                     {
+                        /*
+                        * Valida si se seleccionó la bandera $contingencia
+                        * para registrar el rango de papeleria con ese atributo
+                        */                        
+                        if(isset($_POST['contingencia']) && $this->input->post('contingencia') == 'SI')
+                        {
+                            $contingencia = $this->input->post('contingencia');
+                        }
 
                         //Valida si alguno de los codigos de papeleria
                         //ingresados se encuentra dentro de, por lo menos
@@ -85,9 +103,15 @@ class Papeles extends MY_Controller {
                         $codigoDown=(int)$this->input->post('codigoinicial');
   
                         $cadenaErrorPapelEnRango='null';
-  
+                        
+                        /*
+                        * Construye el where para realizar la consulta
+                        * discriminando si es de contingencia o no
+                        */
+                        $where = ' WHERE est_papeles.pape_estadoContintencia = "'. $contingencia .'"';
+
                         $campo='pape_codigoinicial, pape_codigofinal';
-                        $rangos=$this->codegen_model->getSelect('est_papeles',$campo);
+                        $rangos=$this->codegen_model->getSelect('est_papeles',$campo, $where);
   
                         foreach ($rangos as $value) 
                         {
@@ -119,6 +143,7 @@ class Papeles extends MY_Controller {
                                       'pape_codigofinal' => $this->input->post('codigofinal'),
                                       'pape_observaciones' => $this->input->post('observaciones'),      
                                       'pape_cantidad' => $this->input->post('cantidad'),
+                                      'pape_estadoContintencia' => $contingencia,
                                       'pape_fecha' => date('Y-m-d H:i:s'),
                                       'pape_estado'=> 1,
                                       'pape_imprimidos'=> 0
@@ -141,8 +166,7 @@ class Papeles extends MY_Controller {
 
                                 } 
                             }
-    		         }
-              $this->template->set('title', 'Nueva aplicación');
+    		         }              
               $this->data['style_sheets']= array(
                         'css/chosen.css' => 'screen',
                         'css/jquery-ui.css' => 'screen'
@@ -152,7 +176,14 @@ class Papeles extends MY_Controller {
                         'js/jquery-ui.js'
                     );  
               $this->template->set('title', 'Agregar Papeleria');
-              $this->data['maxcodigofinal']  = $this->codegen_model->max('est_papeles','pape_codigofinal');
+
+              /*
+              * Construye el where para extraer el numero de rotulo maximo asignado
+              * discriminando si es de contingencia o no
+              */
+              $where = 'pape_estadoContintencia = "'. $contingencia .'"';
+
+              $this->data['maxcodigofinal']  = $this->codegen_model->max('est_papeles','pape_codigofinal', $where);
               $this->template->load($this->config->item('admin_template'),'papeles/papeles_add', $this->data);
              
           } else {

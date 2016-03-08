@@ -22,7 +22,6 @@
                              <div class="panel-body">
                               <?php echo form_open(current_url(),'role="form"');?>
 
-
                                     <div class="form-group">
                                            <label for="redondeo">Número de cifras para redondeo de liquidaciones</label>
                                            <input class="form-control" id="redondeo" type="number" name="redondeo" value="<?php echo $result->para_redondeo; ?>" required="required" />
@@ -35,6 +34,20 @@
                                            <?php echo form_error('salariominimo','<span class="text-danger">','</span>'); ?>
                                     </div>
 
+                                    <div class="checkbox">
+                                        <label>
+                                            <?php 
+                                                if($result->para_contingencia == 1)
+                                                {
+                                                    echo '<input type="checkbox" name="contingencia" value="SI" checked/> Rotulos de Contingencia';
+                                                }else
+                                                    {
+                                                        echo '<input type="checkbox" name="contingencia" value="SI"/> Rotulos de Contingencia';
+                                                    }
+                                            ?>                                            
+                                        </label>
+                                        <?php echo form_error('contingencia','<span class="text-danger">','</span>'); ?>
+                                    </div> 
 
                                     <div class="pull-right">
                                     <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>

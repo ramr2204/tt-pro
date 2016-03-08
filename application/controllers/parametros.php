@@ -41,12 +41,22 @@ class Parametros extends MY_Controller {
                   
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);
                             
-              } else {                            
+              } else {
+
+                /*
+                * Valida si se seleccionó la bandera $contingencia
+                * para registrar el rango de papeleria con ese atributo
+                */        
+                $contingencia = 0;                
+                if(isset($_POST['contingencia']) && $this->input->post('contingencia') == 'SI')
+                {
+                    $contingencia = 1;
+                }
                   
                   $data = array(
                           'para_redondeo' => $this->input->post('redondeo'),
                           'para_salariominimo' => $this->input->post('salariominimo'),
-
+                          'para_contingencia' => $contingencia
                    );
                            
                 	if ($this->codegen_model->edit('adm_parametros',$data,'para_id',$idparametro) == TRUE) {
@@ -59,10 +69,11 @@ class Parametros extends MY_Controller {
                       $this->data['errormessage'] = 'No se pudo registrar los parámetros';
 
                 	}
-              }       
+              }
+              
                   $this->data['successmessage']=$this->session->flashdata('successmessage');
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                	$this->data['result'] = $this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo','para_id = '.$idparametro,1,NULL,true);
+                  $this->data['result'] = $this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo,para_contingencia','para_id = '.$idparametro,1,NULL,true);
                   $this->template->set('title', 'Editar parámetros');
                   $this->template->load($this->config->item('admin_template'),'parametros/parametros_edit', $this->data);
                         
