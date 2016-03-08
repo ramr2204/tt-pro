@@ -14,10 +14,10 @@ class Contratistas extends MY_Controller {
   function __construct() 
   {
       parent::__construct();
-	    $this->load->library('form_validation');		
-		  $this->load->helper(array('form','url','codegen_helper'));
-		  $this->load->model('codegen_model','',TRUE);
-
+	    $this->load->library('form_validation');
+        $this->load->helper('HelperGeneral');
+        $this->load->helper(array('form','url','codegen_helper'));
+        $this->load->model('codegen_model','',TRUE);
 	}	
 	
 	function index()
@@ -130,12 +130,12 @@ class Contratistas extends MY_Controller {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/edit')) {  
 
-              $idregimen = ($this->uri->segment(3)) ? $this->uri->segment(3) : $this->input->post('id') ;
-              if ($idregimen==''){
+              $idContratista = ($this->uri->segment(3)) ? $this->uri->segment(3) : $this->input->post('id') ;
+              if ($idContratista==''){
                   $this->session->set_flashdata('infomessage', 'Debe elegir un contratista para editar');
                   redirect(base_url().'index.php/contratistas');
               }
-              $resultado = $this->codegen_model->get('con_contratistas','cont_nit','cont_id = '.$idregimen,1,NULL,true);
+              $resultado = $this->codegen_model->get('con_contratistas','cont_nit','cont_id = '.$idContratista,1,NULL,true);
        
               foreach ($resultado as $key => $value) {
                   $aplilo[$key]=$value;
@@ -171,14 +171,37 @@ class Contratistas extends MY_Controller {
                         'cont_regimenid' => $this->input->post('regimenid'),
                         'cont_telefono' => $this->input->post('telefono'),
                         'cont_tipocontratistaid' => $this->input->post('tipocontratistaid')
-
                      );
                            
-                	if ($this->codegen_model->edit('con_contratistas',$data,'cont_id',$idregimen) == TRUE) {
+                	if ($this->codegen_model->edit('con_contratistas',$data,'cont_id',$idContratista) == TRUE) {
 
-                      $this->session->set_flashdata('successmessage', 'El contratista se ha editado con éxito');
-                      redirect(base_url().'index.php/contratistas/edit/'.$idregimen);
-                      
+                    /*
+                    * Extrae los id de los contratos que existan para el contratista
+                    */
+                    $where = 'WHERE cntr_contratistaid = '.$idContratista;
+                    $idContratos = $this->codegen_model->getSelect('con_contratos','cntr_id',$where);
+                    $vecIds = HelperGeneral::lists($idContratos,'cntr_id');                    
+                    
+                    /*
+                    * Actualiza los datos del contratista en las posibles liquidaciones de los contratos
+                    */
+                    $where = 'liqu_contratoid IN ('. implode(',', $vecIds) .')';
+                    
+                    /*
+                    * Se Agregan los datos del pago manual
+                    */                                
+                    $datos['liqu_nombrecontratista'] = $this->input->post('nombre');
+                    $datos['liqu_nit'] = $this->input->post('nit');                                
+
+                    /*
+                    * Se Actualiza el registro del pago
+                    */
+                    $this->codegen_model->editWhere('est_liquidaciones',$datos,$where);
+
+
+                    $this->session->set_flashdata('successmessage', 'El contratista se ha editado con éxito');
+                    redirect(base_url().'index.php/contratistas/edit/'.$idContratista);
+                    
                 	} else {
                 				  
                       $this->data['errormessage'] = 'No se pudo registrar el aplilo';
@@ -193,7 +216,7 @@ class Contratistas extends MY_Controller {
                         );    
                   $this->data['successmessage']=$this->session->flashdata('successmessage');
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                	$this->data['result'] = $this->codegen_model->get('con_contratistas','cont_id,cont_nombre,cont_nit,cont_direccion,cont_telefono,cont_municipioid,cont_regimenid,cont_tributarioid, cont_tipocontratistaid','cont_id = '.$idregimen,1,NULL,true);
+                	$this->data['result'] = $this->codegen_model->get('con_contratistas','cont_id,cont_nombre,cont_nit,cont_direccion,cont_telefono,cont_municipioid,cont_regimenid,cont_tributarioid, cont_tipocontratistaid','cont_id = '.$idContratista,1,NULL,true);
                   $this->data['municipios']  = $this->codegen_model->getMunicipios();
                   $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
                   $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
