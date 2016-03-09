@@ -18,7 +18,17 @@
                         </div>
                         <div class="col-md-4 column">
                            <div class="panel panel-default">
-                            <div class="panel-heading"><h1>Nueva Anulación</h1></div>
+                            <div class="panel-heading">
+                                <?php 
+                                    if($objContin->para_contingencia == 1)
+                                    {
+                                        echo '<h1>Nueva Anulación<br>(CONTINGENCIA)</h1>';
+                                    }else
+                                        {
+                                            echo '<h1>Nueva Anulación<br>(NUMERADAS)</h1>';
+                                        }
+                                ?>
+                            </div>
                              <div class="panel-body">
                               <?php echo form_open(current_url()); ?>
                                     <div class="form-group">

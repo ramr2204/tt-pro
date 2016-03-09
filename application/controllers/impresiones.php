@@ -57,8 +57,8 @@ class Impresiones extends MY_Controller {
 
   }
 	
-  function add()
-  {
+function add()
+{
       if ($this->ion_auth->logged_in()) {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('impresiones/add')) {
@@ -68,7 +68,10 @@ class Impresiones extends MY_Controller {
               $this->form_validation->set_rules('observaciones', 'Observaciones', 'trim|xss_clean|max_length[500]');
               $this->form_validation->set_rules('codigopapel', 'Consecutivo', 'required|trim|xss_clean|numeric|');
 
-             
+            /*
+            * Variable que determina si se debe trabajar con papelería de contingencia
+            */
+            $this->data['objContin'] = $this->codegen_model->get('adm_parametros','para_contingencia','para_id = 1',1,NULL,true);
 
               if ($this->form_validation->run() == false) {
 
@@ -106,28 +109,43 @@ class Impresiones extends MY_Controller {
                    //Verifica si el codigo de papel a eliminar esta asignado a un
                    //contrato en caso de estarlo realiza las operaciones necesarias
                    //para actualizar el estado del contrato y el estado de la impresion
-                    $result= $this->codegen_model->get('est_impresiones','impr_id,impr_facturaid','impr_codigopapel = "'.$this->input->post('codigopapel').'" AND impr_estadoContintencia = "'. $contingencia .'"',1,NULL,true);
+                    $result= $this->codegen_model->get('est_impresiones','impr_id,impr_facturaid,impr_estado,impr_contratopapel','impr_codigopapel = "'.$this->input->post('codigopapel').'" AND impr_estadoContintencia = "'. $contingencia .'"',1,NULL,true);
 
                     if ($result) 
                     {
-                       //Sobre escribe el id de la factura que se habia generado con ese papel
-                       //por cero (0) y actualiza el estado de impresión a 2
-                       $data = array(
-                            'impr_codigopapel' => $this->input->post('codigopapel'),
-                            'impr_observaciones' => $this->input->post('observaciones'),
-                            'impr_tipoanulacionid' => $tipoanulacionid,
-                            'impr_facturaid' => 0,
-                            'impr_estado' => 2,
-                        );
+                        /*
+                        * Valida si ya fue anulado por rotulo o por impresion
+                        */
+                        if($result->impr_estado == 1)
+                        {
+                            //Sobre escribe el id de la factura que se habia generado con ese papel
+                            //por cero (0) y actualiza el estado de impresión a 2
+                            $data = array(
+                                 'impr_codigopapel' => $this->input->post('codigopapel'),
+                                 'impr_observaciones' => $this->input->post('observaciones'),
+                                 'impr_tipoanulacionid' => $tipoanulacionid,
+                                 'impr_facturaid' => 0,
+                                 'impr_estado' => 2,
+                             );
+     
+                            if($this->codegen_model->edit('est_impresiones',$data,'impr_id',$result->impr_id) == TRUE) 
+                            {                     
+                                /*
+                                * Solicita la actualizacion de cantidad de estampillas impresas para el contrato
+                                * del rotulo anulado
+                                */
+                                $this->actualizarImpresionesContrato($result->impr_contratopapel);   
 
-                        if($this->codegen_model->edit('est_impresiones',$data,'impr_id',$result->impr_id) == TRUE) 
-                        {                        
-                            $this->session->set_flashdata('successmessage', 'La anulación se ha creado con éxito');
-                            redirect(base_url().'index.php/impresiones');
-                        }else 
-                            {  
-                                $this->data['errormessage'] = 'No se pudo registrar la anulación';
-                            }                    
+                                $this->session->set_flashdata('successmessage', 'La anulación se ha creado con éxito');
+                                redirect(base_url().'index.php/impresiones');
+                             }else 
+                                 {  
+                                     $this->data['errormessage'] = 'No se pudo registrar la anulación';
+                                 } 
+                        }else
+                            {                                
+                                $this->data['errormessage'] = 'Ya fue Anulado el Rotulo';                                
+                            }
                     }else 
                         {
                             //En caso de no existir una factura ni contrato asignado al papel que se
@@ -135,7 +153,7 @@ class Impresiones extends MY_Controller {
                             $papeles = $this->codegen_model->get('est_papeles','pape_id,pape_codigoinicial,pape_codigofinal, pape_imprimidos','pape_codigoinicial <= '.$this->input->post('codigopapel').' AND pape_codigofinal >= '.$this->input->post('codigopapel') .' AND pape_estadoContintencia = "'. $contingencia .'"',1,NULL,true);
                             $data = array(
                                 'impr_codigopapel' => $this->input->post('codigopapel'),
-                                'impr_observaciones' => $this->input->post('observaciones'),
+                                'impr_observaciones' => 'Contingencia ['. $contingencia .'] : '.$this->input->post('observaciones'),
                                 'impr_tipoanulacionid' => $tipoanulacionid,
                                 'impr_estado' => 2,
                                 'impr_fecha' => date('Y-m-d H:i:s',now()),
@@ -186,76 +204,117 @@ class Impresiones extends MY_Controller {
       } else {
           redirect(base_url().'index.php/users/login');
       }
-  }	
+}	
 
 
-	function edit()
-  {    
-      if ($this->ion_auth->logged_in()) {
+function edit()
+{
+    if ($this->ion_auth->logged_in()) 
+    {
+        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('impresiones/add')) 
+        {
+            $this->data['successmessage']=$this->session->flashdata('message');
+            $this->form_validation->set_rules('observaciones', 'Observaciones', 'trim|xss_clean|max_length[500]');
+            $this->form_validation->set_rules('codigopapel', 'Consecutivo', 'required|trim|xss_clean|numeric|');
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('impresiones/edit')) {  
+            /*
+            * Variable que determina si se debe trabajar con papelería de contingencia
+            */
+            $this->data['objContin'] = $this->codegen_model->get('adm_parametros','para_contingencia','para_id = 1',1,NULL,true);
 
-              $idregimen = ($this->uri->segment(3)) ? $this->uri->segment(3) : $this->input->post('id') ;
-              if ($idregimen==''){
-                  $this->session->set_flashdata('infomessage', 'Debe elegir un tipo de anulación para editar');
-                  redirect(base_url().'index.php/impresiones');
-              }
-              $resultado = $this->codegen_model->get('est_impresiones','impr_nombre','impr_id = '.$idregimen,1,NULL,true);
-              
-              foreach ($resultado as $key => $value) {
-                  $aplilo[$key]=$value;
-              }
-              
-              if ($aplilo['impr_nombre']==$this->input->post('nombre')) {
-                  
-                  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]');
-              
-              } else {
+            if ($this->form_validation->run() == false) 
+            {
+                $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
+            }else 
+                {
+                    /*
+                    * Variable que determina si se debe trabajar con papelería de contingencia
+                    */
+                    $objContin = $this->codegen_model->get('adm_parametros','para_contingencia','para_id = 1',1,NULL,true);
+                    if($objContin->para_contingencia == 1)
+                    {
+                        $contingencia = 'SI';
+                    }else
+                        {
+                            $contingencia = 'NO';
+                        }                   
 
-                  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]|is_unique[est_impresiones.impr_nombre]');
-              
-              }
+                    //Verifica si el codigo de papel a eliminar esta asignado a un
+                    //contrato en caso de estarlo realiza las operaciones necesarias
+                    //para actualizar el estado del contrato y el estado de la impresion
+                    $result= $this->codegen_model->get('est_impresiones','impr_id,impr_facturaid,impr_estado,impr_codigopapel,impr_contratopapel','impr_codigopapel = "'.$this->input->post('codigopapel').'" AND impr_estadoContintencia = "'. $contingencia .'"',1,NULL,true);
 
-              $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[500]');
-              $this->form_validation->set_rules('iva', 'IVA', 'required|trim|xss_clean|numeric|');
+                    if($result) 
+                    {
+                        /*
+                        * Valida si ya fue anulado por rotulo o por impresion
+                        */
+                        if($result->impr_estado == 1)
+                        {
+                            //Sobre escribe el id de la factura que se habia generado con ese papel
+                            //por cero (0), actualiza el estado de impresión a 2
+                            //sobre escribe el numero de la impresion por cero (0)
+                            $data = array(
+                                 'impr_codigopapel' => 0,
+                                 'impr_observaciones' => 'Se Anula la Impresion para el rotulo No '
+                                     .$this->input->post('codigopapel')
+                                     .' de Contingencia ['. $contingencia .'] '
+                                     .$this->input->post('observaciones'),
+                                 'impr_facturaid' => 0,
+                                 'impr_estado' => 2,
+                             );             
 
-              if ($this->form_validation->run() == false) {
-                  
-                  $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);
-                            
-              } else {                            
-                  
-                  $data = array(
-                          'impr_nombre' => $this->input->post('nombre'),
-                          'impr_descripcion' => $this->input->post('descripcion'),
-                          'impr_iva' => $this->input->post('iva')
-                   );
-                           
-                	if ($this->codegen_model->edit('est_impresiones',$data,'impr_id',$idregimen) == TRUE) {
+                            if($this->codegen_model->edit('est_impresiones',$data,'impr_id',$result->impr_id) == TRUE) 
+                            {
+                                /*
+                                * Solicita la actualizacion de cantidad de estampillas impresas para el contrato
+                                * de la impresion anulada
+                                */
+                                $this->actualizarImpresionesContrato($result->impr_contratopapel);
 
-                      $this->session->set_flashdata('successmessage', 'El anulación se ha editado con éxito');
-                      redirect(base_url().'index.php/impresiones/edit/'.$idregimen);
-                      
-                	} else {
-                				  
-                      $this->data['errormessage'] = 'No se pudo registrar el aplilo';
+                                $this->session->set_flashdata('successmessage', 'La anulación de la Impresión para el Rotulo ['. $this->input->post('codigopapel') .'] se ha creado con éxito');
+                                redirect(base_url().'index.php/impresiones');
+                            }else 
+                                {  
+                                    $this->data['errormessage'] = 'No se pudo registrar la anulación de la Impresión';
+                                }                    
+                        }else
+                            {                                
+                                $this->data['errormessage'] = 'Ya fue Anulado el Rotulo';                                
+                            }
+                    }else 
+                        {
+                            $this->data['errormessage'] = 'No se ha registrado una Impresión para el Rotulo ['. $this->input->post('codigopapel') .']';
+                        }
+                }
 
-                	}
-              }       
-                  $this->data['successmessage']=$this->session->flashdata('successmessage');
-                  $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                	$this->data['result'] = $this->codegen_model->get('est_impresiones','impr_id,impr_nombre,impr_descripcion,impr_iva','impr_id = '.$idregimen,1,NULL,true);
-                  $this->template->set('title', 'Editar anulación');
-                  $this->template->load($this->config->item('admin_template'),'impresiones/impresiones_edit', $this->data);
-                        
-          }else {
-              redirect(base_url().'index.php/error_404');
-          }
-      } else {
-          redirect(base_url().'index.php/users/login');
-      }
-        
-  }
+                $this->template->set('title', 'Anular Impresion');
+                $this->template->load($this->config->item('admin_template'),'impresiones/impresiones_anulimpr', $this->data);
+        }else 
+            {
+                redirect(base_url().'index.php/error_404');
+            }
+    }else
+        {
+            redirect(base_url().'index.php/users/login');
+        }
+}
+
+private function actualizarImpresionesContrato($idContrato)
+{
+    /*
+    * Extrae la cantidad de impresiones validas para el contrato
+    */
+    $where = 'impr_estado = 1 AND impr_contratopapel = '.$idContrato;
+    $resultado = $this->codegen_model->countwhere('est_impresiones',$where);
+
+    /*
+    * Actualiza la cantidad de estampillas impresas para el contrato
+    */
+    $this->codegen_model->edit('est_contratopapeles',
+        ['conpap_impresos' => $resultado->contador],
+        'conpap_id', $idContrato);    
+}
 	
   function delete()
   {
