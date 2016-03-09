@@ -82,6 +82,7 @@
      <input type="hidden" name="tipocontrato" value="<?php echo $result->tico_nombre; ?>">
      </td>
      <td colspan="2" class="text-center"><strong>Régimen <?php echo $result->regi_nombre; ?></strong>
+     <input type="hidden" name="idregimen" value="<?php echo $result->regi_id; ?>">
 </tr>
 <tr>
      <td colspan="4"></td>
