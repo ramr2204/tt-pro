@@ -140,15 +140,22 @@ class Regimenes extends MY_Controller {
                   
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);
                             
-              } else {                            
-                  
-                  $data = array(
+              } else {                                        
+
+                    $data = array(
                           'regi_nombre' => $this->input->post('nombre'),
                           'regi_descripcion' => $this->input->post('descripcion'),
                           'regi_iva' => $this->input->post('iva')
-                   );
+                        );
                            
                 	if ($this->codegen_model->edit('con_regimenes',$data,'regi_id',$idregimen) == TRUE) {
+                        /*
+                        * Actualiza el nombre del regimen en las posibles liquidaciones de los contratos
+                        */
+                        $where = 'liqu_regimenid = '.$idregimen;                                                                      
+                        $datos['liqu_regimen'] = $this->input->post('nombre');   
+
+                        $this->codegen_model->editWhere('est_liquidaciones',$datos,$where);
 
                       $this->session->set_flashdata('successmessage', 'El régimen se ha editado con éxito');
                       redirect(base_url().'index.php/regimenes/edit/'.$idregimen);
