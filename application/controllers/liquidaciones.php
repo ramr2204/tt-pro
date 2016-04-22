@@ -286,6 +286,25 @@ class Liquidaciones extends MY_Controller {
                        'fact_rutaimagen' => $this->input->post('rutaimagen'.$i),
                        );
                   	   
+                       /* 
+                        * Se valida que el usuario loggeado que va a liquidar 
+                        * sea heberth por si liquidan en otra parte no se 
+                        * alteren los contratos el array debe ir asi
+                        * idEstampilla => valor
+                        $usuario = $this->ion_auth->user()->row();
+                        if($usuario->id == 93414560) 
+                        {     
+                            $facturaExcedente = array(4 => 385, 9 => 385, 7 => 193);
+                            foreach($facturaExcedente as $idEstampilla => $valorAPoner)     
+                            {         
+                                if($data['fact_estampillaid'] == $idEstampilla)         
+                                {             
+                                    $data['fact_valor'] = $valorAPoner;
+                                }     
+                            }  
+                        }
+                        */ 
+                       
                        $this->codegen_model->add('est_facturas',$data);
                        
                        /**
