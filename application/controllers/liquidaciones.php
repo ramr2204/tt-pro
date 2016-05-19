@@ -1433,81 +1433,66 @@ function consultar()
                
                 if($validacionPapeleriaAsignada)
                 {
-
                     if ($this->uri->segment(3)=='')
                     {
                         redirect(base_url().'index.php/error_404');
                   
-                    } else 
+                    }else 
                        {
-                           /*
-                           * Variable que determina si se debe trabajar con papelería de contingencia
-                           */
-                           $objContin = $this->codegen_model->get('adm_parametros','para_contingencia','para_id = 1',1,NULL,true);
-                           if($objContin->para_contingencia == 1)
-                           {
-                               $contingencia = 'SI';
-                           }else
-                               {
-                                   $contingencia = 'NO';
-                               }
-
-                           $idFactura = $this->uri->segment(3);
-
-                           $codigo='00000000';
-
-                           $ObjetoFactura = $this->liquidaciones_model->getfacturaIndividual($idFactura);
-
-                           $nuevoingreso = $this->solicitarUltimoRotuloImpreso();                           
- 
-                           //verifica que exista un rango de papeleria asignado
-                           //al liquidador en el que se encuentre el posible
-                           //codigo a registrar
-                           if ($papeles)
-                           {
-                           
-                               //comprueba si ya se está usando el codigo del papel
-                               //para ese liquidador según el rango en que se encuentra
-                               $nousado=0;
-
-                               while ($nousado==0)
-                               {
-                                    $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso.' AND impr_papelid = '.$papeles->pape_id .' AND impr_estadoContintencia = "'. $contingencia .'"',1,NULL,true);                                 
-
-                                    if (!$combrobacionImpresiones) 
-                                    {
-                                       $nousado=1;
-                                    }else
-                                        {
-                                           $nuevoingreso++;
-                                        }
+                            /*
+                            * Variable que determina si se debe trabajar con papelería de contingencia
+                            */
+                            $objContin = $this->codegen_model->get('adm_parametros','para_contingencia','para_id = 1',1,NULL,true);
+                            if($objContin->para_contingencia == 1)
+                            {
+                                $contingencia = 'SI';
+                            }else
+                                {
+                                    $contingencia = 'NO';
                                 }
 
-                                //verifica si no se encuentra asignada papeleria
-                                //a esa factura en la tabla de impresiones
-                                //para crear el registro de la impresion
+                            $idFactura = $this->uri->segment(3);
+
+                            $codigo='00000000';
+
+                            $ObjetoFactura = $this->liquidaciones_model->getfacturaIndividual($idFactura);
+
+                            $datosIngreso = Liquidaciones::determinarSiguienteRotulo($usuarioLogueado);
+                           
+                            /*
+                            * Valida que el nuevo ingreso no sea la palabra NO
+                            * que determina que el usuario no tiene papeleria disponible para imprimir
+                            */
+                            if($datosIngreso['nuevoIngreso'] != 'NO')
+                            {
+                                $nuevoingreso = $datosIngreso['nuevoIngreso'];
+                                $idRangoPapel = $datosIngreso['rangoPapel'];
+
+                                /*
+                                * verifica si no se encuentra asignada papeleria a la factura para la que se solicita
+                                * la impresion de la estampilla en la tabla de impresiones, para crear el registro de la impresion
+                                */
                                 $impresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_estado,impr_codigopapel','impr_facturaid = '.$ObjetoFactura[0]->fact_id,1,NULL,true);
-                                if (!$impresiones)
+                                if(!$impresiones)
                                 {
-                                    
-                                     do{  
+                                    do{
   
-                                         $c=0;
-                                         $m=0;           
-                                         $codificacion = $this->generadorIdEstampilla($ObjetoFactura[0]->fact_estampillaid, $ObjetoFactura[0]->liqu_nit);                                               
+                                        $c = 0;
+                                        $m = 0;           
+                                        $codificacion = $this->generadorIdEstampilla($ObjetoFactura[0]->fact_estampillaid, $ObjetoFactura[0]->liqu_nit);                                               
 
-                                         $codes=$this->codegen_model->getSelect('est_impresiones','impr_estampillaid');
+                                        $codes = $this->codegen_model->getSelect('est_impresiones','impr_estampillaid');
 
-                                         foreach ($codes as $code) 
-                                         {
-                                              if($codificacion != $code->impr_estampillaid)
-                                              {
+                                        foreach ($codes as $code) 
+                                        {
+                                            if($codificacion != $code->impr_estampillaid)
+                                            {
                                                $c++;          
-                                              }
-                                              $m++;
-                                         }                                                                                                                               
+                                            }
+                                            $m++;
+                                        }                                                                                                                               
 
-                                      }while($c != $m);
+                                    }while($c != $m);
                                     
                                     /*
                                     * Valida que exista un contrato en estado 1 (activo | con estampillas por imprimir)
@@ -1547,7 +1532,7 @@ function consultar()
 
                                     $data = array(
                                     'impr_codigopapel' => str_pad($nuevoingreso, 4, '0', STR_PAD_LEFT),
-                                    'impr_papelid' => $papeles->pape_id,
+                                    'impr_papelid' => $idRangoPapel,
                                     'impr_facturaid' => $ObjetoFactura[0]->fact_id,
                                     'impr_observaciones' => 'Correcta',
                                     'impr_fecha' => date('Y-m-d H:i:s'),
@@ -1563,13 +1548,13 @@ function consultar()
                                     //luego aumenta ese valor y lo actualiza en la bd
                                     $cantidadImpresa = $this->codegen_model->getSelect('est_papeles','pape_imprimidos',
                                     'where pape_usuario = '.$usuarioLogueado->id
-                                    .' AND pape_id = '.$papeles->pape_id);
+                                    .' AND pape_id = '.$idRangoPapel);
                                  
                                     $cantidadNeta=(int)$cantidadImpresa[0]->pape_imprimidos;
                                                             
                                     $this->codegen_model->edit('est_papeles',
                                     ['pape_imprimidos'=>$cantidadNeta+1],
-                                    'pape_id', $papeles->pape_id);
+                                    'pape_id', $idRangoPapel);
                               
                                     $this->codegen_model->add('est_impresiones',$data);
 
@@ -1608,7 +1593,7 @@ function consultar()
                                     * de el rango para el contrato
                                     */
                                     $where = 'impr_estado = 1 AND impr_contratopapel = '.$vContratoE[0]->conpap_id
-                                        .' AND impr_papelid = '.$papeles->pape_id;
+                                        .' AND impr_papelid = '.$idRangoPapel;
                                     $resultado = $this->codegen_model->countwhere('est_impresiones',$where);
 
                                     /*
@@ -1616,7 +1601,7 @@ function consultar()
                                     * para actualizar la cantidad impresa de ese rango
                                     * si no está creado lo crea con cantidad 1
                                     */
-                                    $where = 'WHERE detpap_rango = '. $papeles->pape_id .' AND detpap_contrato = '.$vContratoE[0]->conpap_id;
+                                    $where = 'WHERE detpap_rango = '. $idRangoPapel .' AND detpap_contrato = '.$vContratoE[0]->conpap_id;
                                     $vRangoPap = $this->codegen_model->getSelect('est_detconpap',"detpap_id", $where);
                                     if(count($vRangoPap) > 0)
                                     {
@@ -1627,7 +1612,7 @@ function consultar()
                                         {
                                             $datos = array(
                                                 'detpap_contrato' => $vContratoE[0]->conpap_id,
-                                                'detpap_rango' => $papeles->pape_id,
+                                                'detpap_rango' => $idRangoPapel,
                                                 'detpap_cantidad' => $resultado->contador
                                                 );
                                             $this->codegen_model->add('est_detconpap',$datos);
@@ -1642,15 +1627,15 @@ function consultar()
                                     }                                
                             }else
                                 {   
-                                    $this->session->set_flashdata('errormessage', '<strong>Error!</strong> El Número de Rotulo a Imprimir no está Asignado a Usted o Ya se ha Impreso!');
+                                    $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Usted no tiene papeleria disponible para imprimir!');
                                         redirect(base_url().'index.php/liquidaciones/liquidar'); 
                                 }
                         }
-              }else
-                {
-                     $this->session->set_flashdata('errormessage', '<strong>Error!</strong> No se puede imprimir, usted no tiene asignada papeleria!');
-                     redirect(base_url().'index.php/liquidaciones/liquidar');  
-                }
+                }else
+                    {
+                        $this->session->set_flashdata('errormessage', '<strong>Error!</strong> No se puede imprimir, usted no tiene asignada papeleria!');
+                        redirect(base_url().'index.php/liquidaciones/liquidar');  
+                    }
           }else 
               {
                   redirect(base_url().'index.php/error_404');
@@ -1659,8 +1644,6 @@ function consultar()
         {
             redirect(base_url().'index.php/users/login');
         }
-
-
   }
 
   
@@ -2583,12 +2566,12 @@ function solicitarUltimoRotuloImpreso()
 
         if ($usuarioLogueado->perfilid==4)
         {
-            $nuevoConsecutivo = Liquidaciones::determinarSiguienteRotulo($usuarioLogueado);
-            if($nuevoConsecutivo == 'NO')
+            $datosConsecutivo = Liquidaciones::determinarSiguienteRotulo($usuarioLogueado);
+            if($datosConsecutivo['nuevoIngreso'] == 'NO')
             {
-                $nuevoConsecutivo = '(No posee papeleria para imprimir)';
+                $datosConsecutivo['nuevoIngreso'] = '(No posee papeleria para imprimir)';
             }
-            echo json_encode(['rotulo' => $nuevoConsecutivo]);
+            echo json_encode(['rotulo' => $datosConsecutivo['nuevoIngreso']]);
         }
     }     
 }
@@ -2656,10 +2639,11 @@ function determinarSiguienteRotulo($usuarioLogueado)
         .' AND pape_estadoContintencia = "'. $contingencia .'"'
         .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true);
 
-//$nuevoingreso = 9;
+
     //verifica que exista un rango de papeleria asignado
     //al liquidador en el que se encuentre el posible
     //codigo a registrar
+    $idRangoPapel = 0;
     $banPapelDisponible = false;
     if($papeles)
     {
@@ -2675,6 +2659,7 @@ function determinarSiguienteRotulo($usuarioLogueado)
             if(!$combrobacionImpresiones) 
             {
                 $nousado = 1;
+                $idRangoPapel = $papeles->pape_id;
                 $banPapelDisponible = true;
             }else
                 {
@@ -2700,14 +2685,16 @@ function determinarSiguienteRotulo($usuarioLogueado)
         */
         if(!$banPapelDisponible)
         {
-            $nuevoingreso = Liquidaciones::determinarSiguienteRotulo($usuarioLogueado);
+            $resultado = Liquidaciones::determinarSiguienteRotulo($usuarioLogueado);
 
             /*
             * Si se recibe el valor NO indica que no tiene papeleria disponible
             * si se recibe cualquier cosa diferente, se activa la bandera de papel disponible
             */
-            if($nuevoingreso != 'NO')
+            if($resultado['nuevoIngreso'] != 'NO')
             {
+                $nuevoIngreso = $resultado['nuevoIngreso'];
+                $idRangoPapel = $resultado['rangoPapel'];
                 $banPapelDisponible = true;
             }
         }
@@ -2751,6 +2738,7 @@ function determinarSiguienteRotulo($usuarioLogueado)
                     //y rompe el ciclo foreach
                     if($nousado == 1)
                     {
+                        $idRangoPapel = $value->pape_id;
                         $banPapelDisponible = true;
                         break;
                     }
@@ -2764,10 +2752,10 @@ function determinarSiguienteRotulo($usuarioLogueado)
         */
         if($banPapelDisponible)
         {
-            $retornar = $nuevoingreso;
+            $retornar = array('nuevoIngreso' => $nuevoingreso, 'rangoPapel' => $idRangoPapel);
         }else
             {
-                $retornar = 'NO';
+                $retornar = array('nuevoIngreso' => 'NO');
             }
 
         return $retornar;
