@@ -2583,7 +2583,12 @@ function solicitarUltimoRotuloImpreso()
 
         if ($usuarioLogueado->perfilid==4)
         {
-            echo json_encode(['rotulo' => Liquidaciones::determinarSiguienteRotulo()]);
+            $nuevoConsecutivo = Liquidaciones::determinarSiguienteRotulo($usuarioLogueado);
+            if($nuevoConsecutivo == 'NO')
+            {
+                $nuevoConsecutivo = '(No posee papeleria para imprimir)';
+            }
+            echo json_encode(['rotulo' => $nuevoConsecutivo]);
         }
     }     
 }
@@ -2591,7 +2596,7 @@ function solicitarUltimoRotuloImpreso()
 /*
 * Funcion de apoyo que determina el numero del rotulo siguiente a imprimir
 */
-function determinarSiguienteRotulo()
+function determinarSiguienteRotulo($usuarioLogueado)
 {
     /*
     * Variable que determina si se debe trabajar con papelería de contingencia
@@ -2651,40 +2656,67 @@ function determinarSiguienteRotulo()
         .' AND pape_estadoContintencia = "'. $contingencia .'"'
         .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true);
 
-
+//$nuevoingreso = 9;
     //verifica que exista un rango de papeleria asignado
     //al liquidador en el que se encuentre el posible
     //codigo a registrar
     $banPapelDisponible = false;
-    if ($papeles)
+    if($papeles)
     {
-        //comprueba si ya se está usando el codigo del papel
+        /*
+        * Comprueba si ya se está usando el codigo del papel
+        */
         $nousado = 0;
 
         while ($nousado==0)
         {
-            $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso.' AND impr_estadoContintencia = "'. $contingencia .'"',1,NULL,true);
+            $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id,impr_papelid','impr_codigopapel = '.$nuevoingreso.' AND impr_estadoContintencia = "'. $contingencia .'"',1,NULL,true);
 
             if(!$combrobacionImpresiones) 
             {
-                /*
-                * Valida impr_papelid = '. $papeles->pape_id .'
-                */
                 $nousado = 1;
                 $banPapelDisponible = true;
             }else
                 {
                     $nuevoingreso++;
+
+                    /*
+                    * Valida si el numero siguiente luego del incremento continua 
+                    * estando dentro del rango de papeleria del usuario
+                    * determinado en la consulta anterior, si salió del rango ordena
+                    * que salga del bucle
+                    */
+                    if($papeles->pape_codigoinicial > $nuevoingreso || $papeles->pape_codigofinal < $nuevoingreso)
+                    {
+                        $nousado = 1;
+                    }
                 }
+        }
+
+        /*
+        * Si la bandera de papel disponible no se activó significa que en el momento
+        * de solicitar el consecutivo alguien más lo utilizó entonces solicita
+        * ejecutar nuevamente esta funcion para extraer un consecutivo de otro rango
+        */
+        if(!$banPapelDisponible)
+        {
+            $nuevoingreso = Liquidaciones::determinarSiguienteRotulo($usuarioLogueado);
+
+            /*
+            * Si se recibe el valor NO indica que no tiene papeleria disponible
+            * si se recibe cualquier cosa diferente, se activa la bandera de papel disponible
+            */
+            if($nuevoingreso != 'NO')
+            {
+                $banPapelDisponible = true;
+            }
         }
                                 
     }else
         {
-
             //extrae los posibles rangos de papeleria asignados
             //al usuario que se encuentra logueado que debe ser
-            //un liquidador
-                   
+            //un liquidador                   
             $papelesAsignados = $this->codegen_model->getSelect('est_papeles','pape_id'
                 .',pape_codigoinicial,pape_codigofinal',                                    
                 ' where pape_usuario = '. $usuarioLogueado->id .' AND pape_estadoContintencia = "'. $contingencia .'"', '', '',
@@ -2719,7 +2751,7 @@ function determinarSiguienteRotulo()
                     //y rompe el ciclo foreach
                     if($nousado == 1)
                     {
-                        $idRangoCodigo = $value->pape_id;
+                        $banPapelDisponible = true;
                         break;
                     }
                 }
@@ -2735,7 +2767,7 @@ function determinarSiguienteRotulo()
             $retornar = $nuevoingreso;
         }else
             {
-                $retornar = '(No posee papeleria para imprimir)';
+                $retornar = 'NO';
             }
 
         return $retornar;
