@@ -264,7 +264,7 @@ class Liquidaciones extends MY_Controller {
                    'liqu_fecha' => date('Y-m-d')
 
                  );
-                  
+
               if ($this->codegen_model->add('est_liquidaciones',$data) == TRUE) {
               	  $liquidacionid=$this->db->insert_id();
                   for ($i=1; $i < $this->input->post('numeroestampillas'); $i++) { 
@@ -466,7 +466,7 @@ class Liquidaciones extends MY_Controller {
                             $idComprobante = $this->input->post('liquida_id');
                             $config['file_name']='liquidacion_'.$idComprobante.'_'.date("F_d_Y");
                             $this->upload->initialize($config);
-          
+
                             //Valida si se carga correctamente el soporte
                             if ($this->upload->do_upload("comprobante_objeto")) 
                             {
@@ -1439,61 +1439,7 @@ function consultar()
 
                            $ObjetoFactura = $this->liquidaciones_model->getfacturaIndividual($idFactura);
 
-
-                           //extrae el ultimo codigo de papeleria registrado
-                           //en las impresiones para el liquidador autenticado
-                           $tablaJoin='est_papeles';
-                           $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
-
-                           /*
-                           * Construye la consulta para trabajar con los rotulos normales o de contigencia
-                           * dependiendo del valor de la variable $contingencia
-                           */
-                           $where='est_papeles.pape_usuario ='. $usuarioLogueado->id .' AND est_impresiones.impr_estadoContintencia = "'. $contingencia .'"';
-
-                           $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);                          
-
-                           //verifica si ya habia asignado por lo menos
-                           //un consecutivo a una impresion
-                           //de lo contrario elige el primer codigo
-
-                           if((int)$max['impr_codigopapel']>0)
-                           {
-                                //extrae el ultimo codigo de papeleria asignado al
-                                //liquidador para verificar que el ultimo impreso
-                                //no sea el ultimo asignado                           
-                                $where='pape_usuario ='.$usuarioLogueado->id .' AND est_papeles.pape_estadoContintencia = "'. $contingencia .'"';
-
-                                $maxAsignado = $this->codegen_model->max('est_papeles','pape_codigofinal',$where);
-
-                                if((int)$max['impr_codigopapel'] >= (int)$maxAsignado['pape_codigofinal'])
-                                {
-                                     $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Usted no tiene papeleria disponible para realizar esta impresión!');
-                                     redirect(base_url().'index.php/liquidaciones/liquidar'); 
-                                }
-
-                                $nuevoingreso = (int)$max['impr_codigopapel'] + 1;
-
-                           }else
-                               {
-                                     //extrae el primer codigo de papeleria resgistrado
-                                     //en los rangos de papel asginado al liquidador autenticado
-                                     $where='est_papeles.pape_usuario ='. $usuarioLogueado->id .' AND est_papeles.pape_estadoContintencia = "'. $contingencia .'"';
-                                     $primerCodigo = $this->codegen_model->min('est_papeles','pape_codigoinicial',$where);
-                                     $nuevoingreso = (int)$primerCodigo['pape_codigoinicial'];
-                               }
-            
-                           //extrae el posible rango de papeleria asignado
-                           //al usuario que se encuentra logueado que debe ser
-                           //un liquidador, en el que pueda estar el nuevo 
-                           //codigo a asignar                   
-                           $papeles = $this->codegen_model->get('est_papeles','pape_id'
-                           .',pape_codigoinicial,pape_codigofinal',
-                           'pape_codigoinicial <= '.$nuevoingreso
-                           .' AND pape_codigofinal >='
-                           .$nuevoingreso
-                           .' AND est_papeles.pape_estadoContintencia = "'. $contingencia .'"'
-                           .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true);
+                           $nuevoingreso = $this->solicitarUltimoRotuloImpreso();                           
  
                            //verifica que exista un rango de papeleria asignado
                            //al liquidador en el que se encuentre el posible
@@ -2618,57 +2564,67 @@ function solicitarUltimoRotuloImpreso()
 
         if ($usuarioLogueado->perfilid==4)
         {
-            /*
-            * Variable que determina si se debe trabajar con papelería de contingencia
-            */
-            $objContin = $this->codegen_model->get('adm_parametros','para_contingencia','para_id = 1',1,NULL,true);
-            if($objContin->para_contingencia == 1)
-            {
-                $contingencia = 'SI';
-            }else
-                {
-                    $contingencia = 'NO';
-                }
+            echo json_encode(['rotulo' => Liquidaciones::determinarSiguienteRotulo()]);
+        }
+    }     
+}
 
-            //extrae el ultimo codigo de papeleria registrado
-            //en las impresiones para el liquidador autenticado
-            $tablaJoin='est_papeles';
-            $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
-            $where='est_papeles.pape_usuario ='. $usuarioLogueado->id .' AND est_impresiones.impr_estadoContintencia = "'. $contingencia .'"';
+/*
+* Funcion de apoyo que determina el numero del rotulo siguiente a imprimir
+*/
+function determinarSiguienteRotulo()
+{
+    /*
+    * Variable que determina si se debe trabajar con papelería de contingencia
+    */
+    $objContin = $this->codegen_model->get('adm_parametros','para_contingencia','para_id = 1',1,NULL,true);
+    if($objContin->para_contingencia == 1)
+    {
+        $contingencia = 'SI';
+    }else
+        {
+            $contingencia = 'NO';
+        }
+
+    //extrae el ultimo codigo de papeleria registrado
+    //en las impresiones para el liquidador autenticado
+    $tablaJoin='est_papeles';
+    $equivalentesJoin='est_impresiones.impr_papelid = est_papeles.pape_id';
+    $where='est_papeles.pape_usuario ='. $usuarioLogueado->id .' AND est_impresiones.impr_estadoContintencia = "'. $contingencia .'"';
     
-            $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);                          
+    $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);                          
 
-            //verifica si ya habia asignado por lo menos
-            //un consecutivo a una impresion
-            //de lo contrario elige el primer codigo
+    //verifica si ya habia asignado por lo menos
+    //un consecutivo a una impresion
+    //de lo contrario elige el primer codigo
 
-            if((int)$max['impr_codigopapel']>0)
-            {
-                //extrae el ultimo codigo de papeleria asignado al
-                //liquidador para verificar que el ultimo impreso
-                //no sea el ultimo asignado                           
-                $where='pape_usuario ='. $usuarioLogueado->id .' AND pape_estadoContintencia = "'. $contingencia .'"';
+    if((int)$max['impr_codigopapel']>0)
+    {
+        //extrae el ultimo codigo de papeleria asignado al
+        //liquidador para verificar que el ultimo impreso
+        //no sea el ultimo asignado                           
+        $where='pape_usuario ='. $usuarioLogueado->id .' AND pape_estadoContintencia = "'. $contingencia .'"';
 
-                $maxAsignado = $this->codegen_model->max('est_papeles','pape_codigofinal',$where);                                
+        $maxAsignado = $this->codegen_model->max('est_papeles','pape_codigofinal',$where);                                
 
-                $nuevoingreso=$max['impr_codigopapel']+1;
+        $nuevoingreso=$max['impr_codigopapel']+1;
 
-            }else
-                {
-                    //extrae el primer codigo de papeleria registrado
-                    //en los rangos de papel asginado al liquidador autenticado
-                    $where='est_papeles.pape_usuario ='. $usuarioLogueado->id .' AND pape_estadoContintencia = "'. $contingencia .'"';
-                    $primerCodigo = $this->codegen_model->min('est_papeles','pape_codigoinicial',$where);
-                    $nuevoingreso = (int)$primerCodigo['pape_codigoinicial'];
-                }
+    }else
+        {
+            //extrae el primer codigo de papeleria registrado
+            //en los rangos de papel asginado al liquidador autenticado
+            $where='est_papeles.pape_usuario ='. $usuarioLogueado->id .' AND pape_estadoContintencia = "'. $contingencia .'"';
+            $primerCodigo = $this->codegen_model->min('est_papeles','pape_codigoinicial',$where);
+            $nuevoingreso = (int)$primerCodigo['pape_codigoinicial'];
+        }
                        
 
-        //extrae los posibles rangos de papeleria asignados
-        //al usuario que se encuentra logueado que debe ser
-        //un liquidador, en los que pueda estar el nuevo 
-        //codigo a asignar
+    //extrae los posibles rangos de papeleria asignados
+    //al usuario que se encuentra logueado que debe ser
+    //un liquidador, en los que pueda estar el nuevo 
+    //codigo a asignar
                    
-        $papeles = $this->codegen_model->get('est_papeles','pape_id'
+    $papeles = $this->codegen_model->get('est_papeles','pape_id'
         .',pape_codigoinicial,pape_codigofinal',
         'pape_codigoinicial <= '.$nuevoingreso
         .' AND pape_codigofinal >='
@@ -2677,81 +2633,93 @@ function solicitarUltimoRotuloImpreso()
         .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true);
 
 
-        //verifica que exista un rango de papeleria asignado
-        //al liquidador en el que se encuentre el posible
-        //codigo a registrar
-        if ($papeles)
+    //verifica que exista un rango de papeleria asignado
+    //al liquidador en el que se encuentre el posible
+    //codigo a registrar
+    $banPapelDisponible = false;
+    if ($papeles)
+    {
+        //comprueba si ya se está usando el codigo del papel
+        $nousado = 0;
+
+        while ($nousado==0)
         {
-                           
-            //comprueba si ya se está usando el codigo del papel
-            $nousado=0;
+            $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso.' AND impr_estadoContintencia = "'. $contingencia .'"',1,NULL,true);
 
-            while ($nousado==0)
+            if(!$combrobacionImpresiones) 
             {
-                $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '.$nuevoingreso.' AND impr_papelid = '. $papeles->pape_id .' AND impr_estadoContintencia = "'. $contingencia .'"',1,NULL,true);
-
-                if (!$combrobacionImpresiones) 
+                /*
+                * Valida impr_papelid = '. $papeles->pape_id .'
+                */
+                $nousado = 1;
+                $banPapelDisponible = true;
+            }else
                 {
-                    $nousado=1;
-                } else
-                    {
                     $nuevoingreso++;
-                    }
-            }                                
+                }
+        }
                                 
-        } else
-            {   
+    }else
+        {
 
-                //extrae los posibles rangos de papeleria asignados
-                //al usuario que se encuentra logueado que debe ser
-                //un liquidador
+            //extrae los posibles rangos de papeleria asignados
+            //al usuario que se encuentra logueado que debe ser
+            //un liquidador
                    
-                $papelesAsignados = $this->codegen_model->getSelect('est_papeles','pape_id'
+            $papelesAsignados = $this->codegen_model->getSelect('est_papeles','pape_id'
                 .',pape_codigoinicial,pape_codigofinal',                                    
                 ' where pape_usuario = '. $usuarioLogueado->id .' AND pape_estadoContintencia = "'. $contingencia .'"', '', '',
                 'order by pape_codigoinicial');
+            
 
-                foreach ($papelesAsignados as $value) 
+            foreach ($papelesAsignados as $value) 
+            {
+                if($nuevoingreso < (int)$value->pape_codigoinicial)
                 {
-                    if($nuevoingreso < (int)$value->pape_codigoinicial)
+                    $nuevoingreso = (int)$value->pape_codigoinicial;
+
+                    //comprueba si ya se está usando el codigo del papel
+                    //en alguna impresión y ademas que no se salga del rango
+                    //si sale del rango va y compara con el rango siguiente
+                    $nousado=0;
+
+                    while ($nousado==0 && $nuevoingreso <= (int)$value->pape_codigofinal)
                     {
-                          $nuevoingreso = (int)$value->pape_codigoinicial;
-
-
-                          //comprueba si ya se está usando el codigo del papel
-                          //en alguna impresión y ademas que no se salga del rango
-                          //si sale del rango va y compara con el rango siguiente
-                          $nousado=0;
-
-                          while ($nousado==0 && $nuevoingreso <= (int)$value->pape_codigofinal)
-                          {
-                              $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '. $nuevoingreso .' AND impr_estadoContintencia = "'. $contingencia .'"',1,NULL,true);
+                        $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '. $nuevoingreso .' AND impr_estadoContintencia = "'. $contingencia .'"',1,NULL,true);
     
-                              if (!$combrobacionImpresiones) 
-                              {
-                                  $nousado=1;
-                              } else
-                                  {
-                                  $nuevoingreso++;
-                                  }                                                  
-                          }
+                        if(!$combrobacionImpresiones) 
+                        {
+                            $nousado=1;
+                        }else
+                            {
+                                $nuevoingreso++;
+                            }                                                  
+                    }
 
-                          //valida si ya se encontró un codigo para asignar
-                          //y rompe el ciclo foreach
-                          if($nousado == 1)
-                          {
-                              $idRangoCodigo = $value->pape_id;
-                              break;
-                          }
-
+                    //valida si ya se encontró un codigo para asignar
+                    //y rompe el ciclo foreach
+                    if($nousado == 1)
+                    {
+                        $idRangoCodigo = $value->pape_id;
+                        break;
                     }
                 }
             }
+        }
 
-        echo json_encode(['rotulo' => $nuevoingreso]);   
-        } 
-    }     
+        /*
+        * Valida si se activó la bandera que indica que hay papeleria
+        * disponible para impresion
+        */
+        if($banPapelDisponible)
+        {
+            $retornar = $nuevoingreso;
+        }else
+            {
+                $retornar = '(No posee papeleria para imprimir)';
+            }
+
+        return $retornar;
 }
-
 
 }
