@@ -88,6 +88,18 @@ function q()
                       'module_height' => 1 // height of a single module in points                      
                   );
 
+                    /*
+                    * Variable que determina si se debe trabajar con papelería de contingencia
+                    */
+                    $objContin = $this->codegen_model->get('adm_parametros','para_contingencia','para_id = 1',1,NULL,true);
+                    if($objContin->para_contingencia == 1)
+                    {
+                        $this->data['contingencia'] = 'C';
+                    }else
+                        {
+                            $this->data['contingencia'] = '';
+                        }
+
                   // set font
                    $pdf->SetFont('times', '', 8);
                    $pdf->AddPage('L',array(92,141));
