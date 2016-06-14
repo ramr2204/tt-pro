@@ -88,10 +88,22 @@ function q()
                       'module_height' => 1 // height of a single module in points                      
                   );
 
+                    /*
+                    * Variable que determina si se debe trabajar con papelería de contingencia
+                    */
+                    $objContin = $this->codegen_model->get('adm_parametros','para_contingencia','para_id = 1',1,NULL,true);
+                    if($objContin->para_contingencia == 1)
+                    {
+                        $this->data['contingencia'] = 'C';
+                    }else
+                        {
+                            $this->data['contingencia'] = '';
+                        }
+
                   // set font
                    $pdf->SetFont('times', '', 8);
                    $pdf->AddPage('L',array(92,141));
-                   $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array('http://www.aplicativosenlinea.net:8081/estampillas-pro/index.php/qr/q/'.$this->uri->segment(3), 'QRCODE,H', 110, 56, 16, 16, $style, 'T'));
+                   $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array('http://qrcol.com/EP/f.php?c='.$this->uri->segment(3), 'QRCODE,H', 110, 56, 16, 16, $style, 'T'));
                    $html = $this->load->view('generarpdf/generarpdf_estampillalegalizada', $this->data, TRUE);  
                 
                    $pdf->writeHTML($html, true, false, true, false, '');
