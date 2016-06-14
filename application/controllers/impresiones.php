@@ -151,30 +151,40 @@ function add()
                             //En caso de no existir una factura ni contrato asignado al papel que se
                             //va a anular se crea solamente la anulación con el codigo del papel respectivo
                             $papeles = $this->codegen_model->get('est_papeles','pape_id,pape_codigoinicial,pape_codigofinal, pape_imprimidos','pape_codigoinicial <= '.$this->input->post('codigopapel').' AND pape_codigofinal >= '.$this->input->post('codigopapel') .' AND pape_estadoContintencia = "'. $contingencia .'"',1,NULL,true);
-                            $data = array(
-                                'impr_codigopapel' => $this->input->post('codigopapel'),
-                                'impr_observaciones' => 'Contingencia ['. $contingencia .'] : '.$this->input->post('observaciones'),
-                                'impr_tipoanulacionid' => $tipoanulacionid,
-                                'impr_estado' => 2,
-                                'impr_fecha' => date('Y-m-d H:i:s',now()),
-                                'impr_papelid' => $papeles->pape_id,
-                                'impr_estadoContintencia' => $contingencia
-                            );
-                        
-                           
-                            if($this->codegen_model->add('est_impresiones',$data) == TRUE) 
+
+                            /*
+                            * Valida si existe un rango de papeleria en que pueda estar asignado el rotulo a anular
+                            */
+                            if(count($papeles) > 0)
                             {
-                                //Descuenta del total de la papeleria asignada al liquidador
-                                //debido a la anulación
-                                $nuevoTotal = ((int)$papeles->pape_imprimidos)+1;
-                                $data = array('pape_imprimidos' => $nuevoTotal);
-        
-                                $this->codegen_model->edit('est_papeles',$data,'pape_id',$papeles->pape_id);
-                                $this->session->set_flashdata('message', 'La anulación se ha creado con éxito');
-                                redirect(base_url().'index.php/impresiones');
-                            }else 
+                                $data = array(
+                                    'impr_codigopapel' => $this->input->post('codigopapel'),
+                                    'impr_observaciones' => 'Contingencia ['. $contingencia .'] : '.$this->input->post('observaciones'),
+                                    'impr_tipoanulacionid' => $tipoanulacionid,
+                                    'impr_estado' => 2,
+                                    'impr_fecha' => date('Y-m-d H:i:s',now()),
+                                    'impr_papelid' => $papeles->pape_id,
+                                    'impr_estadoContintencia' => $contingencia
+                                );
+                            
+                               
+                                if($this->codegen_model->add('est_impresiones',$data) == TRUE) 
                                 {
-                                    $this->data['errormessage'] = 'No se pudo registrar la anulación';
+                                    //Descuenta del total de la papeleria asignada al liquidador
+                                    //debido a la anulación
+                                    $nuevoTotal = ((int)$papeles->pape_imprimidos)+1;
+                                    $data = array('pape_imprimidos' => $nuevoTotal);
+            
+                                    $this->codegen_model->edit('est_papeles',$data,'pape_id',$papeles->pape_id);
+                                    $this->session->set_flashdata('message', 'La anulación se ha creado con éxito');
+                                    redirect(base_url().'index.php/impresiones');
+                                }else 
+                                    {
+                                        $this->data['errormessage'] = 'No se pudo registrar la anulación';
+                                    }
+                            }else
+                                {
+                                    $this->data['errormessage'] = 'No se pudo registrar la anulación, el rotulo no se encuentra registrado en el sistema!';
                                 }
                         }
 
