@@ -42,6 +42,17 @@ function q()
                   
               
                   $estampilla=$this->data['estampilla'];  
+                    /*
+                    * Determina la distancia en y para imprimir el codigo qr
+                    * dependiendo de la logitud del nombre del contribuyente
+                    */
+                    if(strlen($estampilla->cont_nombre) <= 146)
+                    {
+                        $distQRenY = 57.5;
+                    }else
+                        {
+                            $distQRenY = 61;
+                        }
 
                   
                   $this->load->library("Pdf");
@@ -103,7 +114,7 @@ function q()
                   // set font
                    $pdf->SetFont('times', '', 8);
                    $pdf->AddPage('L',array(92,141));
-                   $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array('http://qrcol.com/EP/f.php?c='.$this->uri->segment(3), 'QRCODE,H', 110, 56, 16, 16, $style, 'T'));
+                   $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array('http://qrcol.com/EP/f.php?c='.$this->uri->segment(3), 'QRCODE,H', 110, $distQRenY, 16, 16, $style, 'T'));
                    $html = $this->load->view('generarpdf/generarpdf_estampillalegalizada', $this->data, TRUE);  
                 
                    $pdf->writeHTML($html, true, false, true, false, '');

@@ -67,7 +67,7 @@
                     <td colspan="4" style="height: 4.5mm; width: 94mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"> <?php echo $estampilla->cont_nombre; ?></td>
+                        border-bottom: 0.5px solid black;"> <?php echo ucwords(strtolower($estampilla->cont_nombre)); ?></td>
                 </tr>                
 
                 <tr>
