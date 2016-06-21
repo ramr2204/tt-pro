@@ -2381,13 +2381,13 @@ function renderizarExcel()
 function renderizarRangoImpresionesPDF()
 {
     if ($this->ion_auth->logged_in()) 
-    {            
+    {
         /*
         * Extrae el objeto del usuario autenticado para validar
         * si es usuario conciliacion
         */
         $usuario = $this->ion_auth->user()->row();
-        if ($this->ion_auth->is_admin() || $usuario->perfilid == 5) 
+        if ($this->ion_auth->is_admin() || $usuario->perfilid == 5 || $usuario->perfilid == 4) 
         {
             $fecha_inicial = $_GET['fecha_I'];
             $fecha_final = $_GET['fecha_F'];
