@@ -504,7 +504,8 @@ class Users extends MY_Controller {
               
 		      $this->form_validation->set_rules('perfilid', 'Perfil',  'required|numeric');  
               //update the password if it was posted
-
+              
+              $datosActualizar = array();
 			  if ($this->input->post('password'))
 			  {
 				  $this->form_validation->set_rules('password', $this->lang->line('edit_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[password_confirm]');
@@ -513,20 +514,27 @@ class Users extends MY_Controller {
                   $this->form_validation->set_rules('telefono', $this->lang->line('create_user_validation_telefono_label'), 'required|numeric');
 		          $this->form_validation->set_rules('apellidos', $this->lang->line('create_user_validation_apellidos_label'), 'required|min_length[4]|max_length[40]');
     		      $this->form_validation->set_rules('nombres', $this->lang->line('create_user_validation_nombres_label'), 'required|min_length[4]|max_length[40]');
-				  $data['password'] = $this->input->post('password');
+				  $datosActualizar['password'] = $this->input->post('password');
 			  }
 
 			  if ($this->form_validation->run() === TRUE)
-			  {
-				  $data = array(
-				    'email' => $this->input->post('email'),
-                    'perfilid' => $this->input->post('perfilid'),
-                    'phone'=> $this->input->post('telefono'),
-                    'last_name'=> $this->input->post('apellidos'),
-                    'first_name'=> $this->input->post('nombres')
-			      );
+			  {				  
+				    $datosActualizar['email']  = $this->input->post('email');
+                    $datosActualizar['perfilid']  = $this->input->post('perfilid');
+                    $datosActualizar['phone'] = $this->input->post('telefono');
+                    $datosActualizar['last_name'] = $this->input->post('apellidos');
+                    $datosActualizar['first_name'] = $this->input->post('nombres');
 
-				  $this->ion_auth->update($user->id, $data); 
+				    $this->ion_auth->update($user->id, $datosActualizar);
+
+				    /*
+				    * Si se suministró contraseña se modifica
+				    */
+				    if(isset($datosActualizar['password']))
+				    {
+				    	$identity = $user->{$this->config->item('identity', 'ion_auth')};
+                        $change = $this->ion_auth->reset_password($identity, $datosActualizar['password']);
+				    }
 				  
 				  if ($user->perfilid != $this->input->post('perfilid')) { //si cambia de perfil borramos permisos anteriores y agregamos los nuevos
 
