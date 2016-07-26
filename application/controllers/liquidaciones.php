@@ -478,7 +478,7 @@ class Liquidaciones extends MY_Controller {
                             $config['upload_path'] = $path;
                             $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
                             $config['remove_spaces']=TRUE;
-                            $config['max_size']    = '2048';
+                            $config['max_size']    = '4048';
                             $config['overwrite']    = TRUE;
                             $this->load->library('upload');
           
