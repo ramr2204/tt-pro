@@ -140,30 +140,37 @@ class Liquidaciones extends MY_Controller {
               $estampillas = $this->liquidaciones_model->getestampillas($contrato->cntr_tipocontratoid);  
               $this->data['estampillas'] = [];
 
-              //valida el valor del porcentaje según el regimen
-              //del contratista para realizar un calcúlo acertado
-
-              if($contrato->regi_iva > 0)
-              {
-                  $valorsiniva = (float)$contrato->cntr_valor/(((float)$contrato->regi_iva/100)+1);
-
-                  //Formatea el resultado del calculo de valor sin iva
-                  //para que redondee por decimales y unidades de mil
-                  //ej valorsiniva=204519396.55172 ->decimales -> 204519397 ->centenas ->204519400
-                  $sinIvaRedondeoDecimales = round($valorsiniva);
-                  $sinIvaRedondeoCentenas = round($sinIvaRedondeoDecimales, -2);  
-                  unset($valorsiniva);
-                  $valorsiniva = $sinIvaRedondeoCentenas;
-              }else
-                  {
-                       $valorsiniva = (float)$contrato->cntr_valor;
-                  }
-              
+                /*
+                * Valida si el régimen del contratista es otros para calcular el valor
+                * restando el valor del IVA suministrado en la creación del contrato
+                */
+                if($contrato->regi_id == 6)
+                {
+                    $valorsiniva = (float)$contrato->cntr_valor - (float)$contrato->cntr_iva_otros;
+                }else
+                    {
+                        //valida el valor del porcentaje según el regimen
+                        //del contratista para realizar un calcúlo acertado
+                        if($contrato->regi_iva > 0)
+                        {
+                            $valorsiniva = (float)$contrato->cntr_valor/(((float)$contrato->regi_iva/100)+1);
+          
+                            //Formatea el resultado del calculo de valor sin iva
+                            //para que redondee por decimales y unidades de mil
+                            //ej valorsiniva=204519396.55172 ->decimales -> 204519397 ->centenas ->204519400
+                            $sinIvaRedondeoDecimales = round($valorsiniva);
+                            $sinIvaRedondeoCentenas = round($sinIvaRedondeoDecimales, -2);  
+                            unset($valorsiniva);
+                            $valorsiniva = $sinIvaRedondeoCentenas;
+                        }else
+                            {
+                                 $valorsiniva = (float)$contrato->cntr_valor;
+                            }
+                    }
 
               //arreglo que guarda los distintos valores
               //de liquidacion de las estampillas    
               $totalestampilla= array(); 
-
 
               $valortotal=0;
               $parametros=$this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo','para_id = 1',1,NULL,true);
