@@ -87,7 +87,64 @@ class Liquidaciones extends MY_Controller {
     */
     public function listarLiquidacionesIVADescuentos()
     {
-        echo 'juaz';
+        if ($this->ion_auth->logged_in())
+        {
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar'))
+            {
+                $this->data['successmessage']=$this->session->flashdata('successmessage');
+                $this->data['errormessage']=$this->session->flashdata('errormessage');
+                $this->data['infomessage']=$this->session->flashdata('infomessage');
+              
+                //template data
+                $this->template->set('title', 'Auditar liquidaciones');
+                $this->data['style_sheets']= array(
+                        'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'                        
+                        );
+
+                $this->data['javascripts']= array(
+                        'js/jquery.dataTables.min.js',
+                        'js/plugins/dataTables/dataTables.bootstrap.js',
+                        'js/jquery.dataTables.defaults.js',
+                        'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
+                        'js/autoNumeric.js',
+                        'js/applicationEvents.js'
+                       );
+                
+                /*
+                * Extrae la vigencia maxima de los contratos para el select
+                * en los filtros
+                */
+                $resultado = $this->codegen_model->max('con_contratos','cntr_fecha_firma');
+              
+                foreach($resultado as $key => $value)
+                {
+                    $aplilo[$key] = $value;
+                }
+                
+                $vigencia_mayor = substr($aplilo['cntr_fecha_firma'], 0, 4);
+                $vigencia_anterior = $vigencia_mayor - 1;
+
+                /*
+                * Construye el vector para las vigencias para js
+                */
+                $a = "[";
+                foreach (array($vigencia_mayor,$vigencia_anterior) as $key => $value)
+                {
+                    $a .= '"'.$value.'", ';
+                }
+                $a = substr($a, 0, -2);
+                $a .= "]";
+
+                $this->data['vigencias'] = $a;
+                $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_listadoivaotros', $this->data);
+            }else 
+                {
+                    redirect(base_url().'index.php/error_404');
+                }
+        }else
+            {
+                redirect(base_url().'index.php/users/login');
+            }
     }
 
  function liquidartramites()
@@ -1298,6 +1355,35 @@ function verliquidartramite()
       }        
   }
 
+    /*
+    * Funcion que genera información para la datatable del listado de contratos
+    * liquidados con regimen otros por AIU
+    */
+    public function liquidaciones_regimenotros()
+    { 
+        if ($this->ion_auth->logged_in()) 
+        {
+            if($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/listarLiquidacionesIVADescuentos'))
+            {
+                $this->load->library('datatables');
+                $this->datatables->select('c.cntr_id,c.cntr_numero,co.cont_nit,c.cntr_valor,c.cntr_iva_otros,li.liqu_id,li.liqu_fecha,li.liqu_soporteobjeto');
+                $this->datatables->from('con_contratos c');
+                $this->datatables->join('est_liquidaciones li', 'c.cntr_id = li.liqu_contratoid', 'left');
+                $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
+                $this->datatables->where('co.cont_regimenid = 6');
+                $this->datatables->where('c.cntr_estadolocalid = 2');
+                $this->datatables->add_column('edit', '-');
+                echo $this->datatables->generate();
+            }else
+                {
+                    redirect(base_url().'index.php/error_404');
+                }
+        }else
+            {
+                redirect(base_url().'index.php/users/login');
+            }
+    }
+
 
 /**
 * Funcion que renderiza la vista de consulta de liquidaciones
@@ -1698,7 +1784,7 @@ function consultar()
 */
 
   function extraerFacturas()
-  {    
+  {
        $liquidacion = $this->input->post('id');
        $where = 'where fact_liquidacionid = '.$liquidacion;
        $resultado = $this->codegen_model->getSelect('est_facturas',"fact_nombre, fact_valor",$where);

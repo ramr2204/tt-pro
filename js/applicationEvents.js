@@ -28,7 +28,7 @@ var base_url;
 
 function inicial () 
 {
-    base_url=$('#base').val();
+    base_url = $('#base').val();
 
     //Eventos Ingresar Papeleria
     $('.responsable').keyup(solicitarUsuarios);
@@ -58,7 +58,13 @@ function inicial ()
     * Evento para solicitar recargar el formulario de adicionar papelería
     * con o sin la variable de contingencia
     */
-    $('#chk_contingencia').click(solicitarRecargaPagina);    
+    $('#chk_contingencia').click(solicitarRecargaPagina);
+
+    /*
+    * Solicita la identificacion de la vista de auditoria
+    * para enlazar los eventos
+    */
+    identificarVistaAuditoria();
  
     //Solicita la identificacion de vistas
     //con controles timepicker
@@ -270,6 +276,164 @@ function generarInformeRango(e)
     {
         window.open(base_url+'index.php/liquidaciones/renderizarRangoImpresionesPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final);
     }
+}
+
+/*
+* Funcion de apoyo que identifica si se encuentra en la vista
+* de la tabla de auditoria de liquidaciones
+*/
+function identificarVistaAuditoria()
+{
+    var n = 0;
+    $('body').find('#tabla_audit').each(function()
+        {
+            n++;
+        });
+
+    /*
+    * Valida si encontró por lo menos una coincidencia
+    * lo que indica que es la vista de auditoria
+    */
+    if(n > 0)
+    {
+        /*
+        * Enlaza el evento que genera la datatable
+        */
+        var oTable = $('#tabla_audit').dataTable(objParametrosAudit()).columnFilter(objFiltrosAudit());
+        oTable.fnSearchHighlighting();
+    }
+}
+
+/*
+* Funcion de apoyo que construye el objeto parametro para la tabla de auditoria
+*/
+function objParametrosAudit()
+{
+    var parametros = {
+        "bProcessing": true,
+        "bServerSide": true,
+        "sAjaxSource": base_url+"index.php/liquidaciones/liquidaciones_regimenotros",
+        "sServerMethod": "POST",
+        "iDisplayLength": 5,
+        "aoColumns": [ 
+                    { "sClass": "center","bVisible": false}, /*id 0*/
+                    { "sClass": "center","sWidth": "6%" }, 
+                    { "sClass": "center" }, 
+                    { "sClass": "item" },
+                    { "sClass": "item" },
+                    { "sClass": "item" },  
+                    { "sClass": "money"},
+                    { "sClass": "item"},
+                    { "sClass": "center","bSortable": false,"bSearchable": false},
+            ],
+        "fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) 
+            {
+                if(aData[5] != null)
+                {
+                    $("td:eq(4)", nRow).html('<div class="small">' + aData[5].substr( 0, 130 )+ '...</div>');
+                }else
+                    {
+                         $("td:eq(4)", nRow).html('<div class="small">NO REGISTRA...</div>');     
+                    }
+
+                /*
+                * Se formatean los valores
+                */
+                $("td:eq(2)", nRow).html('<span class="auto_num">' + aData[3] + '</span>');
+                $("td:eq(3)", nRow).html('<span class="auto_num">' + aData[4] + '</span>');
+
+                /*
+                * Se solicitan los valores de las estampillas y sus porcentajes
+                */
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    data: {id : aData[5]},
+                    url: base_url+"index.php/liquidaciones/extraerFacturas",
+                    success: function(data) {
+                        $("td:eq(4)", nRow).html('<div class="text-left">' + data.estampillas + '</div>');                                        
+                    }
+                });
+
+                /*
+                * Se dibuja el link para visualizar el soporte del contrato
+                */
+                $("td:eq(6)", nRow).html('<span class="auto_num">' + aData[7] + '</span>');
+                //<a href='<?php echo base_url().$row2->fact_rutacomprobante; ?>' target='_blank'><img src='<?php echo base_url().$row2->fact_rutacomprobante; ?>' class='file-preview-image' alt='comprobante de pago' title='comprobante de pago'  height="42" width="42"></a>
+
+            },
+        "fnDrawCallback": function( oSettings ) 
+            {
+                $(".auto_num").autoNumeric('init',{aSep:'.',aDec:',',aSign:'$ '});
+                // $(".liquidar").on('click', function(event) {
+                     // event.preventDefault();
+                     // var ID = $(this).attr("id");
+                      // $("#idcontrato").val(ID);
+                       // $('.liquida').load('<?php echo base_url(); ?>index.php/liquidaciones/liquidarcontrato/'+ID,function(result){
+                        // $('#myModal').modal({show:true});
+          // 
+                       // Eventos liquidar contratos-temporal
+                        // $('.calcular').blur(actualizarTotal); 
+                        // function actualizarTotal(e)
+                        // { 
+                            // var total = 0;
+          // 
+                            // $('.calcular').map(function(){      
+          // 
+                                // if($(this).val()!='')
+                                // {
+                                    // total += parseInt($(this).val());   
+                                // }else
+                                    // {
+                                        // total += 0;  
+                                    // }                
+                                // 
+                            // });
+          // 
+                            // $('#valortotal').val(total);
+                            // 
+                        // }
+          // 
+                       // });
+                   // });
+            }
+        };
+    return parametros;
+}
+
+/*
+* Funcion de apoyo que retorna el objeto de configuracion de filtros para la tabla
+* de auditoria
+*/
+function objFiltrosAudit()
+{
+    var filtros = {
+        aoColumns: [
+            {
+                type: "number",
+                sSelector: "#buscarnumero"
+            },
+            {
+                type: "number",
+                sSelector: "#buscarnit"
+            },
+            {
+                type: "text",
+                sSelector: "#buscarcontratista",
+                bSmart: false
+            },
+            {    
+                sSelector: "#buscarano", 
+                type:"select" ,
+                values : vecVig
+            },
+            null,
+            null,
+            null,
+            null,
+        ]
+        };
+    return filtros;
 }
 
 /*
