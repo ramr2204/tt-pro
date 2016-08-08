@@ -58,7 +58,7 @@ function inicial ()
     * Evento para solicitar recargar el formulario de adicionar papelería
     * con o sin la variable de contingencia
     */
-    $('#chk_contingencia').click(solicitarRecargaPagina);
+    $('#chk_contingencia').click(solicitarRecargaPagina);    
  
     //Solicita la identificacion de vistas
     //con controles timepicker
@@ -73,6 +73,40 @@ function inicial ()
     //listado de conciliaciones para eliminar
     //el css del container en esa vista
     identificarVistaListadoConciliaciones();
+}
+
+/*
+* Funcion que solicita al servidor la validacion del tipo de regimen
+* del contratista seleccionado
+*/
+function validarRegimenContratista(e)
+{
+    var idContratista = $(this).val();
+
+    if(idContratista != '0')
+    {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            data: {idContratista : idContratista},
+            url: base_url+"index.php/contratos/validarRegimen",
+            success: function(objResponse) {
+                if(objResponse.msj == '')
+                {
+                    if(objResponse.es_otros == 'SI')
+                    {
+                        $('#cont_iva_otros').slideDown(400);
+                    }else
+                        {
+                            $('#cont_iva_otros').slideUp(400);
+                        }
+                }else
+                    {
+                        renderizarNotificacion('notificacion',objResponse.msj, 'alert-danger', 400);
+                    }
+            }
+        });
+    }
 }
 
 /*
@@ -619,10 +653,20 @@ function establecerDatosElegidos (e)
             $('#ultimo').val(limites[1]);
             $('#idRango').val(limites[2]);
         }
-    
-    
 }
 
-
-
-   
+/*
+* Funcion de apoyo que renderiza una notificacion
+*/
+function renderizarNotificacion(idContenedor,mensaje, tipo, animacion)
+{
+    var notificacion = '<div class="alert '+tipo+'" role="alert">'
+        +'<button type="button" class="close" data-dismiss="alert">'
+        +'<span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'        
+        +'<strong>Atencion!</strong> '+mensaje
+        +'</div>';
+    $('#'+idContenedor).empty();
+    $('#'+idContenedor).html(notificacion);
+    $('#'+idContenedor).hide();
+    $('#'+idContenedor).slideDown(animacion);
+}   

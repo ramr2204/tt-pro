@@ -14,6 +14,8 @@
 <div class="row clearfix">
             <div class="col-md-12 column">
                   <div class="row clearfix">
+                        <div class="col-xs-12 column" id="notificacion">
+                        </div>
                         <div class="col-md-2 column">
                         </div>
                         <div class="col-md-8 column">
@@ -24,34 +26,30 @@
 
                               <?php echo form_open(current_url()); ?>
                                   
-                                     <div class="col-md-12 column">
-                                      <div class="form-group">
+                                    <div class="col-md-12 column">
+                                        <div class="form-group">
                                            <label for="contratistaid">Contratista</label>
-                                           <select class="form-control" id="contratistaid" name="contratistaid" required="required" >
+                                           <select class="form-control chosen" id="contratistaid" name="contratistaid" required="required" >
                                            <option value="0">Seleccione...</option>
                                              <?php  foreach($contratistas as $row) { ?>
                                              <option value="<?php echo $row->cont_id; ?>"><?php echo $row->cont_nit.' - '.$row->cont_nombre; ?></option>
                                              <?php   } ?>
                                            </select>
                                            <?php echo form_error('contratistaid','<span class="text-danger">','</span>'); ?>
+                                        </div>
                                     </div>
-                                         
-
-                                     </div>
-                                     <div class="col-md-6 column">
-                                         <div class="form-group">
-                                           <label for="tipocontratoid">Tipo de contrato</label>
-                                           <select class="form-control" id="tipocontratoid" name="tipocontratoid" required="required" >
-                                           <option value="0">Seleccione...</option>
-                                             <?php  foreach($tiposcontratos as $row) { ?>
-                                             <option value="<?php echo $row->tico_id; ?>"><?php echo $row->tico_nombre; ?></option>
-                                             <?php   } ?>
-                                           </select>
-                                           <?php echo form_error('estadoid','<span class="text-danger">','</span>'); ?>
+                                    <div class="col-md-6 column">
+                                        <div class="form-group">
+                                            <label for="tipocontratoid">Tipo de contrato</label>
+                                            <select class="form-control" id="tipocontratoid" name="tipocontratoid" required="required" >
+                                            <option value="0">Seleccione...</option>
+                                              <?php  foreach($tiposcontratos as $row) { ?>
+                                              <option value="<?php echo $row->tico_id; ?>"><?php echo $row->tico_nombre; ?></option>
+                                              <?php   } ?>
+                                            </select>
+                                            <?php echo form_error('estadoid','<span class="text-danger">','</span>'); ?>
+                                        </div>
                                     </div>
-                                         
-
-                                     </div>
 
                                      <div class="col-md-6 column">
                                        <div class="form-group">
@@ -75,8 +73,7 @@
 
                                      </div>
 
-                                      <div class="col-md-6 column">
-
+                                    <div class="col-md-6 column">
                                           <div class="form-group">
                                             <label for="valor">Valor</label>
                                              <div class="input-group">
@@ -85,8 +82,18 @@
                                               </div>
                                             <?php echo form_error('valor','<span class="text-danger">','</span>'); ?>
                                           </div>
+                                    </div>
 
-                                     </div>
+                                    <div class="col-xs-12 column" id="cont_iva_otros" style="display:none;">
+                                        <div class="form-group">
+                                            <label for="valor_iva_otros">Valor IVA</label>
+                                            <div class="input-group">
+                                                <div class="input-group-addon">$</div>
+                                                    <input class="form-control" id="valor_iva_otros" type="text" name="valor_iva_otros" value="<?php echo set_value('valor_iva_otros'); ?>" maxlength="100" />
+                                                </div>
+                                            <?php echo form_error('valor_iva_otros','<span class="text-danger">','</span>'); ?>
+                                        </div>
+                                    </div>
 
                                       <div class="col-md-12 column">
                                       <div class="form-group">
@@ -140,17 +147,23 @@
     //style selects
     var config = {
       '#municipioid'  : {disable_search_threshold: 10},
-      '#tipocontratoid'  : {disable_search_threshold: 10},
-      '#contratistaid'  : {disable_search_threshold: 10},
+      '#tipocontratoid'  : {disable_search_threshold: 10},      
       '#cntr_municipio_origen'  : {disable_search_threshold: 10}
     }
     for (var selector in config) {
         $(selector).chosen(config[selector]);
     }
 
+    /*
+    * Evento para establecer validacion de regimen de contratista para
+    * permitir ingresar el valor del IVA en contratos con AUI
+    */
+    $('#contratistaid').chosen({disable_search_threshold: 10}).change(validarRegimenContratista);
+
   </script>
   <script type="text/javascript">
       $(function () {
-         $('#valor').autoNumeric('init',{aSep: '.' , aDec: ',' }); 
+            $('#valor').autoNumeric('init',{aSep: '.' , aDec: ',' }); 
+            $('#valor_iva_otros').autoNumeric('init',{aSep: '.' , aDec: ',' }); 
       });
   </script>

@@ -526,4 +526,42 @@ class Contratos extends MY_Controller {
               redirect(base_url().'index.php/users/login');
       }           
   }
+
+    /*
+    * Funcion de apoyo que valida el tipo de regimen del contratista
+    * para verificar si es o no tipo otros (6)
+    */
+    public function validarRegimen()
+    {
+        if ($this->ion_auth->logged_in()) 
+        {
+            if(isset($_POST['idContratista']) && $_POST['idContratista'] != '0')
+            {
+                /*
+                * Valida que el contratista exista en la base de datos
+                */
+                $objContratista = $this->codegen_model->get('con_contratistas','cont_regimenid','cont_id = '.$_POST['idContratista'],1,NULL,true);
+
+                if(count($objContratista) > 0)
+                {
+                    /*
+                    * Valida si el tipo de régimen es otros
+                    */
+                    $esOtros = 'NO';
+                    if($objContratista->cont_regimenid == 6)
+                    {
+                        $esOtros = 'SI';
+                    }
+
+                    echo json_encode(array('msj' => '', 'es_otros' => $esOtros));
+                }else
+                    {
+                        echo json_encode(array('msj' => 'No existe el contratista seleccionado!'));
+                    }
+            }
+        }else
+            {
+                redirect(base_url().'index.php/users/login');
+            }
+    }
 }
