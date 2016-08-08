@@ -81,6 +81,15 @@ class Liquidaciones extends MY_Controller {
 
   }
 
+    /*
+    * Funcion que ordena la renderización de los contratos con regimen otros para realizar
+    * auditoria a las liquidaciones
+    */
+    public function listarLiquidacionesIVADescuentos()
+    {
+        echo 'juaz';
+    }
+
  function liquidartramites()
   {
       if ($this->ion_auth->logged_in()){
