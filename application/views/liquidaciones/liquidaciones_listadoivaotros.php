@@ -42,7 +42,7 @@
     <div class="col-sm-1"></div>
     <div class="col-sm-2">Número Contrato:<div align="center" id="buscarnumero"></div></div>
     <div class="col-sm-2">NIT Contratista:<div align="center" id="buscarnit"></div></div>
-    <div class="col-sm-2">Vigencia:<div align="center" id="buscarano"></div></div>
+    <div class="col-sm-2">Vigencia Liquidación:<div align="center" id="buscarano"></div></div>
     <div class="col-sm-1"></div>
 </div>
 
@@ -55,9 +55,9 @@
                         <th>Id</th>
                         <th>Número Contrato</th>
                         <th>NIT Contratista</th>
-                        <th>Valor total</th>
-                        <th>Valor IVA</th>
-                        <th>Valores estampillas</th>
+                        <th class="text-center center-vertical">Valor total</th>
+                        <th class="text-center center-vertical">Valor IVA</th>
+                        <th class="text-center center-vertical">Valores Estampillas</th>
                         <th>Fecha Liquidación</th>       
                         <th>Soporte</th>
                         <th></th>

@@ -299,8 +299,7 @@ function identificarVistaAuditoria()
         /*
         * Enlaza el evento que genera la datatable
         */
-        var oTable = $('#tabla_audit').dataTable(objParametrosAudit()).columnFilter(objFiltrosAudit());
-        oTable.fnSearchHighlighting();
+        var oTable = $('#tabla_audit').dataTable(objParametrosAudit()).columnFilter(objFiltrosAudit()).fnSearchHighlighting();
     }
 }
 
@@ -318,24 +317,16 @@ function objParametrosAudit()
         "aoColumns": [ 
                     { "sClass": "center","bVisible": false}, /*id 0*/
                     { "sClass": "center","sWidth": "6%" }, 
-                    { "sClass": "center" }, 
-                    { "sClass": "item" },
-                    { "sClass": "item" },
-                    { "sClass": "item" },  
-                    { "sClass": "money"},
-                    { "sClass": "item"},
+                    { "sClass": "center","sWidth": "6%" }, 
+                    { "sClass": "item","sWidth": "14%" },
+                    { "sClass": "item","sWidth": "14%" },
+                    { "sClass": "item","sWidth": "45%" },  
+                    { "sClass": "item","sWidth": "6%"},
+                    { "sClass": "item","sWidth": "6%"},
                     { "sClass": "center","bSortable": false,"bSearchable": false},
             ],
         "fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) 
             {
-                if(aData[5] != null)
-                {
-                    $("td:eq(4)", nRow).html('<div class="small">' + aData[5].substr( 0, 130 )+ '...</div>');
-                }else
-                    {
-                         $("td:eq(4)", nRow).html('<div class="small">NO REGISTRA...</div>');     
-                    }
-
                 /*
                 * Se formatean los valores
                 */
@@ -358,8 +349,7 @@ function objParametrosAudit()
                 /*
                 * Se dibuja el link para visualizar el soporte del contrato
                 */
-                $("td:eq(6)", nRow).html('<span class="auto_num">' + aData[7] + '</span>');
-                //<a href='<?php echo base_url().$row2->fact_rutacomprobante; ?>' target='_blank'><img src='<?php echo base_url().$row2->fact_rutacomprobante; ?>' class='file-preview-image' alt='comprobante de pago' title='comprobante de pago'  height="42" width="42"></a>
+                $("td:eq(6)", nRow).html("<a href='"+ base_url + aData[7] +"' target='_blank'><img src='"+ base_url + aData[7] +"' class='file-preview-image' alt='comprobante de pago' title='comprobante de pago'  height='42' width='42'></a>");
 
             },
         "fnDrawCallback": function( oSettings ) 
@@ -417,19 +407,15 @@ function objFiltrosAudit()
                 type: "number",
                 sSelector: "#buscarnit"
             },
-            {
-                type: "text",
-                sSelector: "#buscarcontratista",
-                bSmart: false
-            },
+            null,
+            null,
+            null,
+            null,
             {    
                 sSelector: "#buscarano", 
                 type:"select" ,
                 values : vecVig
             },
-            null,
-            null,
-            null,
             null,
         ]
         };

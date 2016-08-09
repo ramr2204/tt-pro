@@ -98,7 +98,8 @@ class Liquidaciones extends MY_Controller {
                 //template data
                 $this->template->set('title', 'Auditar liquidaciones');
                 $this->data['style_sheets']= array(
-                        'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'                        
+                        'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen',
+                        'css/applicationStyles.css' => 'screen'
                         );
 
                 $this->data['javascripts']= array(
@@ -1785,16 +1786,22 @@ function consultar()
 
   function extraerFacturas()
   {
-       $liquidacion = $this->input->post('id');
-       $where = 'where fact_liquidacionid = '.$liquidacion;
-       $resultado = $this->codegen_model->getSelect('est_facturas',"fact_nombre, fact_valor",$where);
+        $liquidacion = $this->input->post('id');
+        $where = 'where fact_liquidacionid = '.$liquidacion;
+        $resultado = $this->codegen_model->getSelect('est_facturas',"fact_nombre, fact_valor, fact_porcentaje",$where);
        
-       $vector_facturas['estampillas']='';
+        $vector_facturas['estampillas'] = '<table class="table table-bordered">'
+           .'<tr><th>Estampilla</th><th>Porcentaje</th><th>Valor</th></tr>';
 
        foreach ($resultado as $value) 
        {
-          $vector_facturas['estampillas'] .= $value->fact_nombre.' ==> '.$value->fact_valor.'<br>';          
+            $vector_facturas['estampillas'] .= '<tr>'
+                    .'<td>'. $value->fact_nombre .'</td>'
+                    .'<td>(%'. $value->fact_porcentaje .')</td>'
+                    .'<td>($'. number_format($value->fact_valor,0,',','.') .')</td>'
+                .'</tr>';
        }
+       $vector_facturas['estampillas'] .= '</table>';
     
        echo json_encode($vector_facturas); 
   }
