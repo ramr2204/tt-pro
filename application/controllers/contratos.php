@@ -79,29 +79,63 @@ class Contratos extends MY_Controller {
               if ($this->form_validation->run() == false) {
 
                   $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
-              } else {    
+              } else {
+                    
+                    /*
+                    * Valida que el contratista exista en la base de datos
+                    */
+                    $objContratista = $this->codegen_model->get('con_contratistas','cont_regimenid','cont_id = '.$this->input->post('contratistaid'),1,NULL,true);
+    
+                    if(count($objContratista) > 0)
+                    {
+                        $data = array(
+                            'cntr_contratistaid' => $this->input->post('contratistaid'),
+                            'cntr_tipocontratoid' => $this->input->post('tipocontratoid'),
+                            'cntr_fecha_firma' => $this->input->post('fecha'),
+                            'cntr_numero' => $this->input->post('numero'),
+                            'cntr_objeto' => $this->input->post('objeto'),
+                            'cntr_valor' => $valor,
+                            'cntr_vigencia' => $vigencia[0],
+                            'cntr_municipio_origen' => $this->input->post('cntr_municipio_origen')
+                            );
 
-                  $data = array(
-                        'cntr_contratistaid' => $this->input->post('contratistaid'),
-                        'cntr_tipocontratoid' => $this->input->post('tipocontratoid'),
-                        'cntr_fecha_firma' => $this->input->post('fecha'),
-                        'cntr_numero' => $this->input->post('numero'),
-                        'cntr_objeto' => $this->input->post('objeto'),
-                        'cntr_valor' => $valor,
-                        'cntr_vigencia' => $vigencia[0],
-                        'cntr_municipio_origen' => $this->input->post('cntr_municipio_origen')
-                     );
-                 
-                  if ($this->codegen_model->add('con_contratos',$data) == TRUE) {
+                        /*
+                        * Valida si el tipo de régimen es otros
+                        */
+                        $registrarContrato = true;
+                        if($objContratista->cont_regimenid == 6)
+                        {
+                            /*
+                            * Valida que se haya recibido valor de IVA otros
+                            */
+                            if($this->input->post('valor_iva_otros') == '')
+                            {
+                                $this->data['errormessage'] = 'Debe suministrar el valor del IVA!';
+                                $registrarContrato = false;
+                            }else
+                                {
+                                    $data['cntr_iva_otros'] = str_replace('.','',$this->input->post('valor_iva_otros'));
+                                }
+                        }
 
-                      $this->session->set_flashdata('message', 'El contrato se ha creado con éxito');
-                      redirect(base_url().'index.php/contratos/add');
-                  } else {
-
-                      $this->data['errormessage'] = 'No se pudo registrar el contratista';
-
-                  }
-
+                        /*
+                        * Valida si se debe registrar el contrato
+                        */
+                        if($registrarContrato)
+                        {
+                            if ($this->codegen_model->add('con_contratos',$data) == TRUE) 
+                            {
+                                $this->session->set_flashdata('message', 'El contrato se ha creado con éxito');
+                                redirect(base_url().'index.php/contratos/add');
+                            }else
+                                {
+                                    $this->data['errormessage'] = 'No se pudo registrar el contrato';
+                                }
+                        }
+                    }else
+                        {
+                            $this->data['errormessage'] = 'No existe el contratista seleccionado!';
+                        }
               }
               $this->template->set('title', 'Nueva aplicación');
               $this->data['style_sheets']= array(
@@ -526,4 +560,42 @@ class Contratos extends MY_Controller {
               redirect(base_url().'index.php/users/login');
       }           
   }
+
+    /*
+    * Funcion de apoyo que valida el tipo de regimen del contratista
+    * para verificar si es o no tipo otros (6)
+    */
+    public function validarRegimen()
+    {
+        if ($this->ion_auth->logged_in()) 
+        {
+            if(isset($_POST['idContratista']) && $_POST['idContratista'] != '0')
+            {
+                /*
+                * Valida que el contratista exista en la base de datos
+                */
+                $objContratista = $this->codegen_model->get('con_contratistas','cont_regimenid','cont_id = '.$_POST['idContratista'],1,NULL,true);
+
+                if(count($objContratista) > 0)
+                {
+                    /*
+                    * Valida si el tipo de régimen es otros
+                    */
+                    $esOtros = 'NO';
+                    if($objContratista->cont_regimenid == 6)
+                    {
+                        $esOtros = 'SI';
+                    }
+
+                    echo json_encode(array('msj' => '', 'es_otros' => $esOtros));
+                }else
+                    {
+                        echo json_encode(array('msj' => 'No existe el contratista seleccionado!'));
+                    }
+            }
+        }else
+            {
+                redirect(base_url().'index.php/users/login');
+            }
+    }
 }

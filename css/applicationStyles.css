@@ -13,6 +13,11 @@
 *
 */
 
+.center-vertical
+{
+    vertical-align: middle !important;
+}
+
 .btn-pdf{
   padding-top: 20px;	
 }

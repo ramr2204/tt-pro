@@ -28,7 +28,7 @@ var base_url;
 
 function inicial () 
 {
-    base_url=$('#base').val();
+    base_url = $('#base').val();
 
     //Eventos Ingresar Papeleria
     $('.responsable').keyup(solicitarUsuarios);
@@ -59,6 +59,12 @@ function inicial ()
     * con o sin la variable de contingencia
     */
     $('#chk_contingencia').click(solicitarRecargaPagina);
+
+    /*
+    * Solicita la identificacion de la vista de auditoria
+    * para enlazar los eventos
+    */
+    identificarVistaAuditoria();
  
     //Solicita la identificacion de vistas
     //con controles timepicker
@@ -73,6 +79,40 @@ function inicial ()
     //listado de conciliaciones para eliminar
     //el css del container en esa vista
     identificarVistaListadoConciliaciones();
+}
+
+/*
+* Funcion que solicita al servidor la validacion del tipo de regimen
+* del contratista seleccionado
+*/
+function validarRegimenContratista(e)
+{
+    var idContratista = $(this).val();
+
+    if(idContratista != '0')
+    {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            data: {idContratista : idContratista},
+            url: base_url+"index.php/contratos/validarRegimen",
+            success: function(objResponse) {
+                if(objResponse.msj == '')
+                {
+                    if(objResponse.es_otros == 'SI')
+                    {
+                        $('#cont_iva_otros').slideDown(400);
+                    }else
+                        {
+                            $('#cont_iva_otros').slideUp(400);
+                        }
+                }else
+                    {
+                        renderizarNotificacion('notificacion',objResponse.msj, 'alert-danger', 400);
+                    }
+            }
+        });
+    }
 }
 
 /*
@@ -236,6 +276,150 @@ function generarInformeRango(e)
     {
         window.open(base_url+'index.php/liquidaciones/renderizarRangoImpresionesPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final);
     }
+}
+
+/*
+* Funcion de apoyo que identifica si se encuentra en la vista
+* de la tabla de auditoria de liquidaciones
+*/
+function identificarVistaAuditoria()
+{
+    var n = 0;
+    $('body').find('#tabla_audit').each(function()
+        {
+            n++;
+        });
+
+    /*
+    * Valida si encontró por lo menos una coincidencia
+    * lo que indica que es la vista de auditoria
+    */
+    if(n > 0)
+    {
+        /*
+        * Enlaza el evento que genera la datatable
+        */
+        var oTable = $('#tabla_audit').dataTable(objParametrosAudit()).columnFilter(objFiltrosAudit()).fnSearchHighlighting();
+    }
+}
+
+/*
+* Funcion de apoyo que construye el objeto parametro para la tabla de auditoria
+*/
+function objParametrosAudit()
+{
+    var parametros = {
+        "bProcessing": true,
+        "bServerSide": true,
+        "sAjaxSource": base_url+"index.php/liquidaciones/liquidaciones_regimenotros",
+        "sServerMethod": "POST",
+        "iDisplayLength": 5,
+        "aoColumns": [ 
+                    { "sClass": "center","bVisible": false}, /*id 0*/
+                    { "sClass": "center","sWidth": "6%" }, 
+                    { "sClass": "center","sWidth": "6%" }, 
+                    { "sClass": "item","sWidth": "14%" },
+                    { "sClass": "item","sWidth": "14%" },
+                    { "sClass": "item","sWidth": "45%" },  
+                    { "sClass": "item","sWidth": "6%"},
+                    { "sClass": "item","sWidth": "6%"},
+                    { "sClass": "center","bSortable": false,"bSearchable": false},
+            ],
+        "fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) 
+            {
+                /*
+                * Se formatean los valores
+                */
+                $("td:eq(2)", nRow).html('<span class="auto_num">' + aData[3] + '</span>');
+                $("td:eq(3)", nRow).html('<span class="auto_num">' + aData[4] + '</span>');
+
+                /*
+                * Se solicitan los valores de las estampillas y sus porcentajes
+                */
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    data: {id : aData[5]},
+                    url: base_url+"index.php/liquidaciones/extraerFacturas",
+                    success: function(data) {
+                        $("td:eq(4)", nRow).html('<div class="text-left">' + data.estampillas + '</div>');                                        
+                    }
+                });
+
+                /*
+                * Se dibuja el link para visualizar el soporte del contrato
+                */
+                $("td:eq(6)", nRow).html("<a href='"+ base_url + aData[7] +"' target='_blank'><img src='"+ base_url + aData[7] +"' class='file-preview-image' alt='comprobante de pago' title='comprobante de pago'  height='42' width='42'></a>");
+
+            },
+        "fnDrawCallback": function( oSettings ) 
+            {
+                $(".auto_num").autoNumeric('init',{aSep:'.',aDec:',',aSign:'$ '});
+                // $(".liquidar").on('click', function(event) {
+                     // event.preventDefault();
+                     // var ID = $(this).attr("id");
+                      // $("#idcontrato").val(ID);
+                       // $('.liquida').load('<?php echo base_url(); ?>index.php/liquidaciones/liquidarcontrato/'+ID,function(result){
+                        // $('#myModal').modal({show:true});
+          // 
+                       // Eventos liquidar contratos-temporal
+                        // $('.calcular').blur(actualizarTotal); 
+                        // function actualizarTotal(e)
+                        // { 
+                            // var total = 0;
+          // 
+                            // $('.calcular').map(function(){      
+          // 
+                                // if($(this).val()!='')
+                                // {
+                                    // total += parseInt($(this).val());   
+                                // }else
+                                    // {
+                                        // total += 0;  
+                                    // }                
+                                // 
+                            // });
+          // 
+                            // $('#valortotal').val(total);
+                            // 
+                        // }
+          // 
+                       // });
+                   // });
+            }
+        };
+    return parametros;
+}
+
+/*
+* Funcion de apoyo que retorna el objeto de configuracion de filtros para la tabla
+* de auditoria
+*/
+function objFiltrosAudit()
+{
+    var filtros = {
+        aoColumns: [
+            {
+                type: "number",
+                sSelector: "#buscarnumero"
+            },
+            {
+                type: "number",
+                sSelector: "#buscarnit"
+            },
+            null,
+            null,
+            null,
+            null,
+            {    
+                sSelector: "#buscarano", 
+                type:"select" ,
+                values : vecVig
+            },
+            null,
+        ]
+        };
+    return filtros;
 }
 
 /*
@@ -619,10 +803,20 @@ function establecerDatosElegidos (e)
             $('#ultimo').val(limites[1]);
             $('#idRango').val(limites[2]);
         }
-    
-    
 }
 
-
-
-   
+/*
+* Funcion de apoyo que renderiza una notificacion
+*/
+function renderizarNotificacion(idContenedor,mensaje, tipo, animacion)
+{
+    var notificacion = '<div class="alert '+tipo+'" role="alert">'
+        +'<button type="button" class="close" data-dismiss="alert">'
+        +'<span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'        
+        +'<strong>Atencion!</strong> '+mensaje
+        +'</div>';
+    $('#'+idContenedor).empty();
+    $('#'+idContenedor).html(notificacion);
+    $('#'+idContenedor).hide();
+    $('#'+idContenedor).slideDown(animacion);
+}   
