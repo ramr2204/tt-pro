@@ -177,8 +177,9 @@ class Contratos extends MY_Controller {
                   redirect(base_url().'index.php/contratos');
               }
               
-              //$valor=str_replace('.','',$this->input->post('valor'));
-              $vigencia=explode("-", $this->input->post('fecha'));
+              $this->data['successmessage'] = $this->session->flashdata('message');
+              $valor = str_replace('.','',$this->input->post('valor'));
+              $vigencia = explode("-", $this->input->post('fecha'));
 
               $this->form_validation->set_rules('cntr_municipio_origen', 'Municipio Origen','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('contratistaid', 'contratista','required|trim|xss_clean|numeric|greater_than[0]');
@@ -192,28 +193,63 @@ class Contratos extends MY_Controller {
                   
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);
                             
-              } else {                            
-                 
-                  $data = array(
-                        'cntr_contratistaid' => $this->input->post('contratistaid'),
-                        'cntr_tipocontratoid' => $this->input->post('tipocontratoid'),
-                        'cntr_fecha_firma' => $this->input->post('fecha'),
-                        'cntr_numero' => $this->input->post('numero'),
-                        'cntr_objeto' => $this->input->post('objeto'),
-                        'cntr_valor' => $this->input->post('valor'),
-                        'cntr_vigencia' => $vigencia[0],
-                        'cntr_municipio_origen' => $this->input->post('cntr_municipio_origen')
-                     ); 
-                	if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idcontrato) == TRUE) {
+              } else {
 
-                      $this->session->set_flashdata('successmessage', 'El contrato se ha editado con éxito');
-                      //redirect(base_url().'index.php/contratos/edit/'.$idcontrato);
-                      
-                	} else {
-                				  
-                      $this->data['errormessage'] = 'No se pudo registrar el contrato';
+                    /*
+                    * Valida que el contratista exista en la base de datos
+                    */
+                    $objContratista = $this->codegen_model->get('con_contratistas','cont_regimenid','cont_id = '.$this->input->post('contratistaid'),1,NULL,true);                      
 
-                	}
+                    if(count($objContratista) > 0)
+                    {
+                        $data = array(
+                            'cntr_contratistaid' => $this->input->post('contratistaid'),
+                            'cntr_tipocontratoid' => $this->input->post('tipocontratoid'),
+                            'cntr_fecha_firma' => $this->input->post('fecha'),
+                            'cntr_numero' => $this->input->post('numero'),
+                            'cntr_objeto' => $this->input->post('objeto'),
+                            'cntr_valor' => $valor,
+                            'cntr_vigencia' => $vigencia[0],
+                            'cntr_municipio_origen' => $this->input->post('cntr_municipio_origen')
+                            );
+
+                        /*
+                        * Valida si el tipo de régimen es otros
+                        */
+                        $registrarContrato = true;
+                        if($objContratista->cont_regimenid == 6)
+                        {
+                            /*
+                            * Valida que se haya recibido valor de IVA otros
+                            */
+                            if($this->input->post('valor_iva_otros') == '')
+                            {
+                                $this->data['errormessage'] = 'Debe suministrar el valor del IVA!';
+                                $registrarContrato = false;
+                            }else
+                                {
+                                    $data['cntr_iva_otros'] = str_replace('.','',$this->input->post('valor_iva_otros'));
+                                }
+                        }
+
+                        /*
+                        * Valida si se debe registrar el contrato
+                        */
+                        if($registrarContrato)
+                        {
+                            if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idcontrato) == TRUE) 
+                            {
+                                $this->session->set_flashdata('message', 'El contrato se ha editado con éxito');
+                                redirect(base_url().'index.php/contratos/edit/'.$idcontrato);
+                            }else
+                                {
+                                    $this->data['errormessage'] = 'No se pudo modificar el contrato';
+                                }
+                        }
+                    }else
+                        {
+                            $this->data['errormessage'] = 'No existe el contratista seleccionado!';
+                        }
               }   
                   $this->data['style_sheets']= array(
                         'css/chosen.css' => 'screen',
@@ -225,15 +261,13 @@ class Contratos extends MY_Controller {
                         'js/plugins/bootstrap/bootstrap-datetimepicker.js',
                         'js/autoNumeric.js'
                     );
-
-                  $this->data['successmessage']=$this->session->flashdata('successmessage');
-                  $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                	$this->data['result'] = $this->codegen_model->get('con_contratos','cntr_id,cntr_contratistaid,cntr_municipio_origen,cntr_tipocontratoid,cntr_fecha_firma,cntr_numero,cntr_objeto,cntr_valor','cntr_id = '.$idcontrato,1,NULL,true);
-                  $this->data['tiposcontratos']  = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
-                  $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
-                  $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 29');
-                  $this->template->set('title', 'Editar contrato');
-                  $this->template->load($this->config->item('admin_template'),'contratos/contratos_edit', $this->data);
+                
+                $this->data['result'] = $this->codegen_model->get('con_contratos','cont_regimenid,cntr_id,cntr_contratistaid,cntr_municipio_origen,cntr_tipocontratoid,cntr_fecha_firma,cntr_numero,cntr_objeto,cntr_valor,cntr_iva_otros','cntr_id = '.$idcontrato,1,NULL,true,array(),'con_contratistas','con_contratistas.cont_id = con_contratos.cntr_contratistaid');
+                $this->data['tiposcontratos']  = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
+                $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
+                $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 29');
+                $this->template->set('title', 'Editar contrato');
+                $this->template->load($this->config->item('admin_template'),'contratos/contratos_edit', $this->data);
                         
           }else {
               redirect(base_url().'index.php/error_404');
