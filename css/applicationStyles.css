@@ -12,6 +12,27 @@
 * @version          2015-01-10
 *
 */
+.dataTables_filter, .dataTables_length, .dataTables_footer 
+{
+    display: none;
+}
+
+.item2
+{
+    width: 160px;
+    height: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.header-modal-custom
+{
+    background-color: #00632D;
+    color: #FFF;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
 
 .center-vertical
 {

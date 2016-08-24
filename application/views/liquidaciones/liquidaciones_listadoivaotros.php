@@ -17,20 +17,6 @@
     var vecVig = <?php echo $vigencias; ?>;
 </script>
 
-<style type="text/css">
-    .dataTables_filter, .dataTables_length, .dataTables_footer 
-    {
-      display: none;
-    }
-    .item2
-    {
-        width: 160px;
-        height: 15px;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
-    }
-</style>
 <div class="row">
     <div class="col-sm-12">
         <h1>Auditar Liquidaciones</h1>
@@ -60,7 +46,7 @@
                         <th class="text-center center-vertical">Valores Estampillas</th>
                         <th>Fecha Liquidación</th>       
                         <th>Soporte</th>
-                        <th></th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody></tbody>     
@@ -82,19 +68,17 @@
     </div>
 </div>
 
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-    <input class="form-control" id="idcontrato" type="hidden" name="idcontrato" value=""/>
-      <div class="modal-body liquida">
-         
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
-        <button type="submit" class="btn btn-primary">Liquidar</button>
-      </div>
-    </div>
-  </div>
-</div>
+<div class="modal fade" id="modal_auditoria" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header header-modal-custom">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title text-center"></h4>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer"></div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 
