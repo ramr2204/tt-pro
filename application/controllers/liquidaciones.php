@@ -1371,7 +1371,7 @@ function verliquidartramite()
                 $this->datatables->from('con_contratos c');
                 $this->datatables->join('est_liquidaciones li', 'c.cntr_id = li.liqu_contratoid', 'left');
                 $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
-                $this->datatables->where('co.cont_regimenid = 6');
+                $this->datatables->where('li.liqu_regimenid = 6');
                 $this->datatables->where('c.cntr_estadolocalid = 2');
                 $this->datatables->add_column('edit', '-');
                 echo $this->datatables->generate();
