@@ -1361,13 +1361,13 @@ function verliquidartramite()
     * liquidados con regimen otros por AIU
     */
     public function liquidaciones_regimenotros()
-    { 
+    {
         if ($this->ion_auth->logged_in()) 
         {
             if($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/listarLiquidacionesIVADescuentos'))
             {
                 $this->load->library('datatables');
-                $this->datatables->select('c.cntr_id,c.cntr_numero,co.cont_nit,c.cntr_valor,c.cntr_iva_otros,li.liqu_id,li.liqu_fecha,li.liqu_soporteobjeto');
+                $this->datatables->select('c.cntr_id,c.cntr_numero,co.cont_nit,c.cntr_valor,c.cntr_iva_otros,li.liqu_id,li.liqu_fecha,li.liqu_soporteobjeto,li.liqu_auditado,li.liqu_ok');
                 $this->datatables->from('con_contratos c');
                 $this->datatables->join('est_liquidaciones li', 'c.cntr_id = li.liqu_contratoid', 'left');
                 $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
@@ -1375,6 +1375,82 @@ function verliquidartramite()
                 $this->datatables->where('c.cntr_estadolocalid = 2');
                 $this->datatables->add_column('edit', '-');
                 echo $this->datatables->generate();
+            }else
+                {
+                    redirect(base_url().'index.php/error_404');
+                }
+        }else
+            {
+                redirect(base_url().'index.php/users/login');
+            }
+    }
+
+    /*
+    * Funcion que retorna los valores de auditoria de liquidaciones
+    * a partir de el id de la liquidacion
+    */
+    public function datosAuditoria()
+    {
+        if ($this->ion_auth->logged_in()) 
+        {
+            if($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/listarLiquidacionesIVADescuentos'))
+            {
+                /*
+                * Extrae el id de la liquidación de la petición
+                */
+                $liquidacion = $this->input->post('liquId');
+
+                /*
+                * Realiza la consulta de los datos de auditoría
+                */
+                $where = 'where liqu_id = '.$liquidacion;
+                $resultado = $this->codegen_model->getSelect('est_liquidaciones',"liqu_id,liqu_ok, liqu_usuario_audita, liqu_fecha_auditoria, liqu_observacionesaudit",$where);
+
+                echo json_encode($resultado[0]);
+            }else
+                {
+                    redirect(base_url().'index.php/error_404');
+                }
+        }else
+            {
+                redirect(base_url().'index.php/users/login');
+            }
+    }
+
+    /*
+    * Funcion que registra los datos de auditoria suministrados
+    */
+    public function registrarAuditoria()
+    {
+        if ($this->ion_auth->logged_in()) 
+        {
+            if($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/listarLiquidacionesIVADescuentos'))
+            {
+                /*
+                * Extrae los datos a almacenar
+                */
+                $usuario = $this->ion_auth->user()->row();
+                $liquidacion = $this->input->post('idLiquidacion');
+                $obs_auditoria = $this->input->post('obsAuditoriaForm');
+                $estado_liquidacion = $this->input->post('ok_liquidacion');
+
+                /*
+                * Establece los datos de modificación
+                */
+                $datosModificacion = array(
+                        'liqu_auditado' => 1,
+                        'liqu_ok' => $estado_liquidacion,
+                        'liqu_usuario_audita' => $usuario->id,
+                        'liqu_fecha_auditoria' => date('Y-m-d H:i:s'),
+                        'liqu_observacionesaudit' => $obs_auditoria
+                        );
+
+                /*
+                * Se realiza la query de modificación
+                */
+                $this->codegen_model->edit('est_liquidaciones', $datosModificacion, 'liqu_id', $liquidacion);
+
+                echo json_encode(array('mensaje' => 'Se registró la información de auditoria exitosamente!', 'datos' => $datosModificacion, 'liquidacion' => $liquidacion));
             }else
                 {
                     redirect(base_url().'index.php/error_404');

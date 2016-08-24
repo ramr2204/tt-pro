@@ -323,7 +323,9 @@ function objParametrosAudit()
                     { "sClass": "item","sWidth": "45%" },  
                     { "sClass": "item","sWidth": "6%"},
                     { "sClass": "item","sWidth": "6%"},
-                    { "sClass": "center","bSortable": false,"bSearchable": false},
+                    { "sClass": "center","bSearchable": false},
+                    { "sClass": "center","bVisible": false},
+                    { "sClass": "center","bVisible": false},
             ],
         "fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) 
             {
@@ -350,42 +352,43 @@ function objParametrosAudit()
                 * Se dibuja el link para visualizar el soporte del contrato
                 */
                 $("td:eq(6)", nRow).html("<a href='"+ base_url + aData[7] +"' target='_blank'><img src='"+ base_url + aData[7] +"' class='file-preview-image' alt='comprobante de pago' title='comprobante de pago'  height='42' width='42'></a>");
+                
+                /*
+                * Valida si la liquidación tiene estado liquidacion ok
+                * para modificar el estilo del boton a renderizar
+                */
+                var datosVisualesBoton = {claseCss : 'success', nombre : 'Auditar'};
+                if(aData[9] == 1)
+                {
+                    datosVisualesBoton.claseCss = 'primary';
+                    datosVisualesBoton.nombre = 'Ver';
+                }
+
+                /*
+                * Se dibuja el boton para solicitar el registro de observaciones de liquidación
+                */
+                $("td:eq(7)", nRow).html("<input type='button' id='aud_"+ aData[5] +"' owner='"+ aData[5] +"' class='btn btn-"+ datosVisualesBoton.claseCss +" auditar' value='"+ datosVisualesBoton.nombre +"' />");
+
+                /*
+                * Valida si ya fué auditada la liquidación
+                * para sombrear la fila
+                */
+                if(aData[8] == 1)
+                {
+                    $("td:eq(7)", nRow).parent().addClass('warning');
+                }
+
+                /*
+                * Se establece el id a la primer casilla de la fila
+                * para resaltarla cuando se haya auditado
+                */
+                $("td:eq(7)", nRow).attr('id','liqu_'+aData[5]);
 
             },
         "fnDrawCallback": function( oSettings ) 
             {
                 $(".auto_num").autoNumeric('init',{aSep:'.',aDec:',',aSign:'$ '});
-                // $(".liquidar").on('click', function(event) {
-                     // event.preventDefault();
-                     // var ID = $(this).attr("id");
-                      // $("#idcontrato").val(ID);
-                       // $('.liquida').load('<?php echo base_url(); ?>index.php/liquidaciones/liquidarcontrato/'+ID,function(result){
-                        // $('#myModal').modal({show:true});
-          // 
-                       // Eventos liquidar contratos-temporal
-                        // $('.calcular').blur(actualizarTotal); 
-                        // function actualizarTotal(e)
-                        // { 
-                            // var total = 0;
-          // 
-                            // $('.calcular').map(function(){      
-          // 
-                                // if($(this).val()!='')
-                                // {
-                                    // total += parseInt($(this).val());   
-                                // }else
-                                    // {
-                                        // total += 0;  
-                                    // }                
-                                // 
-                            // });
-          // 
-                            // $('#valortotal').val(total);
-                            // 
-                        // }
-          // 
-                       // });
-                   // });
+                $(".auditar").click(solicitarAuditoria);
             }
         };
     return parametros;
@@ -420,6 +423,176 @@ function objFiltrosAudit()
         ]
         };
     return filtros;
+}
+
+/*
+* Funcion que resuelve la peticion del listado de auditoria para iniciar
+* auditoría en las liquidaciones con régimen AUI
+*/
+function solicitarAuditoria(e)
+{
+    var liquId = $(this).attr('owner');
+    if(liquId != '')
+    {
+        /*
+        * Solicita las posibles observaciones previas
+        * de auditoría y el estado de la auditoria (liqu_ok)
+        */
+        $.ajax({
+               type: "POST",
+               dataType: "json",
+               data: {liquId : liquId},
+               url: base_url+"index.php/liquidaciones/datosAuditoria",
+               success: function(objResponse) {
+                    console.log(objResponse);
+                    /*
+                    * Solicita la renderización de la modal para las
+                    * observaciones
+                    */
+                    solicitarModalAuditoria(objResponse);
+               }
+            });
+    }
+}
+
+/*
+* Funcion que renderiza la modal con contenido para
+* registrar nueva informacion
+*/
+function solicitarModalAuditoria(objResponse)
+{
+    /*
+    * Establece el objeto de la modal
+    */
+    var objModal = $('#modal_auditoria');
+
+    /*
+    * Valida si el valor de las observaciones previas es nulo
+    * para establecer el valor como vacio
+    */
+    obsAuditoria = objResponse.liqu_observacionesaudit;
+    if(objResponse.liqu_observacionesaudit == null)
+    {
+        obsAuditoria = '';
+    }
+
+    /*
+    * Establece el titulo en la modal
+    */
+    objModal.find('.modal-title').html('<span class="fa fa-pencil-square-o" aria-hidden="true"></span> Agregar observaciones auditoría');
+
+    /*
+    * Valida si la liquidacion tiene estado liqu_ok
+    * para inhabilitar el campo de observaciones
+    * y agregar la propiedad checked al check
+    */
+    var datosVisualesLiquidacion = {propiedadChk : '', propiedadTextA : ''};
+    if(objResponse.liqu_ok == 1)
+    {
+        datosVisualesLiquidacion.propiedadChk = 'checked';
+        datosVisualesLiquidacion.propiedadTextA = 'disabled';
+    }
+    
+    /*
+    * Crea el Formulario
+    */
+    var strForm = '<div class="col-xs-12"><div id="notificacion_auditoria"></div></div>'
+        +'<div class="col-xs-12">'
+            +'<div class="form-group">'
+                +'<label>Ingrese la Informacion</label>'
+                +'<textarea rows="10" class="form-control" name="observaciones_audit" owner="'+ objResponse.liqu_id +'" '+ datosVisualesLiquidacion.propiedadTextA +'>'+ obsAuditoria +'</textarea>'
+            +'</div>'
+            +'<div class="checkbox">'
+                +'<label>'
+                    +'<input type="checkbox" name="ok_audit" owner="'+ objResponse.liqu_id +'" '+ datosVisualesLiquidacion.propiedadChk +'> Liquidación OK'
+                +'</label>'
+            +'</div>'
+        +'</div>';
+
+    objModal.find('.modal-body').html(strForm);
+    
+    /*
+    * Crea los botones para la modal
+    */
+    var strBotones = '<button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>'
+        +'<button type="button" id="new_auditoria" class="btn btn-primary">Agregar</button>';
+    
+    objModal.find('.modal-footer').html(strBotones);
+
+    /*
+    * Enlaza el evento al boton para guardar
+    */
+    $('#new_auditoria').click(guardarInformacionAuditoria);
+
+    objModal.modal('show');
+}
+
+/*
+* Funcion que procesa la actualización de los datos de la auditoria
+*/
+function guardarInformacionAuditoria(e)
+{
+    /*
+    * Extrae la información de los campos
+    */
+    var objDatosForm = {};
+    objDatosForm.obsAuditoriaForm = $('[name="observaciones_audit"]').val();
+    objDatosForm.idLiquidacion = $('[name="observaciones_audit"]').attr('owner');
+
+    /*
+    * Valida si el check fue activado
+    */
+    objDatosForm.ok_liquidacion = 0;
+    if($('[name="ok_audit"]').is(':checked'))
+    {
+        objDatosForm.ok_liquidacion = 1;
+    }
+
+    /*
+    * Solicita el registro de la informacion de auditoría
+    */
+    $.ajax({
+            type: "POST",
+            dataType: "json",
+            data: objDatosForm,
+            url: base_url+"index.php/liquidaciones/registrarAuditoria",
+            success: function(objResponse) {
+                /*
+                * Renderiza la notificación
+                */
+                renderizarNotificacion('notificacion_auditoria',objResponse.mensaje, 'alert-success', 400);
+
+                /*
+                * Se solicita el establecimiento de propiedades visuales
+                * para los campos de informacion de auditoria
+                */
+                actualizarEstadoVisualLiquidacion(objResponse);
+            }
+        });
+}
+
+/*
+* Funcion que valida los valores establecidos en la modificación de la auditoria
+* y actualiza la vista para la liquidacion
+*/
+function actualizarEstadoVisualLiquidacion(objModificacion)
+{
+    $('#liqu_'+objModificacion.liquidacion).parent().addClass('warning');
+
+    /*
+    * Valida si se estableció la propiedad liqu_ok en 1
+    * para habilitar o inhabilitar el input de observaciones
+    * y para modificar la visualización del botón en el listado
+    */
+    if(objModificacion.datos.liqu_ok == 1)
+    {
+        $('[name="observaciones_audit"]').attr('disabled','disabled');
+        $('#aud_'+objModificacion.liquidacion).attr('value','Ver').removeClass('btn btn-success').addClass('btn btn-primary');
+    }else
+        {
+            $('[name="observaciones_audit"]').removeAttr('disabled');
+            $('#aud_'+objModificacion.liquidacion).val('value','Auditar').removeClass('btn btn-primary').addClass('btn btn-success');
+        }
 }
 
 /*
@@ -589,7 +762,6 @@ function solicitarUsuarios (e) {
     				 });   			    
                }
              });
-	
 }
 
 
