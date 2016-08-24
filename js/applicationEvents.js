@@ -324,6 +324,8 @@ function objParametrosAudit()
                     { "sClass": "item","sWidth": "6%"},
                     { "sClass": "item","sWidth": "6%"},
                     { "sClass": "center","bSortable": false,"bSearchable": false},
+                    { "sClass": "center","bVisible": false},
+                    { "sClass": "center","bVisible": false},
             ],
         "fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) 
             {
@@ -350,11 +352,37 @@ function objParametrosAudit()
                 * Se dibuja el link para visualizar el soporte del contrato
                 */
                 $("td:eq(6)", nRow).html("<a href='"+ base_url + aData[7] +"' target='_blank'><img src='"+ base_url + aData[7] +"' class='file-preview-image' alt='comprobante de pago' title='comprobante de pago'  height='42' width='42'></a>");
+                
+                /*
+                * Valida si la liquidación tiene estado liquidacion ok
+                * para modificar el estilo del boton a renderizar
+                */
+                var datosVisualesBoton = {claseCss : 'success', nombre : 'Auditar'};
+                if(aData[9] == 1)
+                {
+                    datosVisualesBoton.claseCss = 'primary';
+                    datosVisualesBoton.nombre = 'Ver';
+                }
 
                 /*
                 * Se dibuja el boton para solicitar el registro de observaciones de liquidación
                 */
-                $("td:eq(7)", nRow).html("<button id='aud_"+ aData[5] +"' owner='"+ aData[5] +"' class='btn btn-success auditar'>Auditar</button>");
+                $("td:eq(7)", nRow).html("<input type='button' id='aud_"+ aData[5] +"' owner='"+ aData[5] +"' class='btn btn-"+ datosVisualesBoton.claseCss +" auditar' value='"+ datosVisualesBoton.nombre +"' />");
+
+                /*
+                * Valida si ya fué auditada la liquidación
+                * para sombrear la fila
+                */
+                if(aData[8] == 1)
+                {
+                    $("td:eq(7)", nRow).parent().addClass('warning');
+                }
+
+                /*
+                * Se establece el id a la primer casilla de la fila
+                * para resaltarla cuando se haya auditado
+                */
+                $("td:eq(7)", nRow).attr('id','liqu_'+aData[5]);
 
             },
         "fnDrawCallback": function( oSettings ) 
@@ -452,6 +480,18 @@ function solicitarModalAuditoria(objResponse)
     * Establece el titulo en la modal
     */
     objModal.find('.modal-title').html('<span class="fa fa-pencil-square-o" aria-hidden="true"></span> Agregar observaciones auditoría');
+
+    /*
+    * Valida si la liquidacion tiene estado liqu_ok
+    * para inhabilitar el campo de observaciones
+    * y agregar la propiedad checked al check
+    */
+    var datosVisualesLiquidacion = {propiedadChk : '', propiedadTextA : ''};
+    if(objResponse.liqu_ok == 1)
+    {
+        datosVisualesLiquidacion.propiedadChk = 'checked';
+        datosVisualesLiquidacion.propiedadTextA = 'disabled';
+    }
     
     /*
     * Crea el Formulario
@@ -460,11 +500,11 @@ function solicitarModalAuditoria(objResponse)
         +'<div class="col-xs-12">'
             +'<div class="form-group">'
                 +'<label>Ingrese la Informacion</label>'
-                +'<textarea rows="10" class="form-control" name="observaciones_audit" owner="'+ objResponse.liqu_id +'">'+ obsAuditoria +'</textarea>'
+                +'<textarea rows="10" class="form-control" name="observaciones_audit" owner="'+ objResponse.liqu_id +'" '+ datosVisualesLiquidacion.propiedadTextA +'>'+ obsAuditoria +'</textarea>'
             +'</div>'
             +'<div class="checkbox">'
                 +'<label>'
-                    +'<input type="checkbox" name="ok_audit" owner="'+ objResponse.liqu_id +'"> Liquidación OK'
+                    +'<input type="checkbox" name="ok_audit" owner="'+ objResponse.liqu_id +'" '+ datosVisualesLiquidacion.propiedadChk +'> Liquidación OK'
                 +'</label>'
             +'</div>'
         +'</div>';
@@ -521,8 +561,38 @@ function guardarInformacionAuditoria(e)
                 * Renderiza la notificación
                 */
                 renderizarNotificacion('notificacion_auditoria',objResponse.mensaje, 'alert-success', 400);
+
+                /*
+                * Se solicita el establecimiento de propiedades visuales
+                * para los campos de informacion de auditoria
+                */
+                actualizarEstadoVisualLiquidacion(objResponse);
             }
         });
+}
+
+/*
+* Funcion que valida los valores establecidos en la modificación de la auditoria
+* y actualiza la vista para la liquidacion
+*/
+function actualizarEstadoVisualLiquidacion(objModificacion)
+{
+    $('#liqu_'+objModificacion.liquidacion).parent().addClass('warning');
+
+    /*
+    * Valida si se estableció la propiedad liqu_ok en 1
+    * para habilitar o inhabilitar el input de observaciones
+    * y para modificar la visualización del botón en el listado
+    */
+    if(objModificacion.datos.liqu_ok == 1)
+    {
+        $('[name="observaciones_audit"]').attr('disabled','disabled');
+        $('#aud_'+objModificacion.liquidacion).attr('value','Ver').removeClass('btn btn-success').addClass('btn btn-primary');
+    }else
+        {
+            $('[name="observaciones_audit"]').removeAttr('disabled');
+            $('#aud_'+objModificacion.liquidacion).val('value','Auditar').removeClass('btn btn-primary').addClass('btn btn-success');
+        }
 }
 
 /*
