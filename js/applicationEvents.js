@@ -323,7 +323,7 @@ function objParametrosAudit()
                     { "sClass": "item","sWidth": "45%" },  
                     { "sClass": "item","sWidth": "6%"},
                     { "sClass": "item","sWidth": "6%"},
-                    { "sClass": "center","bSortable": false,"bSearchable": false},
+                    { "sClass": "center","bSearchable": false},
                     { "sClass": "center","bVisible": false},
                     { "sClass": "center","bVisible": false},
             ],
