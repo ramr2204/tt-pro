@@ -351,7 +351,7 @@ function objParametrosAudit()
                 /*
                 * Se dibuja el link para visualizar el soporte del contrato
                 */
-                $("td:eq(6)", nRow).html("<a href='"+ base_url + aData[7] +"' target='_blank'><img src='"+ base_url + aData[7] +"' class='file-preview-image' alt='comprobante de pago' title='comprobante de pago'  height='42' width='42'></a>");
+                $("td:eq(6)", nRow).html("<a href='"+ base_url + aData[7] +"' target='_blank'><img src='"+ base_url + aData[7] +"' class='file-preview-image' alt='Soporte contrato' title='Soporte contrato'  height='42' width='42'></a>");
                 
                 /*
                 * Valida si la liquidación tiene estado liquidacion ok
@@ -591,7 +591,7 @@ function actualizarEstadoVisualLiquidacion(objModificacion)
     }else
         {
             $('[name="observaciones_audit"]').removeAttr('disabled');
-            $('#aud_'+objModificacion.liquidacion).val('value','Auditar').removeClass('btn btn-primary').addClass('btn btn-success');
+            $('#aud_'+objModificacion.liquidacion).attr('value','Auditar').removeClass('btn btn-primary').addClass('btn btn-success');
         }
 }
 
