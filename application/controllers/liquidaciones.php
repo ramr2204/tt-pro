@@ -194,7 +194,7 @@ class Liquidaciones extends MY_Controller {
   }
 
   function liquidarcontrato()
-  {        
+  {
       if ($this->ion_auth->logged_in()) {
           if ($this->uri->segment(3)==''){
                redirect(base_url().'index.php/error_404');
@@ -313,31 +313,39 @@ class Liquidaciones extends MY_Controller {
   {        
       if ($this->ion_auth->logged_in()) {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) { 
-              $codigo = 00000; 
-              $idcontrato=$this->input->post('idcontrato');
-              $data = array(
-                   'liqu_contratoid' => $this->input->post('idcontrato'),
-                   'liqu_nombrecontratista' => $this->input->post('nombrecontratista'),
-                   'liqu_nit' => $this->input->post('nit'),
-                   'liqu_tipocontratista' => $this->input->post('tipocontratista'),
-                   'liqu_numero' => $this->input->post('numero'),
-                   'liqu_vigencia' => $this->input->post('vigencia'),
-                   'liqu_valorconiva' => $this->input->post('valorconiva'),
-                   'liqu_valorsiniva' => $this->input->post('valorsiniva'),
-                   'liqu_tipocontrato' => $this->input->post('tipocontrato'),
-                   'liqu_regimenid' => $this->input->post('idregimen'),
-                   'liqu_regimen' => $this->input->post('regimen'),
-                   'liqu_nombreestampilla' => $this->input->post('nombreestampilla'),
-                   'liqu_cuentas' => $this->input->post('cuentas'),
-                   'liqu_porcentajes' => $this->input->post('porcentajes'),
-                   'liqu_totalestampilla' => $this->input->post('totalestampillas'),
-                   'liqu_valortotal' => $this->input->post('valortotal'),
-                   'liqu_comentarios' => $this->input->post('comentarios'),
-                   'liqu_codigo' => $codigo,
-                   'liqu_fecha' => date('Y-m-d')
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
 
-                 );
+            /*
+            * Extrae el usuario autenticado para establecer que usuario
+            * realizó la liquidación
+            */
+            $usuario = $this->ion_auth->user()->row();
+
+            $codigo = 00000;
+            $idcontrato=$this->input->post('idcontrato');
+            $data = array(
+                'liqu_contratoid' => $this->input->post('idcontrato'),
+                'liqu_nombrecontratista' => $this->input->post('nombrecontratista'),
+                'liqu_nit' => $this->input->post('nit'),
+                'liqu_tipocontratista' => $this->input->post('tipocontratista'),
+                'liqu_numero' => $this->input->post('numero'),
+                'liqu_vigencia' => $this->input->post('vigencia'),
+                'liqu_valorconiva' => $this->input->post('valorconiva'),
+                'liqu_valorsiniva' => $this->input->post('valorsiniva'),
+                'liqu_tipocontrato' => $this->input->post('tipocontrato'),
+                'liqu_regimenid' => $this->input->post('idregimen'),
+                'liqu_regimen' => $this->input->post('regimen'),
+                'liqu_nombreestampilla' => $this->input->post('nombreestampilla'),
+                'liqu_cuentas' => $this->input->post('cuentas'),
+                'liqu_porcentajes' => $this->input->post('porcentajes'),
+                'liqu_totalestampilla' => $this->input->post('totalestampillas'),
+                'liqu_valortotal' => $this->input->post('valortotal'),
+                'liqu_comentarios' => $this->input->post('comentarios'),
+                'liqu_codigo' => $codigo,
+                'liqu_fecha' => date('Y-m-d'),
+                'liqu_usuarioliquida' => $usuario->id,
+                'liqu_tiempoliquida' => date('Y-m-d H:i:s')
+                );
 
               if ($this->codegen_model->add('est_liquidaciones',$data) == TRUE) {
               	  $liquidacionid=$this->db->insert_id();

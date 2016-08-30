@@ -64,9 +64,20 @@ class Contratos extends MY_Controller {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/add')) {
 
-              $this->data['successmessage']=$this->session->flashdata('message');  
-              $valor=str_replace('.','',$this->input->post('valor'));
-              $vigencia=explode("-", $this->input->post('fecha'));
+            $this->data['successmessage'] = $this->session->flashdata('message');
+
+            /*
+            * Extrae el usuario autenticado para establecer que usuario
+            * creó el contrato
+            */
+            $usuario = $this->ion_auth->user()->row();
+            
+            /*
+            * Se da formato al valor del contrato para que guarde los valores decimales
+            */
+            $valor = str_replace(',', '.', str_replace('.','',$this->input->post('valor')));
+
+            $vigencia = explode("-", $this->input->post('fecha'));
               
               $this->form_validation->set_rules('cntr_municipio_origen', 'Municipio Origen','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('contratistaid', 'contratista','required|trim|xss_clean|numeric|greater_than[0]');
@@ -96,6 +107,8 @@ class Contratos extends MY_Controller {
                             'cntr_objeto' => $this->input->post('objeto'),
                             'cntr_valor' => $valor,
                             'cntr_vigencia' => $vigencia[0],
+                            'fecha_insercion' => date('Y-m-d H:i:s'),
+                            'cntr_usuariocrea' => $usuario->id,
                             'cntr_municipio_origen' => $this->input->post('cntr_municipio_origen')
                             );
 
@@ -114,7 +127,7 @@ class Contratos extends MY_Controller {
                                 $registrarContrato = false;
                             }else
                                 {
-                                    $data['cntr_iva_otros'] = str_replace('.','',$this->input->post('valor_iva_otros'));
+                                    $data['cntr_iva_otros'] = str_replace(',', '.', str_replace('.','',$this->input->post('valor_iva_otros')));
                                 }
                         }
 
