@@ -1397,10 +1397,11 @@ function verliquidartramite()
             if($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/listarLiquidacionesIVADescuentos'))
             {
                 $this->load->library('datatables');
-                $this->datatables->select('c.cntr_id,c.cntr_numero,co.cont_nit,c.cntr_valor,c.cntr_iva_otros,li.liqu_id,li.liqu_fecha,li.liqu_soporteobjeto,li.liqu_auditado,li.liqu_ok');
+                $this->datatables->select('c.cntr_id,c.cntr_numero,co.cont_nit,c.cntr_valor,c.cntr_iva_otros,li.liqu_id,li.liqu_fecha,li.liqu_soporteobjeto,li.liqu_auditado,li.liqu_ok,us.first_name,us.last_name,li.liqu_usuarioliquida');
                 $this->datatables->from('con_contratos c');
                 $this->datatables->join('est_liquidaciones li', 'c.cntr_id = li.liqu_contratoid', 'left');
                 $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
+                $this->datatables->join('users us', 'li.liqu_usuarioliquida = us.id', 'left');
                 $this->datatables->where('li.liqu_regimenid = 6');
                 $this->datatables->where('c.cntr_estadolocalid = 2');
                 $this->datatables->add_column('edit', '-');
