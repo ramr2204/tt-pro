@@ -324,6 +324,9 @@ function objParametrosAudit()
                     { "sClass": "item","sWidth": "6%"},
                     { "sClass": "item","sWidth": "6%"},
                     { "sClass": "center","bSearchable": false},
+                    { "sClass": "center","bSearchable": false},
+                    { "sClass": "center","bVisible": false},
+                    { "sClass": "center","bVisible": false},
                     { "sClass": "center","bVisible": false},
                     { "sClass": "center","bVisible": false},
             ],
@@ -349,9 +352,21 @@ function objParametrosAudit()
                 });
 
                 /*
+                * Se dibuja el nombre del usuario que liquidó
+                * validando si el valor del campo en la tabla liquidaciones
+                * no es nulo, si es nulo se establece la cadena N/R
+                */
+                var nombreUsuarioLiquida = 'N/R';
+                if(aData[12] != null)
+                {
+                    nombreUsuarioLiquida = aData[10]+' '+aData[11];
+                }
+                $("td:eq(6)", nRow).html(nombreUsuarioLiquida);
+
+                /*
                 * Se dibuja el link para visualizar el soporte del contrato
                 */
-                $("td:eq(6)", nRow).html("<a href='"+ base_url + aData[7] +"' target='_blank'><img src='"+ base_url + aData[7] +"' class='file-preview-image' alt='Soporte contrato' title='Soporte contrato'  height='42' width='42'></a>");
+                $("td:eq(7)", nRow).html("<a href='"+ base_url + aData[7] +"' target='_blank'><img src='"+ base_url + aData[7] +"' class='file-preview-image' alt='Soporte contrato' title='Soporte contrato'  height='42' width='42'></a>");
                 
                 /*
                 * Valida si la liquidación tiene estado liquidacion ok
@@ -367,7 +382,7 @@ function objParametrosAudit()
                 /*
                 * Se dibuja el boton para solicitar el registro de observaciones de liquidación
                 */
-                $("td:eq(7)", nRow).html("<input type='button' id='aud_"+ aData[5] +"' owner='"+ aData[5] +"' class='btn btn-"+ datosVisualesBoton.claseCss +" auditar' value='"+ datosVisualesBoton.nombre +"' />");
+                $("td:eq(8)", nRow).html("<input type='button' id='aud_"+ aData[5] +"' owner='"+ aData[5] +"' class='btn btn-"+ datosVisualesBoton.claseCss +" auditar' value='"+ datosVisualesBoton.nombre +"' />");
 
                 /*
                 * Valida si ya fué auditada la liquidación
@@ -375,14 +390,14 @@ function objParametrosAudit()
                 */
                 if(aData[8] == 1)
                 {
-                    $("td:eq(7)", nRow).parent().addClass('warning');
+                    $("td:eq(8)", nRow).parent().addClass('warning');
                 }
 
                 /*
                 * Se establece el id a la primer casilla de la fila
                 * para resaltarla cuando se haya auditado
                 */
-                $("td:eq(7)", nRow).attr('id','liqu_'+aData[5]);
+                $("td:eq(8)", nRow).attr('id','liqu_'+aData[5]);
 
             },
         "fnDrawCallback": function( oSettings ) 

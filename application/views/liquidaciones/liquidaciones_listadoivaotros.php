@@ -44,7 +44,8 @@
                         <th class="text-center center-vertical">Valor total</th>
                         <th class="text-center center-vertical">Valor IVA</th>
                         <th class="text-center center-vertical">Valores Estampillas</th>
-                        <th>Fecha Liquidación</th>       
+                        <th>Fecha Liquidación</th>
+                        <th>Usuario Liquidación</th>
                         <th>Soporte</th>
                         <th>Acciones</th>
                     </tr>
@@ -52,6 +53,7 @@
                 <tbody></tbody>     
                 <tfoot>
                     <tr class="dataTables_footer">
+                        <th></th>
                         <th></th>
                         <th></th>
                         <th></th>
