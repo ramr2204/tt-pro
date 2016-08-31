@@ -28,7 +28,7 @@
     <div class="col-sm-1"></div>
     <div class="col-sm-2">Número Contrato:<div align="center" id="buscarnumero"></div></div>
     <div class="col-sm-2">NIT Contratista:<div align="center" id="buscarnit"></div></div>
-    <div class="col-sm-2">Vigencia Liquidación:<div align="center" id="buscarano"></div></div>
+    <div class="col-sm-2">Fecha Liquidación:<div align="center" id="buscarano"></div></div>
     <div class="col-sm-1"></div>
 </div>
 

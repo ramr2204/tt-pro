@@ -428,12 +428,13 @@ function objFiltrosAudit()
             null,
             null,
             null,
-            null,
             {    
                 sSelector: "#buscarano", 
-                type:"select" ,
-                values : vecVig
+                type:"text",
+                bSmart: false
             },
+            null,
+            null,
             null,
         ]
         };
