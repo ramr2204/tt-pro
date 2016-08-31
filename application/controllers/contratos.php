@@ -127,7 +127,7 @@ class Contratos extends MY_Controller {
                                 $registrarContrato = false;
                             }else
                                 {
-                                    $data['cntr_iva_otros'] = str_replace(',', '.', str_replace('.','',$this->input->post('valor_iva_otros')));
+                                    $data['cntr_iva_otros'] = str_replace('.','',$this->input->post('valor_iva_otros'));
                                 }
                         }
 
