@@ -271,24 +271,34 @@ class Liquidaciones extends MY_Controller {
                              {
                                   $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
                                   $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
-                                  $valortotal+=$totalestampilla[$value->estm_id]; 
                                   array_push($this->data['estampillas'], $value);
                              }
                         }else
                             {
                                  $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
                                  $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
-                                 $valortotal+=$totalestampilla[$value->estm_id];
                                  array_push($this->data['estampillas'], $value);  
                             }
                     }else
                         {
                              $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
                              $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
-                             $valortotal+=$totalestampilla[$value->estm_id]; 
-    
                              array_push($this->data['estampillas'], $value);
                         }                    
+                    
+                    /*
+                    * Valida si el valor establecido para la estampilla es igual a cero
+                    * para establecer el valor minimo 1000
+                    */
+                    if($totalestampilla[$value->estm_id] <= 0)
+                    {
+                        $totalestampilla[$value->estm_id] = 1000;
+                    }
+                    
+                    /*
+                    * Calcula el total a pagar
+                    */
+                    $valortotal += $totalestampilla[$value->estm_id];
                 //}
             }
 
