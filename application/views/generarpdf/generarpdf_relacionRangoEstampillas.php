@@ -71,8 +71,8 @@ if(isset($fecha_u) && $fecha_u != '')
 
 <p>
 Doctora<br>
-<b>LUZ MERY HERRERA RODRIGUEZ</b><br>
-Directora Financiera de Tesorería<br>
+<b>LUZ AIDA LARA BAHAMON</b><br>
+Directora de Rentas<br>
 Gobernación del Tolima<br>
 Ibagué<br>
 </p>
