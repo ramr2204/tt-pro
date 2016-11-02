@@ -541,7 +541,7 @@ class Liquidaciones extends MY_Controller {
               * Valida si es un contrato para verificar la carga de la copia del objeto
               */
               if($this->input->post('contratoid'))
-              {              
+              {
                 /*
                 * Valida que la liquidacion tenga registrada la ruta del soporte
                 */
@@ -575,7 +575,7 @@ class Liquidaciones extends MY_Controller {
                             $config['upload_path'] = $path;
                             $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
                             $config['remove_spaces']=TRUE;
-                            $config['max_size']    = '9999';
+                            $config['max_size']    = '99999';
                             $config['overwrite']    = TRUE;
                             $this->load->library('upload');
           
