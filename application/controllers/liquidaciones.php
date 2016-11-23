@@ -290,15 +290,18 @@ class Liquidaciones extends MY_Controller {
                     * Valida si el valor establecido para la estampilla es igual a cero
                     * para establecer el valor minimo 1000
                     */
-                    if($totalestampilla[$value->estm_id] <= 0)
+                    if(isset($totalestampilla[$value->estm_id]))
                     {
-                        $totalestampilla[$value->estm_id] = 1000;
+                        if($totalestampilla[$value->estm_id] <= 0)
+                        {
+                            $totalestampilla[$value->estm_id] = 1000;
+                        }
+                        
+                        /*
+                        * Calcula el total a pagar
+                        */
+                        $valortotal += (double)$totalestampilla[$value->estm_id];
                     }
-                    
-                    /*
-                    * Calcula el total a pagar
-                    */
-                    $valortotal += $totalestampilla[$value->estm_id];
                 //}
             }
 
