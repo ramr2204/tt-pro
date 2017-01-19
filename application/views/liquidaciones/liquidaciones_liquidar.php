@@ -118,14 +118,15 @@ var oTable = $('#tablaq').dataTable( {
               solicitarUltimoRotulo();    
 
               $('.confirmar_impresion').click(function(event) {
+                  var objEvento = $(this);
                   event.preventDefault();
-                  console.log('huy');
+
                   //Solicita el ultimo rotulo para la impresion
                   solicitarUltimoRotulo();
                   var bandEnviarImpresion = true;
 
                   var siguienteEstampilla = $('#siguienteEstampilla').val();
-                  if(!confirm('SIGUIENTE ESTAMPIILLA A IMPRIMIRSE => No. '+siguienteEstampilla+'\n\n'
+                  if(!confirm('.::SIGUIENTE ESTAMPIILLA A IMPRIMIRSE => No. '+siguienteEstampilla+'::.\n\n'
                         +'Esta seguro de generar la impresión?'
                         +' Recuerde que será modificado el consecutivo de la papeleria asignada a usted!'))
                   {
@@ -134,10 +135,10 @@ var oTable = $('#tablaq').dataTable( {
 
                   for(var i =1; i <= 3; i++)
                   {
-                      var inputTeclado = prompt("Por favor confirme el número de rotulo físico a imprimir:",Math.random()*6);
-                      if(inputTeclado != stringVerificar)
+                      var inputTeclado = prompt(".::POR FAVOR CONFIRME EL NÚMERO DE ROTULO FÍSICO A IMPRIMIR::.",Math.floor(Math.random()*10000));
+                      if(inputTeclado != siguienteEstampilla)
                       {
-                          alert('El número de rotulo físico especificado por usted no corresponde con el rotulo físico siguiente en el sistema!');
+                          alert('.::EL NÚMERO DE ROTULO FÍSICO ESPECIFICADO POR USTED NO CORRESPONDE CON EL ROTULO FÍSICO SIGUIENTE EN EL SISTEMA::.');
                           bandEnviarImpresion = false;
                           break;
                       }
@@ -145,8 +146,8 @@ var oTable = $('#tablaq').dataTable( {
 
                   if(bandEnviarImpresion)
                   {
-                      $('.confirmar_impresion').unbind('click');
-                      $('.confirmar_impresion').click();
+                      objEvento.attr('disabled','disabled');
+                      window.open(objEvento.attr('href'),'_blank');
                   }
               });
 
