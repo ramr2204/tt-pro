@@ -118,17 +118,37 @@ var oTable = $('#tablaq').dataTable( {
               solicitarUltimoRotulo();    
 
               $('.confirmar_impresion').click(function(event) {
+                  var objEvento = $(this);
+                  event.preventDefault();
+
                   //Solicita el ultimo rotulo para la impresion
-                  solicitarUltimoRotulo();                   
+                  solicitarUltimoRotulo();
+                  var bandEnviarImpresion = true;
 
                   var siguienteEstampilla = $('#siguienteEstampilla').val();
-                  if(!confirm('SIGUIENTE ESTAMPIILLA A IMPRIMIRSE => No. '+siguienteEstampilla+'\n\n'
+                  if(!confirm('.::SIGUIENTE ESTAMPIILLA A IMPRIMIRSE => No. '+siguienteEstampilla+'::.\n\n'
                         +'Esta seguro de generar la impresión?'
                         +' Recuerde que será modificado el consecutivo de la papeleria asignada a usted!'))
                   {
-                    event.preventDefault();
-                  }                  
+                      bandEnviarImpresion = false;
+                  }
 
+                  for(var i =1; i <= 3; i++)
+                  {
+                      var inputTeclado = prompt(".::POR FAVOR CONFIRME EL NÚMERO DE ROTULO FÍSICO A IMPRIMIR::.",Math.floor(Math.random()*10000));
+                      if(inputTeclado != siguienteEstampilla)
+                      {
+                          alert('.::EL NÚMERO DE ROTULO FÍSICO ESPECIFICADO POR USTED NO CORRESPONDE CON EL ROTULO FÍSICO SIGUIENTE EN EL SISTEMA::.');
+                          bandEnviarImpresion = false;
+                          break;
+                      }
+                  }
+
+                  if(bandEnviarImpresion)
+                  {
+                      objEvento.attr('disabled','disabled');
+                      window.open(objEvento.attr('href'),'_blank');
+                  }
               });
 
               /**
@@ -148,8 +168,7 @@ var oTable = $('#tablaq').dataTable( {
                           $('#siguienteEstampilla').val(data.rotulo);                          
                       }
                   });  
-              }     
-             
+              }
              });
          });
     }     
