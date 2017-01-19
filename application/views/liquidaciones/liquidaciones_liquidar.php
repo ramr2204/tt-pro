@@ -118,17 +118,36 @@ var oTable = $('#tablaq').dataTable( {
               solicitarUltimoRotulo();    
 
               $('.confirmar_impresion').click(function(event) {
+                  event.preventDefault();
+                  console.log('huy');
                   //Solicita el ultimo rotulo para la impresion
-                  solicitarUltimoRotulo();                   
+                  solicitarUltimoRotulo();
+                  var bandEnviarImpresion = true;
 
                   var siguienteEstampilla = $('#siguienteEstampilla').val();
                   if(!confirm('SIGUIENTE ESTAMPIILLA A IMPRIMIRSE => No. '+siguienteEstampilla+'\n\n'
                         +'Esta seguro de generar la impresión?'
                         +' Recuerde que será modificado el consecutivo de la papeleria asignada a usted!'))
                   {
-                    event.preventDefault();
-                  }                  
+                      bandEnviarImpresion = false;
+                  }
 
+                  for(var i =1; i <= 3; i++)
+                  {
+                      var inputTeclado = prompt("Por favor confirme el número de rotulo físico a imprimir:",Math.random()*6);
+                      if(inputTeclado != stringVerificar)
+                      {
+                          alert('El número de rotulo físico especificado por usted no corresponde con el rotulo físico siguiente en el sistema!');
+                          bandEnviarImpresion = false;
+                          break;
+                      }
+                  }
+
+                  if(bandEnviarImpresion)
+                  {
+                      $('.confirmar_impresion').unbind('click');
+                      $('.confirmar_impresion').click();
+                  }
               });
 
               /**
@@ -148,8 +167,7 @@ var oTable = $('#tablaq').dataTable( {
                           $('#siguienteEstampilla').val(data.rotulo);                          
                       }
                   });  
-              }     
-             
+              }
              });
          });
     }     
