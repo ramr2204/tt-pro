@@ -205,6 +205,7 @@ function generarInformeRangoDetalle(e)
     var fecha_inicial = $('#m_rango').find('[name="f_inicial"]').val();
     var fecha_final = $('#m_rango').find('[name="f_final"]').val();
     var tipoEst = $('#tipoEst').val();
+    var tipoActo = $('#tipoActo').val();
     
     /*
     * Se valida numericamente que las fechas tengan valor
@@ -235,10 +236,10 @@ function generarInformeRangoDetalle(e)
         var tipoInforme = $(this).attr('documento');
         if(tipoInforme == 'pdf')
         {
-            window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst);
+            window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo);
         }else if(tipoInforme == 'excel')
             {
-                window.open(base_url+'index.php/liquidaciones/renderizarExcel?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst);
+                window.open(base_url+'index.php/liquidaciones/renderizarExcel?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo);
             }
     }
 }
@@ -705,6 +706,15 @@ function identificarVistaDatetimepicker()
 function solicitarRango(e)
 {
     $('#m_rango').modal('show');
+
+    /*
+    * Enlaza el chosen a los select luego de que se haya mostrado
+    * la modal
+     */
+    $('#m_rango').on('shown.bs.modal', function () {
+        //Evento para los select con chosen
+        $('.chosen-modal').chosen({no_results_text: "No se encuentra"});
+    });
 }
 
 //Funcion que valida si se ha digitado
