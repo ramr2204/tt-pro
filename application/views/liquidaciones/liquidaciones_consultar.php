@@ -126,18 +126,7 @@ var oTable = $('#tablaq').dataTable( {
     <div class="col-xs-12 col-sm-3 col-custom-chosen">
         Fecha (Generacion Estampilla):<div align="center" id="buscarfecha"></div>                
     </div>
-    <div class="col-xs-12 col-sm-4 btn-pdf">
-        <div class="form-group">
-            <label for="tipoEst">Tipo Estampilla (Detalle)</label>
-            <select class="form-control chosen" id="tipoEst">
-                <option value="0">Seleccione...</option>
-                <?php  foreach($estampillas as $id => $valor) { ?>
-                    <option value="<?php echo $id; ?>"><?php echo $valor; ?></option>
-                <?php   } ?>
-            </select>                
-        </div>
-    </div>
-    <div class="col-xs-12 col-sm-5 btn-pdf">        
+    <div class="col-xs-12 col-sm-5 btn-pdf pull-right">
         <div class="btn-group group-custom-chosen">
             <a class="btn btn-danger" id="btn-relacion">
                 <i class="fa fa-file-pdf-o fa-1x"></i>
@@ -229,6 +218,28 @@ var oTable = $('#tablaq').dataTable( {
                               <span class="glyphicon glyphicon-time"></span>
                           </span>
                       </div>                       
+                  </div>
+              </div>
+              <div class="col-xs-12 btn-pdf">
+                  <div class="form-group">
+                      <label for="tipoEst">Tipo Estampilla (Detalle)</label>
+                      <select class="form-control chosen-modal" id="tipoEst">
+                          <option value="0">Seleccione...</option>
+                          <?php  foreach($estampillas as $id => $valor) { ?>
+                              <option value="<?php echo $id; ?>"><?php echo $valor; ?></option>
+                          <?php   } ?>
+                      </select>
+                  </div>
+              </div>
+              <div class="col-xs-12 btn-pdf">
+                  <div class="form-group">
+                      <label for="tipoActo">Tipo Acto (Detalle)</label>
+                      <select class="form-control chosen-modal" id="tipoActo">
+                          <option value="0">Seleccione...</option>
+                          <?php  foreach($actos as $id => $valor) { ?>
+                              <option value="<?php echo $id; ?>"><?php echo $valor; ?></option>
+                          <?php   } ?>
+                      </select>
                   </div>
               </div>
           </div>
