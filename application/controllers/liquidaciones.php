@@ -1569,7 +1569,7 @@ function consultar()
               {
                   foreach($tiposContrato as $tipoA)
                   {
-                      $vTiposActo['c_'.$tipoA->tico_id] = $tipoA->tico_nombre.' (Contrato)';
+                      $vTiposActo['c_'.$tipoA->tico_id] = $tipoA->tico_nombre.' ( Contrato )';
                   }
               }
 
@@ -1577,12 +1577,37 @@ function consultar()
               {
                   foreach($tiposTramite as $tipoA)
                   {
-                      $vTiposActo['t_'.$tipoA->tram_id] = $tipoA->tram_nombre.' (Tramite)';
+                      $vTiposActo['t_'.$tipoA->tram_id] = $tipoA->tram_nombre.' ( Tramite )';
                   }
               }
 
               $this->data['actos'] = $vTiposActo;
-                                              
+
+              /*
+               * Extrae los contratistas creados para filtrar por contratos
+               */
+              $contratistas = $this->codegen_model->getSelect('con_contratistas',"cont_id,cont_nombre,cont_nit");
+              $tramitadores = $this->codegen_model->getSelect('est_liquidartramites',"litr_id,litr_tramitadornombre,litr_tramitadorid",'','','GROUP BY litr_tramitadorid');
+
+              $vecContribuyentes = array();
+              if(count($contratistas) > 0)
+              {
+                  foreach($contratistas as $contratista)
+                  {
+                      $vTiposActo['c_'.$contratista->cont_id] = $contratista->cont_nit.'-'.$contratista->cont_nombre.' ( Contratista )';
+                  }
+              }
+
+              if(count($tramitadores) > 0)
+              {
+                  foreach($tramitadores as $tramitador)
+                  {
+                      $vecContribuyentes['t_'.$tramitador->litr_id] = $tramitador->litr_tramitadorid.'-'.$tramitador->litr_tramitadornombre.' ( Tramitador )';
+                  }
+              }
+
+              $this->data['contribuyentes'] = $vecContribuyentes;
+
               $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_consultar', $this->data);
               
           } else {
