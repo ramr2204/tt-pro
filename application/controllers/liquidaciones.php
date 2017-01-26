@@ -1594,7 +1594,7 @@ function consultar()
               {
                   foreach($contratistas as $contratista)
                   {
-                      $vTiposActo['c_'.$contratista->cont_id] = $contratista->cont_nit.'-'.$contratista->cont_nombre.' ( Contratista )';
+                      $vecContribuyentes['c_'.$contratista->cont_nit] = $contratista->cont_nit.' - '.$contratista->cont_nombre.' ( Contratista )';
                   }
               }
 
@@ -1602,7 +1602,7 @@ function consultar()
               {
                   foreach($tramitadores as $tramitador)
                   {
-                      $vecContribuyentes['t_'.$tramitador->litr_id] = $tramitador->litr_tramitadorid.'-'.$tramitador->litr_tramitadornombre.' ( Tramitador )';
+                      $vecContribuyentes['t_'.$tramitador->litr_tramitadorid] = $tramitador->litr_tramitadorid.' - '.$tramitador->litr_tramitadornombre.' ( Tramitador )';
                   }
               }
 
@@ -1989,7 +1989,6 @@ function consultar()
   {
     if ($this->ion_auth->logged_in()) 
     {
-          
         if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar') ) 
         {
             $resultadosFiltros = Liquidaciones::extraerRegistrosDetalleImpresiones($_GET);
@@ -2086,6 +2085,7 @@ function consultar()
         $fecha_inicial = $vectorGet['fecha_I'];
         $tipoEst = $vectorGet['est'];
         $tipoActo = $vectorGet['acto'];
+        $contribuyente = $vectorGet['contribuyente'];
 
         /*
         * Valida si llega la fecha final o no
@@ -2180,6 +2180,19 @@ function consultar()
         $campos = 'l.liqu_contratoid,l.liqu_tramiteid,l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_valorsiniva,l.liqu_fecha';
         $where = $whereIn;
         $group = 'GROUP BY l.liqu_id';
+
+        /*
+         * Valida si se suministró el id de un contribuyente para
+         * realizar el filtrado en las liquidaciones
+         */
+        $whereContribuyente = '';
+        if($contribuyente != '0')
+        {
+            preg_match('/^[t|c]_([0-9\-]+)$/',$contribuyente,$coincidencia);
+            $whereContribuyente = ' AND l.liqu_nit = "'. $coincidencia[1] .'" ';
+        }
+
+        $where .= $whereContribuyente;
 
         $liquidaciones = $this->codegen_model->getSelect('est_facturas f',$campos,$where,$join2, $group);
 
