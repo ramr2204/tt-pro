@@ -242,6 +242,17 @@ var oTable = $('#tablaq').dataTable( {
                       </select>
                   </div>
               </div>
+              <div class="col-xs-12 btn-pdf">
+                  <div class="form-group">
+                      <label for="contribuyente">Contribuyente (Detalle)</label>
+                      <select class="form-control chosen-modal" id="contribuyente">
+                          <option value="0">Seleccione...</option>
+                          <?php  foreach($contribuyentes as $id => $valor) { ?>
+                              <option value="<?php echo $id; ?>"><?php echo $valor; ?></option>
+                          <?php   } ?>
+                      </select>
+                  </div>
+              </div>
           </div>
       </div>
       <div class="modal-footer">

@@ -1569,7 +1569,7 @@ function consultar()
               {
                   foreach($tiposContrato as $tipoA)
                   {
-                      $vTiposActo['c_'.$tipoA->tico_id] = $tipoA->tico_nombre.' (Contrato)';
+                      $vTiposActo['c_'.$tipoA->tico_id] = $tipoA->tico_nombre.' ( Contrato )';
                   }
               }
 
@@ -1577,12 +1577,37 @@ function consultar()
               {
                   foreach($tiposTramite as $tipoA)
                   {
-                      $vTiposActo['t_'.$tipoA->tram_id] = $tipoA->tram_nombre.' (Tramite)';
+                      $vTiposActo['t_'.$tipoA->tram_id] = $tipoA->tram_nombre.' ( Tramite )';
                   }
               }
 
               $this->data['actos'] = $vTiposActo;
-                                              
+
+              /*
+               * Extrae los contratistas creados para filtrar por contratos
+               */
+              $contratistas = $this->codegen_model->getSelect('con_contratistas',"cont_id,cont_nombre,cont_nit");
+              $tramitadores = $this->codegen_model->getSelect('est_liquidartramites',"litr_id,litr_tramitadornombre,litr_tramitadorid",'','','GROUP BY litr_tramitadorid');
+
+              $vecContribuyentes = array();
+              if(count($contratistas) > 0)
+              {
+                  foreach($contratistas as $contratista)
+                  {
+                      $vecContribuyentes['c_'.$contratista->cont_nit] = $contratista->cont_nit.' - '.$contratista->cont_nombre.' ( Contratista )';
+                  }
+              }
+
+              if(count($tramitadores) > 0)
+              {
+                  foreach($tramitadores as $tramitador)
+                  {
+                      $vecContribuyentes['t_'.$tramitador->litr_tramitadorid] = $tramitador->litr_tramitadorid.' - '.$tramitador->litr_tramitadornombre.' ( Tramitador )';
+                  }
+              }
+
+              $this->data['contribuyentes'] = $vecContribuyentes;
+
               $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_consultar', $this->data);
               
           } else {
@@ -1964,7 +1989,6 @@ function consultar()
   {
     if ($this->ion_auth->logged_in()) 
     {
-          
         if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar') ) 
         {
             $resultadosFiltros = Liquidaciones::extraerRegistrosDetalleImpresiones($_GET);
@@ -2061,6 +2085,7 @@ function consultar()
         $fecha_inicial = $vectorGet['fecha_I'];
         $tipoEst = $vectorGet['est'];
         $tipoActo = $vectorGet['acto'];
+        $contribuyente = $vectorGet['contribuyente'];
 
         /*
         * Valida si llega la fecha final o no
@@ -2155,6 +2180,19 @@ function consultar()
         $campos = 'l.liqu_contratoid,l.liqu_tramiteid,l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_valorsiniva,l.liqu_fecha';
         $where = $whereIn;
         $group = 'GROUP BY l.liqu_id';
+
+        /*
+         * Valida si se suministró el id de un contribuyente para
+         * realizar el filtrado en las liquidaciones
+         */
+        $whereContribuyente = '';
+        if($contribuyente != '0')
+        {
+            preg_match('/^[t|c]_([0-9\-]+)$/',$contribuyente,$coincidencia);
+            $whereContribuyente = ' AND l.liqu_nit = "'. $coincidencia[1] .'" ';
+        }
+
+        $where .= $whereContribuyente;
 
         $liquidaciones = $this->codegen_model->getSelect('est_facturas f',$campos,$where,$join2, $group);
 

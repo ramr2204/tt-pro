@@ -206,6 +206,7 @@ function generarInformeRangoDetalle(e)
     var fecha_final = $('#m_rango').find('[name="f_final"]').val();
     var tipoEst = $('#tipoEst').val();
     var tipoActo = $('#tipoActo').val();
+    var contribuyente = $('#contribuyente').val();
     
     /*
     * Se valida numericamente que las fechas tengan valor
@@ -236,10 +237,10 @@ function generarInformeRangoDetalle(e)
         var tipoInforme = $(this).attr('documento');
         if(tipoInforme == 'pdf')
         {
-            window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo);
+            window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&contribuyente='+contribuyente);
         }else if(tipoInforme == 'excel')
             {
-                window.open(base_url+'index.php/liquidaciones/renderizarExcel?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo);
+                window.open(base_url+'index.php/liquidaciones/renderizarExcel?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&contribuyente='+contribuyente);
             }
     }
 }
