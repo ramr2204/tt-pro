@@ -211,7 +211,7 @@ class Liquidaciones extends MY_Controller {
                 * Valida si el régimen del contratista es otros para calcular el valor
                 * restando el valor del IVA suministrado en la creación del contrato
                 */
-                if($contrato->regi_id == 6)
+                if($contrato->regi_id == 6 || $contrato->regi_id == 8)
                 {
                     $valorsiniva = (float)$contrato->cntr_valor - (float)$contrato->cntr_iva_otros;
                 }else
