@@ -116,7 +116,7 @@ class Contratos extends MY_Controller {
                         * Valida si el tipo de régimen es otros
                         */
                         $registrarContrato = true;
-                        if($objContratista->cont_regimenid == 6)
+                        if($objContratista->cont_regimenid == 6 || $objContratista->cont_regimenid == 8)
                         {
                             /*
                             * Valida que se haya recibido valor de IVA otros
@@ -230,7 +230,7 @@ class Contratos extends MY_Controller {
                         * Valida si el tipo de régimen es otros
                         */
                         $registrarContrato = true;
-                        if($objContratista->cont_regimenid == 6)
+                        if($objContratista->cont_regimenid == 6 || $objContratista->cont_regimenid == 8)
                         {
                             /*
                             * Valida que se haya recibido valor de IVA otros
@@ -629,7 +629,7 @@ class Contratos extends MY_Controller {
                     * Valida si el tipo de régimen es otros
                     */
                     $esOtros = 'NO';
-                    if($objContratista->cont_regimenid == 6)
+                    if($objContratista->cont_regimenid == 6 || $objContratista->cont_regimenid == 8)
                     {
                         $esOtros = 'SI';
                     }
