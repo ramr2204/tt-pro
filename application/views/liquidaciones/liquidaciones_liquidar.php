@@ -238,6 +238,14 @@ var oTable = $('#tablaq').dataTable( {
 }
 </style>
 <div class="row"> 
+ <div class="col-xs-12">
+     <?php
+        if($band_saldoestampillas) 
+        {
+            echo '<div class="alert alert-dismissable alert-danger">'. $notif_saldoestampillas.'</div>';
+        }
+     ?>
+ </div>
  <div class="col-sm-12">
  <h1>Contratos</h1>
 

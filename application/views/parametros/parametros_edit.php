@@ -34,6 +34,12 @@
                                            <?php echo form_error('salariominimo','<span class="text-danger">','</span>'); ?>
                                     </div>
 
+                                    <div class="form-group">
+                                           <label for="estampillassaldo">Cantidad de estampillas restantes para notificación de contrato</label>
+                                           <input class="form-control" id="estampillassaldo" type="number" name="estampillassaldo" value="<?php echo $result->para_estampillasnotificacion; ?>" required="required" />
+                                           <?php echo form_error('estampillassaldo','<span class="text-danger">','</span>'); ?>
+                                    </div>
+
                                     <div class="checkbox">
                                         <label>
                                             <?php 

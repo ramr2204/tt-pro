@@ -35,7 +35,8 @@ class Parametros extends MY_Controller {
               $idparametro =1;
 
               $this->form_validation->set_rules('redondeo', 'Cifra de redondeo',  'required|trim|xss_clean|numeric|greater_than[0]');  
-              $this->form_validation->set_rules('salariominimo', 'Salario mínimo',  'required|trim|xss_clean|numeric|greater_than[0]'); 
+              $this->form_validation->set_rules('salariominimo', 'Salario mínimo',  'required|trim|xss_clean|numeric|greater_than[0]');
+              $this->form_validation->set_rules('estampillassaldo', 'Saldo estampillas',  'required|trim|xss_clean|numeric|greater_than[0]');
 
               if ($this->form_validation->run() == false) {
                   
@@ -56,7 +57,8 @@ class Parametros extends MY_Controller {
                   $data = array(
                           'para_redondeo' => $this->input->post('redondeo'),
                           'para_salariominimo' => $this->input->post('salariominimo'),
-                          'para_contingencia' => $contingencia
+                          'para_contingencia' => $contingencia,
+                          'para_estampillasnotificacion' => $this->input->post('estampillassaldo'),
                    );
                            
                 	if ($this->codegen_model->edit('adm_parametros',$data,'para_id',$idparametro) == TRUE) {
@@ -73,7 +75,7 @@ class Parametros extends MY_Controller {
               
                   $this->data['successmessage']=$this->session->flashdata('successmessage');
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                  $this->data['result'] = $this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo,para_contingencia','para_id = '.$idparametro,1,NULL,true);
+                  $this->data['result'] = $this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo,para_contingencia,para_estampillasnotificacion','para_id = '.$idparametro,1,NULL,true);
                   $this->template->set('title', 'Editar parámetros');
                   $this->template->load($this->config->item('admin_template'),'parametros/parametros_edit', $this->data);
                         
