@@ -69,7 +69,37 @@ class Liquidaciones extends MY_Controller {
               $vigencia_mayor=substr($aplilo['cntr_fecha_firma'], 0, 4);
               $vigencia_anterior=$vigencia_mayor-1;
               $this->data['vigencias']= array($vigencia_mayor,$vigencia_anterior);
-              $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_liquidar', $this->data);
+
+            /*
+            * Extrae los datos del contrato de estampillas activo+
+            * y de la cantidad de estampillas para notificación
+            */
+            $where = 'WHERE conpap_estado = 1';                            
+            $vContratoE = $this->codegen_model->getSelect('est_contratopapeles',"conpap_id,conpap_estado,conpap_cantidad,conpap_impresos", $where);
+
+            $estampillasNotificacion = $this->codegen_model->getSelect('adm_parametros',"para_estampillasnotificacion", 'where para_id = 1');
+
+            /*
+            * Valida si hay un contrato de estampillas activo
+            */
+            $this->data['band_saldoestampillas'] = false;
+            if(count($vContratoE) > 0)
+            {
+                $saldoEstampillasContrato = (int)$vContratoE[0]->conpap_cantidad - (int)$vContratoE[0]->conpap_impresos;
+                if((int)$saldoEstampillasContrato <= (int)$estampillasNotificacion[0]->para_estampillasnotificacion)
+                {
+                    $this->data['band_saldoestampillas'] = true;
+                    $this->data['notif_saldoestampillas'] = "ACTUALMENTE QUEDAN <b>(". $saldoEstampillasContrato .")</b> ESTAMPILLAS RESTANTES"
+                        ." PARA CULMINAR EL CONTRATO ACTUAL, POR FAVOR GESTIONE EL TRAMITE PARA UN NUEVO CONTRATO";
+                }
+            }else 
+                {
+                    $this->data['band_saldoestampillas'] = true;
+                    $this->data['notif_saldoestampillas'] = "ACTUALMENTE NO CUENTA CON UN CONTRATO ACTIVO PARA IMPRESION DE ESTAMPILLAS,"
+                        ." POR FAVOR GESTIONE EL TRAMITE PARA UN NUEVO CONTRATO";
+                }
+
+            $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_liquidar', $this->data);
               
           } else {
               redirect(base_url().'index.php/error_404');
