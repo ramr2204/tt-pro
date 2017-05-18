@@ -88,7 +88,18 @@ $totalestampillas='';
 $porcentajes='';
 $cuentas='';
 ?>
-<?php  foreach($estampillas as $row2) { ?>
+<?php  foreach($estampillas as $row2) { 
+    
+    /*
+    * Se valida si la estampilla a almacenar es pro electrificacion
+    * y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
+    * no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
+    */
+    $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($row2->estm_id);
+    if($bandRegistrarFactura)
+    {
+
+?>
 <tr>
      <td colspan="1"><?php echo $row2->estm_nombre; ?>
      <input type="hidden" name="nombreestampilla<?php echo $x; ?>" value="<?php echo $row2->estm_nombre; ?>">
@@ -116,6 +127,8 @@ $cuentas='';
       $porcentajes.=$row2->estr_porcentaje.'|';
       $cuentas.= 'cuenta: '.$row2->estm_cuenta.' banco: '.$row2->banc_nombre.'|';
       $x++;
+
+    }
  ?>
 <?php } ?>
 <tr>
