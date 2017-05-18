@@ -275,64 +275,73 @@ class Liquidaciones extends MY_Controller {
             foreach ($estampillas as $key => $value) 
             {
                 /*
-                * Valida si el tipo de estampilla es Pro-Hospitales
-                * y el municipio del contrato es distinto a Ibagué
-                * para no liquidar la estampilla
+                * Se valida si la estampilla a almacenar es pro electrificacion
+                * y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
+                * no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
                 */
-                /************************
-                *
-                * SE COMENTA ESTA VALIDACION MIENTRAS EL INGENIERO EVELIO
-                * DEFINE CUANDO DEBE SER HABILITADA
-                * SOLO SE DEBE MODIFICAR EL MUNICIPIO DE ORIGEN AL ID DEL MUNICIPIO
-                * QUE EL INGE EVELIO DIGA QUE NO SE DEBE COBRAR LA ESTAMPILLA PRO HOSPITALES
-                */
-                //if(($value->estm_id == 4 && $contrato->cntr_municipio_origen != 1028) || $value->estm_id != 4)
-                //{
-                    //Realiza la validación para los contratos de tipo
-                    //consultoria o concesión y que el valor del contrato
-                    //sea >= 10 SMMLV para aplicar la estampilla pro grandeza de colombia                
-                    if($value->estm_id == 8)
-                    {
-                        if($contrato->cntr_tipocontratoid==9 || $contrato->cntr_tipocontratoid==7)
+                $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($value->estm_id);
+                if($bandRegistrarFactura)
+                {
+                    /*
+                    * Valida si el tipo de estampilla es Pro-Hospitales
+                    * y el municipio del contrato es distinto a Ibagué
+                    * para no liquidar la estampilla
+                    */
+                    /************************
+                    *
+                    * SE COMENTA ESTA VALIDACION MIENTRAS EL INGENIERO EVELIO
+                    * DEFINE CUANDO DEBE SER HABILITADA
+                    * SOLO SE DEBE MODIFICAR EL MUNICIPIO DE ORIGEN AL ID DEL MUNICIPIO
+                    * QUE EL INGE EVELIO DIGA QUE NO SE DEBE COBRAR LA ESTAMPILLA PRO HOSPITALES
+                    */
+                    //if(($value->estm_id == 4 && $contrato->cntr_municipio_origen != 1028) || $value->estm_id != 4)
+                    //{
+                        //Realiza la validación para los contratos de tipo
+                        //consultoria o concesión y que el valor del contrato
+                        //sea >= 10 SMMLV para aplicar la estampilla pro grandeza de colombia                
+                        if($value->estm_id == 8)
                         {
-                             $valor10SMMLV = $parametros->para_salariominimo * 10;
-    
-                             if($contrato->cntr_valor >= $valor10SMMLV)
-                             {
-                                  $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
-                                  $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
-                                  array_push($this->data['estampillas'], $value);
-                             }
+                            if($contrato->cntr_tipocontratoid==9 || $contrato->cntr_tipocontratoid==7)
+                            {
+                                 $valor10SMMLV = $parametros->para_salariominimo * 10;
+        
+                                 if($contrato->cntr_valor >= $valor10SMMLV)
+                                 {
+                                      $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
+                                      $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
+                                      array_push($this->data['estampillas'], $value);
+                                 }
+                            }else
+                                {
+                                     $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
+                                     $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
+                                     array_push($this->data['estampillas'], $value);  
+                                }
                         }else
                             {
                                  $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
                                  $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
-                                 array_push($this->data['estampillas'], $value);  
-                            }
-                    }else
-                        {
-                             $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
-                             $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
-                             array_push($this->data['estampillas'], $value);
-                        }                    
-                    
-                    /*
-                    * Valida si el valor establecido para la estampilla es igual a cero
-                    * para establecer el valor minimo 1000
-                    */
-                    if(isset($totalestampilla[$value->estm_id]))
-                    {
-                        if($totalestampilla[$value->estm_id] <= 0)
-                        {
-                            $totalestampilla[$value->estm_id] = 1000;
-                        }
+                                 array_push($this->data['estampillas'], $value);
+                            }                    
                         
                         /*
-                        * Calcula el total a pagar
+                        * Valida si el valor establecido para la estampilla es igual a cero
+                        * para establecer el valor minimo 1000
                         */
-                        $valortotal += (double)$totalestampilla[$value->estm_id];
-                    }
-                //}
+                        if(isset($totalestampilla[$value->estm_id]))
+                        {
+                            if($totalestampilla[$value->estm_id] <= 0)
+                            {
+                                $totalestampilla[$value->estm_id] = 1000;
+                            }
+                            
+                            /*
+                            * Calcula el total a pagar
+                            */
+                            $valortotal += (double)$totalestampilla[$value->estm_id];
+                        }
+                    //}
+                }
             }
 
               $this->data['est_totalestampilla']=$totalestampilla;
@@ -428,14 +437,24 @@ class Liquidaciones extends MY_Controller {
                                 }     
                             }  
                         }
-                        */ 
+                        */
+
+                        /*
+                        * Se valida si la estampilla a almacenar es pro electrificacion
+                        * y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
+                        * no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
+                        */
+                        $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($data['fact_estampillaid']);
+                        if($bandRegistrarFactura)
+                        {
+                            $this->codegen_model->add('est_facturas',$data);
+
+                            /**
+                            * Solicita la Asignación del codigo para el codigo de barras
+                            */
+                            $this->asignarCodigoParaBarras($liquidacionid,$this->input->post('idestampilla'.$i));
+                        }
                        
-                       $this->codegen_model->add('est_facturas',$data);
-                       
-                       /**
-                       * Solicita la Asignación del codigo para el codigo de barras
-                       */
-                       $this->asignarCodigoParaBarras($liquidacionid,$this->input->post('idestampilla'.$i));
                     }
                     
                   }
@@ -1001,12 +1020,21 @@ function verliquidartramite()
               $totalestampilla= array();
               $valortotal=0;
               
-              foreach ($estampillas as $key => $value) {
-                
-                 $totalestampilla[$value->estm_id] = (($salarioMinimoDiario*$value->estr_porcentaje)/100);
-                 $totalestampilla[$value->estm_id] = Liquidaciones::ceiling($totalestampilla[$value->estm_id], 1000);                 
-                 $valortotal+=$totalestampilla[$value->estm_id];
-              }
+            foreach ($estampillas as $key => $value) 
+            {
+                /*
+                * Se valida si la estampilla a almacenar es pro electrificacion
+                * y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
+                * no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
+                */
+                $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($value->estm_id);
+                if($bandRegistrarFactura)
+                {
+                    $totalestampilla[$value->estm_id] = (($salarioMinimoDiario*$value->estr_porcentaje)/100);
+                    $totalestampilla[$value->estm_id] = Liquidaciones::ceiling($totalestampilla[$value->estm_id], 1000);                 
+                    $valortotal+=$totalestampilla[$value->estm_id];
+                }
+            }
               $this->data['idtramite']=$idliquidacion;
               $this->data['est_totalestampilla']=$totalestampilla;
               $this->data['cnrt_valorsiniva']=$salarioMinimoDiario;
@@ -1083,12 +1111,21 @@ function verliquidartramite()
                           'fact_rutaimagen' => $this->input->post('rutaimagen'.$i),
                           );
 
-                          $this->codegen_model->add('est_facturas',$data);
-
-                          /**
-                          * Solicita la Asignación del codigo para el codigo de barras
-                          */
-                          $this->asignarCodigoParaBarras($liquidacionid,$this->input->post('idestampilla'.$i));
+                            /*
+                            * Se valida si la estampilla a almacenar es pro electrificacion
+                            * y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
+                            * no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
+                            */
+                            $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($data['fact_estampillaid']);
+                            if($bandRegistrarFactura)
+                            {
+                                $this->codegen_model->add('est_facturas',$data);
+    
+                                /**
+                                * Solicita la Asignación del codigo para el codigo de barras
+                                */
+                                $this->asignarCodigoParaBarras($liquidacionid,$this->input->post('idestampilla'.$i));
+                            }
                       }
                   }
 
@@ -2929,6 +2966,32 @@ function determinarSiguienteRotulo($usuarioLogueado)
             }
 
         return $retornar;
+}
+
+/*
+* Funcion de apoyo que realiza la validacion para inclusion
+* o exclusion de la estampilla pro electrificacion
+* Se valida si la estampilla a almacenar es pro electrificacion
+* y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
+* no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
+*/
+public static function validarInclusionEstampilla($idTipoEstampilla)
+{
+    $bandRegistrarFactura = true;
+    # pro electrificacion
+    if($idTipoEstampilla == 7)
+    {
+        /*
+        * Valida que la fecha de liquidacion sea mayor a la fecha permitida
+        * lo que indica que no puede incluir la factura para pro-electrificacion
+        */
+        if(strtotime('2017-05-21') < strtotime(date('Y-m-d')))
+        {
+            $bandRegistrarFactura = false;
+        }
+    }
+
+    return $bandRegistrarFactura;
 }
 
 }
