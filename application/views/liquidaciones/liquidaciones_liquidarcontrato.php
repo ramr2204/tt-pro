@@ -109,7 +109,7 @@ $cuentas='';
     * y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
     * no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
     */
-    $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($row2->estm_id);
+    $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($row2->estm_id, $result->cntr_fecha_firma);
     if($bandRegistrarFactura)
     {
 ?>

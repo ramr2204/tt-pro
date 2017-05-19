@@ -279,7 +279,7 @@ class Liquidaciones extends MY_Controller {
                 * y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
                 * no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
                 */
-                $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($value->estm_id);
+                $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($value->estm_id, $contrato->cntr_fecha_firma);
                 if($bandRegistrarFactura)
                 {
                     /*
@@ -375,6 +375,12 @@ class Liquidaciones extends MY_Controller {
 
             $codigo = 00000;
             $idcontrato=$this->input->post('idcontrato');
+            
+            /*
+            * Extrae el objeto del contrato
+            */
+            $contrato = $this->liquidaciones_model->get($idcontrato);
+
             $data = array(
                 'liqu_contratoid' => $this->input->post('idcontrato'),
                 'liqu_nombrecontratista' => $this->input->post('nombrecontratista'),
@@ -444,7 +450,7 @@ class Liquidaciones extends MY_Controller {
                         * y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
                         * no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
                         */
-                        $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($data['fact_estampillaid']);
+                        $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($data['fact_estampillaid'], $contrato->cntr_fecha_firma);
                         if($bandRegistrarFactura)
                         {
                             $this->codegen_model->add('est_facturas',$data);
@@ -2975,8 +2981,16 @@ function determinarSiguienteRotulo($usuarioLogueado)
 * y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
 * no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
 */
-public static function validarInclusionEstampilla($idTipoEstampilla)
+public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_validar = '')
 {
+    /*
+    * Si no se suministró fecha para validar se establece la fecha actual
+    */
+    if($fecha_validar == '')
+    {
+        $fecha_validar = date('Y-m-d');
+    }
+
     $bandRegistrarFactura = true;
     # pro electrificacion
     if($idTipoEstampilla == 7)
@@ -2985,7 +2999,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla)
         * Valida que la fecha de liquidacion sea mayor a la fecha permitida
         * lo que indica que no puede incluir la factura para pro-electrificacion
         */
-        if(strtotime('2017-05-21') < strtotime(date('Y-m-d')))
+        if(strtotime('2017-05-21') < strtotime($fecha_validar))
         {
             $bandRegistrarFactura = false;
         }
