@@ -1617,6 +1617,11 @@ function consultar()
                        );
 
               /*
+              * Crea el vector con los tipos de acto para filtrar
+              */
+              $this->data['tipos_acto'] = array('1' => 'Contrato', '2' => 'Tramite');
+
+              /*
               * Extrae el listado de tipos de estampilla
               */
               $tiposEstampilla = $this->codegen_model->getSelect('est_estampillas',"estm_id,estm_nombre");
@@ -1631,7 +1636,7 @@ function consultar()
               $this->data['estampillas'] = $vTiposEst;
 
               /*
-               * Exrae el listado de tipos de actos liquidados para realizar
+               * Extrae el listado de tipos de actos liquidados para realizar
                * la consulta
                */
               $tiposContrato = $this->codegen_model->getSelect('con_tiposcontratos',"tico_id,tico_nombre");
@@ -1654,7 +1659,7 @@ function consultar()
                   }
               }
 
-              $this->data['actos'] = $vTiposActo;
+              $this->data['subtipos_acto'] = $vTiposActo;
 
               /*
                * Extrae los contratistas creados para filtrar por contratos
@@ -2156,8 +2161,9 @@ function consultar()
    function extraerRegistrosDetalleImpresiones($vectorGet)
     {
         $fecha_inicial = $vectorGet['fecha_I'];
-        $tipoEst = $vectorGet['est'];
-        $tipoActo = $vectorGet['acto'];
+        $tipoEst       = $vectorGet['est'];
+        $tipoActo      = $vectorGet['acto'];
+        $subTipoActo   = $vectorGet['subtipo'];
         $contribuyente = $vectorGet['contribuyente'];
 
         /*
@@ -2184,14 +2190,14 @@ function consultar()
          * Extrae el posible tipo de acto
          */
         $bandValidarActo = false;
-        if($tipoActo != '0')
+        if($subTipoActo != '0')
         {
             $bandValidarActo = true;
-            if(preg_match('/^c_([0-9]+)$/',$tipoActo,$coincidencias))
+            if(preg_match('/^c_([0-9]+)$/',$subTipoActo,$coincidencias))
             {
                 $id_acto = $coincidencias[1];
                 $t_acto = 'contrato';
-            }elseif(preg_match('/^t_([0-9]+)$/',$tipoActo,$coincidencias))
+            }elseif(preg_match('/^t_([0-9]+)$/',$subTipoActo,$coincidencias))
             {
                 $id_acto = $coincidencias[1];
                 $t_acto = 'tramite';
@@ -2267,9 +2273,28 @@ function consultar()
 
         $where .= $whereContribuyente;
 
+        /*
+        * Valida si se suministró un tipo de acto
+        * contrato o tramite para agregar el where
+        */
+        $whereTipoActo = '';
+        if($tipoActo != '0')
+        {
+            if($tipoActo == '1') //Valida si se solicitan solo contratos
+            {
+                $whereTipoActo .= ' AND l.liqu_tramiteid = 0 ';
+            }elseif($tipoActo == '2') //Valida si se solicitan solo tramites
+                {
+                    $whereTipoActo .= ' AND l.liqu_contratoid = 0 ';
+                }
+        }
+
+        $where .= $whereTipoActo;
+
         $liquidaciones = $this->codegen_model->getSelect('est_facturas f',$campos,$where,$join2, $group);
 
         $vLiquidaciones = array();
+        $total_recaudado = 0;
         if($liquidaciones)
         {
             /*
@@ -2299,7 +2324,7 @@ function consultar()
                 * Valida si hubo resultado para incluir o no la liquidacion
                 * en el grupo para el informe
                 */
-                if (count($resultado) > 0)
+                if(count($resultado) > 0)
                 {
                     $bandAgregar = true;
                     if ($bandValidarActo) {
@@ -2332,6 +2357,7 @@ function consultar()
                         $facturas = [];
                         $liquidador = '';
                         $cantEstampillas = 0;
+                        $total_liquidacion = 0;
                         foreach ($resultado as $value) {
                             $facturas[] = ['tipo' => $value->fact_nombre,
                                 'rotulo' => $value->impr_codigopapel,
@@ -2352,10 +2378,17 @@ function consultar()
                             * maquetacion en la renderizacion del listado
                             */
                             $cantEstampillas++;
+
+                            /*
+                            * Acumula el total de las estampillas incluidas
+                            */
+                            $total_liquidacion += (double)$value->fact_valor;
                         }
-                        $liquidacion->liquidador = $liquidador;
-                        $liquidacion->estampillas = $facturas;
+
+                        $liquidacion->liquidador      = $liquidador;
+                        $liquidacion->estampillas     = $facturas;
                         $liquidacion->cantEstampillas = $cantEstampillas;
+                        $liquidacion->liqu_valortotal = $total_liquidacion;
 
                         /*
                         * Valida si la liquidacion fue de tramite o de contrato
@@ -2388,7 +2421,7 @@ function consultar()
             $fecha = $fechaUnica;
         }else
             {
-                $fecha = 'PERIODO COMPRENDIDO ENTRE LAS FECHAS'.$fecha_inicial.' Y '.$fecha_final;
+                $fecha = 'PERIODO COMPRENDIDO ENTRE LAS FECHAS '.$fecha_inicial.' Y '.$fecha_final;
             }
 
         return array(
