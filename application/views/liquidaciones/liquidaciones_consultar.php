@@ -123,32 +123,20 @@ var oTable = $('#tablaq').dataTable( {
 </div> 
 
 <div class="row">     
-    <div class="col-xs-12 col-sm-3 col-custom-chosen">
+    <div class="col-xs-12 col-md-3 col-custom-chosen">
         Fecha (Generacion Estampilla):<div align="center" id="buscarfecha"></div>                
     </div>
-    <div class="col-xs-12 col-sm-5 btn-pdf pull-right">
-        <div class="btn-group group-custom-chosen">
-            <a class="btn btn-danger" id="btn-relacion">
-                <i class="fa fa-file-pdf-o fa-1x"></i>
-                Relación
-            </a>        
-            <a class="btn btn-success" id="btn-detalle-excel" documento="excel">
-                <i class="fa fa-file-excel-o fa-1x"></i>
-                Detalle-Excel
-            </a>
-            <a class="btn btn-danger" id="btn-detalle-pdf" documento="pdf">
-              <i class="fa fa-file-pdf-o fa-1x"></i>
-              Detalle-PDF
-            </a>        
-            <a class="btn btn-danger" id="btn-rango">
-                <i class="fa fa-file-pdf-o fa-1x"></i>
-                Rango
+    <div class="col-xs-12 col-md-9 btn-pdf">
+        <div class="btn-group group-custom-chosen pull-right">
+            <a class="btn btn-default" id="btn-rango">
+                <i class="fa fa-file-pdf-o fa-1x text-danger" style="font-weight: bold;"></i>
+                /
+                <i class="fa fa-file-excel-o fa-1x text-success" style="font-weight: bold;"></i>
+                <b>Generar Informes</b>
             </a>
         </div>
     </div>               
 </div>
-            
-
 
 <div class="row"> 
      <div class="col-sm-12">    
@@ -268,7 +256,7 @@ var oTable = $('#tablaq').dataTable( {
       </div>
       <div class="modal-footer">
         <div class="btn-group">
-            <a class="btn btn-danger" id="btn-consultar">
+            <a class="btn btn-danger" id="btn-consultar" documento="consolidado_pdf">
                 <i class="fa fa-file-pdf-o fa-1x"></i>        
                 Consultar Relacion
             </a>     

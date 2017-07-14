@@ -23,7 +23,7 @@ ini_set('max_execution_time', 0);
             <th rowspan="2" style="width:40mm;"><strong>Contratista / NIT</strong></th>
             <th rowspan="2" style="width:20mm;"><strong>Fecha Liquidacion</strong></th>            
             <th rowspan="2" style="width:27mm;"><strong>Valor Acto</strong></th>            
-            <th colspan="5" style="width:102mm;"><strong>Estampillas</strong></th> 
+            <th colspan="5" style="width:102mm;"><strong>Estampillas</strong></th>
             <?php 
             /*
             * Valida si el usuario autenticado es administrador para
@@ -34,11 +34,6 @@ ini_set('max_execution_time', 0);
             {
                 echo '<th rowspan="2" style="width:20mm;"><strong>Liquidador</strong></th>';
             }
-
-            /*
-            * Se crea variable para almacenar el total de las estampillas
-            */
-            $totalEstampillas = 0;
             ?>
             <th rowspan="2" style="width:20mm;"><strong>Total</strong></th>                                                    
         </tr>
@@ -57,7 +52,7 @@ ini_set('max_execution_time', 0);
             {
                 $n++; 
                 $cantRowspan = $liquidacion->cantEstampillas;
-                $totalEstampillas += $liquidacion->cantEstampillas;
+
                 /*
                 * Valida si la fila a imprimir no es la primera
                 * para aumentar el valor de las filas anidadas en 1
