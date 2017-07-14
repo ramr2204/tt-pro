@@ -33,11 +33,6 @@
             {
                 echo '<th rowspan="2" style="width:20mm;"><strong>Liquidador</strong></th>';
             }
-
-            /*
-            * Se crea variable para almacenar el total de las estampillas
-            */
-            $totalEstampillas = 0;
             ?>
             <th rowspan="2" style="width:20mm;"><strong>Total</strong></th>                                                    
         </tr>
@@ -56,7 +51,7 @@
             {
                 $n++; 
                 $cantRowspan = $liquidacion->cantEstampillas;
-                $totalEstampillas += $liquidacion->cantEstampillas;
+
                 /*
                 * Valida si la fila a imprimir no es la primera
                 * para aumentar el valor de las filas anidadas en 1

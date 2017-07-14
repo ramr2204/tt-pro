@@ -238,13 +238,13 @@ function generarInformeRangoDetalle(e)
         var tipoInforme = $(this).attr('documento');
         if(tipoInforme == 'pdf')
         {
-            window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&subtipo='+subTipoActo+'&contribuyente='+contribuyente);
+            window.open(base_url+'index.php/liquidaciones/renderizarDetalleRangoPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&subtipo='+subTipoActo+'&contribuyente='+contribuyente);
         }else if(tipoInforme == 'excel')
             {
-                window.open(base_url+'index.php/liquidaciones/renderizarExcel?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&subtipo='+subTipoActo+'&contribuyente='+contribuyente);
+                window.open(base_url+'index.php/liquidaciones/renderizarDetalleRangoExcel?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&subtipo='+subTipoActo+'&contribuyente='+contribuyente);
             }else if(tipoInforme == 'consolidado_pdf')
                 {
-                    window.open(base_url+'index.php/liquidaciones/renderizarRangoImpresionesPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&subtipo='+subTipoActo+'&contribuyente='+contribuyente);
+                    window.open(base_url+'index.php/liquidaciones/renderizarConsolidadoRangoImpresionesPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&subtipo='+subTipoActo+'&contribuyente='+contribuyente);
                 }
     }
 }
