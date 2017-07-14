@@ -2728,54 +2728,8 @@ function renderizarRangoImpresionesPDF()
             $fecha_inicial = $_GET['fecha_I'];
             $fecha_final = $_GET['fecha_F'];
             
-            /*
-            * Valida que lleguen fechas
-            */
-            if($fecha_inicial == "" && $fecha_final == "")
-            {
-                $this->session->set_flashdata('errormessage', 'Debe Elegir un Rango de Fechas Valido!'); 
-                redirect(base_url().'index.php/liquidaciones/consultar');
-            }
-
-            /*
-            * Se Validan los valores que llegan para construir el where
-            */
-            $where = 'WHERE i.impr_estado = 1 ';
-            if($fecha_inicial != "" && $fecha_final != "")
-            {
-                $where .= ' AND date_format(i.impr_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial.'" AND "'.$fecha_final.'"';
-                /*
-                * Agrega al vector de parametro para la vista
-                * las fechas de rango
-                */
-                $datos['fecha_i'] = $fecha_inicial;
-                $datos['fecha_f'] = $fecha_final;
-            }
-            if($fecha_inicial != "" && $fecha_final == "")
-            {
-                $where .= ' AND date_format(i.impr_fecha,"%Y-%m-%d") = "'.$fecha_inicial.'"';
-                /*
-                * Agrega al vector de parametro para la vista
-                * las fecha unica
-                */
-                $datos['fecha_u'] = $fecha_inicial;                
-            }
-            if($fecha_final != "" && $fecha_inicial == "")
-            {
-                $where .= ' AND date_format(i.impr_fecha,"%Y-%m-%d") = "'.$fecha_final.'"';
-                /*
-                * Agrega al vector de parametro para la vista
-                * las fecha unica
-                */
-                $datos['fecha_u'] = $fecha_final; 
-            }                                
-            
-            $join = ' INNER JOIN est_facturas f ON i.impr_facturaid=f.fact_id ';
-            $groupby = ' GROUP BY f.fact_estampillaid';  
-            $campos = 'date_format(i.impr_fecha,"%Y-%m-%d") as fecha, f.fact_estampillaid, f.fact_nombre, count(f.fact_estampillaid) as cant, sum(f.fact_valor) as valor ';
-  
-            $estampillas = $this->codegen_model->getSelect('est_impresiones i',$campos,$where,$join,$groupby);
-  
+            $resultadosFiltros = Liquidaciones::extraerRegistrosDetalleImpresiones($_GET);
+  echo'<pre>';print_r($resultadosFiltros);echo'</pre>';exit();
             if($estampillas)
             {                
                 /*

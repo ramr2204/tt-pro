@@ -50,7 +50,7 @@ function inicial ()
 
     $('#btn-relacion').click(generarInformeRelacion);
     $('#btn-rango').click(solicitarRango);
-    $('#btn-consultar').click(generarInformeRango);
+    $('#btn-consultar').click(generarInformeRangoDetalle);
     $('#btn-consultar-detalle-pdf').click(generarInformeRangoDetalle);
     $('#btn-consultar-detalle-excel').click(generarInformeRangoDetalle);
 
@@ -242,42 +242,10 @@ function generarInformeRangoDetalle(e)
         }else if(tipoInforme == 'excel')
             {
                 window.open(base_url+'index.php/liquidaciones/renderizarExcel?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&subtipo='+subTipoActo+'&contribuyente='+contribuyente);
-            }
-    }
-}
-
-/*
-* Funcion de apoyo que solicita la generacion del informe
-* de impresiones por rango de fecha
-*/
-function generarInformeRango(e)
-{
-    var fecha_inicial = $('#m_rango').find('[name="f_inicial"]').val();
-    var fecha_final = $('#m_rango').find('[name="f_final"]').val();
-    
-    /*
-    * Se valida numericamente que las fechas tengan valor
-    * distinto de vacio
-    */
-    if(fecha_inicial != '')
-    {
-        var fe_i = 1;
-    }else
-        {
-            var fe_i = 0;
-        }
-    
-    if(fecha_final != '')
-    {
-        var fe_f = 1;
-    }else
-        {
-            var fe_f = 0;
-        }
-
-    if((fe_i+fe_f) > 0)
-    {
-        window.open(base_url+'index.php/liquidaciones/renderizarRangoImpresionesPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final);
+            }else if(tipoInforme == 'consolidado_pdf')
+                {
+                    window.open(base_url+'index.php/liquidaciones/renderizarRangoImpresionesPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&subtipo='+subTipoActo+'&contribuyente='+contribuyente);
+                }
     }
 }
 

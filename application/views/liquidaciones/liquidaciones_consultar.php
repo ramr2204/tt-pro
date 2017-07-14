@@ -268,7 +268,7 @@ var oTable = $('#tablaq').dataTable( {
       </div>
       <div class="modal-footer">
         <div class="btn-group">
-            <a class="btn btn-danger" id="btn-consultar">
+            <a class="btn btn-danger" id="btn-consultar" documento="consolidado_pdf">
                 <i class="fa fa-file-pdf-o fa-1x"></i>        
                 Consultar Relacion
             </a>     
