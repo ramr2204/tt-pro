@@ -129,16 +129,21 @@
     </tbody>       
 </table>
 
+<br><br>
 <table border="1">
     <tbody>
     <tr>
         <td style="width:214mm;"><strong> CANTIDAD TOTAL ESTAMPILLAS</strong></td>                 
-        <td style="width:20mm;text-align:center;"><strong><?php echo $totalEstampillas; ?></strong></td>
+        <td style="width:20mm;text-align:center;"><strong><?php echo number_format($totalEstampillas,0,',','.'); ?></strong></td>
+    </tr>
+    <tr>
+        <td style="width:214mm;"><strong> TOTAL RECAUDADO</strong></td>                 
+        <td style="width:20mm;text-align:center;">$ <strong><?php echo number_format($totalRecaudado,0,',','.'); ?></strong></td>
     </tr>
     </tbody>
 </table>
 
-<?php 
+<?php
 /*
 * Funcion de apoyo que imprime la informacion de la estampilla especificada
 */

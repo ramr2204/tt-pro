@@ -1642,12 +1642,12 @@ function consultar()
               $tiposContrato = $this->codegen_model->getSelect('con_tiposcontratos',"tico_id,tico_nombre");
               $tiposTramite = $this->codegen_model->getSelect('est_tramites',"tram_id,tram_nombre");
 
-              $vTiposActo = array();
+              $vSubTiposActo = array();
               if(count($tiposContrato) > 0)
               {
                   foreach($tiposContrato as $tipoA)
                   {
-                      $vTiposActo['c_'.$tipoA->tico_id] = $tipoA->tico_nombre.' ( Contrato )';
+                      $vSubTiposActo['c_'.$tipoA->tico_id] = $tipoA->tico_nombre.' ( Contrato )';
                   }
               }
 
@@ -1655,11 +1655,11 @@ function consultar()
               {
                   foreach($tiposTramite as $tipoA)
                   {
-                      $vTiposActo['t_'.$tipoA->tram_id] = $tipoA->tram_nombre.' ( Tramite )';
+                      $vSubTiposActo['t_'.$tipoA->tram_id] = $tipoA->tram_nombre.' ( Tramite )';
                   }
               }
 
-              $this->data['subtipos_acto'] = $vTiposActo;
+              $this->data['subtipos_acto'] = $vSubTiposActo;
 
               /*
                * Extrae los contratistas creados para filtrar por contratos
@@ -1752,7 +1752,12 @@ function consultar()
               $this->datatables->join('est_pagos p', 'p.pago_facturaid = f.fact_id', 'left');
               $this->datatables->where($whereIn);
 
-                           
+                       /*
+               * Extrae el listado de tipos de actos liquidados para realizar
+               * la consulta
+               */
+              $tiposContrato = $this->codegen_model->getSelect('con_tiposcontratos',"tico_id,tico_nombre");
+              $tiposTramite = $this->codegen_model->getSelect('est_tramites',"tram_id,tram_nombre");    
 
               $this->datatables->add_column('facturas','edess');              
               echo $this->datatables->generate();
@@ -2084,6 +2089,8 @@ function consultar()
 
                 $datos['liquidaciones'] = $resultadosFiltros['vec_liquidaciones'];
 
+                $datos['totalRecaudado'] = $resultadosFiltros['total_recaudado'];
+
                 //Creación del PDF
                 $this->load->library("Pdf");                  
                 $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
@@ -2293,7 +2300,7 @@ function consultar()
 
         $liquidaciones = $this->codegen_model->getSelect('est_facturas f',$campos,$where,$join2, $group);
 
-        $vLiquidaciones = array();
+        $vLiquidaciones  = array();
         $total_recaudado = 0;
         if($liquidaciones)
         {
@@ -2391,6 +2398,12 @@ function consultar()
                         $liquidacion->liqu_valortotal = $total_liquidacion;
 
                         /*
+                        * Acumula el total recaudado según los filtros
+                        * solicitados para el informe
+                        */
+                        $total_recaudado += (double)$liquidacion->liqu_valortotal;
+
+                        /*
                         * Valida si la liquidacion fue de tramite o de contrato
                         * para extraer el numero de contrato y el valor del acto
                         */
@@ -2426,8 +2439,83 @@ function consultar()
 
         return array(
             'vec_liquidaciones' => $vLiquidaciones,
-            'fecha' => $fecha
+            'total_recaudado'   => $total_recaudado,
+            'fecha'             => $fecha
         );
+    }
+
+    /*
+    * Funcion que retorna los subtipos de acto según el tipo de acto
+    * suministrado
+    */
+    function extraerSubtiposActo()
+    {
+        if($this->ion_auth->logged_in()) 
+        {
+            if($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar') )
+            {
+                $tipoActo = $this->input->post('tipo_acto');
+
+                /*
+                * Extrae el listado de subtipos de actos para realizar
+                * la consulta
+                */
+                $tiposContrato = $this->codegen_model->getSelect('con_tiposcontratos',"tico_id,tico_nombre");
+                $tiposTramite  = $this->codegen_model->getSelect('est_tramites',"tram_id,tram_nombre"); 
+                
+                $vSubTiposActo        = array();
+                $bandIncluirContratos = true;
+                $bandIncluirTramites  = true;
+
+                /*
+                * Si el tipo de acto suministrado es contrato (1)
+                * se inhabilita la inclusión de tramites
+                */
+                if($tipoActo == '1')
+                {
+                    $bandIncluirTramites = false;
+                }
+
+                /*
+                * Si el tipo de acto suministrado es tramite (2)
+                * se inhabilita la inclusión de contratos
+                */
+                if($tipoActo == '2')
+                {
+                    $bandIncluirContratos = false;
+                }
+
+                if($bandIncluirContratos)
+                {
+                    if(count($tiposContrato) > 0)
+                    {
+                        foreach($tiposContrato as $tipoA)
+                        {
+                            $vSubTiposActo['c_'.$tipoA->tico_id] = $tipoA->tico_nombre.' ( Contrato )';
+                        }
+                    }
+                }
+                
+                if($bandIncluirTramites)
+                {
+                    if(count($tiposTramite) > 0)
+                    {
+                        foreach($tiposTramite as $tipoA)
+                        {
+                            $vSubTiposActo['t_'.$tipoA->tram_id] = $tipoA->tram_nombre.' ( Tramite )';
+                        }
+                    }
+                }
+
+                echo json_encode($vSubTiposActo);
+            }else
+                {
+                    redirect(base_url().'index.php/error_404');
+                }
+        }else
+            {
+                redirect(base_url().'index.php/users/login');
+            }
     }
 
 
@@ -2456,6 +2544,8 @@ function renderizarExcel()
             $datos['fecha'] = $resultadosFiltros['fecha'];
 
             $datos['liquidaciones'] = $resultadosFiltros['vec_liquidaciones'];
+
+            $datos['totalRecaudado'] = $resultadosFiltros['total_recaudado'];
 
             $this->template->load($this->config->item('excel_template'),'generarexcel/generarexcel_impresiones', $datos);
 
