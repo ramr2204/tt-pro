@@ -10,9 +10,8 @@ if( ! defined('BASEPATH') ) exit('No direct script access allowed');
 *   @version          2015-09-15
 *
 */
-
 header("Content-type: application/vnd.ms-excel; name='excel'");
-header("Content-Disposition: filename=ficheroExcel.xls");
+header("Content-Disposition: filename=Impresiones_". str_replace(' ', '_', $_SESSION['fecha_informe_excel']) .".xls");
 header("Pragma: no-cache");
 header("Expires: 0");
 ini_set('memory_limit', '-1');

@@ -2663,6 +2663,9 @@ function renderizarDetalleRangoExcel()
             $datos['liquidaciones']    = $resultadosFiltros['vec_liquidaciones'];
             $datos['totalRecaudado']   = $resultadosFiltros['total_recaudado'];
             $datos['totalEstampillas'] = $resultadosFiltros['cant_total_estampillas'];
+            
+            session_start();
+            $_SESSION['fecha_informe_excel'] = $datos['fecha'];
 
             $this->template->load($this->config->item('excel_template'),'generarexcel/generarexcel_impresiones', $datos);
 
