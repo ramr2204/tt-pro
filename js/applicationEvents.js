@@ -203,9 +203,10 @@ function identificarVistaChosen()
 function generarInformeRangoDetalle(e)
 {
     var fecha_inicial = $('#m_rango').find('[name="f_inicial"]').val();
-    var fecha_final = $('#m_rango').find('[name="f_final"]').val();
-    var tipoEst = $('#tipoEst').val();
-    var tipoActo = $('#tipoActo').val();
+    var fecha_final   = $('#m_rango').find('[name="f_final"]').val();
+    var tipoEst       = $('#tipoEst').val();
+    var tipoActo      = $('#tipoActo').val();
+    var subTipoActo   = $('#subTipoActo').val();
     var contribuyente = $('#contribuyente').val();
     
     /*
@@ -237,10 +238,10 @@ function generarInformeRangoDetalle(e)
         var tipoInforme = $(this).attr('documento');
         if(tipoInforme == 'pdf')
         {
-            window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&contribuyente='+contribuyente);
+            window.open(base_url+'index.php/liquidaciones/renderizarPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&subtipo='+subTipoActo+'&contribuyente='+contribuyente);
         }else if(tipoInforme == 'excel')
             {
-                window.open(base_url+'index.php/liquidaciones/renderizarExcel?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&contribuyente='+contribuyente);
+                window.open(base_url+'index.php/liquidaciones/renderizarExcel?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&subtipo='+subTipoActo+'&contribuyente='+contribuyente);
             }
     }
 }
@@ -713,9 +714,51 @@ function solicitarRango(e)
     * la modal
      */
     $('#m_rango').on('shown.bs.modal', function () {
+
         //Evento para los select con chosen
         $('.chosen-modal').chosen({no_results_text: "No se encuentra"});
+
+        /*
+        * Evento para dibujar el select de subtipo de acto
+        * dependiendo del tipo de acto suministrado para consultar
+        */
+        $('#tipoActo').chosen({no_results_text: "No se encuentra"}).change(solicitarSubtiposActoConsulta);
     });
+}
+
+/*
+* Función que solicita los subtipos de acto para la consulta
+* de impresiones y redibuja los select de subtipos
+*/
+function solicitarSubtiposActoConsulta(e)
+{
+    var objEvento = $(this);
+
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        data: {tipo_acto : objEvento.val()},
+        url: base_url+"index.php/liquidaciones/extraerSubtiposActo",
+        success: function(data) {
+
+                /*
+                * Se vacia el select de subtipos de acto
+                */
+                $('#subTipoActo option:gt(0)').remove();
+
+                /*
+                * Construye los option con los subtipos de acto
+                * recibidos
+                */
+                var opcionesSelect = '';
+                $.map(data, function (nombre, identificador)
+                    {
+                        opcionesSelect += '<option value="'+ identificador +'">'+ nombre +'</option>';
+                    });
+
+                $('#subTipoActo').append(opcionesSelect).trigger('chosen:updated');
+               }
+             });
 }
 
 //Funcion que valida si se ha digitado

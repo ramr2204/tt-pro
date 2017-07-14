@@ -74,7 +74,7 @@ ini_set('max_execution_time', 0);
                     <td rowspan="<?php echo $cantRowspan;?>" style="width:15mm;"><?php echo $liquidacion->numActo; ?></td>
             	    <td rowspan="<?php echo $cantRowspan;?>" style="width:40mm;"><?php echo ucwords($liquidacion->liqu_nombrecontratista); ?><br><?php echo $liquidacion->liqu_nit;?></td>
                     <td rowspan="<?php echo $cantRowspan;?>" style="width:20mm;"><?php echo $liquidacion->liqu_fecha; ?></td>                
-                    <td rowspan="<?php echo $cantRowspan;?>" style="width:27mm;"><?php echo $liquidacion->valorActo; ?></td>                
+                    <td rowspan="<?php echo $cantRowspan;?>" style="width:27mm;"><?php echo number_format($liquidacion->valorActo,0,',','.'); ?></td>                
                 <?php 
                 /*
                 * Valida si la fila a imprimir no es la primera
@@ -110,10 +110,10 @@ ini_set('max_execution_time', 0);
                 */
                 if($this->ion_auth->is_admin())
                 {
-                    echo '<td rowspan="'.$cantRowspan.'" style="text-align:left; width:20mm;">'.$liquidacion->liquidador.'</td>';
+                    echo '<td rowspan="'.$cantRowspan.'" style="text-align:left; width:20mm;">'. $liquidacion->liquidador .'</td>';
                 }
                            
-                echo '<td rowspan="'.$cantRowspan.'" style="width:20mm;"><br>'.$liquidacion->liqu_valortotal.'</td>'
+                echo '<td rowspan="'.$cantRowspan.'" style="width:20mm;"><br>'. number_format($liquidacion->liqu_valortotal,0,',','.') .'</td>'
                     .'</tr>';
                 ?>
 
@@ -124,17 +124,21 @@ ini_set('max_execution_time', 0);
                     echo '<tr>';
                     imprimirInformacionEstampilla($estampilla);
                     echo '</tr>';                        
-                }                
+                }
             }   
                 ?>            
     </tbody>       
 </table>
-
+<br><br>
 <table border="1">
     <tbody>
     <tr>
         <td style="width:214mm;"><strong> CANTIDAD TOTAL ESTAMPILLAS</strong></td>                 
-        <td style="width:20mm;text-align:center;"><strong><?php echo $totalEstampillas; ?></strong></td>
+        <td style="width:20mm;text-align:center;"><strong><?php echo number_format($totalEstampillas,0,',','.'); ?></strong></td>
+    </tr>
+    <tr>
+        <td style="width:214mm;"><strong> TOTAL RECAUDADO</strong></td>                 
+        <td style="width:20mm;text-align:center;">$ <strong><?php echo number_format($totalRecaudado,0,',','.'); ?></strong></td>
     </tr>
     </tbody>
 </table>
@@ -145,10 +149,10 @@ ini_set('max_execution_time', 0);
 */
 function imprimirInformacionEstampilla($vectorEstampilla)
 {
-    echo '<td style="text-align:left; width:26mm;">'.$vectorEstampilla['tipo'].'</td>'
-        .'<td style="text-align:left; width:20mm;">'.$vectorEstampilla['fecha_pago'].'</td>'
-        .'<td style="text-align:right; width:20mm;">'.round($vectorEstampilla['valor']).'</td>'
-        .'<td style="text-align:center; width:16mm;">'.$vectorEstampilla['rotulo'].'</td>'
-        .'<td style="text-align:left; width:20mm;">'.$vectorEstampilla['fecha_impr'].'</td>';
+    echo '<td style="text-align:left; width:26mm;">'. $vectorEstampilla['tipo'] .'</td>'
+        .'<td style="text-align:left; width:20mm;">'. $vectorEstampilla['fecha_pago'] .'</td>'
+        .'<td style="text-align:right; width:20mm;">'. number_format(round($vectorEstampilla['valor']),0,',','.') .'</td>'
+        .'<td style="text-align:center; width:16mm;">'. $vectorEstampilla['rotulo'] .'</td>'
+        .'<td style="text-align:left; width:20mm;">'. $vectorEstampilla['fecha_impr'] .'</td>';
 }
 ?>
