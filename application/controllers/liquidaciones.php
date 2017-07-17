@@ -2159,6 +2159,10 @@ function consultar()
     */
    function extraerRegistrosDetalleImpresiones($vectorGet)
     {
+        header("Expires: 0");
+        ini_set('memory_limit', '-1');
+        ini_set('max_execution_time', 0);
+
         $fecha_inicial = $vectorGet['fecha_I'];
         $tipoEst       = $vectorGet['est'];
         $tipoActo      = $vectorGet['acto'];
