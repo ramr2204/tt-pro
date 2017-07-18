@@ -50,15 +50,22 @@ function inicial ()
 
     $('#btn-relacion').click(generarInformeRelacion);
     $('#btn-rango').click(solicitarRango);
-    $('#btn-consultar').click(generarInformeRangoDetalle);
-    $('#btn-consultar-detalle-pdf').click(generarInformeRangoDetalle);
-    $('#btn-consultar-detalle-excel').click(generarInformeRangoDetalle);
+    $('#btn-consultar').click(generarInformeRangoImpresiones);
+    $('#btn-consultar-detalle-pdf').click(generarInformeRangoImpresiones);
+    $('#btn-consultar-detalle-excel').click(generarInformeRangoImpresiones);
 
     /*
     * Evento para solicitar recargar el formulario de adicionar papelería
     * con o sin la variable de contingencia
     */
     $('#chk_contingencia').click(solicitarRecargaPagina);
+
+    /*
+    * Eventos para checkbox de agrupamiento de información
+    * en informes de impresiones
+    */
+    $('#group_mes').click(solicitarMarcarAnio);
+    $('#group_anio').click(solicitarDesmarcarMes);
 
     /*
     * Solicita la identificacion de la vista de auditoria
@@ -132,6 +139,32 @@ function solicitarRecargaPagina(e)
 }
 
 /*
+* Función que identifica si el checkbox de agrupamiento
+* por meses fue seleccionado en informe de impresiones
+* para seleccionar tambien el checkbox de año
+*/
+function solicitarMarcarAnio(e)
+{
+    if($(this).is(':checked'))
+    {
+        $('#group_anio').prop('checked', true);
+    }
+}
+
+/*
+* Función que identifica si el checkbox de agrupamiento
+* por años fue de-seleccionado en informe de impresiones
+* para de-seleccionar tambien el checkbox de mes
+*/
+function solicitarDesmarcarMes(e)
+{
+    if(!$(this).is(':checked'))
+    {
+        $('#group_mes').prop('checked', false);
+    }
+}
+
+/*
 * Funcion de apoyo que identifica si se está
 * en la vista listado de conciliaciones
 */
@@ -200,7 +233,7 @@ function identificarVistaChosen()
 * Funcion de apoyo que solicita la generacion del informe
 * de impresiones por rango de fecha
 */
-function generarInformeRangoDetalle(e)
+function generarInformeRangoImpresiones(e)
 {
     var fecha_inicial = $('#m_rango').find('[name="f_inicial"]').val();
     var fecha_final   = $('#m_rango').find('[name="f_final"]').val();
@@ -229,6 +262,39 @@ function generarInformeRangoDetalle(e)
             var fe_f = 0;
         }
 
+    /*
+    * Se validan los checkbox de agrupación
+    */
+    var group_anio = 0;
+    if($('#group_anio').prop('checked'))
+    {
+        group_anio = 1;
+    }
+
+    var group_mes = 0;
+    if($('#group_mes').prop('checked'))
+    {
+        group_mes = 1;
+    }
+
+    var group_contribuyente = 0;
+    if($('#group_contribuyente').prop('checked'))
+    {
+        group_contribuyente = 1;
+    }
+
+    var group_tipoacto = 0;
+    if($('#group_tipoacto').prop('checked'))
+    {
+        group_tipoacto = 1;
+    }
+
+    var group_subtipoacto = 0;
+    if($('#group_subtipoacto').prop('checked'))
+    {
+        group_subtipoacto = 1;
+    }
+
     if((fe_i+fe_f) > 0)
     {
         /*
@@ -238,13 +304,36 @@ function generarInformeRangoDetalle(e)
         var tipoInforme = $(this).attr('documento');
         if(tipoInforme == 'pdf')
         {
-            window.open(base_url+'index.php/liquidaciones/renderizarDetalleRangoPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&subtipo='+subTipoActo+'&contribuyente='+contribuyente);
+            window.open(base_url+'index.php/liquidaciones/renderizarDetalleRangoPDF?fecha_I='+fecha_inicial
+                +'&fecha_F='+fecha_final
+                +'&est='+tipoEst
+                +'&acto='+tipoActo
+                +'&subtipo='+subTipoActo
+                +'&contribuyente='+contribuyente
+                +'&agrupar=0');
         }else if(tipoInforme == 'excel')
             {
-                window.open(base_url+'index.php/liquidaciones/renderizarDetalleRangoExcel?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&subtipo='+subTipoActo+'&contribuyente='+contribuyente);
+                window.open(base_url+'index.php/liquidaciones/renderizarDetalleRangoExcel?fecha_I='+fecha_inicial
+                    +'&fecha_F='+fecha_final
+                    +'&est='+tipoEst
+                    +'&acto='+tipoActo
+                    +'&subtipo='+subTipoActo
+                    +'&contribuyente='+contribuyente
+                    +'&agrupar=0');
             }else if(tipoInforme == 'consolidado_pdf')
                 {
-                    window.open(base_url+'index.php/liquidaciones/renderizarConsolidadoRangoImpresionesPDF?fecha_I='+fecha_inicial+'&fecha_F='+fecha_final+'&est='+tipoEst+'&acto='+tipoActo+'&subtipo='+subTipoActo+'&contribuyente='+contribuyente);
+                    window.open(base_url+'index.php/liquidaciones/renderizarConsolidadoRangoImpresionesPDF?fecha_I='+fecha_inicial
+                        +'&fecha_F='+fecha_final
+                        +'&est='+tipoEst
+                        +'&acto='+tipoActo
+                        +'&subtipo='+subTipoActo
+                        +'&contribuyente='+contribuyente
+                        +'&group_anio='+group_anio
+                        +'&group_mes='+group_mes
+                        +'&group_contribuyente='+group_contribuyente
+                        +'&group_tipoacto='+group_tipoacto
+                        +'&group_subtipoacto='+group_subtipoacto
+                        +'&agrupar=1');
                 }
     }
 }

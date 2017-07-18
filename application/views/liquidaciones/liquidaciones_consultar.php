@@ -178,15 +178,15 @@ var oTable = $('#tablaq').dataTable( {
 
 <!-- Modal Rango-->
 <div class="modal fade" id="m_rango" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-lg" role="document" style="width: 750px !important;">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Consultar por Rango (Fecha Generacion Estampilla)</h4>
+        <h4 class="modal-title text-center" id="myModalLabel">Consultar por Rango (Fecha Generacion Estampilla)</h4>
       </div>
       <div class="modal-body">      
           <div class="row">          
-              <div class="col-xs-12 col-sm-6">
+              <div class="col-xs-12 col-md-6">
                   <div class="form-group">
                       <label for="f_inicial">Fecha Inicial</label>
                       <div class='input-group date' id='datetimepicker_inicial' data-date-format="YYYY-MM-DD">
@@ -197,7 +197,7 @@ var oTable = $('#tablaq').dataTable( {
                       </div>                      
                   </div>
               </div>
-              <div class="col-xs-12 col-sm-6">
+              <div class="col-xs-12 col-md-6">
                   <div class="form-group">
                       <label for="f_final">Fecha Final</label>
                       <div class='input-group date' id='datetimepicker_final' data-date-format="YYYY-MM-DD">
@@ -208,9 +208,9 @@ var oTable = $('#tablaq').dataTable( {
                       </div>                       
                   </div>
               </div>
-              <div class="col-xs-12 btn-pdf">
+              <div class="col-xs-12 col-md-6 btn-pdf">
                   <div class="form-group">
-                      <label for="tipoEst">Tipo Estampilla (Detalle)</label>
+                      <label for="tipoEst">Tipo Estampilla</label>
                       <select class="form-control chosen-modal" id="tipoEst">
                           <option value="0">Seleccione...</option>
                           <?php  foreach($estampillas as $id => $valor) { ?>
@@ -219,9 +219,9 @@ var oTable = $('#tablaq').dataTable( {
                       </select>
                   </div>
               </div>
-              <div class="col-xs-12 btn-pdf">
+              <div class="col-xs-12 col-md-6 btn-pdf">
                   <div class="form-group">
-                      <label for="tipoActo">Tipo Acto (Detalle)</label>
+                      <label for="tipoActo">Tipo Acto</label>
                       <select class="form-control" id="tipoActo">
                           <option value="0">Seleccione...</option>
                           <?php  foreach($tipos_acto as $id => $valor) { ?>
@@ -232,7 +232,7 @@ var oTable = $('#tablaq').dataTable( {
               </div>
               <div class="col-xs-12 btn-pdf">
                   <div class="form-group">
-                      <label for="tipoActo">Subtipo Acto (Detalle)</label>
+                      <label for="tipoActo">Subtipo Acto</label>
                       <select class="form-control chosen-modal" id="subTipoActo">
                           <option value="0">Seleccione...</option>
                           <?php  foreach($subtipos_acto as $id => $valor) { ?>
@@ -243,7 +243,7 @@ var oTable = $('#tablaq').dataTable( {
               </div>
               <div class="col-xs-12 btn-pdf">
                   <div class="form-group">
-                      <label for="contribuyente">Contribuyente (Detalle)</label>
+                      <label for="contribuyente">Contribuyente</label>
                       <select class="form-control chosen-modal" id="contribuyente">
                           <option value="0">Seleccione...</option>
                           <?php  foreach($contribuyentes as $id => $valor) { ?>
@@ -251,6 +251,26 @@ var oTable = $('#tablaq').dataTable( {
                           <?php   } ?>
                       </select>
                   </div>
+              </div>
+              <div class="col-xs-12 btn-pdf">
+                  <label>(Sólo informe Consolidado) Agrupar por :</label>
+              </div>
+              <div class="col-xs-12 btn-pdf text-center">
+                    <label class="checkbox-inline">
+                        <input type="checkbox" id="group_anio"> <b>Año</b>
+                    </label>
+                    <label class="checkbox-inline">
+                        <input type="checkbox" id="group_mes"> <b>Mes</b>
+                    </label>
+                    <label class="checkbox-inline">
+                        <input type="checkbox" id="group_contribuyente"> <b>Contribuyente</b>
+                    </label>
+                    <label class="checkbox-inline">
+                        <input type="checkbox" id="group_tipoacto"> <b>Tipo Acto</b>
+                    </label>
+                    <label class="checkbox-inline">
+                        <input type="checkbox" id="group_subtipoacto"> <b>Subtipo Acto</b>
+                    </label>
               </div>
           </div>
       </div>

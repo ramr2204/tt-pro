@@ -2336,12 +2336,16 @@ function consultar()
                 if(count($resultado) > 0)
                 {
                     $bandAgregar = true;
-                    if ($bandValidarActo) {
+                    if ($bandValidarActo) 
+                    {
                         /*
                          * Valida si se debe agregar el registro a la coleccion
                          * dependiendo si es del tipo de acto suministrado o no
                          */
-                        $bandAgregar = false;
+                        $bandAgregar   = false;
+                        $datosContrato = array();
+                        $datosTramite  = array();
+
                         if ($liquidacion->liqu_contratoid != '0' && $t_acto == 'contrato') {
                             $datosContrato = $this->codegen_model->getSelect('con_contratos c', 'c.cntr_numero, c.cntr_valor, c.cntr_tipocontratoid', 'WHERE cntr_id = ' . $liquidacion->liqu_contratoid);
                             if ($datosContrato[0]->cntr_tipocontratoid == $id_acto) {
@@ -2355,7 +2359,7 @@ function consultar()
                         }
                     }
 
-                    if ($bandAgregar)
+                    if($bandAgregar)
                     {
                         /*
                         * Agrega el objeto de la liquidacion al vector
@@ -2363,6 +2367,33 @@ function consultar()
                         */
                         $vLiquidaciones[] = $liquidacion;
 
+                        /*
+                        * Valida si la liquidacion fue de tramite o de contrato
+                        * para extraer el numero de contrato y el valor del acto
+                        */
+                        if ($liquidacion->liqu_contratoid != 0)
+                        {
+                            $datosContrato = $this->codegen_model->getSelect('con_contratos c', 'c.cntr_numero, c.cntr_valor, c.cntr_tipocontratoid', 'WHERE cntr_id = ' . $liquidacion->liqu_contratoid);
+                            $liquidacion->numActo = $datosContrato[0]->cntr_numero;
+                            $liquidacion->valorActo = $datosContrato[0]->cntr_valor;
+                            $liquidacion->liqu_tipocontrato = 'Contrato '.$liquidacion->liqu_tipocontrato;
+                            $liquidacion->subtipoacto = 'tipocontrato_'.$datosContrato[0]->cntr_tipocontratoid;
+                            $liquidacion->tipoacto = 'contrato';
+                        }else
+                            {
+                                $datosTramite = $this->codegen_model->getSelect('est_liquidartramites t', 't.litr_tramiteid', 'WHERE litr_id = ' . $liquidacion->liqu_tramiteid);
+                                $nombreTramite = $this->codegen_model->getSelect('est_tramites ta', 'ta.tram_nombre', 'WHERE tram_id = ' . $datosTramite[0]->litr_tramiteid);
+                                $liquidacion->numActo = 'N/A';
+                                $liquidacion->valorActo = $liquidacion->liqu_valorsiniva;
+                                $liquidacion->liqu_tipocontrato = $nombreTramite[0]->tram_nombre;
+                                $liquidacion->subtipoacto = 'tipotramite_'.$datosTramite[0]->litr_tramiteid;
+                                $liquidacion->tipoacto = 'tramite';
+                            }
+
+                        /*
+                        * Itera para extraer la información de las impresiones
+                        * para la liquidación
+                        */
                         $facturas = [];
                         $liquidador = '';
                         $cantEstampillas = 0;
@@ -2374,23 +2405,15 @@ function consultar()
                                 'valor' => $value->fact_valor,
                                 'fecha_impr' => $value->impr_fecha,
                                 'fecha_pago' => $value->pago_fecha];
-
+                            
                             /*
-                            * Registra la informacion del tipo de estampilla
-                            * en el vector independiente $vEstampillas
-                            * para el informe consolidado
+                            * Solicita la agrupación de los resultados
+                            * dependiendo de los parametros de agrupacion recibidos
                             */
-                            if(!isset($vEstampillas[$value->fact_estampillaid]))
+                            if($vectorGet['agrupar'] == '1')
                             {
-                                $vEstampillas[$value->fact_estampillaid] = array(
-                                    'nombre_estampilla' => $value->fact_nombre,
-                                    'cant_estampilla'   => 0,
-                                    'valor_estampilla'  => 0
-                                    );
+                                $vEstampillas = $this->agruparResultadosImpresiones($liquidacion, $value, $vEstampillas, $vectorGet);
                             }
-
-                            $vEstampillas[$value->fact_estampillaid]['cant_estampilla']++;
-                            $vEstampillas[$value->fact_estampillaid]['valor_estampilla'] += (double)$value->fact_valor;
 
                             /*
                             * Valida que el nombre del liquidador no haya sido asignado
@@ -2429,28 +2452,9 @@ function consultar()
                         * Acumula la cantidad total de estampillas impresas
                         */
                         $cant_total_estampillas += (int)$liquidacion->cantEstampillas;
-
-                        /*
-                        * Valida si la liquidacion fue de tramite o de contrato
-                        * para extraer el numero de contrato y el valor del acto
-                        */
-                        if ($liquidacion->liqu_contratoid != 0)
-                        {
-                            $datosContrato = $this->codegen_model->getSelect('con_contratos c', 'c.cntr_numero, c.cntr_valor, c.cntr_tipocontratoid', 'WHERE cntr_id = ' . $liquidacion->liqu_contratoid);
-                            $liquidacion->numActo = $datosContrato[0]->cntr_numero;
-                            $liquidacion->valorActo = $datosContrato[0]->cntr_valor;
-                            $liquidacion->liqu_tipocontrato = 'Contrato '.$liquidacion->liqu_tipocontrato;
-                        } else
-                            {
-                                $datosTramite = $this->codegen_model->getSelect('est_liquidartramites t', 't.litr_tramiteid', 'WHERE litr_id = ' . $liquidacion->liqu_tramiteid);
-                                $nombreTramite = $this->codegen_model->getSelect('est_tramites ta', 'ta.tram_nombre', 'WHERE tram_id = ' . $datosTramite[0]->litr_tramiteid);
-                                $liquidacion->numActo = 'N/A';
-                                $liquidacion->valorActo = $liquidacion->liqu_valorsiniva;
-                                $liquidacion->liqu_tipocontrato = $nombreTramite[0]->tram_nombre;
-                            }
                     }
                 }
-            }
+            }//echo'<pre>';print_r($vEstampillas);echo'</pre>';exit();
         }
 
         /*
@@ -2472,6 +2476,139 @@ function consultar()
             'total_recaudado'        => $total_recaudado,
             'fecha'                  => $fecha
         );
+    }
+
+    /*
+    * Función de apoyo para agrupar los resultados de la consulta de impresiones
+    * de estampillas dependiendo de los parametros de agrupacion recibidos
+    */
+    function agruparResultadosImpresiones($objLiquidacion ,$objFactura, $vEstampillas, $vectorGet)
+    {
+        /*
+        * Se extraen los valores para agrupacion
+        */
+        $fecha_dividida     = explode('-', $objFactura->impr_fecha);
+        $anio               = $fecha_dividida[0];
+        $mes                = $fecha_dividida[1];
+        $nombre_tipoacto    = $objLiquidacion->tipoacto;
+        $nombre_subtipoacto = $objLiquidacion->subtipoacto;
+        $contribuyente      = $objLiquidacion->liqu_nit;
+        $mesesEspanol       = array(
+            '01' => 'Enero',
+            '02' => 'Febrero',
+            '03' => 'Marzo',
+            '04' => 'Abril',
+            '05' => 'Mayo',
+            '06' => 'Junio',
+            '07' => 'Julio',
+            '08' => 'Agosto',
+            '09' => 'Septiembre',
+            '10' => 'Octubre',
+            '11' => 'Noviembre',
+            '12' => 'Diciembre'
+        );
+
+        /*
+        * Si se solicitó agrupar por año se crea el indice si no existe
+        */
+        $objEstampillas = (object)$vEstampillas;
+        $objValidar = $objEstampillas;
+        if($vectorGet['group_anio'] == '1')
+        {
+            if(!property_exists($objValidar, $anio))
+            {
+                $objValidar->$anio = (object) array(
+                    'nombre' => $anio,
+                    'datos'  => new stdClass()
+                    );
+            }
+            $objGrupo   = $objValidar->$anio;
+            $objValidar = $objGrupo->datos;
+        }
+
+        /*
+        * Si se solicitó agrupar por mes se crea el indice si no existe
+        */
+        if($vectorGet['group_mes'] == '1')
+        {
+            if(!property_exists($objValidar, $mes))
+            {
+                $objValidar->$mes = (object) array(
+                    'nombre' => $mesesEspanol[$mes],
+                    'datos'  => new stdClass()
+                    );
+            }
+            $objGrupo   = $objValidar->$mes;
+            $objValidar = $objGrupo->datos;
+        }
+
+        /*
+        * Si se solicitó agrupar por contribuyente se crea el indice si no existe
+        */
+        if($vectorGet['group_contribuyente'] == '1')
+        {
+            if(!property_exists($objValidar, $contribuyente))
+            {
+                $objValidar->$contribuyente = (object) array(
+                    'nombre' => $objLiquidacion->liqu_nombrecontratista,
+                    'datos'  => new stdClass()
+                    );
+            }
+            $objGrupo   = $objValidar->$contribuyente;
+            $objValidar = $objGrupo->datos;
+        }
+
+        /*
+        * Si se solicitó agrupar por tipo acto se crea el indice si no existe
+        */
+        if($vectorGet['group_tipoacto'] == '1')
+        {
+            if(!property_exists($objValidar, $nombre_tipoacto))
+            {
+                $objValidar->$nombre_tipoacto = (object) array(
+                    'nombre' => $objLiquidacion->tipoacto,
+                    'datos'  => new stdClass()
+                    );
+            }
+            $objGrupo   = $objValidar->$nombre_tipoacto;
+            $objValidar = $objGrupo->datos;
+        }
+
+        /*
+        * Si se solicitó agrupar por subtipo acto se crea el indice si no existe
+        */
+        if($vectorGet['group_subtipoacto'] == '1')
+        {
+            if(!property_exists($objValidar, $nombre_subtipoacto))
+            {
+                $objValidar->$nombre_subtipoacto = (object) array(
+                    'nombre' => $objLiquidacion->liqu_tipocontrato,
+                    'datos'  => new stdClass()
+                    );
+            }
+            $objGrupo   = $objValidar->$nombre_subtipoacto;
+            $objValidar = $objGrupo->datos;
+        }
+
+        /*
+        * Registra la informacion del tipo de estampilla
+        * en el vector independiente para el informe consolidado
+        */
+        $strTipoEstampilla = $objFactura->fact_estampillaid;
+        if(!property_exists($objValidar, $strTipoEstampilla))
+        {
+            $objValidar->$strTipoEstampilla = (object)array(
+                'nombre_estampilla' => $objFactura->fact_nombre,
+                'cant_estampilla'   => 0,
+                'valor_estampilla'  => 0
+                );
+        }
+        $objValidar = $objValidar->$strTipoEstampilla;
+
+        $objValidar->cant_estampilla++;
+        $objValidar->valor_estampilla += (double)$objFactura->fact_valor;
+        
+        return $objEstampillas;
     }
 
     /*
