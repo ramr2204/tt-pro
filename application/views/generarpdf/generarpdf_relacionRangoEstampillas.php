@@ -105,7 +105,7 @@ Ibagué<br>
             	<td  style="height: 5mm; width:50mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"> <?php echo $estampilla['nombre_estampilla']; ?></td>            	
+                        border-bottom: 0.5px solid black;"> <?php echo $estampilla->nombre_estampilla; ?></td>            	
                 <td class="text-center" style="height: 5mm; width:30mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
@@ -113,11 +113,11 @@ Ibagué<br>
                 <td class="text-center" style="height: 5mm; width:20mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"> <?php echo number_format($estampilla['cant_estampilla'],0,',','.'); ?></td>
+                        border-bottom: 0.5px solid black;"> <?php echo number_format($estampilla->cant_estampilla,0,',','.'); ?></td>
             	<td class="text-right" style="height: 5mm; width:30mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><?php echo number_format(round($estampilla['valor_estampilla']),0,',','.');?><span style="color:white;">..</span></td>
+                        border-bottom: 0.5px solid black;"><?php echo number_format(round($estampilla->valor_estampilla),0,',','.');?><span style="color:white;">..</span></td>
             	<td  style="height: 5mm; width:30mm;border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
