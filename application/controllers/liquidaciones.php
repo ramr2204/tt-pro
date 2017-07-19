@@ -2512,13 +2512,14 @@ function consultar()
             '12' => 'Diciembre'
         );
 
-        $cant_agrupacion = 0;
+        $objEstampillas      = (object)$vEstampillas;
+        $objValidar          = $objEstampillas;
+        $cant_agrupacion     = 0;
+        $titulos_agrupacion  = array();
 
         /*
         * Si se solicitó agrupar por año se crea el indice si no existe
         */
-        $objEstampillas = (object)$vEstampillas;
-        $objValidar = $objEstampillas;
         if($vectorGet['group_anio'] == '1')
         {
             if(!property_exists($objValidar, $anio))
@@ -2532,6 +2533,7 @@ function consultar()
             $objValidar = $objGrupo->datos;
 
             $cant_agrupacion++;
+            $titulos_agrupacion[] = $anio;
         }
 
         /*
@@ -2550,6 +2552,7 @@ function consultar()
             $objValidar = $objGrupo->datos;
 
             $cant_agrupacion++;
+            $titulos_agrupacion[] = $mesesEspanol[$mes];
         }
 
         /*
@@ -2568,6 +2571,7 @@ function consultar()
             $objValidar = $objGrupo->datos;
 
             $cant_agrupacion++;
+            $titulos_agrupacion[] = $objLiquidacion->liqu_nombrecontratista;
         }
 
         /*
@@ -2586,6 +2590,7 @@ function consultar()
             $objValidar = $objGrupo->datos;
 
             $cant_agrupacion++;
+            $titulos_agrupacion[] = $objLiquidacion->tipoacto;
         }
 
         /*
@@ -2604,6 +2609,7 @@ function consultar()
             $objValidar = $objGrupo->datos;
 
             $cant_agrupacion++;
+            $titulos_agrupacion[] = $objLiquidacion->liqu_tipocontrato;
         }
 
         /*
@@ -2614,9 +2620,10 @@ function consultar()
         if(!property_exists($objValidar, $strTipoEstampilla))
         {
             $objValidar->$strTipoEstampilla = (object)array(
-                'nombre_estampilla' => $objFactura->fact_nombre,
-                'cant_estampilla'   => 0,
-                'valor_estampilla'  => 0
+                'nombre_estampilla'  => $objFactura->fact_nombre,
+                'cant_estampilla'    => 0,
+                'valor_estampilla'   => 0,
+                'titulos_agrupacion' => $titulos_agrupacion
                 );
         }
         $objValidar = $objValidar->$strTipoEstampilla;
@@ -2625,6 +2632,94 @@ function consultar()
         $objValidar->valor_estampilla += (double)$objFactura->fact_valor;
         
         return array('vec' => $objEstampillas, 'cant_agrupacion' => $cant_agrupacion);
+    }
+
+    /*
+    * Función de apoyo que concatena al string de la tabla html
+    * las filas titulo o de información dependiendo del contenido
+    */
+    public static function concatenarStrTabla($vecStrTabla, $objAgrupacion, $cantAgrupacion)
+    {
+        if(property_exists($objAgrupacion, 'nombre_titulo'))
+        {
+            $vecStrTabla = Liquidaciones::concatenarStrTabla($vecStrTabla, $objAgrupacion->datos, $cantAgrupacion);
+        }else
+            {
+                /*
+                * Valida si es una agrupación para iterar en las 
+                * agrupaciones inferiores
+                */
+                foreach($objAgrupacion as $objTestear)
+                {
+                    if(!property_exists($objTestear, 'nombre_estampilla'))
+                    {
+                        $vecStrTabla = Liquidaciones::concatenarStrTabla($vecStrTabla, $objTestear->datos, $cantAgrupacion);
+                    }else
+                        {
+                            /*
+                            * Determina la extensión de las celdas en los titulos
+                            */
+                            $expansion_celda1 = 1;
+                            $expansion_titulo1 = 1;
+                            if($cantAgrupacion > 3)
+                            {
+                                $expansion_celda1 = (int)$cantAgrupacion - 2;
+                            }elseif($cantAgrupacion == 2)
+                                {
+                                    $expansion_titulo1 = 2;
+                                }elseif($cantAgrupacion == 1)
+                                    {
+                                        $expansion_titulo1 = 3;
+                                    }
+    
+                            $strTemporal = $vecStrTabla['plantilla_inicio'].'<tr>';
+                            
+                            /*
+                            * Se agregan los titulos de la agrupación
+                            */
+                            $strExpansionTitulo = '';
+                            foreach($objTestear->titulos_agrupacion as $nom_grupo)
+                            {
+                                if($strExpansionTitulo == '')
+                                {
+                                    $strExpansionTitulo = 'colspan="'. $expansion_titulo1 .'"';
+                                    $strTemporal .= '<th '. $strExpansionTitulo .' style="background-color:#00632D;color:white;">'. $nom_grupo .'</th>';
+                                }else
+                                    {
+                                        $strTemporal .= '<th style="background-color:#00632D;color:white;">'. $nom_grupo .'</th>';
+                                    }
+                            }
+
+                            $strTemporal .= '</tr>'
+                                .'<tr>'
+                                    .'<th style="background-color:#3C3C3C;color:white;" colspan="'. $expansion_celda1 .'">Tipo Estampilla</th>'
+                                    .'<th style="background-color:#3C3C3C;color:white;">Cantidad</th>'
+                                    .'<th style="background-color:#3C3C3C;color:white;">Valor</th>'
+                                .'</tr>'
+                                .'</thead>'
+                                .'<tbody>';
+                
+                            foreach($objAgrupacion as $objEstampilla)
+                            {
+                                $strTemporal .= '<tr>'
+                                        .'<td colspan="'. $expansion_celda1 .'">'. $objEstampilla->nombre_estampilla .'</td>'
+                                        .'<td>'. number_format($objEstampilla->cant_estampilla,0,',','.') .'</td>'
+                                        .'<td>'. number_format($objEstampilla->valor_estampilla,0,',','.') .'</td>'
+                                    .'</tr>';
+                            }
+                            
+                            $strTemporal .= $vecStrTabla['plantilla_fin'].'<br><br><br>';
+                            $vecStrTabla['str_tablas_completas'] .= $strTemporal;
+                            
+                            /*
+                            * Se rompe el ciclo porque en una sola iteración se construye
+                            * la tabla para las estampillas en la agrupación
+                            */
+                            break;
+                        }
+                }
+            }
+        return $vecStrTabla;
     }
 
     /*
