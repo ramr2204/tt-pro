@@ -265,34 +265,41 @@ function generarInformeRangoImpresiones(e)
     /*
     * Se validan los checkbox de agrupación
     */
+    var bandAgrupar = 0;
+
     var group_anio = 0;
     if($('#group_anio').prop('checked'))
     {
-        group_anio = 1;
+        group_anio  = 1;
+        bandAgrupar = 1;
     }
 
     var group_mes = 0;
     if($('#group_mes').prop('checked'))
     {
-        group_mes = 1;
+        group_mes   = 1;
+        bandAgrupar = 1;
     }
 
     var group_contribuyente = 0;
     if($('#group_contribuyente').prop('checked'))
     {
         group_contribuyente = 1;
+        bandAgrupar         = 1;
     }
 
     var group_tipoacto = 0;
     if($('#group_tipoacto').prop('checked'))
     {
         group_tipoacto = 1;
+        bandAgrupar    = 1;
     }
 
     var group_subtipoacto = 0;
     if($('#group_subtipoacto').prop('checked'))
     {
         group_subtipoacto = 1;
+        bandAgrupar       = 1;
     }
 
     if((fe_i+fe_f) > 0)
@@ -333,6 +340,7 @@ function generarInformeRangoImpresiones(e)
                         +'&group_contribuyente='+group_contribuyente
                         +'&group_tipoacto='+group_tipoacto
                         +'&group_subtipoacto='+group_subtipoacto
+                        +'&agruparvista='+bandAgrupar
                         +'&agrupar=1');
                 }
     }

@@ -2304,6 +2304,7 @@ function consultar()
 
         $cant_total_estampillas = 0;
         $total_recaudado        = 0;
+        $cant_agrupaciones      = 0;
         if($liquidaciones)
         {
             /*
@@ -2412,7 +2413,9 @@ function consultar()
                             */
                             if($vectorGet['agrupar'] == '1')
                             {
-                                $vEstampillas = $this->agruparResultadosImpresiones($liquidacion, $value, $vEstampillas, $vectorGet);
+                                $resultadosAgrupacion = $this->agruparResultadosImpresiones($liquidacion, $value, $vEstampillas, $vectorGet);
+                                $vEstampillas         = $resultadosAgrupacion['vec'];
+                                $cant_agrupaciones    = $resultadosAgrupacion['cant_agrupacion'];
                             }
 
                             /*
@@ -2454,7 +2457,7 @@ function consultar()
                         $cant_total_estampillas += (int)$liquidacion->cantEstampillas;
                     }
                 }
-            }//echo'<pre>';print_r($vEstampillas);echo'</pre>';exit();
+            }
         }
 
         /*
@@ -2472,6 +2475,7 @@ function consultar()
         return array(
             'vec_liquidaciones'      => $vLiquidaciones,
             'vec_estampillas'        => $vEstampillas,
+            'cant_agrupacion'        => $cant_agrupaciones,
             'cant_total_estampillas' => $cant_total_estampillas,
             'total_recaudado'        => $total_recaudado,
             'fecha'                  => $fecha
@@ -2508,6 +2512,8 @@ function consultar()
             '12' => 'Diciembre'
         );
 
+        $cant_agrupacion = 0;
+
         /*
         * Si se solicitó agrupar por año se crea el indice si no existe
         */
@@ -2518,12 +2524,14 @@ function consultar()
             if(!property_exists($objValidar, $anio))
             {
                 $objValidar->$anio = (object) array(
-                    'nombre' => $anio,
+                    'nombre_titulo' => $anio,
                     'datos'  => new stdClass()
                     );
             }
             $objGrupo   = $objValidar->$anio;
             $objValidar = $objGrupo->datos;
+
+            $cant_agrupacion++;
         }
 
         /*
@@ -2534,12 +2542,14 @@ function consultar()
             if(!property_exists($objValidar, $mes))
             {
                 $objValidar->$mes = (object) array(
-                    'nombre' => $mesesEspanol[$mes],
+                    'nombre_titulo' => $mesesEspanol[$mes],
                     'datos'  => new stdClass()
                     );
             }
             $objGrupo   = $objValidar->$mes;
             $objValidar = $objGrupo->datos;
+
+            $cant_agrupacion++;
         }
 
         /*
@@ -2550,12 +2560,14 @@ function consultar()
             if(!property_exists($objValidar, $contribuyente))
             {
                 $objValidar->$contribuyente = (object) array(
-                    'nombre' => $objLiquidacion->liqu_nombrecontratista,
+                    'nombre_titulo' => $objLiquidacion->liqu_nombrecontratista,
                     'datos'  => new stdClass()
                     );
             }
             $objGrupo   = $objValidar->$contribuyente;
             $objValidar = $objGrupo->datos;
+
+            $cant_agrupacion++;
         }
 
         /*
@@ -2566,12 +2578,14 @@ function consultar()
             if(!property_exists($objValidar, $nombre_tipoacto))
             {
                 $objValidar->$nombre_tipoacto = (object) array(
-                    'nombre' => $objLiquidacion->tipoacto,
+                    'nombre_titulo' => $objLiquidacion->tipoacto,
                     'datos'  => new stdClass()
                     );
             }
             $objGrupo   = $objValidar->$nombre_tipoacto;
             $objValidar = $objGrupo->datos;
+
+            $cant_agrupacion++;
         }
 
         /*
@@ -2582,12 +2596,14 @@ function consultar()
             if(!property_exists($objValidar, $nombre_subtipoacto))
             {
                 $objValidar->$nombre_subtipoacto = (object) array(
-                    'nombre' => $objLiquidacion->liqu_tipocontrato,
+                    'nombre_titulo' => $objLiquidacion->liqu_tipocontrato,
                     'datos'  => new stdClass()
                     );
             }
             $objGrupo   = $objValidar->$nombre_subtipoacto;
             $objValidar = $objGrupo->datos;
+
+            $cant_agrupacion++;
         }
 
         /*
@@ -2608,7 +2624,7 @@ function consultar()
         $objValidar->cant_estampilla++;
         $objValidar->valor_estampilla += (double)$objFactura->fact_valor;
         
-        return $objEstampillas;
+        return array('vec' => $objEstampillas, 'cant_agrupacion' => $cant_agrupacion);
     }
 
     /*
@@ -2996,9 +3012,9 @@ function renderizarConsolidadoRangoImpresionesPDF()
                 $datos['resultados'] = $resultadosFiltros;
                 
                 //Creación del PDF
-                $this->load->library("Pdf");                  
-                $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);                  
-      
+                $this->load->library("Pdf");
+                $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
                 // set document information
                 $pdf->SetCreator(PDF_CREATOR);
                 $pdf->SetAuthor('turrisystem');
@@ -3007,14 +3023,34 @@ function renderizarConsolidadoRangoImpresionesPDF()
                 $pdf->SetKeywords('estampillas,gobernación');
                 $pdf->SetPrintHeader(false);
                 $pdf->SetPrintFooter(false);
+
                 // set default monospaced font
                 $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-      
-                // set margins
-                $pdf->setPageUnit('mm');
-                $pdf->SetMargins(30, 10, 20, true);
-                $pdf->SetHeaderMargin(0);
-                $pdf->SetFooterMargin(0);
+
+                /*
+                * Dependiendo de si se solicitó agrupacion se establece
+                * la orientación del documento y la vista para el PDF
+                */
+                if($_GET['agruparvista'] == '1')
+                {
+                    $vistaPDF = 'generarpdf_relacionRangoAgrupado';
+                    $pdf->setPageOrientation('l');
+
+                    // set margins
+                    $pdf->setPageUnit('mm');
+                    $pdf->SetMargins(10, 5, 20, true);
+                    $pdf->SetHeaderMargin(0);
+                    $pdf->SetFooterMargin(0);
+                }else
+                    {
+                        $vistaPDF = 'generarpdf_relacionRangoEstampillas';
+
+                        // set margins
+                        $pdf->setPageUnit('mm');
+                        $pdf->SetMargins(30, 10, 20, true);
+                        $pdf->SetHeaderMargin(0);
+                        $pdf->SetFooterMargin(0);
+                    }
             
                 // set auto page breaks
                 $pdf->SetAutoPageBreak(TRUE, 2);
@@ -3024,13 +3060,11 @@ function renderizarConsolidadoRangoImpresionesPDF()
                     require_once(dirname(__FILE__).'/lang/eng.php');
                     $pdf->setLanguageArray($l);
                 }
-                     
-                        // ---------------------------------------------------------
                   
                 // set font
                 $pdf->SetFont('helvetica', '', 10);
                 $pdf->AddPage();                  
-                $html = $this->load->view('generarpdf/generarpdf_relacionRangoEstampillas', $datos, TRUE);  
+                $html = $this->load->view('generarpdf/'.$vistaPDF, $datos, TRUE);  
                       
                 $pdf->writeHTML($html, true, false, true, false, '');
                  
