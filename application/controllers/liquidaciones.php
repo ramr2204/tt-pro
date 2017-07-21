@@ -3137,8 +3137,11 @@ function renderizarConsolidadoRangoImpresionesPDF()
                 * Dependiendo de si se solicitó agrupacion se establece
                 * la orientación del documento y la vista para el PDF
                 */
+                $especificacion_nombre_archivo = '';
                 if($_GET['agruparvista'] == '1')
                 {
+                    $especificacion_nombre_archivo = 'Agrupado_';
+
                     $vistaPDF = 'generarpdf_relacionRangoAgrupado';
                     $pdf->setPageOrientation('l');
 
@@ -3180,7 +3183,7 @@ function renderizarConsolidadoRangoImpresionesPDF()
                 //el PDF 
                 ob_end_clean();
                 //Close and output PDF document
-                $pdf->Output('Relacion_Entrega_Estampillas_Rango_'. str_replace(' ', '_', $resultadosFiltros['fecha']) .'.pdf', 'I');
+                $pdf->Output('Relacion_Entrega_Estampillas_Rango_'. $especificacion_nombre_archivo . str_replace(' ', '_', $resultadosFiltros['fecha']) .'.pdf', 'I');
             }else
                 {   
                     $this->session->set_flashdata('errormessage', 'El Rango de fechas elegido no presenta registros!'); 
