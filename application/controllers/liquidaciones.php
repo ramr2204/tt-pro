@@ -2698,7 +2698,9 @@ function consultar()
                                 .'</tr>'
                                 .'</thead>'
                                 .'<tbody>';
-                
+                            
+                            $valor_total_agrupacion = 0;
+                            $cant_total_agrupacion  = 0;
                             foreach($objAgrupacion as $objEstampilla)
                             {
                                 $strTemporal .= '<tr>'
@@ -2706,9 +2708,18 @@ function consultar()
                                         .'<td>'. number_format($objEstampilla->cant_estampilla,0,',','.') .'</td>'
                                         .'<td>'. number_format($objEstampilla->valor_estampilla,0,',','.') .'</td>'
                                     .'</tr>';
+
+                                $valor_total_agrupacion += (double)$objEstampilla->valor_estampilla;
+                                $cant_total_agrupacion  += (double)$objEstampilla->cant_estampilla;
                             }
                             
-                            $strTemporal .= $vecStrTabla['plantilla_fin'].'<br><br><br>';
+                            $strTemporal .= '<tr>'
+                                    .'<td colspan="'. $expansion_celda1 .'"><b>TOTAL</b></td>'
+                                    .'<td><b>'. number_format($cant_total_agrupacion,0,',','.') .'</b></td>'
+                                    .'<td><b>'. number_format($valor_total_agrupacion,0,',','.') .'</b></td>'
+                                .'</tr>'
+                                .$vecStrTabla['plantilla_fin'].'<br><br><br>';
+
                             $vecStrTabla['str_tablas_completas'] .= $strTemporal;
                             
                             /*
