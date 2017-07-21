@@ -29,12 +29,12 @@ foreach($resultados['vec_estampillas'] as $objInformacion)
 <table border="1">
     <tbody>
     <tr>
-        <td style="width:214mm;"><strong> CANTIDAD TOTAL ESTAMPILLAS</strong></td>                 
-        <td style="width:20mm;text-align:center;"><strong><?php echo number_format($resultados['cant_total_estampillas'],0,',','.'); ?></strong></td>
+        <td style="width:150mm;"><strong> CANTIDAD TOTAL ESTAMPILLAS</strong></td>                 
+        <td style="width:55mm;text-align:center;"><strong><?php echo number_format($resultados['cant_total_estampillas'],0,',','.'); ?></strong></td>
     </tr>
     <tr>
-        <td style="width:214mm;"><strong> TOTAL RECAUDADO</strong></td>                 
-        <td style="width:20mm;text-align:center;">$ <strong><?php echo number_format($resultados['total_recaudado'],0,',','.'); ?></strong></td>
+        <td style="width:150mm;"><strong> TOTAL RECAUDADO</strong></td>                 
+        <td style="width:55mm;text-align:center;">$ <strong><?php echo number_format($resultados['total_recaudado'],0,',','.'); ?></strong></td>
     </tr>
     </tbody>
 </table>
