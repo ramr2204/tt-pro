@@ -121,8 +121,17 @@
                           {
                               if($row2->impr_estado == 2)
                               { 
-                                  echo anchor(base_url().'liquidaciones/procesarConsecutivos/'.$row2->fact_id,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large btn-default confirmar_impresion" target="_blank"');
-
+                                    /*
+                                    * Se agrega validación especifica para estampillas
+                                    * por un contrato especifico
+                                    */
+                                    if($result->liqu_contratoid != 11219)
+                                    {
+                                        echo anchor(base_url().'liquidaciones/procesarConsecutivos/'.$row2->fact_id,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large btn-default confirmar_impresion" target="_blank"');
+                                    }else
+                                        {
+                                            echo '<a href="#" class="btn btn-large  btn-default" disabled><i class="fa fa-print"></i>Imprimir estampilla</a>';
+                                        }
                               }else{ ?>
                                      <a href="#" class="btn btn-large  btn-default" disabled><i class="fa fa-print"></i>Imprimir estampilla</a>    
                      <?php         }  
