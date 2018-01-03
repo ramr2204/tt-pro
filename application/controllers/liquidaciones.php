@@ -2073,7 +2073,7 @@ function renderizarDetalleRangoPDF()
     {
         if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar') ) 
         {
-            $resultadosFiltros = Liquidaciones::extraerRegistrosDetalleImpresiones($_GET);
+            $resultadosFiltros = Liquidaciones::extraerRegistrosDetalleImpresiones($_GET, true);
 
             /*
             * Valida si hubo resultados para generar el pdf
@@ -2156,7 +2156,7 @@ function renderizarDetalleRangoPDF()
     *  Función de apoyo que realiza la consulta para renderizar el detalle
     * de impresiones según los filtros suministrados
     */
-    function extraerRegistrosDetalleImpresiones($vectorGet)
+    function extraerRegistrosDetalleImpresiones($vectorGet, $bandDetallado = false)
     {
         header("Expires: 0");
         ini_set('memory_limit', '-1');
@@ -2191,10 +2191,10 @@ function renderizarDetalleRangoPDF()
         /*
          * Extrae el posible subtipo de acto (tipo de tramite o tipo de contrato)
          */
-        $bandValidarActo = false;
+        $bandValidarSubtipoActo = false;
         if($subTipoActo != '0')
         {
-            $bandValidarActo = true;
+            $bandValidarSubtipoActo = true;
             if(preg_match('/^c_([0-9]+)$/',$subTipoActo,$coincidencias))
             {
                 $id_subtipoacto = $coincidencias[1];
@@ -2209,7 +2209,8 @@ function renderizarDetalleRangoPDF()
         /*
         * Construye la query inicial
         */
-        $sqlInicial = ' if(liq.liqu_contratoid = 0,"N/A", concat("Contrato"," ",liq.liqu_tipocontrato)) as liqu_tipocontrato, '
+        $campos = ' liq.liqu_id,'
+            .' if(liq.liqu_contratoid = 0,"N/A", concat("Contrato"," ",liq.liqu_tipocontrato)) as liqu_tipocontrato, '
             .' if(liq.liqu_contratoid = 0,"tramite","contrato") as tipoacto,'
             .' if(liq.liqu_numero = "","N/A", liq. liqu_numero) as numActo,'
             .' liq.liqu_nombrecontratista,'
@@ -2220,12 +2221,6 @@ function renderizarDetalleRangoPDF()
         $join = ' INNER JOIN est_facturas fac ON imp.`impr_facturaid` = fac.`fact_id`'
             .' INNER JOIN `est_liquidaciones` liq ON liq.`liqu_id` = fac.`fact_liquidacionid`';
 
- /*'INNER JOIN `con_contratos` con ON con.`cntr_id` = liq.`liqu_contratoid`
-
-and fac.`fact_estampillaid` = 9
-and con.`cntr_tipocontratoid` = 1
-and `impr_fecha` between '2017-01-01' and '2017-12-31'  ';
-*/
         /*
         * Se Validan los valores que llegan para construir el where
         */
@@ -2253,23 +2248,11 @@ and `impr_fecha` between '2017-01-01' and '2017-12-31'  ';
             $where .= ' fac.`fact_estampillaid` = '.$tipoEst;
         }
 
-        if($t_acto == 'contrato')
-        {
-            $where = Liquidaciones::concatenarWhere($where);
-            $where .= ' liq.liqu_contratoid <> 0';
-        }
-
-        if($t_acto == 'tramite')
-        {
-            $where = Liquidaciones::concatenarWhere($where);
-            $where .= ' liq.liqu_contratoid = 0';
-        }
-
         if($contribuyente != '0')
         {
             $where = Liquidaciones::concatenarWhere($where);
             preg_match('/^[t|c]_([0-9\-]+)$/',$contribuyente,$coincidencia);
-            $where .= ' l.liqu_nit = "'. $coincidencia[1] .'" ';
+            $where .= ' liq.liqu_nit = "'. $coincidencia[1] .'" ';
         }
 
         if($tipoActo != '0')
@@ -2285,44 +2268,33 @@ and `impr_fecha` between '2017-01-01' and '2017-12-31'  ';
                 }
         }
 
-        if($bandValidarActo)
+        if($bandValidarSubtipoActo)
         {
-            $where = Liquidaciones::concatenarWhere($where);
-            $where .=
+            if($t_acto == 'contrato')
+            {
+                $where = Liquidaciones::concatenarWhere($where);
+                $where .= ' liq.liqu_contratoid <> 0';
+
+                $join .= ' INNER JOIN `con_contratos` con ON con.`cntr_id` = liq.`liqu_contratoid`';
+
+                $where = Liquidaciones::concatenarWhere($where);
+                $where .= ' con.`cntr_tipocontratoid` = '.$id_subtipoacto;
+            }
+    
+            if($t_acto == 'tramite')
+            {
+                $where = Liquidaciones::concatenarWhere($where);
+                $where .= ' liq.liqu_contratoid = 0';
+
+                $join .= ' INNER JOIN `est_liquidartramites` liqt ON liqt.`litr_id` = liq.`liqu_tramiteid`';
+
+                $where = Liquidaciones::concatenarWhere($where);
+                $where .= ' liqt.`litr_tramiteid` = '.$id_subtipoacto;
+            }
         }
 
-        $facturas = $this->codegen_model->getSelect('est_impresiones imp',"i.impr_facturaid",$where,$join);
-
-        //se extrae el vector con los id de las facturas
-        $idFacturas = '(';
-        foreach ($facturas as $factura)
-        {
-            $idFacturas .= $factura->impr_facturaid.',';
-        }
-        $idFacturas .= '0)';
-        $where = 'where fact_id in '.$idFacturas;
-
-        //Extrae los id de las liquidaciones
-        $liquidaciones = $this->codegen_model->getSelect('est_facturas f',"distinct f.fact_liquidacionid",$where);
-
-        //se extrae el vector con los id de las liquidaciones
-        $idLiquidaciones = '(';
-        foreach ($liquidaciones as $liquidacion)
-        {
-            $idLiquidaciones .= $liquidacion->fact_liquidacionid.',';
-        }
-        $idLiquidaciones .= '0)';
-        $whereIn = 'where l.liqu_id in '.$idLiquidaciones;
-        $join2 = ' INNER JOIN est_liquidaciones l ON l.liqu_id = f.fact_liquidacionid';
-
-        $campos = 'l.liqu_contratoid,l.liqu_tramiteid,l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_valorsiniva,l.liqu_fecha';
-        $where = $whereIn;
-        $group = 'GROUP BY l.liqu_id';
-        
-
-      
-
-        $liquidaciones = $this->codegen_model->getSelect('est_facturas f',$campos,$where,$join2, $group);
+        $liquidaciones = $this->codegen_model->getSelect('est_impresiones imp',$campos,$where,$join, 'GROUP BY liq.liqu_id');
+echo'<pre>';print_r($liquidaciones);echo'</pre>';exit();
         
         /*
         * Inicializa las variables para la respuesta
@@ -2364,32 +2336,6 @@ and `impr_fecha` between '2017-01-01' and '2017-12-31'  ';
                 */
                 if(count($resultado) > 0)
                 {
-                    $bandAgregar = true;
-                    if ($bandValidarActo) 
-                    {
-                        /*
-                         * Valida si se debe agregar el registro a la coleccion
-                         * dependiendo si es del tipo de acto suministrado o no
-                         */
-                        $bandAgregar   = false;
-                        $datosContrato = array();
-                        $datosTramite  = array();
-
-                        if ($liquidacion->liqu_contratoid != '0' && $t_acto == 'contrato') {
-                            $datosContrato = $this->codegen_model->getSelect('con_contratos c', 'c.cntr_numero, c.cntr_valor, c.cntr_tipocontratoid', 'WHERE cntr_id = ' . $liquidacion->liqu_contratoid);
-                            if ($datosContrato[0]->cntr_tipocontratoid == $id_acto) {
-                                $bandAgregar = true;
-                            }
-                        } elseif ($liquidacion->liqu_tramiteid != '0' && $t_acto == 'tramite') {
-                            $datosTramite = $this->codegen_model->getSelect('est_liquidartramites t', 't.litr_tramiteid', 'WHERE litr_id = ' . $liquidacion->liqu_tramiteid);
-                            if ($datosTramite[0]->litr_tramiteid == $id_acto) {
-                                $bandAgregar = true;
-                            }
-                        }
-                    }
-
-                    if($bandAgregar)
-                    {
                         /*
                         * Agrega el objeto de la liquidacion al vector
                         * que irá a la vista
@@ -2483,7 +2429,6 @@ and `impr_fecha` between '2017-01-01' and '2017-12-31'  ';
                         * Acumula la cantidad total de estampillas impresas
                         */
                         $cant_total_estampillas += (int)$liquidacion->cantEstampillas;
-                    }
                 }
             }
         }
@@ -2955,7 +2900,7 @@ function renderizarDetalleRangoExcel()
     {
         if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar') ) 
         {
-            $resultadosFiltros = Liquidaciones::extraerRegistrosDetalleImpresiones($_GET);
+            $resultadosFiltros = Liquidaciones::extraerRegistrosDetalleImpresiones($_GET, true);
 
             /*
             * Valida si hubo resultados para generar el pdf
