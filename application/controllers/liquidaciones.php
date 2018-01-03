@@ -2067,79 +2067,79 @@ function consultar()
 * de las liquidaciones de la fecha especificada
 * Mike Ortiz
 */
-  function renderizarDetalleRangoPDF()
-  {
+function renderizarDetalleRangoPDF()
+{
     if ($this->ion_auth->logged_in()) 
     {
         if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar') ) 
         {
             $resultadosFiltros = Liquidaciones::extraerRegistrosDetalleImpresiones($_GET);
 
-                /*
-                * Valida si hubo resultados para generar el pdf
-                */
-                if(count($resultadosFiltros['vec_liquidaciones']) <= 0)
-                {
-                    $this->session->set_flashdata('errormessage', 'La fecha elegida no presenta registros!'); 
-                    redirect(base_url().'index.php/liquidaciones/consultar');
-                }
+            /*
+            * Valida si hubo resultados para generar el pdf
+            */
+            if(count($resultadosFiltros['vec_liquidaciones']) <= 0)
+            {
+                $this->session->set_flashdata('errormessage', 'La fecha elegida no presenta registros!'); 
+                redirect(base_url().'index.php/liquidaciones/consultar');
+            }
 
-                $datos['fecha']            = $resultadosFiltros['fecha'];
-                $datos['liquidaciones']    = $resultadosFiltros['vec_liquidaciones'];
-                $datos['totalRecaudado']   = $resultadosFiltros['total_recaudado'];
-                $datos['totalEstampillas'] = $resultadosFiltros['cant_total_estampillas'];
+            $datos['fecha']            = $resultadosFiltros['fecha'];
+            $datos['liquidaciones']    = $resultadosFiltros['vec_liquidaciones'];
+            $datos['totalRecaudado']   = $resultadosFiltros['total_recaudado'];
+            $datos['totalEstampillas'] = $resultadosFiltros['cant_total_estampillas'];
 
-                //Creación del PDF
-                $this->load->library("Pdf");                  
-                $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-                $pdf->setPageOrientation('l');
+            //Creación del PDF
+            $this->load->library("Pdf");                  
+            $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+            $pdf->setPageOrientation('l');
 
-                // set document information
-                $pdf->SetCreator(PDF_CREATOR);
-                $pdf->SetAuthor('turrisystem');
-                $pdf->SetTitle('Listado de Impresiones');
-                $pdf->SetSubject('Gobernación del Tolima');
-                $pdf->SetKeywords('estampillas,gobernación');
-                $pdf->SetPrintHeader(false);
-                $pdf->SetPrintFooter(false);
-                // set default monospaced font
-                $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+            // set document information
+            $pdf->SetCreator(PDF_CREATOR);
+            $pdf->SetAuthor('turrisystem');
+            $pdf->SetTitle('Listado de Impresiones');
+            $pdf->SetSubject('Gobernación del Tolima');
+            $pdf->SetKeywords('estampillas,gobernación');
+            $pdf->SetPrintHeader(false);
+            $pdf->SetPrintFooter(false);
+            // set default monospaced font
+            $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
-                // set margins
-                $pdf->setPageUnit('mm');
-                $pdf->SetMargins(10, 5, 20, true);
-                $pdf->SetHeaderMargin(0);
-                $pdf->SetFooterMargin(0);
+            // set margins
+            $pdf->setPageUnit('mm');
+            $pdf->SetMargins(10, 5, 20, true);
+            $pdf->SetHeaderMargin(0);
+            $pdf->SetFooterMargin(0);
       
-                // set auto page breaks
-                $pdf->SetAutoPageBreak(TRUE, 2);
+            // set auto page breaks
+            $pdf->SetAutoPageBreak(TRUE, 2);
 
-                // set some language-dependent strings (optional)
-                if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-                    require_once(dirname(__FILE__).'/lang/eng.php');
-                    $pdf->setLanguageArray($l);
-                }
+            // set some language-dependent strings (optional)
+            if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+                require_once(dirname(__FILE__).'/lang/eng.php');
+                $pdf->setLanguageArray($l);
+            }
                
-                // ---------------------------------------------------------
+            // ---------------------------------------------------------
             
-                // set font
-                $pdf->SetFont('helvetica', '', 9);
-                $pdf->AddPage();                  
-                $html = $this->load->view('generarpdf/generarpdf_impresiones', $datos, TRUE);  
+            // set font
+            $pdf->SetFont('helvetica', '', 9);
+            $pdf->AddPage();
+            $html = $this->load->view('generarpdf/generarpdf_impresiones', $datos, TRUE);  
                 
-                $pdf->writeHTML($html, true, false, true, false, '');
+            $pdf->writeHTML($html, true, false, true, false, '');
            
 
-                // ---------------------------------------------------------
-                //para evitar el error de que se ha impreso algo antes de enviar
-                //el PDF 
-                ob_end_clean();
-                //Close and output PDF document
+            // ---------------------------------------------------------
+            //para evitar el error de que se ha impreso algo antes de enviar
+            //el PDF 
+            ob_end_clean();
+            //Close and output PDF document
 
-                /*
-                * Establece el nombre del archivo
-                */
-                $pdf->Output('Impresiones_'. str_replace(' ','_',$datos['fecha']) .'.pdf', 'I');
+            /*
+            * Establece el nombre del archivo
+            */
+            $pdf->Output('Impresiones_'. str_replace(' ','_',$datos['fecha']) .'.pdf', 'I');
         } else 
             {
                 redirect(base_url().'index.php/error_404');
@@ -2148,16 +2148,15 @@ function consultar()
     }else
         {
             redirect(base_url().'index.php/users/login');
-        } 
-      
-  }
+        }
+}
 
 
     /**
     *  Función de apoyo que realiza la consulta para renderizar el detalle
     * de impresiones según los filtros suministrados
     */
-   function extraerRegistrosDetalleImpresiones($vectorGet)
+    function extraerRegistrosDetalleImpresiones($vectorGet)
     {
         header("Expires: 0");
         ini_set('memory_limit', '-1');
@@ -2176,9 +2175,9 @@ function consultar()
         {
             $fecha_final = $vectorGet['fecha_F'];
         }else
-        {
-            $fecha_final = "";
-        }
+            {
+                $fecha_final = "";
+            }
 
         /*
         * Valida que lleguen fechas
@@ -2190,7 +2189,7 @@ function consultar()
         }
 
         /*
-         * Extrae el posible tipo de acto
+         * Extrae el posible subtipo de acto (tipo de tramite o tipo de contrato)
          */
         $bandValidarActo = false;
         if($subTipoActo != '0')
@@ -2198,44 +2197,101 @@ function consultar()
             $bandValidarActo = true;
             if(preg_match('/^c_([0-9]+)$/',$subTipoActo,$coincidencias))
             {
-                $id_acto = $coincidencias[1];
+                $id_subtipoacto = $coincidencias[1];
                 $t_acto = 'contrato';
             }elseif(preg_match('/^t_([0-9]+)$/',$subTipoActo,$coincidencias))
             {
-                $id_acto = $coincidencias[1];
+                $id_subtipoacto = $coincidencias[1];
                 $t_acto = 'tramite';
             }
         }
 
         /*
+        * Construye la query inicial
+        */
+        $sqlInicial = ' if(liq.liqu_contratoid = 0,"N/A", concat("Contrato"," ",liq.liqu_tipocontrato)) as liqu_tipocontrato, '
+            .' if(liq.liqu_contratoid = 0,"tramite","contrato") as tipoacto,'
+            .' if(liq.liqu_numero = "","N/A", liq. liqu_numero) as numActo,'
+            .' liq.liqu_nombrecontratista,'
+            .' liq.liqu_nit,'
+            .' liq.liqu_fecha,'
+            .' liq.liqu_valorsiniva as valorActo';
+        
+        $join = ' INNER JOIN est_facturas fac ON imp.`impr_facturaid` = fac.`fact_id`'
+            .' INNER JOIN `est_liquidaciones` liq ON liq.`liqu_id` = fac.`fact_liquidacionid`';
+
+ /*'INNER JOIN `con_contratos` con ON con.`cntr_id` = liq.`liqu_contratoid`
+
+and fac.`fact_estampillaid` = 9
+and con.`cntr_tipocontratoid` = 1
+and `impr_fecha` between '2017-01-01' and '2017-12-31'  ';
+*/
+        /*
         * Se Validan los valores que llegan para construir el where
         */
-        $where = 'WHERE i.impr_estado = 1 ';
+        $where = 'WHERE imp.impr_estado = 1 ';
         if($fecha_inicial != "" && $fecha_final != "")
         {
-            $where .= ' AND date_format(i.impr_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial.'" AND "'.$fecha_final.'"';
+            $where .= ' AND date_format(imp.impr_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial.'" AND "'.$fecha_final.'"';
         }
         if($fecha_inicial != "" && $fecha_final == "")
         {
-            $where .= ' AND date_format(i.impr_fecha,"%Y-%m-%d") = "'.$fecha_inicial.'"';
+            $where .= ' AND date_format(imp.impr_fecha,"%Y-%m-%d") = "'.$fecha_inicial.'"';
             //Bandera para la leyenda de la fecha
             $fechaUnica = $fecha_inicial;
         }
         if($fecha_final != "" && $fecha_inicial == "")
         {
-            $where .= ' AND date_format(i.impr_fecha,"%Y-%m-%d") = "'.$fecha_final.'"';
+            $where .= ' AND date_format(imp.impr_fecha,"%Y-%m-%d") = "'.$fecha_final.'"';
             //Bandera para la leyenda de la fecha
             $fechaUnica = $fecha_final;
         }
 
-        /*
-        * Crea la consulta para el perfil de administrador o Usuario conciliación
-        * para mostrar todas las impresiones
-        */
-        $usuario = $this->ion_auth->user()->row();
-        $join = '';
+        if($tipoEst != '0')
+        {
+            $where = Liquidaciones::concatenarWhere($where);
+            $where .= ' fac.`fact_estampillaid` = '.$tipoEst;
+        }
 
-        $facturas = $this->codegen_model->getSelect('est_impresiones i',"i.impr_facturaid",$where,$join);
+        if($t_acto == 'contrato')
+        {
+            $where = Liquidaciones::concatenarWhere($where);
+            $where .= ' liq.liqu_contratoid <> 0';
+        }
+
+        if($t_acto == 'tramite')
+        {
+            $where = Liquidaciones::concatenarWhere($where);
+            $where .= ' liq.liqu_contratoid = 0';
+        }
+
+        if($contribuyente != '0')
+        {
+            $where = Liquidaciones::concatenarWhere($where);
+            preg_match('/^[t|c]_([0-9\-]+)$/',$contribuyente,$coincidencia);
+            $where .= ' l.liqu_nit = "'. $coincidencia[1] .'" ';
+        }
+
+        if($tipoActo != '0')
+        {
+            if($tipoActo == '1') //Valida si se solicitan solo contratos
+            {
+                $where = Liquidaciones::concatenarWhere($where);
+                $where .= ' liq.liqu_contratoid <> 0';
+            }elseif($tipoActo == '2') //Valida si se solicitan solo tramites
+                {
+                    $where = Liquidaciones::concatenarWhere($where);
+                    $where .= ' liq.liqu_contratoid = 0';
+                }
+        }
+
+        if($bandValidarActo)
+        {
+            $where = Liquidaciones::concatenarWhere($where);
+            $where .=
+        }
+
+        $facturas = $this->codegen_model->getSelect('est_impresiones imp',"i.impr_facturaid",$where,$join);
 
         //se extrae el vector con los id de las facturas
         $idFacturas = '(';
@@ -2262,37 +2318,9 @@ function consultar()
         $campos = 'l.liqu_contratoid,l.liqu_tramiteid,l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_valorsiniva,l.liqu_fecha';
         $where = $whereIn;
         $group = 'GROUP BY l.liqu_id';
+        
 
-        /*
-         * Valida si se suministró el id de un contribuyente para
-         * realizar el filtrado en las liquidaciones
-         */
-        $whereContribuyente = '';
-        if($contribuyente != '0')
-        {
-            preg_match('/^[t|c]_([0-9\-]+)$/',$contribuyente,$coincidencia);
-            $whereContribuyente = ' AND l.liqu_nit = "'. $coincidencia[1] .'" ';
-        }
-
-        $where .= $whereContribuyente;
-
-        /*
-        * Valida si se suministró un tipo de acto
-        * contrato o tramite para agregar el where
-        */
-        $whereTipoActo = '';
-        if($tipoActo != '0')
-        {
-            if($tipoActo == '1') //Valida si se solicitan solo contratos
-            {
-                $whereTipoActo .= ' AND l.liqu_tramiteid = 0 ';
-            }elseif($tipoActo == '2') //Valida si se solicitan solo tramites
-                {
-                    $whereTipoActo .= ' AND l.liqu_contratoid = 0 ';
-                }
-        }
-
-        $where .= $whereTipoActo;
+      
 
         $liquidaciones = $this->codegen_model->getSelect('est_facturas f',$campos,$where,$join2, $group);
         
@@ -2731,6 +2759,22 @@ function consultar()
                 }
             }
         return $vecStrTabla;
+    }
+
+    /*
+    * Funcion de apoyo que procesa la construccion del bloque where
+    * para la vista index
+    */
+    public static function concatenarWhere($strWhere)
+    {
+        if($strWhere == '')
+        {
+            $strWhere .= ' WHERE ';
+        }else
+        {
+            $strWhere .= ' AND ';
+        }
+        return $strWhere;
     }
 
     /*
