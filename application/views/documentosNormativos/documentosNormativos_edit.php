@@ -57,7 +57,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="docnor_numero">Número de documentoN</label>
-                                    <input class="form-control" id="docnor_numero" type="number" name="docnor_numero" required="required" maxlength="100" value="<?php echo $documentoN->docnor_numero;?>" />
+                                    <input class="form-control" id="docnor_numero" type="text" name="docnor_numero" required="required" maxlength="100" value="<?php echo $documentoN->docnor_numero;?>" />
                                     <?php echo form_error('docnor_numero','<span class="text-danger">','</span>'); ?>
                                 </div>
                                 <div class="form-group">

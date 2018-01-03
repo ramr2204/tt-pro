@@ -301,7 +301,7 @@ class Liquidaciones extends MY_Controller {
                         //sea >= 10 SMMLV para aplicar la estampilla pro grandeza de colombia                
                         if($value->estm_id == 8)
                         {
-                            if($contrato->cntr_tipocontratoid==9 || $contrato->cntr_tipocontratoid==7)
+                            if($contrato->cntr_tipocontratoid==9 || $contrato->cntr_tipocontratoid==7 || $contrato->cntr_tipocontratoid==37)
                             {
                                  $valor10SMMLV = $parametros->para_salariominimo * 10;
         
