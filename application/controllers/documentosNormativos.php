@@ -112,7 +112,7 @@ class DocumentosNormativos extends MY_Controller {
             {                
                 $this->form_validation->set_rules('docnor_fecha', 'Fecha Documento', 'required|trim|xss_clean|required');   
                 $this->form_validation->set_rules('docnor_iniciovigencia', 'Fecha Inicio Vigencia', 'trim|xss_clean|required');
-                $this->form_validation->set_rules('docnor_numero', 'Número de Documento', 'numeric|trim|xss_clean|required');
+                $this->form_validation->set_rules('docnor_numero', 'Número de Documento', 'trim|xss_clean|required');
                 $this->form_validation->set_rules('docnor_tipo', 'Tipo de Documento', 'numeric|trim|xss_clean|required');
 
                 if($this->form_validation->run() == false) 
@@ -162,7 +162,7 @@ class DocumentosNormativos extends MY_Controller {
                         $year = explode('-', $this->input->post('docnor_fecha'));
                         $year = $year[0];
 
-                        $where = 'WHERE docnor_numero = '.$this->input->post('docnor_numero')
+                        $where = 'WHERE docnor_numero = "'.$this->input->post('docnor_numero').'"'
                             .' AND docnor_year ="'.$year.'"'
                             .' AND docnor_tipo = '.$vTipoDoc[0]->tidocn_id;
 
@@ -323,7 +323,7 @@ class DocumentosNormativos extends MY_Controller {
 
                 $this->form_validation->set_rules('docnor_fecha', 'Fecha Documento', 'required|trim|xss_clean|required');   
                 $this->form_validation->set_rules('docnor_iniciovigencia', 'Fecha Inicio Vigencia', 'trim|xss_clean|required');
-                $this->form_validation->set_rules('docnor_numero', 'Número de Documento', 'numeric|trim|xss_clean|required');
+                $this->form_validation->set_rules('docnor_numero', 'Número de Documento', 'trim|xss_clean|required');
                 $this->form_validation->set_rules('docnor_tipo', 'Tipo de Documento', 'numeric|trim|xss_clean|required');
 
                 if($this->form_validation->run() == false) 
@@ -376,7 +376,7 @@ class DocumentosNormativos extends MY_Controller {
 
                         if($vDocumentoN[0]->docnor_numero != $this->input->post('docnor_numero') || $vDocumentoN[0]->docnor_year != $year || $vDocumentoN[0]->docnor_tipo != $this->input->post('docnor_tipo'))
                         {
-                            $where = 'WHERE docnor_numero = '.$this->input->post('docnor_numero')
+                            $where = 'WHERE docnor_numero = "'.$this->input->post('docnor_numero').'"'
                             .' AND docnor_year ="'.$year.'"'
                             .' AND docnor_tipo = '.$vTipoDoc[0]->tidocn_id;
 
