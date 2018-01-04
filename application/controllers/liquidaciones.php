@@ -2221,11 +2221,14 @@ function renderizarDetalleRangoPDF()
             .' fac.fact_valor,'
             .' imp.impr_codigopapel,'
             .' imp.impr_fecha,'
-            .' pag.pago_fecha';
+            .' pag.pago_fecha,'
+            .' concat(u.first_name," ",u.last_name) as liquidador';
         
         $join = ' INNER JOIN est_facturas fac ON imp.`impr_facturaid` = fac.`fact_id`'
             .' INNER JOIN `est_liquidaciones` liq ON liq.`liqu_id` = fac.`fact_liquidacionid`'
-            .' INNER JOIN est_pagos pag ON pag.pago_facturaid = fac.`fact_id`';
+            .' INNER JOIN est_pagos pag ON pag.pago_facturaid = fac.`fact_id`'
+            .' INNER JOIN est_papeles pap ON imp.impr_papelid = pap.pape_id'
+            .' INNER JOIN users u ON u.id = pap.pape_usuario';
 
         /*
         * Se Validan los valores que llegan para construir el where
@@ -2312,25 +2315,40 @@ function renderizarDetalleRangoPDF()
             
             $groupBy = 'GROUP BY fac.fact_estampillaid';
         }
-
-        $liquidaciones = $this->codegen_model->getSelect('est_impresiones imp',$campos,$where,$join, $groupBy);
+$liquidaciones = $this->codegen_model->getSelect('est_impresiones imp',$campos,$where,$join, $groupBy);
+        echo'<pre>';print_r($liquidaciones);echo'</pre>';exit();
         
         /*
-        * Si se pidió detallar se llama el método
-        * que procesa la extracción de detalles
+        * Si se pidió detallar se realizan 2 consultas para tramites
+        * y contratos respectivamente y luego se extraen los detalles
         */
         if($bandDetallado)
         {
+            /*
+            * Datos para tramites
+            */
+            $joinTramites = $join
+                .' INNER JOIN `est_liquidartramites` liqt2 ON liqt2.`litr_id` = liq.`liqu_tramiteid`'
+                .' INNER JOIN `est_tramites` ttra ON ttra.`tram_id` = liqt2.`litr_tramiteid`';
+            $camposTramites = $campos. ', ttra.tram_nombre as liqu_tipocontrato';
+            $whereTramites = $where. ' AND liq.liqu_contratoid = 0';
+            $liquidacionesTramites = $this->codegen_model->getSelect('est_impresiones imp',$camposTramites,$whereTramites,$joinTramites, $groupBy);
+//echo'<pre>';print_r($liquidacionesTramites);echo'</pre>';
+            $where .= ' AND liq.liqu_contratoid <> 0';
+            $liquidacionesContratos = $this->codegen_model->getSelect('est_impresiones imp',$campos,$where,$join, $groupBy);
+echo'<pre>';print_r($liquidacionesContratos);echo'</pre>';exit();
             $resultadosDetallados = $this->extraerDetallesLiquidaciones($liquidaciones);
         }
 
         /*
-        * Si no se pidió detallar se realiza el calculo
-        * de totales
+        * Si no se pidió detallar se realiza una sola consulta
+        * de tramites y contratos y se calculan los totales
         */
         $vEstampillas = array();
         if(!$bandDetallado)
         {
+            $liquidaciones = $this->codegen_model->getSelect('est_impresiones imp',$campos,$where,$join, $groupBy);
+
             $vEstampillas = $liquidaciones;
             $total_recaudado = 0;
             $cant_total_estampillas = 0;
