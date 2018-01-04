@@ -3152,7 +3152,13 @@ function renderizarConsolidadoRangoImpresionesPDF()
         $usuario = $this->ion_auth->user()->row();
         if ($this->ion_auth->is_admin() || $usuario->perfilid == 5 || $usuario->perfilid == 4) 
         {
-            $resultadosFiltros = Liquidaciones::extraerRegistrosDetalleImpresiones($_GET);
+            if($_GET['agruparvista'] == '1')
+            {
+                $resultadosFiltros = Liquidaciones::extraerRegistrosDetalleImpresiones($_GET, true);
+            }else
+                {
+                    $resultadosFiltros = Liquidaciones::extraerRegistrosDetalleImpresiones($_GET);
+                }
 
             if(!empty($resultadosFiltros['vec_estampillas']))
             {
