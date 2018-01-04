@@ -293,7 +293,3 @@ var oTable = $('#tablaq').dataTable( {
     </div>
   </div>
 </div>
-
-
-
-
