@@ -2217,8 +2217,10 @@ function renderizarDetalleRangoPDF()
             .' liq.liqu_nit,'
             .' liq.liqu_fecha,'
             .' liq.liqu_valorsiniva as valorActo,'
+            .' fac.`fact_id`,'
             .' fac.`fact_nombre`,'
             .' fac.fact_valor,'
+            .' fac.fact_estampillaid,'
             .' imp.impr_codigopapel,'
             .' imp.impr_fecha,'
             .' pag.pago_fecha,'
@@ -2315,8 +2317,16 @@ function renderizarDetalleRangoPDF()
             
             $groupBy = 'GROUP BY fac.fact_estampillaid';
         }
-$liquidaciones = $this->codegen_model->getSelect('est_impresiones imp',$campos,$where,$join, $groupBy);
-        echo'<pre>';print_r($liquidaciones);echo'</pre>';exit();
+
+        /*
+        * Se inicializan las variables de respuesta
+        */
+        $fecha = '';
+        $vEstampillas      = array();
+        $liquidaciones     = array();
+        $total_recaudado   = 0;
+        $cant_agrupaciones = 0;
+        $cant_total_estampillas = 0;
         
         /*
         * Si se pidió detallar se realizan 2 consultas para tramites
@@ -2330,21 +2340,40 @@ $liquidaciones = $this->codegen_model->getSelect('est_impresiones imp',$campos,$
             $joinTramites = $join
                 .' INNER JOIN `est_liquidartramites` liqt2 ON liqt2.`litr_id` = liq.`liqu_tramiteid`'
                 .' INNER JOIN `est_tramites` ttra ON ttra.`tram_id` = liqt2.`litr_tramiteid`';
-            $camposTramites = $campos. ', ttra.tram_nombre as liqu_tipocontrato';
+
+            $camposTramites = $campos
+                .', ttra.tram_nombre as liqu_tipocontrato,'
+                .' concat("tipotramite_",liqt2.litr_tramiteid) as subtipoacto';
+
             $whereTramites = $where. ' AND liq.liqu_contratoid = 0';
             $liquidacionesTramites = $this->codegen_model->getSelect('est_impresiones imp',$camposTramites,$whereTramites,$joinTramites, $groupBy);
-//echo'<pre>';print_r($liquidacionesTramites);echo'</pre>';
+            
+            /*
+            * Datos para contratos
+            */
+            $join .= ' INNER JOIN con_contratos con2 ON con2.cntr_id = liq.liqu_contratoid';
+            $campos .= ', concat("tipocontrato_",con2.cntr_tipocontratoid) as subtipoacto';
             $where .= ' AND liq.liqu_contratoid <> 0';
             $liquidacionesContratos = $this->codegen_model->getSelect('est_impresiones imp',$campos,$where,$join, $groupBy);
-echo'<pre>';print_r($liquidacionesContratos);echo'</pre>';exit();
-            $resultadosDetallados = $this->extraerDetallesLiquidaciones($liquidaciones);
+            
+            /*
+            * Datos consolidados
+            */
+            $liquidaciones = array_merge($liquidacionesTramites, $liquidacionesContratos);
+
+            $resultadosDetallados = $this->extraerDetallesLiquidaciones($liquidaciones, $vectorGet);
+
+            $vEstampillas       = $resultadosDetallados->vEstampillas;
+            $liquidaciones      = $resultadosDetallados->vLiquidaciones;
+            $total_recaudado    = $resultadosDetallados->total_recaudado;
+            $cant_agrupaciones  = $resultadosDetallados->cant_agrupaciones;
+            $cant_total_estampillas  = $resultadosDetallados->cant_total_estampillas;
         }
 
         /*
         * Si no se pidió detallar se realiza una sola consulta
         * de tramites y contratos y se calculan los totales
         */
-        $vEstampillas = array();
         if(!$bandDetallado)
         {
             $liquidaciones = $this->codegen_model->getSelect('est_impresiones imp',$campos,$where,$join, $groupBy);
@@ -2384,146 +2413,101 @@ echo'<pre>';print_r($liquidacionesContratos);echo'</pre>';exit();
     /*
     * Función de apoyo para extraer los detalles de liquidaciones de actos
     */
-    function extraerDetallesLiquidaciones($vecLiquidaciones)
+    function extraerDetallesLiquidaciones($vecLiquidaciones, $vectorGet)
     {
         /*
         * Inicializa la variable para la respuesta
         */
         $objResponse = (object)array(
-            'vEstampillas' => array(),
+            'vEstampillas'   => array(),
             'vLiquidaciones' => array(),
             'cant_total_estampillas' => 0,
-            'total_recaudado' => 0,
+            'total_recaudado'   => 0,
             'cant_agrupaciones' => 0
         );
-echo'<pre>';print_r($vecLiquidaciones);echo'</pre>';exit();
-        if(count($liquidaciones))
+        
+        /*
+        * Vector que se utiliza solamente para garantizar
+        * que no se repitan las facturas en una liquidacion
+        */
+        $vecFactUnicas = array();
+
+        if(count($vecLiquidaciones))
         {
-            /*
-            * Vector para almacenar las liquidaciones
-            * que si tuvieron resultados, para enviarlas
-            * a la vista
-            */
-            foreach ($liquidaciones as $liquidacion)
+            foreach ($vecLiquidaciones as $objLiquidacion)
             {
-                $where = 'where f.fact_liquidacionid = ' . $liquidacion->liqu_id;
-                $join3 = ' INNER JOIN est_impresiones i ON i.impr_facturaid=f.fact_id';
-                $join3 .= ' INNER JOIN est_pagos pag ON pag.pago_facturaid=f.fact_id';
-                $join3 .= ' INNER JOIN est_papeles p ON i.impr_papelid=p.pape_id';
-                $join3 .= ' INNER JOIN users u ON u.id=p.pape_usuario';
-
                 /*
-                * Se valida si llegó tipo de estampilla para construir
-                * la consulta con la restriccion
+                * Agrega el objeto de la liquidacion al vector
+                * que irá a la vista
                 */
-                if ($tipoEst != 0) {
-                    $where .= ' AND f.fact_estampillaid = ' . $tipoEst;
-                }
-
-                $resultado = $this->codegen_model->getSelect('est_facturas f', "f.fact_estampillaid, f.fact_nombre, f.fact_valor, u.first_name, u.last_name, u.id, i.impr_fecha, i.impr_codigopapel, pag.pago_fecha", $where, $join3);
-
-                /*
-                * Valida si hubo resultado para incluir o no la liquidacion
-                * en el grupo para el informe
-                */
-                if(count($resultado) > 0)
+                if(!array_key_exists($objLiquidacion->liqu_id,$objResponse->vLiquidaciones))
                 {
-                        /*
-                        * Agrega el objeto de la liquidacion al vector
-                        * que irá a la vista
-                        */
-                        $vLiquidaciones[] = $liquidacion;
-
-                        /*
-                        * Valida si la liquidacion fue de tramite o de contrato
-                        * para extraer el numero de contrato y el valor del acto
-                        */
-                        if ($liquidacion->liqu_contratoid != 0)
-                        {
-                            $datosContrato = $this->codegen_model->getSelect('con_contratos c', 'c.cntr_numero, c.cntr_valor, c.cntr_tipocontratoid', 'WHERE cntr_id = ' . $liquidacion->liqu_contratoid);
-                            $liquidacion->numActo = $datosContrato[0]->cntr_numero;
-                            $liquidacion->valorActo = $datosContrato[0]->cntr_valor;
-                            $liquidacion->liqu_tipocontrato = 'Contrato '.$liquidacion->liqu_tipocontrato;
-                            $liquidacion->subtipoacto = 'tipocontrato_'.$datosContrato[0]->cntr_tipocontratoid;
-                            $liquidacion->tipoacto = 'contrato';
-                        }else
-                            {
-                                $datosTramite = $this->codegen_model->getSelect('est_liquidartramites t', 't.litr_tramiteid', 'WHERE litr_id = ' . $liquidacion->liqu_tramiteid);
-                                $nombreTramite = $this->codegen_model->getSelect('est_tramites ta', 'ta.tram_nombre', 'WHERE tram_id = ' . $datosTramite[0]->litr_tramiteid);
-                                $liquidacion->numActo = 'N/A';
-                                $liquidacion->valorActo = $liquidacion->liqu_valorsiniva;
-                                $liquidacion->liqu_tipocontrato = $nombreTramite[0]->tram_nombre;
-                                $liquidacion->subtipoacto = 'tipotramite_'.$datosTramite[0]->litr_tramiteid;
-                                $liquidacion->tipoacto = 'tramite';
-                            }
-
-                        /*
-                        * Itera para extraer la información de las impresiones
-                        * para la liquidación
-                        */
-                        $facturas = [];
-                        $liquidador = '';
-                        $cantEstampillas = 0;
-                        $total_liquidacion = 0;
-                        foreach ($resultado as $value)
-                        {
-                            $facturas[] = ['tipo' => $value->fact_nombre,
-                                'rotulo' => $value->impr_codigopapel,
-                                'valor' => $value->fact_valor,
-                                'fecha_impr' => $value->impr_fecha,
-                                'fecha_pago' => $value->pago_fecha];
-                            
-                            /*
-                            * Solicita la agrupación de los resultados
-                            * dependiendo de los parametros de agrupacion recibidos
-                            */
-                            if($vectorGet['agrupar'] == '1')
-                            {
-                                $resultadosAgrupacion = $this->agruparResultadosImpresiones($liquidacion, $value, $vEstampillas, $vectorGet);
-                                $vEstampillas         = $resultadosAgrupacion['vec'];
-                                $cant_agrupaciones    = $resultadosAgrupacion['cant_agrupacion'];
-                            }
-
-                            /*
-                            * Valida que el nombre del liquidador no haya sido asignado
-                            * para asignarlo una sola vez
-                            */
-                            if ($liquidador == '') {
-                                $liquidador = strtoupper($value->first_name)
-                                    . ' ' . strtoupper($value->last_name)
-                                    . '<br>' . $value->id;
-                            }
-
-                            /*
-                            * Cuenta la cantidad de estampillas para establecer
-                            * maquetacion en la renderizacion del listado
-                            */
-                            $cantEstampillas++;
-
-                            /*
-                            * Acumula el total de las estampillas incluidas
-                            */
-                            $total_liquidacion += (double)$value->fact_valor;
-                        }
-
-                        $liquidacion->liquidador      = $liquidador;
-                        $liquidacion->estampillas     = $facturas;
-                        $liquidacion->cantEstampillas = $cantEstampillas;
-                        $liquidacion->liqu_valortotal = $total_liquidacion;
-
-                        /*
-                        * Acumula el total recaudado según los filtros
-                        * solicitados para el informe
-                        */
-                        $total_recaudado += (double)$liquidacion->liqu_valortotal;
-
-                        /*
-                        * Acumula la cantidad total de estampillas impresas
-                        */
-                        $cant_total_estampillas += (int)$liquidacion->cantEstampillas;
+                    $objResponse->vLiquidaciones[$objLiquidacion->liqu_id] = (object)array(
+                        'liqu_id'    => $objLiquidacion->liqu_id,
+                        'liquidador' => $objLiquidacion->liquidador,
+                        'liqu_nombrecontratista' => $objLiquidacion->liqu_nombrecontratista,
+                        'liqu_nit'   => $objLiquidacion->liqu_nit,
+                        'liqu_fecha' => $objLiquidacion->liqu_fecha,
+                        'numActo'    => $objLiquidacion->numActo,
+                        'valorActo'  => $objLiquidacion->valorActo,
+                        'liqu_tipocontrato' => $objLiquidacion->liqu_tipocontrato,
+                        'subtipoacto' => $objLiquidacion->subtipoacto,
+                        'tipoacto'    => $objLiquidacion->tipoacto,
+                        'estampillas' => array(),
+                        'cantEstampillas' => 0,
+                        'liqu_valortotal' => 0
+                    );
                 }
+                
+                if(!array_key_exists($objLiquidacion->liqu_id.'-'.$objLiquidacion->fact_id, $vecFactUnicas))
+                {
+                    $objResponse->vLiquidaciones[$objLiquidacion->liqu_id]->estampillas[] = array(
+                        'tipo'   => $objLiquidacion->fact_nombre,
+                        'rotulo' => $objLiquidacion->impr_codigopapel,
+                        'valor'  => $objLiquidacion->fact_valor,
+                        'fecha_impr' => $objLiquidacion->impr_fecha,
+                        'fecha_pago' => $objLiquidacion->pago_fecha
+                    );
+                }
+
+                /*
+                * Solicita la agrupación de los resultados
+                * dependiendo de los parametros de agrupacion recibidos
+                */
+                if(isset($vectorGet['agruparvista']) && $vectorGet['agruparvista'] == '1')
+                {
+                    $resultadosAgrupacion = $this->agruparResultadosImpresiones($objLiquidacion,
+                        $objLiquidacion,$objResponse->vEstampillas, $vectorGet);
+
+                    $objResponse->vEstampillas      = $resultadosAgrupacion['vec'];
+                    $objResponse->cant_agrupaciones = $resultadosAgrupacion['cant_agrupacion'];
+                }
+
+                /*
+                * Cuenta la cantidad de estampillas para establecer
+                * maquetacion en la renderizacion del listado
+                */
+                $objResponse->vLiquidaciones[$objLiquidacion->liqu_id]->cantEstampillas++;
+
+                /*
+                * Acumula el total de las estampillas incluidas
+                */
+                $objResponse->vLiquidaciones[$objLiquidacion->liqu_id]->liqu_valortotal += (double)$objLiquidacion->fact_valor;
+
+                /*
+                * Acumula el total recaudado según los filtros
+                * solicitados para el informe
+                */
+                $objResponse->total_recaudado += (double)$objLiquidacion->fact_valor;
+
+                /*
+                * Acumula la cantidad total de estampillas impresas
+                */
+                $objResponse->cant_total_estampillas++;
             }
         }
+
+        return $objResponse;
     }
 
     /*
