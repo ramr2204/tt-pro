@@ -2216,10 +2216,16 @@ function renderizarDetalleRangoPDF()
             .' liq.liqu_nombrecontratista,'
             .' liq.liqu_nit,'
             .' liq.liqu_fecha,'
-            .' liq.liqu_valorsiniva as valorActo';
+            .' liq.liqu_valorsiniva as valorActo,'
+            .' fac.`fact_nombre`,'
+            .' fac.fact_valor,'
+            .' imp.impr_codigopapel,'
+            .' imp.impr_fecha,'
+            .' pag.pago_fecha';
         
         $join = ' INNER JOIN est_facturas fac ON imp.`impr_facturaid` = fac.`fact_id`'
-            .' INNER JOIN `est_liquidaciones` liq ON liq.`liqu_id` = fac.`fact_liquidacionid`';
+            .' INNER JOIN `est_liquidaciones` liq ON liq.`liqu_id` = fac.`fact_liquidacionid`'
+            .' INNER JOIN est_pagos pag ON pag.pago_facturaid = fac.`fact_id`';
 
         /*
         * Se Validan los valores que llegan para construir el where
@@ -2293,19 +2299,87 @@ function renderizarDetalleRangoPDF()
             }
         }
 
-        $liquidaciones = $this->codegen_model->getSelect('est_impresiones imp',$campos,$where,$join, 'GROUP BY liq.liqu_id');
-echo'<pre>';print_r($liquidaciones);echo'</pre>';exit();
+        /*
+        * Si no se pidió detallar se agrupa por tipo de estampilla 
+        * para extraer los valores totales
+        */
+        $groupBy = '';
+        if(!$bandDetallado)
+        {
+            $campos = 'fac.fact_nombre as nombre_estampilla,'
+                .' sum(fac.fact_valor) as valor_estampilla,'
+                .' count(fac.fact_id) as cant_estampilla';
+            
+            $groupBy = 'GROUP BY fac.fact_estampillaid';
+        }
+
+        $liquidaciones = $this->codegen_model->getSelect('est_impresiones imp',$campos,$where,$join, $groupBy);
         
         /*
-        * Inicializa las variables para la respuesta
+        * Si se pidió detallar se llama el método
+        * que procesa la extracción de detalles
         */
-        $vEstampillas   = array();
-        $vLiquidaciones = array();
+        if($bandDetallado)
+        {
+            $resultadosDetallados = $this->extraerDetallesLiquidaciones($liquidaciones);
+        }
 
-        $cant_total_estampillas = 0;
-        $total_recaudado        = 0;
-        $cant_agrupaciones      = 0;
-        if($liquidaciones)
+        /*
+        * Si no se pidió detallar se realiza el calculo
+        * de totales
+        */
+        $vEstampillas = array();
+        if(!$bandDetallado)
+        {
+            $vEstampillas = $liquidaciones;
+            $total_recaudado = 0;
+            $cant_total_estampillas = 0;
+            foreach($liquidaciones as $objAgrupadoEstampilla)
+            {
+                $total_recaudado += (double)$objAgrupadoEstampilla->valor_estampilla;
+                $cant_total_estampillas += (int)$objAgrupadoEstampilla->cant_estampilla;
+            }
+        }
+
+        /*
+        * Valida que fecha llega a la vista para preparar la leyenda
+        */
+        if(isset($fechaUnica) && $fechaUnica != '')
+        {
+            $fecha = Liquidaciones::fechaEnLetras($fechaUnica);
+        }else
+            {
+                $fecha = 'PERIODO COMPRENDIDO ENTRE LAS FECHAS '. Liquidaciones::fechaEnLetras($fecha_inicial)
+                    .' Y '. Liquidaciones::fechaEnLetras($fecha_final);
+            }
+
+        return array(
+            'vec_liquidaciones'      => $liquidaciones,
+            'vec_estampillas'        => $vEstampillas,
+            'cant_agrupacion'        => $cant_agrupaciones,
+            'cant_total_estampillas' => $cant_total_estampillas,
+            'total_recaudado'        => $total_recaudado,
+            'fecha'                  => $fecha
+        );
+    }
+
+    /*
+    * Función de apoyo para extraer los detalles de liquidaciones de actos
+    */
+    function extraerDetallesLiquidaciones($vecLiquidaciones)
+    {
+        /*
+        * Inicializa la variable para la respuesta
+        */
+        $objResponse = (object)array(
+            'vEstampillas' => array(),
+            'vLiquidaciones' => array(),
+            'cant_total_estampillas' => 0,
+            'total_recaudado' => 0,
+            'cant_agrupaciones' => 0
+        );
+echo'<pre>';print_r($vecLiquidaciones);echo'</pre>';exit();
+        if(count($liquidaciones))
         {
             /*
             * Vector para almacenar las liquidaciones
@@ -2432,27 +2506,6 @@ echo'<pre>';print_r($liquidaciones);echo'</pre>';exit();
                 }
             }
         }
-
-        /*
-        * Valida que fecha llega a la vista para preparar la leyenda
-        */
-        if(isset($fechaUnica) && $fechaUnica != '')
-        {
-            $fecha = Liquidaciones::fechaEnLetras($fechaUnica);
-        }else
-            {
-                $fecha = 'PERIODO COMPRENDIDO ENTRE LAS FECHAS '. Liquidaciones::fechaEnLetras($fecha_inicial)
-                    .' Y '. Liquidaciones::fechaEnLetras($fecha_final);
-            }
-
-        return array(
-            'vec_liquidaciones'      => $vLiquidaciones,
-            'vec_estampillas'        => $vEstampillas,
-            'cant_agrupacion'        => $cant_agrupaciones,
-            'cant_total_estampillas' => $cant_total_estampillas,
-            'total_recaudado'        => $total_recaudado,
-            'fecha'                  => $fecha
-        );
     }
 
     /*
