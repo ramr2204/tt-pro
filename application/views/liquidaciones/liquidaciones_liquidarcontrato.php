@@ -96,7 +96,7 @@
      </td>
 
 </tr>
-<?php $x=1; ?>
+<?php $x=0; ?>
 <?php
 $totalestampillas='';
 $porcentajes='';
@@ -109,7 +109,7 @@ $cuentas='';
     * y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
     * no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
     */
-    $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($row2->estm_id, $result->cntr_fecha_firma);
+    $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($row2->estm_id, $result->cntr_fecha_firma, $result->cntr_tipocontratoid);
     if($bandRegistrarFactura)
     {
 ?>
@@ -146,10 +146,10 @@ $cuentas='';
 <?php } ?>
 <tr>
      <td colspan="3" class="text-right"><strong>Total</strong>
-     <input type="hidden" name="totalestampillas" value="<?php echo $totalestampillas; ?>">
-     <input type="hidden" name="porcentajes" value="<?php echo $porcentajes; ?>">
-     <input type="hidden" name="cuentas" value="<?php echo $cuentas; ?>">
-     <input type="hidden" name="numeroestampillas" value="<?php echo $x; ?>"
+         <input type="hidden" name="totalestampillas" value="<?php echo $totalestampillas; ?>">
+         <input type="hidden" name="porcentajes" value="<?php echo $porcentajes; ?>">
+         <input type="hidden" name="cuentas" value="<?php echo $cuentas; ?>">
+         <input type="hidden" name="numeroestampillas" value="<?php echo $x; ?>">
 
      </td>
      <td colspan="1" class="text-right"><?php echo '$'.number_format($est_valortotal, 2, ',', '.'); ?>
