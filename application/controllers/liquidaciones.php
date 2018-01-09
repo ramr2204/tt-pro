@@ -3510,14 +3510,15 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
     | PRO ELECTRIFICACION
     | Se valida si la estampilla a almacenar es pro electrificacion y la fecha de liquidacion
     | (fecha actual) es mayor al 21 de mayo de 2017, no se incluya la estampilla 
-    | en las liquidaciones según ordenanza 026 de 2007
+    | en las liquidaciones según ordenanza 026 de 20017
+    | [SE REACTIVA EL COBRO DE LA ESTAMPILLA A PARTIR DEL 9 DE ENERO DE 2018]
     */
     if($idTipoEstampilla == 7)
     {
-        if(strtotime('2017-05-21') < strtotime($fecha_validar))
+        /*if(strtotime('2017-05-21') < strtotime($fecha_validar))
         {
             $bandRegistrarFactura = false;
-        }
+        }*/
     }
 
     /*
