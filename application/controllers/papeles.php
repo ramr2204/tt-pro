@@ -309,8 +309,9 @@ class Papeles extends MY_Controller {
     */
     function contarpapeles()
     {
-        $resultado= $this->codegen_model->countwhere('est_impresiones','impr_papelid = '.$this->input->post('papelid'));
-        echo $resultado->contador;
+        $where = 'WHERE impr_codigopapel != 0 AND impr_papelid = '.$this->input->post('papelid');
+        $resultado = $this->codegen_model->getSelect('est_impresiones',"COUNT(*) AS contador", $where);
+        echo $resultado[0]->contador;
     }
  
   function datatable ()
