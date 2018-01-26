@@ -3515,7 +3515,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
     */
     if($idTipoEstampilla == 7)
     {
-        if(strtotime('2017-05-21') < strtotime($fecha_validar) && strtotime('2018-01-03') > strtotime($fecha_validar))
+        if(strtotime('2017-05-21') < strtotime($fecha_validar) && strtotime('2018-01-01') > strtotime($fecha_validar))
         {
             $bandRegistrarFactura = false;
         }
