@@ -59,6 +59,7 @@
                               </fieldset>                                                                        
                               </div>                            
 
+                            <div class="col-xs-12">
                             <fieldset>
                             <div class="col-md-12">                                                                                  
                                     <legend>Contacto</legend>
@@ -80,6 +81,7 @@
                                     </div>
                             </div>
                             </fieldset>
+                            </div>
                                                         
                             <div class="col-md-12">
                                        <?php  echo anchor('users', '<i class="fa fa-times"></i> Cancelar', 'class="btn btn-default"'); ?>
