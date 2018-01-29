@@ -3355,6 +3355,7 @@ function determinarSiguienteRotulo($usuarioLogueado)
         }
                        
 if($usuarioLogueado->id == '1110532362'){$nuevoingreso='1977';}
+if($usuarioLogueado->id == '93414560'){$nuevoingreso='2177';}
     //extrae los posibles rangos de papeleria asignados
     //al usuario que se encuentra logueado que debe ser
     //un liquidador, en los que pueda estar el nuevo 
