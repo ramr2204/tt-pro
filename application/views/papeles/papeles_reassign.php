@@ -17,7 +17,17 @@
                         </div>
                         <div class="col-md-4 column">
                            <div class="panel panel-default">
-                            <div class="panel-heading"><h1>Reasignación de  papelería para estampillas</h1></div>
+                            <div class="panel-heading">
+                            <?php
+                                if($contingencia == 1)
+                                {
+                                    echo '<h1>Reasignación de  papelería para estampillas<br>(CONTINGENCIA)</h1>';
+                                }else
+                                    {
+                                        echo '<h1>Reasignación de  papelería para estampillas<br>(NUMERADAS)</h1>';
+                                    }
+                            ?>
+                            </div>
                              <div class="panel-body">
                               <?php echo form_open('papeles/postReassign'); ?>
                                     <div class="form-group">

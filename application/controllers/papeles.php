@@ -79,7 +79,7 @@ class Papeles extends MY_Controller {
                 {
                     $contingencia = 'SI';
                     $this->data['contingencia'] = 'SI';
-                }                
+                }
 
                 if($this->form_validation->run() == false)
                 {
@@ -390,8 +390,15 @@ class Papeles extends MY_Controller {
                     );
               $this->data['javascripts']= array(                        
                         'js/jquery-ui.js'
-                    );  
-              $this->template->load($this->config->item('admin_template'),'papeles/papeles_reassign', $this->data);                            
+                    );
+
+            /*
+            * Variable que determina si se debe trabajar con papelería de contingencia
+            */
+            $objContin = $this->codegen_model->get('adm_parametros','para_contingencia','para_id = 1',1,NULL,true);
+            
+            $this->data['contingencia'] = $objContin->para_contingencia;
+            $this->template->load($this->config->item('admin_template'),'papeles/papeles_reassign', $this->data);                            
 
           } else {
               redirect(base_url().'index.php/error_404');
@@ -431,7 +438,7 @@ class Papeles extends MY_Controller {
                       //disponible para reasignar
                       $verificacionDisponibilidad = $this->validarDisponibilidadCodigos($this->input->post('docuOldResponsable')); 
                       if(!$verificacionDisponibilidad)
-                      {  
+                      {
                            $this->session->set_flashdata('errormessage','El Responsable Actual no tiene papeleria para re-asignación!');
                            redirect(base_url().'index.php/papeles/getReassign'); 
                       } 
@@ -442,7 +449,19 @@ class Papeles extends MY_Controller {
                       {
                            $this->session->set_flashdata('errormessage','Los liquidadores suministrados deben ser distintos!');
                            redirect(base_url().'index.php/papeles/getReassign');
-                      }                                           
+                      }
+
+                        /*
+                        * Variable que determina si se debe trabajar con papelería de contingencia
+                        */
+                        $objContin = $this->codegen_model->get('adm_parametros','para_contingencia','para_id = 1',1,NULL,true);
+                        if($objContin->para_contingencia == 1)
+                        {
+                            $contingencia = 'SI';
+                        }else
+                            {
+                                $contingencia = 'NO';
+                            }
                       
                            //actualiza los datos en el registro de rango del responsable que entrega 
                            $this->actualizacionRangosReasignados($this->input->post('docuOldResponsable'), 
@@ -450,7 +469,9 @@ class Papeles extends MY_Controller {
                                $this->input->post('cantidad'), 
                                $this->input->post('codigoinicial'), 
                                $this->input->post('codigofinal'),
-                               $this->input->post('newResponsablePapel'));                            
+                               $this->input->post('newResponsablePapel'),
+                               $contingencia
+                            );
                             
                             $obsRotulosReasignados = 'Rotulos Re-Asignados del Usuario '
                                 .$this->input->post('oldResponsablePapel')
@@ -466,8 +487,8 @@ class Papeles extends MY_Controller {
                                       'pape_cantidad' => $this->input->post('cantidad'),
                                       'pape_fecha' => date('Y-m-d H:i:s'),
                                       'pape_estado'=> 1,
-                                      'pape_imprimidos'=> 0
-
+                                      'pape_imprimidos'=> 0,
+                                      'pape_estadoContintencia' => $contingencia
                                    );
 
                             if ($this->codegen_model->add('est_papeles',$data) == TRUE) 
@@ -514,7 +535,7 @@ class Papeles extends MY_Controller {
   //Función de apoyo que determina si se re-asigna el rango de papeleria
   //original o si solo se re-asigna una sección del rango
 
-  function actualizacionRangosReasignados($docuOldResponsable='', $idRango='', $cantidad='', $codigoinicial='', $codigofinal='', $newResponsablePapel='')
+  function actualizacionRangosReasignados($docuOldResponsable='', $idRango='', $cantidad='', $codigoinicial='', $codigofinal='', $newResponsablePapel='', $estadoContingencia = '')
   {
       if ($this->ion_auth->logged_in()) {
           
@@ -610,7 +631,7 @@ class Papeles extends MY_Controller {
             * Valida si quedan rotulos restantes o no
             */
             if($rotulosRestantes == 0)
-            {                                                               
+            {
                 /*
                 * valida si los codigos a re-asignar son iguales a los
                 * codigos del rango, entonces se borrará
@@ -657,7 +678,8 @@ class Papeles extends MY_Controller {
                               'pape_cantidad' => $rotulosRestantes,
                               'pape_fecha' => date('Y-m-d H:i:s'),
                               'pape_estado'=> 1,
-                              'pape_imprimidos'=> 0
+                              'pape_imprimidos'=> 0,
+                              'pape_estadoContintencia' => $estadoContingencia
                                   );
                     $this->codegen_model->add('est_papeles',$data);
 
@@ -696,7 +718,7 @@ class Papeles extends MY_Controller {
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/getReassign') ) {
 
-              $idLiquidador = $this->input->post('idLiquidador');//2222222222;////1110111111;//
+              $idLiquidador = $this->input->post('idLiquidador');
 
               $codigosReasignar = $this->validarDisponibilidadCodigos($idLiquidador);
 
@@ -720,24 +742,34 @@ class Papeles extends MY_Controller {
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/getReassign') ) { 
 
-              //extrae los posibles rangos de papeleria asignados
-              //al usuario que se encuentra logueado que debe ser
-              //un liquidador
-                   
-              $tabla='est_papeles';
-              $campos="pape_codigoinicial, pape_codigofinal, pape_id";
-              $estructuraWhere='where pape_usuario = '.$idLiquidador;
-              $estructuraGroup='group by pape_codigoinicial';
+            /*
+            * Variable que determina si se debe trabajar con papelería de contingencia
+            */
+            $objContin = $this->codegen_model->get('adm_parametros','para_contingencia','para_id = 1',1,NULL,true);
+            if($objContin->para_contingencia == 1)
+            {
+                $contingencia = 'SI';
+            }else
+                {
+                    $contingencia = 'NO';
+                }
+            
+            /*
+            * Extrae los posibles rangos de papeleria asignados al usuario
+            * que se encuentra logueado que debe ser un liquidador
+            */
+            $tabla='est_papeles';
+            $campos="pape_codigoinicial, pape_codigofinal, pape_id";
+            $estructuraWhere='WHERE pape_usuario = '. $idLiquidador .' AND pape_estadoContintencia = "'. $contingencia .'"';
+            $estructuraGroup='group by pape_codigoinicial';
 
-              $papeles = $this->codegen_model->getSelect($tabla,$campos,$estructuraWhere,'',$estructuraGroup);
+            $papeles = $this->codegen_model->getSelect($tabla,$campos,$estructuraWhere,'',$estructuraGroup);
 
               //verifica que tenga asignada papeleria para reasignar
               if($papeles)
-              {                
-
+              {
                    if(count($papeles)>1)
-                   {   
-
+                   {
                         foreach ($papeles as $value) 
                         {
                             $codigoinicial = (int)$value->pape_codigoinicial;
@@ -769,7 +801,7 @@ class Papeles extends MY_Controller {
 
                         //si ninguno de los rangos que tiene asignados
                         //el liquidador esta disponible envia objeto
-                        //vacio para la norificación del error
+                        //vacio para la notificación del error
                         if(!isset($codigosReasignar))
                         {
                              $codigosReasignar = [] ;
