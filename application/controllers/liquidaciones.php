@@ -3330,10 +3330,10 @@ function determinarSiguienteRotulo($usuarioLogueado)
     
     $max = $this->codegen_model->max('est_impresiones','impr_codigopapel',$where, $tablaJoin, $equivalentesJoin);                          
 
-    //verifica si ya habia asignado por lo menos
-    //un consecutivo a una impresion
-    //de lo contrario elige el primer codigo
-
+    /*
+    * verifica si ya habia asignado por lo menos un consecutivo a una impresion
+    * de lo contrario elige el primer codigo
+    */
     if((int)$max['impr_codigopapel']>0)
     {
         //extrae el ultimo codigo de papeleria asignado al
@@ -3353,14 +3353,12 @@ function determinarSiguienteRotulo($usuarioLogueado)
             $primerCodigo = $this->codegen_model->min('est_papeles','pape_codigoinicial',$where);
             $nuevoingreso = (int)$primerCodigo['pape_codigoinicial'];
         }
-                       
-if($usuarioLogueado->id == '1110532362'){$nuevoingreso='1977';}
-if($usuarioLogueado->id == '93414560'){$nuevoingreso='2177';}
-    //extrae los posibles rangos de papeleria asignados
-    //al usuario que se encuentra logueado que debe ser
-    //un liquidador, en los que pueda estar el nuevo 
-    //codigo a asignar
-                   
+
+    /*
+    * extrae los posibles rangos de papeleria asignados al usuario 
+    * que se encuentra logueado que debe ser un liquidador,
+    * en los que pueda estar el nuevo codigo a asignar
+    */
     $papeles = $this->codegen_model->get('est_papeles','pape_id'
         .',pape_codigoinicial,pape_codigofinal',
         'pape_codigoinicial <= '.$nuevoingreso
@@ -3369,10 +3367,11 @@ if($usuarioLogueado->id == '93414560'){$nuevoingreso='2177';}
         .' AND pape_estadoContintencia = "'. $contingencia .'"'
         .' AND pape_usuario = '.$usuarioLogueado->id,1,NULL,true);
 
-
-    //verifica que exista un rango de papeleria asignado
-    //al liquidador en el que se encuentre el posible
-    //codigo a registrar
+    /*
+    * verifica que exista un rango de papeleria asignado
+    * al liquidador en el que se encuentre el posible
+    * codigo a registrar
+    */
     $idRangoPapel = 0;
     $banPapelDisponible = false;
     if($papeles)
@@ -3431,18 +3430,43 @@ if($usuarioLogueado->id == '93414560'){$nuevoingreso='2177';}
                                 
     }else
         {
-            //extrae los posibles rangos de papeleria asignados
-            //al usuario que se encuentra logueado que debe ser
-            //un liquidador                   
-            $papelesAsignados = $this->codegen_model->getSelect('est_papeles','pape_id'
-                .',pape_codigoinicial,pape_codigofinal',                                    
+            /*
+            * Extrae los posibles rangos de papeleria asignados
+            * al usuario que se encuentra logueado que debe ser
+            * un liquidador
+            */
+            $papelesAsignados = $this->codegen_model->getSelect('est_papeles','*',
                 ' where pape_usuario = '. $usuarioLogueado->id .' AND pape_estadoContintencia = "'. $contingencia .'"', '', '',
                 'order by pape_codigoinicial');
             
-
-            foreach ($papelesAsignados as $value) 
+            /*
+            * Valida cual de los rangos no ha impreso la totalidad
+            * de los rotulos
+            */
+            $rangosDisponibles = array();
+            $rangoMenor = 0;
+            foreach($papelesAsignados as $objRangoPapeles)
             {
-                if($nuevoingreso < (int)$value->pape_codigoinicial)
+                $vDisponibilidad = $this->verificarEstadoDisponibilidadEstampillas($objRangoPapeles);
+                if($vDisponibilidad->estadoDisponibilidad)
+                {
+                    $rangosDisponibles[] = $objRangoPapeles;
+
+                    /*
+                    * Determina cual de los rangos tiene el menor
+                    * valor en codigo inicial para tomarlo e imprimir
+                    */
+                    if((int)$rangoMenor < (int)$objRangoPapeles->pape_codigoinicial)
+                    {
+                        $rangoMenor = $objRangoPapeles->pape_codigoinicial;
+                    }
+                }
+            }
+            echo'<pre>';print_r($rangosDisponibles);echo'</pre>';exit();
+echo'<pre>';print_r($papelesAsignados);echo'</pre>';exit();
+            foreach($papelesAsignados as $value)
+            {
+                if($nuevoingreso != (int)$value->pape_codigoinicial)
                 {
                     $nuevoingreso = (int)$value->pape_codigoinicial;
 
@@ -3451,7 +3475,7 @@ if($usuarioLogueado->id == '93414560'){$nuevoingreso='2177';}
                     //si sale del rango va y compara con el rango siguiente
                     $nousado=0;
 
-                    while ($nousado==0 && $nuevoingreso <= (int)$value->pape_codigofinal)
+                    while($nousado==0 && $nuevoingreso <= (int)$value->pape_codigofinal)
                     {
                         $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '. $nuevoingreso .' AND impr_estadoContintencia = "'. $contingencia .'"',1,NULL,true);
     
@@ -3489,6 +3513,38 @@ if($usuarioLogueado->id == '93414560'){$nuevoingreso='2177';}
             }
 
         return $retornar;
+}
+
+/**
+ * Funcion de apoyo que determina el estado de disponibilidad
+ * de un rango de estampillas
+*/
+public function verificarEstadoDisponibilidadEstampillas($objRango)
+{
+    $respuestaProceso = (object)array(
+        'estadoDisponibilidad' => false,
+        'cantidadDisponible'   => 0
+    );
+
+    /*
+    * Se consulta la cantidad de rotulos correctos y anulados
+    * utilizados para el rango de papeleria
+    */
+    $where = 'WHERE impr_codigopapel != 0 AND impr_papelid = '.$objRango->pape_id;
+    $impresionesActuales = $this->codegen_model->getSelect('est_impresiones',"COUNT(*) AS contador", $where);
+    
+    /*
+    * Se incrementa en 1 la diferencia porque el rango
+    * incluye el código inicial
+    */
+    $cantidadRango = ((int)$objRango->pape_codigofinal - (int)$objRango->pape_codigoinicial) + 1;
+    if((int)$impresionesActuales[0]->contador < $cantidadRango)
+    {
+        $respuestaProceso->estadoDisponibilidad = true;
+        $respuestaProceso->cantidadDisponible = (int)$cantidadRango - (int)$impresionesActuales[0]->contador;
+    }
+
+    return $respuestaProceso;
 }
 
 /*
