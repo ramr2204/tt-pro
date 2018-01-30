@@ -3436,66 +3436,77 @@ function determinarSiguienteRotulo($usuarioLogueado)
             * un liquidador
             */
             $papelesAsignados = $this->codegen_model->getSelect('est_papeles','*',
-                ' where pape_usuario = '. $usuarioLogueado->id .' AND pape_estadoContintencia = "'. $contingencia .'"', '', '',
-                'order by pape_codigoinicial');
+                ' where pape_usuario = '. $usuarioLogueado->id .' AND pape_estadoContintencia = "'. $contingencia .'"',
+                '', '','order by pape_codigoinicial');
             
             /*
             * Valida cual de los rangos no ha impreso la totalidad
             * de los rotulos
             */
             $rangosDisponibles = array();
-            $rangoMenor = 0;
+            $objRangoMenor = array();
             foreach($papelesAsignados as $objRangoPapeles)
             {
                 $vDisponibilidad = $this->verificarEstadoDisponibilidadEstampillas($objRangoPapeles);
                 if($vDisponibilidad->estadoDisponibilidad)
                 {
-                    $rangosDisponibles[] = $objRangoPapeles;
+                    $rangosDisponibles[$objRangoPapeles->pape_id] = $objRangoPapeles;
+
+                    /*
+                    * Se establece el primer objeto de rango
+                    * cómo el rango de menor numeración
+                    */
+                    if(empty($objRangoMenor))
+                    {
+                        $objRangoMenor = $objRangoPapeles;
+                    }
 
                     /*
                     * Determina cual de los rangos tiene el menor
                     * valor en codigo inicial para tomarlo e imprimir
                     */
-                    if((int)$rangoMenor < (int)$objRangoPapeles->pape_codigoinicial)
+                    if((int)$objRangoPapeles->pape_codigoinicial < (int)$objRangoMenor->pape_codigoinicial)
                     {
-                        $rangoMenor = $objRangoPapeles->pape_codigoinicial;
+                        $objRangoMenor = $objRangoPapeles;
                     }
                 }
             }
-            echo'<pre>';print_r($rangosDisponibles);echo'</pre>';exit();
-echo'<pre>';print_r($papelesAsignados);echo'</pre>';exit();
-            foreach($papelesAsignados as $value)
+
+            /*
+            * Si hay rangos con papeleria disponible se realiza la verificación
+            * para el rango que tiene menor numeración
+            */
+            if(count($rangosDisponibles) > 0)
             {
-                if($nuevoingreso != (int)$value->pape_codigoinicial)
+                $nuevoingreso = (int)$objRangoMenor->pape_codigoinicial;
+
+                /*
+                * Comprueba si ya se está usando el codigo del papel
+                * en alguna impresión y ademas que no se salga del rango
+                */
+                $nousado = 0;
+                while($nousado==0 && $nuevoingreso <= (int)$objRangoMenor->pape_codigofinal)
                 {
-                    $nuevoingreso = (int)$value->pape_codigoinicial;
-
-                    //comprueba si ya se está usando el codigo del papel
-                    //en alguna impresión y ademas que no se salga del rango
-                    //si sale del rango va y compara con el rango siguiente
-                    $nousado=0;
-
-                    while($nousado==0 && $nuevoingreso <= (int)$value->pape_codigofinal)
-                    {
-                        $combrobacionImpresiones = $this->codegen_model->get('est_impresiones','impr_id','impr_codigopapel = '. $nuevoingreso .' AND impr_estadoContintencia = "'. $contingencia .'"',1,NULL,true);
+                    $combrobacionImpresiones = $this->codegen_model->get('est_impresiones',
+                        'impr_id','impr_codigopapel = '. $nuevoingreso .' AND impr_estadoContintencia = "'
+                        .$contingencia .'"',1,NULL,true);
     
-                        if(!$combrobacionImpresiones) 
-                        {
-                            $nousado=1;
-                        }else
-                            {
-                                $nuevoingreso++;
-                            }                                                  
-                    }
-
-                    //valida si ya se encontró un codigo para asignar
-                    //y rompe el ciclo foreach
-                    if($nousado == 1)
+                    if(!$combrobacionImpresiones) 
                     {
-                        $idRangoPapel = $value->pape_id;
-                        $banPapelDisponible = true;
-                        break;
-                    }
+                        $nousado = 1;
+                    }else
+                        {
+                            $nuevoingreso++;
+                        }
+                }
+
+                /*
+                * Valida si se encontró un codigo para asignar
+                */
+                if($nousado == 1)
+                {
+                    $idRangoPapel = $objRangoMenor->pape_id;
+                    $banPapelDisponible = true;
                 }
             }
         }
