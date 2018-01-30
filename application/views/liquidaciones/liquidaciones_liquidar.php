@@ -115,17 +115,15 @@ var oTable = $('#tablaq').dataTable( {
               $('#myModal3').modal({show:true});                                 
 
               //Solicita el ultimo rotulo al cargar la modal
-              solicitarUltimoRotulo();    
+              solicitarUltimoRotulo();
 
-              $('.confirmar_impresion').click(function(event) {
+              $('.confirmar_impresion').click(async function(event) {
                   var objEvento = $(this);
                   event.preventDefault();
 
                   //Solicita el ultimo rotulo para la impresion
-                  solicitarUltimoRotulo();
+                  var siguienteEstampilla = await solicitarUltimoRotulo();
                   var bandEnviarImpresion = true;
-
-                  var siguienteEstampilla = $('#siguienteEstampilla').val();
                   if(!confirm('.::SIGUIENTE ESTAMPIILLA A IMPRIMIRSE => No. '+siguienteEstampilla+'::.\n\n'
                         +'Esta seguro de generar la impresión?'
                         +' Recuerde que será modificado el consecutivo de la papeleria asignada a usted!'))
@@ -151,26 +149,29 @@ var oTable = $('#tablaq').dataTable( {
                   }
               });
 
-              /**
-              * Funcion de Apoyo que solicita el ultimo rotulo impreso
-              * del usuario liquidador
-              */
-              function solicitarUltimoRotulo()
-              {
-                  var usuario = <?php echo $this->ion_auth->user()->row()->id ?>;
+            /**
+            * Funcion de Apoyo que solicita el ultimo rotulo impreso
+            * del usuario liquidador
+            */
+            function solicitarUltimoRotulo()
+            {
+                return new Promise(function(exito){
+                    var usuario = <?php echo $this->ion_auth->user()->row()->id ?>;
+                    $.ajax({
+                        type: "POST",
+                        dataType: "json",
+                        data: {usuario : usuario},
+                        url: base_url+"index.php/liquidaciones/solicitarUltimoRotuloImpreso",
+                        success: function(data) {
+                            $('#siguienteEstampilla').val(data.rotulo);
+                            exito(data.rotulo);
+                        }
+                    });
+                });
+            }
 
-                  $.ajax({
-                      type: "POST",
-                      dataType: "json",
-                      data: {usuario : usuario},
-                      url: base_url+"index.php/liquidaciones/solicitarUltimoRotuloImpreso",
-                      success: function(data) {              
-                          $('#siguienteEstampilla').val(data.rotulo);                          
-                      }
-                  });  
-              }
-             });
-         });
+            });
+        });
     }     
 
 
@@ -422,28 +423,7 @@ var oTable = $('#tablaq').dataTable( {
                   {
                     event.preventDefault();
                   }
-
               });
-
-              /**
-              * Funcion de Apoyo que solicita el ultimo rotulo impreso
-              * del usuario liquidador
-              */
-              function solicitarUltimoRotulo()
-              {
-                  var usuario = <?php echo $this->ion_auth->user()->row()->id ?>;
-
-                  $.ajax({
-                      type: "POST",
-                      dataType: "json",
-                      data: {usuario : usuario},
-                      url: base_url+"index.php/liquidaciones/solicitarUltimoRotuloImpreso",
-                      success: function(data) {              
-                          $('#siguienteEstampilla').val(data.rotulo);                          
-                      }
-                  });  
-              }  
-          
         });
         
  

@@ -45,13 +45,13 @@ class Codegen_model extends CI_Model
     
     function add($table,$data)
     {
-        $this->addlog($table,'INSERT',0,$data);
-        $this->db->insert($table, $data);         
+        $this->db->insert($table, $data);
         if ($this->db->affected_rows() == '1')
         {
+            $this->addlog($table,'INSERT',$this->db->insert_id(),$data);
             return TRUE;
         }
-    
+
         return FALSE;       
     }
     
@@ -194,7 +194,7 @@ class Codegen_model extends CI_Model
     //Función que registra el log de autenticación
     //en el sistema
     function registerAccesos($accion='')
-    {         
+    {
          $datos = array('loga_fecha' => date('Y-m-d H:i:s',now()),
                         'loga_tabla' => 'session',
                         'logacodigonombre' => 'no_aplica',
@@ -206,68 +206,67 @@ class Codegen_model extends CI_Model
                         'loga_usuarioid' => $this->ion_auth->get_user_id()
                      );
 
-
-
         $this->db->insert('adm_logactividades', $datos); 
 
     }
 
-
+    /**
+     * Funcion que registra en la tabla de log actividades
+     * las transacciones de INSERT, UPDATE y DELETE
+     */
     function addlog($tabla,$accion,$id,$valores=array())
     {
-
-    $fields = $this->db->field_data($tabla);
-    $nombreid=$fields[0]->name;
-    $field_list='';
-    if ($id==0) { 
-           $database = $this->db->database; 
-           $query = $this->db->query("select k.column_name "
-               ."FROM information_schema.table_constraints t "
-               ."JOIN information_schema.key_column_usage k "
-               ."USING(constraint_name,table_schema,table_name) "
-               ."WHERE t.constraint_type='PRIMARY KEY'"
-               ."AND t.table_schema='".$database."'"
-               ."AND t.table_name='".$tabla."'");
-
-           $result=$query->row();
-           $id=$result->column_name;
-           $datos_anteriores='';
-    } else {
-        if ($accion=='UPDATE') {
-            foreach ($valores as $key => $value) {
-                $field_list.=$key.',';   
+        $fields = $this->db->field_data($tabla);
+        $nombreid = $fields[0]->name;
+        
+        /*
+        * Determina que campos debe consultar para que en el log
+        * se reflejen solamente los datos afectados en la transacción
+        */
+        $field_list = '';
+        if($accion == 'UPDATE')
+        {
+            foreach ($valores as $key => $value)
+            {
+                $field_list .= $key.',';   
             }
             $field_list = substr($field_list, 0, - 1);
-        } else {
-            $field_list='*';
+        }else
+            {
+                $field_list='*';
+            }
+        
+        /**
+         * Si la accion es diferente a INSERT se extraen
+         * los valores antes de que se aplique la transacción
+         */
+        $datos_anteriores = '';
+        if($accion != 'INSERT')
+        {
+            $query = $this->db->query("SELECT ".$field_list."  FROM ".$tabla." WHERE ".$nombreid." = ".$id." LIMIT 1");
+            $datos_anteriores = json_encode($query->row());
         }
         
-        
-        $query = $this->db->query("SELECT ".$field_list."  FROM ".$tabla." WHERE ".$nombreid." = ".$id." LIMIT 1");
-        $datos_anteriores=json_encode($result=$query->row());
-    }
-      $datos_nuevos=json_encode($valores);  
+        $datos_nuevos = json_encode($valores);
 
-       $datos = array(  'loga_fecha' => date('Y-m-d H:i:s',now()),
-                        'loga_tabla' => $tabla,
-                        'logacodigonombre' => $nombreid,
-                        'loga_codigoid' => $id,
-                        'loga_valoresanteriores' => $datos_anteriores,
-                        'loga_valoresnuevos' => $datos_nuevos,
-                        'loga_accion' =>  $accion,
-                        'loga_ip' => $this->input->ip_address(),
-                        'loga_usuarioid' => $this->ion_auth->get_user_id()
-                     );
-
-
+        $datos = array('loga_fecha' => date('Y-m-d H:i:s',now()),
+            'loga_tabla' => $tabla,
+            'logacodigonombre' => $nombreid,
+            'loga_codigoid' => $id,
+            'loga_valoresanteriores' => $datos_anteriores,
+            'loga_valoresnuevos' => $datos_nuevos,
+            'loga_accion' =>  $accion,
+            'loga_ip' => $this->input->ip_address(),
+            'loga_usuarioid' => $this->ion_auth->get_user_id()
+            );
 
         $this->db->insert('adm_logactividades', $datos);         
         if ($this->db->affected_rows() == '1')
         {
             return TRUE;
         }
-        
-        return FALSE;       
+
+        return FALSE;
     }
 
 }
