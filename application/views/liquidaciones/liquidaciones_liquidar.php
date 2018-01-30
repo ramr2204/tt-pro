@@ -112,10 +112,7 @@ var oTable = $('#tablaq').dataTable( {
            var ID = $(this).attr("id");
             $("#idcontrato").val(ID);
              $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vercontratolegalizado/'+ID,function(result){
-              $('#myModal3').modal({show:true});                                 
-
-              //Solicita el ultimo rotulo al cargar la modal
-              solicitarUltimoRotulo();
+              $('#myModal3').modal({show:true});
 
               $('.confirmar_impresion').click(async function(event) {
                   var objEvento = $(this);
@@ -424,6 +421,25 @@ var oTable = $('#tablaq').dataTable( {
                     event.preventDefault();
                   }
               });
+
+            /**
+              * Funcion de Apoyo que solicita el ultimo rotulo impreso
+              * del usuario liquidador
+              */
+              function solicitarUltimoRotulo()
+              {
+                  var usuario = <?php echo $this->ion_auth->user()->row()->id ?>;
+
+                  $.ajax({
+                      type: "POST",
+                      dataType: "json",
+                      data: {usuario : usuario},
+                      url: base_url+"index.php/liquidaciones/solicitarUltimoRotuloImpreso",
+                      success: function(data) {              
+                          $('#siguienteEstampilla').val(data.rotulo);                          
+                      }
+                  });  
+              }  
         });
         
  
