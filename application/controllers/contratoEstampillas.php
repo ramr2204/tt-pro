@@ -174,7 +174,7 @@ class ContratoEstampillas extends MY_Controller {
                         $datos['conpap_year'] = $year;
                         $datos['conpap_estado'] = 1;                        
                         
-                        $this->codegen_model->add('est_contratopapeles',$datos);
+                        $respuestaProceso = $this->codegen_model->add('est_contratopapeles',$datos);
 
                         /*
                         * Se redirecciona a la vista

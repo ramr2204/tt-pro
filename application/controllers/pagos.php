@@ -346,7 +346,7 @@ class Pagos extends MY_Controller {
                                         /*
                                         * Si no existe el pago se crea la instancia para el pago
                                         */
-                                        $this->codegen_model->add('est_pagos',$data);
+                                        $respuestaProceso = $this->codegen_model->add('est_pagos',$data);
                                     }
                             }else
                                 {

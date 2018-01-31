@@ -86,7 +86,8 @@ class Menus extends MY_Controller {
 
                      );
                  
-    			        if ($this->codegen_model->add('adm_menus',$data) == TRUE) {
+                    $respuestaProceso = $this->codegen_model->add('adm_menus',$data);
+    			        if ($respuestaProceso->bandRegistroExitoso) {
 
                       $this->session->set_flashdata('message', 'El menú se ha creado con éxito');
                       redirect(base_url().'index.php/menus/add');

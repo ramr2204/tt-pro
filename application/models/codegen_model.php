@@ -45,14 +45,21 @@ class Codegen_model extends CI_Model
     
     function add($table,$data)
     {
+        $respuestaProceso = (object)array(
+            'bandRegistroExitoso' => false,
+            'idInsercion' => 0
+        );
+
         $this->db->insert($table, $data);
-        if ($this->db->affected_rows() == '1')
+        if($this->db->affected_rows() == '1')
         {
+            $respuestaProceso->idInsercion = $this->db->insert_id();
+            $respuestaProceso->bandRegistroExitoso = true;
+
             $this->addlog($table,'INSERT',$this->db->insert_id(),$data);
-            return TRUE;
         }
 
-        return FALSE;       
+        return $respuestaProceso;
     }
     
     function edit($table,$data,$fieldID,$ID)

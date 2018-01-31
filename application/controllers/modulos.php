@@ -81,7 +81,8 @@ class Modulos extends MY_Controller {
 
                      );
                  
-    			        if ($this->codegen_model->add('adm_modulos',$data) == TRUE) {
+                     $respuestaProceso = $this->codegen_model->add('adm_modulos',$data);
+    			        if ($respuestaProceso->bandRegistroExitoso) {
 
                       $this->session->set_flashdata('message', 'El módulo se ha creado con éxito');
                       redirect(base_url().'index.php/modulos/add');

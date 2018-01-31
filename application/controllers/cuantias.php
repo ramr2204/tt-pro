@@ -77,8 +77,9 @@ class Cuantias extends MY_Controller {
                         'cuan_descripcion' => $this->input->post('descripcion')
 
                      );
-                 
-    			        if ($this->codegen_model->add('con_cuantias',$data) == TRUE) {
+                        
+                        $respuestaProceso = $this->codegen_model->add('con_cuantias',$data);
+    			        if ($respuestaProceso->bandRegistroExitoso) {
 
                       $this->session->set_flashdata('message', 'El tipo de contrato se ha creado con éxito');
                       redirect(base_url().'index.php/cuantias/add');

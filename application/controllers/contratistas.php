@@ -88,8 +88,9 @@ class Contratistas extends MY_Controller {
                         'cont_fecha' => date('Y-m-d')
 
                      );
-                 
-    			        if ($this->codegen_model->add('con_contratistas',$data) == TRUE) {
+                    
+                        $respuestaProceso = $this->codegen_model->add('con_contratistas',$data);
+    			        if ($respuestaProceso->bandRegistroExitoso) {
 
                       $this->session->set_flashdata('message', 'El contratista se ha creado con éxito');
                       redirect(base_url().'index.php/contratistas/add');

@@ -78,7 +78,8 @@ class Tiposestampillas extends MY_Controller {
 
                      );
                  
-    			        if ($this->codegen_model->add('est_tiposestampillas',$data) == TRUE) {
+                        $respuestaProceso = $this->codegen_model->add('est_tiposestampillas',$data);
+    			        if ($respuestaProceso->bandRegistroExitoso) {
 
                       $this->session->set_flashdata('message', 'El tipo de estampilla se ha creado con éxito');
                       redirect(base_url().'index.php/tiposestampillas/add');

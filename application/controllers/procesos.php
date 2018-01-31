@@ -76,7 +76,8 @@ class Procesos extends MY_Controller {
                         'proc_estadoid' => $this->input->post('estadoid')
                      );
                  
-    			        if ($this->codegen_model->add('adm_procesos',$data) == TRUE) {
+                     $respuestaProceso = $this->codegen_model->add('adm_procesos',$data);
+    			        if ($respuestaProceso->bandRegistroExitoso) {
 
                       $this->session->set_flashdata('message', 'El proceso se ha creado con éxito');
                       redirect(base_url().'index.php/procesos/add');

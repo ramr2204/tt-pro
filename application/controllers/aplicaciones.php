@@ -80,12 +80,14 @@ class Aplicaciones extends MY_Controller {
                         'apli_estadoid' => $this->input->post('estadoid')
 
                      );
-                 
-    			        if ($this->codegen_model->add('adm_aplicaciones',$data) == TRUE) {
+                    
+                    $respuestaProceso = $this->codegen_model->add('adm_aplicaciones',$data);
+                    if ($respuestaProceso->bandRegistroExitoso) 
+                    {
 
                       $this->session->set_flashdata('message', 'La aplicación se ha creado con éxito');
                       redirect(base_url().'index.php/aplicaciones/add');
-    			        } else {
+                    } else {
 
     				          $this->data['errormessage'] = 'No se pudo registrar el aplicación';
 

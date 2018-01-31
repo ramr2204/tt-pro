@@ -452,8 +452,8 @@ class Users extends MY_Controller {
                               'usme_usuarioid' => $usuarioid,
                               'usme_menuid' => $value->peme_menuid,
                            );
-                 
-    			           $this->codegen_model->add('adm_usuarios_menus',$data);
+				 
+						   $respuestaProceso = $this->codegen_model->add('adm_usuarios_menus',$data);
                        }
 
 					   $this->session->set_flashdata('successmessage', 'El usuario se ha creado con éxito');
@@ -545,9 +545,8 @@ class Users extends MY_Controller {
                               'usme_usuarioid' => $user->id,
                               'usme_menuid' => $value->peme_menuid
                           );
-                 
-    			         $this->codegen_model->add('adm_usuarios_menus',$data);
-
+				 
+						  $respuestaProceso = $this->codegen_model->add('adm_usuarios_menus',$data);
                       } 
 				  }
 				  $this->session->set_flashdata('successmessage', 'El usuario se ha editado con éxito');
@@ -653,8 +652,9 @@ class Users extends MY_Controller {
                         'usme_menuid' => $id_menu,
                         'usme_usuarioid' => $id_usuario
                 );
-                 
-                if ($this->codegen_model->add('adm_usuarios_menus',$data) == TRUE)
+				 
+				$respuestaProceso = $this->codegen_model->add('adm_usuarios_menus',$data);
+                if ($respuestaProceso->bandRegistroExitoso)
                 {
                      echo $this->data['custom_error'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Agregado correctamente</div>';
                 }

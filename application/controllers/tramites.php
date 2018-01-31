@@ -85,9 +85,10 @@ class Tramites extends MY_Controller {
 
                      ); 
                     
-    			        if ($this->codegen_model->add('est_tramites',$data) == TRUE) {
+                        $respuestaProceso = $this->codegen_model->add('est_tramites',$data);
+    			        if ($respuestaProceso->bandRegistroExitoso) {
                       
-                      $insertid= $this->db->insert_id();
+                      $insertid = $respuestaProceso->idInsercion;
                       $x=1;
                       while ( $x  <= $this->input->post('numero')) {
                           if ($this->input->post('porcentaje'.$x) > 0) {
@@ -96,7 +97,7 @@ class Tramites extends MY_Controller {
                               'estr_tramiteid' => $insertid,
                               'estr_porcentaje' => $this->input->post('porcentaje'.$x)
                               );
-                              $this->codegen_model->add('est_estampillas_tramites',$data);
+                              $respuestaProceso = $this->codegen_model->add('est_estampillas_tramites',$data);
                           }
                           $x++;
                       } 
@@ -200,7 +201,7 @@ class Tramites extends MY_Controller {
                                      'estr_tramiteid' => $idtramite,
                                      'estr_porcentaje' => $this->input->post('porcentaje'.$x)
                                    );
-                                   $this->codegen_model->add('est_estampillas_tramites',$data);
+                                   $respuestaProceso = $this->codegen_model->add('est_estampillas_tramites',$data);
                                }
                           }
                           $x++;
