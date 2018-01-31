@@ -375,7 +375,7 @@ class Liquidaciones extends MY_Controller {
 
             $codigo = 00000;
             $idcontrato=$this->input->post('idcontrato');
-            
+
             /*
             * Extrae el objeto del contrato
             */
@@ -404,9 +404,10 @@ class Liquidaciones extends MY_Controller {
                 'liqu_usuarioliquida' => $usuario->id,
                 'liqu_tiempoliquida' => date('Y-m-d H:i:s')
                 );
-
-              if ($this->codegen_model->add('est_liquidaciones',$data) == TRUE) {
-              	  $liquidacionid=$this->db->insert_id();
+                
+                $respuestaProceso = $this->codegen_model->add('est_liquidaciones',$data);
+              if ($respuestaProceso->bandRegistroExitoso) {
+              	  $liquidacionid = $respuestaProceso->idInsercion;
                   for ($i=0; $i < $this->input->post('numeroestampillas'); $i++) { 
                       
                     //Valida si la factura viene en valor cero
@@ -453,7 +454,7 @@ class Liquidaciones extends MY_Controller {
                         $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($data['fact_estampillaid'], $contrato->cntr_fecha_firma, $contrato->cntr_tipocontratoid);
                         if($bandRegistrarFactura)
                         {
-                            $this->codegen_model->add('est_facturas',$data);
+                            $respuestaProceso = $this->codegen_model->add('est_facturas',$data);
 
                             /**
                             * Solicita la Asignación del codigo para el codigo de barras
@@ -815,7 +816,8 @@ class Liquidaciones extends MY_Controller {
                                          'pago_liquidadorpago' => $usuario->id,
                                          'pago_metodo' => 'manual',
                                        );
-                                $this->codegen_model->add('est_pagos',$datos);                                
+
+                                $respuestaProceso = $this->codegen_model->add('est_pagos',$datos);
                             }
                       }
                       
@@ -1095,8 +1097,9 @@ function verliquidartramite()
                    'liqu_tiempoliquida' => date('Y-m-d H:i:s')
                  );
                   
-              if ($this->codegen_model->add('est_liquidaciones',$data) == TRUE) {
-                  $liquidacionid=$this->db->insert_id();
+                $respuestaProceso = $this->codegen_model->add('est_liquidaciones',$data);
+              if ($respuestaProceso->bandRegistroExitoso) {
+                  $liquidacionid = $respuestaProceso->idInsercion;
 
                   for ($i=1; $i < $this->input->post('numeroestampillas'); $i++) { 
                       
@@ -1125,7 +1128,7 @@ function verliquidartramite()
                             $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($data['fact_estampillaid']);
                             if($bandRegistrarFactura)
                             {
-                                $this->codegen_model->add('est_facturas',$data);
+                                $respuestaProceso = $this->codegen_model->add('est_facturas',$data);
     
                                 /**
                                 * Solicita la Asignación del codigo para el codigo de barras
@@ -1368,9 +1371,10 @@ function verliquidartramite()
                             }
                     }                                       
                      
-                    if ($this->codegen_model->add('est_liquidartramites',$data) == TRUE) 
+                    $respuestaProceso = $this->codegen_model->add('est_liquidartramites',$data);
+                    if ($respuestaProceso->bandRegistroExitoso) 
                     {
-                        $id=$this->db->insert_id();
+                        $id = $respuestaProceso->idInsercion;
                         $this->session->set_flashdata('message','La liquidación se realizó con éxito');
                         $this->session->set_flashdata('accion', 'creado');
                         redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
@@ -1914,7 +1918,7 @@ function consultar()
                                     ['pape_imprimidos'=>$cantidadNeta+1],
                                     'pape_id', $idRangoPapel);
                               
-                                    $this->codegen_model->add('est_impresiones',$data);
+                                    $respuestaProceso = $this->codegen_model->add('est_impresiones',$data);
 
                                     /*
                                     * Valida que el contrato aún tenga estampillas a imprimir
@@ -1973,8 +1977,9 @@ function consultar()
                                                 'detpap_rango' => $idRangoPapel,
                                                 'detpap_cantidad' => $resultado->contador
                                                 );
-                                            $this->codegen_model->add('est_detconpap',$datos);
-                                        }                                    
+                                            
+                                            $respuestaProceso = $this->codegen_model->add('est_detconpap',$datos);
+                                        }
 
                                     redirect(base_url().'index.php/generarpdf/generar_estampilla/'.$idFactura);                                     
 
@@ -3293,14 +3298,24 @@ function solicitarUltimoRotuloImpreso()
         $usuario = $_POST['usuario'];
         $usuarioLogueado=$this->ion_auth->user($usuario)->row();
 
-        if ($usuarioLogueado->perfilid==4)
+        $respuestaPeticion = array(
+            'hayRotuloDisponible' => 'NO',
+            'numeroRotulo' => '',
+            'notificacionErr' => ''
+        );
+
+        if($usuarioLogueado->perfilid==4)
         {
             $datosConsecutivo = Liquidaciones::determinarSiguienteRotulo($usuarioLogueado);
+            $respuestaPeticion['hayRotuloDisponible'] = 'SI';
+            $respuestaPeticion['numeroRotulo'] = $datosConsecutivo['nuevoIngreso'];
+            
             if($datosConsecutivo['nuevoIngreso'] == 'NO')
             {
-                $datosConsecutivo['nuevoIngreso'] = '(No posee papeleria para imprimir)';
+                $respuestaPeticion['hayRotuloDisponible'] = 'NO';
+                $respuestaPeticion['notificacionErr'] = "(No posee papeleria para imprimir)";
             }
-            echo json_encode(['rotulo' => $datosConsecutivo['nuevoIngreso']]);
+            echo json_encode($respuestaPeticion);
         }
     }     
 }

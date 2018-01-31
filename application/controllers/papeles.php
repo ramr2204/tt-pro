@@ -149,8 +149,9 @@ class Papeles extends MY_Controller {
                                       'pape_imprimidos'=> 0
 
                                    );
-                 
-                                if ($this->codegen_model->add('est_papeles',$data) == TRUE) {
+                                
+                                $respuestaProceso = $this->codegen_model->add('est_papeles',$data);
+                                if ($respuestaProceso->bandRegistroExitoso) {
 
                                     $this->session->set_flashdata('message', 'Se ha asignado la Papeleria correspondiente al rango '
                                         .$this->input->post('codigoinicial')
@@ -491,7 +492,8 @@ class Papeles extends MY_Controller {
                                       'pape_estadoContintencia' => $contingencia
                                    );
 
-                            if ($this->codegen_model->add('est_papeles',$data) == TRUE) 
+                                   $respuestaProceso = $this->codegen_model->add('est_papeles',$data);
+                            if ($respuestaProceso->bandRegistroExitoso) 
                             {
 
                                     $this->session->set_flashdata('successmessage', 'Se ha re-asignado la Papeleria correspondiente al rango '
@@ -681,7 +683,7 @@ class Papeles extends MY_Controller {
                               'pape_imprimidos'=> 0,
                               'pape_estadoContintencia' => $estadoContingencia
                                   );
-                    $this->codegen_model->add('est_papeles',$data);
+                    $respuestaProceso = $this->codegen_model->add('est_papeles',$data);
 
                     /*
                     * Se Modifica la Informacion del rango original para 

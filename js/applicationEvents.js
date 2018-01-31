@@ -88,6 +88,80 @@ function inicial ()
     identificarVistaListadoConciliaciones();
 }
 
+/**
+ * Funcion de apoyo que valida si enviar o no la impresion
+ *  de la estampilla segun verificacion de rotulo
+ */
+async function validarNumeroRotuloLiquidador(event) 
+{
+    var objEvento = $(this);
+    event.preventDefault();
+
+    /*
+    * Solicita el ultimo rotulo para la impresion
+    */
+    await solicitarUltimoRotulo().then(
+        function exito(siguienteEstampilla)
+        {
+            var bandEnviarImpresion = true;
+            if (!confirm('.::SIGUIENTE ESTAMPIILLA A IMPRIMIRSE => No. ' + siguienteEstampilla + '::.\n\n'
+                + 'Esta seguro de generar la impresión?'
+                + ' Recuerde que será modificado el consecutivo de la papeleria asignada a usted!')) {
+                bandEnviarImpresion = false;
+            }
+        
+            if(bandEnviarImpresion)
+            {
+                for (var i = 1; i <= 3; i++) {
+                    var inputTeclado = prompt(".::POR FAVOR CONFIRME EL NÚMERO DE ROTULO FÍSICO A IMPRIMIR::.",
+                        Math.floor(Math.random() * 10000));
+                    if (inputTeclado != siguienteEstampilla) {
+                        alert('.::EL NÚMERO DE ROTULO FÍSICO ESPECIFICADO POR USTED NO CORRESPONDE CON EL ROTULO FÍSICO '
+                            + 'SIGUIENTE EN EL SISTEMA::.');
+                        bandEnviarImpresion = false;
+                        break;
+                    }
+                }
+            }
+        
+            if (bandEnviarImpresion) {
+                objEvento.attr('disabled', 'disabled');
+                window.open(objEvento.attr('href'), '_blank');
+            }
+        },
+        function fallo(mensajeError)
+        {
+            alert(".:: " + mensajeError +" ::.");
+        }
+    );
+}
+
+/**
+* Funcion de Apoyo que solicita el ultimo rotulo impreso
+* del usuario liquidador
+*/
+function solicitarUltimoRotulo() 
+{
+    return new Promise(function (exito, fallo) {
+        var usuario = $('[rol="usuario_rotulo"]').html();
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            data: { usuario: usuario },
+            url: base_url + "index.php/liquidaciones/solicitarUltimoRotuloImpreso",
+            success: function (data) {
+                if (data.hayRotuloDisponible == 'SI')
+                {
+                    exito(data.numeroRotulo);
+                }else if(data.hayRotuloDisponible == 'NO')
+                    {
+                        fallo(data.notificacionErr);
+                    }
+            }
+        });
+    });
+}
+
 /*
 * Funcion que solicita al servidor la validacion del tipo de regimen
 * del contratista seleccionado

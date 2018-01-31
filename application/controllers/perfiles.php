@@ -92,8 +92,9 @@ class Perfiles extends MY_Controller {
                                  'perf_nombre' => $this->input->post('nombre'),
                                  'perf_descripcion' => $this->input->post('descripcion')
                    );
-                 
-    			       if ($this->codegen_model->add('adm_perfiles',$data) == TRUE)
+                         
+                    $respuestaProceso = $this->codegen_model->add('adm_perfiles',$data);
+    			       if ($respuestaProceso->bandRegistroExitoso)
     			       {
                    $this->session->set_flashdata('message', 'El perfil se ha creado con éxito');
                    redirect(base_url().'index.php/perfiles/add');
@@ -230,7 +231,8 @@ function predeterminar(){
                         'peme_perfilid' => $id_perfil
                 );
                  
-                if ($this->codegen_model->add('adm_perfiles_menus',$data) == TRUE)
+                $respuestaProceso = $this->codegen_model->add('adm_perfiles_menus',$data);
+                if ($respuestaProceso->bandRegistroExitoso)
                 {
                      echo $this->data['custom_error'] = '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Agregado correctamente</div>';
                 }

@@ -136,7 +136,8 @@ class Contratos extends MY_Controller {
                         */
                         if($registrarContrato)
                         {
-                            if ($this->codegen_model->add('con_contratos',$data) == TRUE) 
+                            $respuestaProceso = $this->codegen_model->add('con_contratos',$data);
+                            if ($respuestaProceso->bandRegistroExitoso) 
                             {
                                 $this->session->set_flashdata('message', 'El contrato se ha creado con éxito');
                                 redirect(base_url().'index.php/contratos/add');
@@ -430,14 +431,14 @@ class Contratos extends MY_Controller {
                                                 
                                            }
                                            
-                                                                   
-                                           if ($this->codegen_model->add('con_contratistas',$data) == TRUE) {
+                                            $respuestaProceso = $this->codegen_model->add('con_contratistas',$data);
+                                           if ($respuestaProceso->bandRegistroExitoso) {
                                                $contratistas_importados++;     
 
                                                //capturamos el id del nuevo contratista
                                                //para establecerlo como foreign key
                                                //en el contrato que se importará
-                                               $tistaid=$this->db->insert_id();
+                                               $tistaid = $respuestaProceso->idInsercion;
                                            } else {
              
                                                $contratistas_falloimpotacion=0;
@@ -476,8 +477,8 @@ class Contratos extends MY_Controller {
                               //como no liquidado
                               $data['cntr_estadolocalid'] = 0;
                               
-                              
-                              if ($this->codegen_model->add('con_contratos',$data) == TRUE) {
+                                $respuestaProceso = $this->codegen_model->add('con_contratos',$data);
+                              if ($respuestaProceso->bandRegistroExitoso) {
                                   $contratos_importados++;     
                               } else {
 

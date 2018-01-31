@@ -77,8 +77,9 @@ class Bancos extends MY_Controller {
                         'banc_descripcion' => $this->input->post('descripcion')
 
                      );
-                 
-    			        if ($this->codegen_model->add('par_bancos',$data) == TRUE) {
+                        
+                        $respuestaProceso = $this->codegen_model->add('par_bancos',$data);
+    			        if ($respuestaProceso->bandRegistroExitoso) {
 
                       $this->session->set_flashdata('message', 'El banco se ha creado con éxito');
                       redirect(base_url().'index.php/bancos/add');

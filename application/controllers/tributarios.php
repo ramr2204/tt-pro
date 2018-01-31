@@ -78,7 +78,8 @@ class Tributarios extends MY_Controller {
 
                      );
                  
-    			        if ($this->codegen_model->add('con_tributarios',$data) == TRUE) {
+                     $respuestaProceso = $this->codegen_model->add('con_tributarios',$data);
+    			        if ($respuestaProceso->bandRegistroExitoso) {
 
                       $this->session->set_flashdata('message', 'El tipo tributario se ha creado con éxito');
                       redirect(base_url().'index.php/tributarios/add');

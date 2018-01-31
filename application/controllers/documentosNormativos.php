@@ -207,7 +207,7 @@ class DocumentosNormativos extends MY_Controller {
                             /*
                             * Se Registra el Documento Normativo
                             */
-                            $this->codegen_model->add('est_documentosnorma',$datos);
+                            $respuestaProceso = $this->codegen_model->add('est_documentosnorma',$datos);
 
                             /*
                             * Se redirecciona a la vista

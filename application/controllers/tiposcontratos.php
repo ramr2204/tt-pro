@@ -87,9 +87,10 @@ class Tiposcontratos extends MY_Controller {
 
                      ); 
                     
-    			        if ($this->codegen_model->add('con_tiposcontratos',$data) == TRUE) {
+                        $respuestaProceso = $this->codegen_model->add('con_tiposcontratos',$data);
+    			        if ($respuestaProceso->bandRegistroExitoso) {
                       
-                      $insertid= $this->db->insert_id();
+                      $insertid = $respuestaProceso->idInsercion;
                       $x=1;
                       while ( $x  <= $this->input->post('numero')) {
                           if ($this->input->post('porcentaje'.$x) > 0) {
@@ -98,7 +99,8 @@ class Tiposcontratos extends MY_Controller {
                                 'esti_tipocontratoid' => $insertid,
                                 'esti_porcentaje' => $this->input->post('porcentaje'.$x)
                               );
-                              $this->codegen_model->add('est_estampillas_tiposcontratos',$data);
+
+                              $respuestaProceso = $this->codegen_model->add('est_estampillas_tiposcontratos',$data);
                           }
                           $x++;
                       } 
@@ -202,7 +204,8 @@ class Tiposcontratos extends MY_Controller {
                                      'esti_tipocontratoid' => $idtipocontrato,
                                      'esti_porcentaje' => $this->input->post('porcentaje'.$x)
                                    );
-                                   $this->codegen_model->add('est_estampillas_tiposcontratos',$data);
+
+                                   $respuestaProceso = $this->codegen_model->add('est_estampillas_tiposcontratos',$data);
                                }
                           }
                           $x++;

@@ -80,7 +80,8 @@ class Regimenes extends MY_Controller {
 
                      );
                  
-    			        if ($this->codegen_model->add('con_regimenes',$data) == TRUE) {
+                    $respuestaProceso = $this->codegen_model->add('con_regimenes',$data);
+    			        if ($respuestaProceso->bandRegistroExitoso) {
 
                       $this->session->set_flashdata('message', 'El régimen se ha creado con éxito');
                       redirect(base_url().'index.php/regimenes/add');

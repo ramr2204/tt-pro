@@ -94,63 +94,7 @@ var oTable = $('#tablaq').dataTable( {
              $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramitelegalizado/'+ID,function(result){
               $('#myModal3').modal({show:true});
 
-              //Solicita el ultimo rotulo al cargar la modal
-              solicitarUltimoRotulo();    
-
-              $('.confirmar_impresion').click(function(event) {
-                  var objEvento = $(this);
-                  event.preventDefault();
-
-                  //Solicita el ultimo rotulo para la impresion
-                  solicitarUltimoRotulo();
-                  var bandEnviarImpresion = true;
-
-                  var siguienteEstampilla = $('#siguienteEstampilla').val();
-                  if(!confirm('.::SIGUIENTE ESTAMPIILLA A IMPRIMIRSE => No. '+siguienteEstampilla+'::.\n\n'
-                        +'Esta seguro de generar la impresión?'
-                        +' Recuerde que será modificado el consecutivo de la papeleria asignada a usted!'))
-                  {
-                      bandEnviarImpresion = false;
-                  }
-
-                  for(var i =1; i <= 3; i++)
-                  {
-                      var inputTeclado = prompt(".::POR FAVOR CONFIRME EL NÚMERO DE ROTULO FÍSICO A IMPRIMIR::.",Math.floor(Math.random()*10000));
-                      if(inputTeclado != siguienteEstampilla)
-                      {
-                          alert('.::EL NÚMERO DE ROTULO FÍSICO ESPECIFICADO POR USTED NO CORRESPONDE CON EL ROTULO FÍSICO SIGUIENTE EN EL SISTEMA::.');
-                          bandEnviarImpresion = false;
-                          break;
-                      }
-                  }
-
-                  if(bandEnviarImpresion)
-                  {
-                      objEvento.attr('disabled','disabled');
-                      window.open(objEvento.attr('href'),'_blank');
-                  }
-
-              });
-
-              /**
-              * Funcion de Apoyo que solicita el ultimo rotulo impreso
-              * del usuario liquidador
-              */
-              function solicitarUltimoRotulo()
-              {
-                  var usuario = <?php echo $this->ion_auth->user()->row()->id ?>;
-
-                  $.ajax({
-                      type: "POST",
-                      dataType: "json",
-                      data: {usuario : usuario},
-                      url: base_url+"index.php/liquidaciones/solicitarUltimoRotuloImpreso",
-                      success: function(data) {              
-                          $('#siguienteEstampilla').val(data.rotulo);                          
-                      }
-                  });  
-              }
-          
+              $('.confirmar_impresion').click(validarNumeroRotuloLiquidador);
 
              });
          });
@@ -215,6 +159,7 @@ var oTable = $('#tablaq').dataTable( {
     overflow: hidden;
 }
 </style>
+<div rol="usuario_rotulo" style="display:none;"><?php echo $this->ion_auth->user()->row()->id; ?></div>
 <div class="row"> 
  <div class="col-sm-12">
  <h1>Liquidación de trámites, documentos, certificados.</h1>
@@ -403,46 +348,11 @@ var oTable = $('#tablaq').dataTable( {
   
             var ID = <?php echo $idtramite; ?>;
             
-           $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramitelegalizado/'+ID,function(result){
+        $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vertramitelegalizado/'+ID,function(result){
   
             $('#myModal3').modal('show');
 
-            //Solicita el ultimo rotulo al cargar la modal
-              solicitarUltimoRotulo();    
-
-              $('.confirmar_impresion').click(function(event) {
-                  //Solicita el ultimo rotulo para la impresion
-                  solicitarUltimoRotulo();                   
-
-                  var siguienteEstampilla = $('#siguienteEstampilla').val();
-                  if(!confirm('SIGUIENTE ESTAMPIILLA A IMPRIMIRSE => No. '+siguienteEstampilla+'\n\n'
-                        +'Esta seguro de generar la impresión?'
-                        +' Recuerde que será modificado el consecutivo de la papeleria asignada a usted!'))
-                  {
-                    event.preventDefault();
-                  }                  
-
-              });
-
-              /**
-              * Funcion de Apoyo que solicita el ultimo rotulo impreso
-              * del usuario liquidador
-              */
-              function solicitarUltimoRotulo()
-              {
-                  var usuario = <?php echo $this->ion_auth->user()->row()->id ?>;
-
-                  $.ajax({
-                      type: "POST",
-                      dataType: "json",
-                      data: {usuario : usuario},
-                      url: base_url+"index.php/liquidaciones/solicitarUltimoRotuloImpreso",
-                      success: function(data) {              
-                          $('#siguienteEstampilla').val(data.rotulo);                          
-                      }
-                  });  
-              }         
-
+            $('.confirmar_impresion').click(validarNumeroRotuloLiquidador);
         });
         
  

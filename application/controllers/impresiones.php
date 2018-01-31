@@ -99,8 +99,9 @@ function add()
                       $datos = array(
                         'tisa_nombre' => $this->input->post('tipoanulacion')
                      );
-                      $this->codegen_model->add('est_tiposanulaciones',$datos); 
-                      $tipoanulacionid=$this->db->insert_id();
+
+                    $respuestaProceso = $this->codegen_model->add('est_tiposanulaciones',$datos);
+                    $tipoanulacionid = $respuestaProceso->idInsercion;
                   
                    } else {
                       $tipoanulacionid=$resultado->tisa_id;
@@ -167,8 +168,8 @@ function add()
                                     'impr_estadoContintencia' => $contingencia
                                 );
                             
-                               
-                                if($this->codegen_model->add('est_impresiones',$data) == TRUE) 
+                                $respuestaProceso = $this->codegen_model->add('est_impresiones',$data);
+                                if($respuestaProceso->bandRegistroExitoso)
                                 {
                                     //Descuenta del total de la papeleria asignada al liquidador
                                     //debido a la anulación

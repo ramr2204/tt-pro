@@ -102,8 +102,9 @@ class Estampillas extends MY_Controller {
                           'estm_codigoB' => $this->input->post('codigoB'),
                           'estm_rutaimagen' => $ruta
                        );
-                 
-                       if ($this->codegen_model->add('est_estampillas',$data) == TRUE) {
+                        
+                        $respuestaProceso = $this->codegen_model->add('est_estampillas',$data);
+                       if ($respuestaProceso->bandRegistroExitoso) {
 
                            $this->session->set_flashdata('message', 'La estampilla se ha creado con éxito');
                            redirect(base_url().'index.php/estampillas/add');
@@ -357,7 +358,8 @@ function agregarcobro()
                     'esti_porcentaje' => $this->input->post('porcentaje')
                   );
                   if ($this->form_validation->run() == false) { 
-                      if ($this->codegen_model->add('est_estampillas_tiposcontratos',$data) == TRUE) {
+                       $respuestaProceso = $this->codegen_model->add('est_estampillas_tiposcontratos',$data);
+                      if ($respuestaProceso->bandRegistroExitoso) {
                             
                         $this->session->set_flashdata('successmessage', 'El cobro se ha creado con éxito');
                       } else {
@@ -378,7 +380,9 @@ function agregarcobro()
                     'estr_porcentaje' => $this->input->post('porcentaje')
                   );
                   if ($this->form_validation->run() == false) {
-                      if ($this->codegen_model->add('est_estampillas_tramites',$data) == TRUE) {
+
+                       $respuestaProceso = $this->codegen_model->add('est_estampillas_tramites',$data);
+                      if ($respuestaProceso->bandRegistroExitoso) {
 
                         $this->session->set_flashdata('successmessage', 'El cobro se ha creado con éxito');
                       } else {

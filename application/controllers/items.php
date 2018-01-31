@@ -107,8 +107,9 @@ class Items extends MY_Controller {
                             'itod_campoid' => $this->input->post('key'),
                             'itod_descripcion' => $this->input->post('descripcion')                            
                            );
-                 
-                        if ($this->codegen_model->add('est_itemordenanza',$data) == TRUE) 
+                        
+                        $respuestaProceso = $this->codegen_model->add('est_itemordenanza',$data);
+                        if ($respuestaProceso->bandRegistroExitoso) 
                         {
                             $this->session->set_flashdata('message', 'El Item se ha creado con éxito');
                             redirect(base_url().'index.php/items/add');
