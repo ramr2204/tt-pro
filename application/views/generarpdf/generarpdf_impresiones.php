@@ -28,9 +28,10 @@ ini_set('max_execution_time', 0);
             /*
             * Valida si el usuario autenticado es administrador para
             * renderizar la informacion del liquidador que generó
-            * la impresion
+            * la impresion, modificado para que al liquidador le salga
+            * y pueda consultar
             */
-            if($this->ion_auth->is_admin())
+            if(true)
             {
                 echo '<th rowspan="2" style="width:20mm;"><strong>Liquidador</strong></th>';
             }
@@ -101,9 +102,10 @@ ini_set('max_execution_time', 0);
                 /*
                 * Valida si el usuario autenticado es administrador para
                 * renderizar la informacion del liquidador que generó
-                * la impresion
+                * la impresion, modificado para que al liquidador le salga
+                * y pueda consultar
                 */
-                if($this->ion_auth->is_admin())
+                if(true)
                 {
                     echo '<td rowspan="'.$cantRowspan.'" style="text-align:left; width:20mm;">'. $liquidacion->liquidador .'</td>';
                 }
