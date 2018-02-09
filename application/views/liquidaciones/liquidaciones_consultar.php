@@ -185,12 +185,15 @@ var oTable = $('#tablaq').dataTable( {
         <h4 class="modal-title text-center" id="myModalLabel">Consultar por Rango (Fecha Generacion Estampilla)</h4>
       </div>
       <div class="modal-body">      
-          <div class="row">          
+          <div class="row">
+            <div class="col-xs-12">
+               <legend>Filtrar por fecha de Impresi&oacute;n</legend>
+            </div>
               <div class="col-xs-12 col-md-6">
                   <div class="form-group">
                       <label for="f_inicial">Fecha Inicial</label>
-                      <div class='input-group date' id='datetimepicker_inicial' data-date-format="YYYY-MM-DD">
-                          <input type='text' class="form-control" name="f_inicial" required="required"/>
+                      <div class='input-group date' id='datetimepicker_inicial_impr' data-date-format="YYYY-MM-DD">
+                          <input type='text' class="form-control" name="f_inicial_impr" required="required"/>
                           <span class="input-group-addon">
                               <span class="glyphicon glyphicon-time"></span>
                           </span>
@@ -200,14 +203,42 @@ var oTable = $('#tablaq').dataTable( {
               <div class="col-xs-12 col-md-6">
                   <div class="form-group">
                       <label for="f_final">Fecha Final</label>
-                      <div class='input-group date' id='datetimepicker_final' data-date-format="YYYY-MM-DD">
-                          <input type='text' class="form-control" name="f_final" required="required"/>
+                      <div class='input-group date' id='datetimepicker_final_impr' data-date-format="YYYY-MM-DD">
+                          <input type='text' class="form-control" name="f_final_impr" required="required"/>
                           <span class="input-group-addon">
                               <span class="glyphicon glyphicon-time"></span>
                           </span>
                       </div>                       
                   </div>
               </div>
+              <div class="col-xs-12">
+               <legend>Filtrar por fecha de pago</legend>
+              </div>
+              <div class="col-xs-12 col-md-6">
+                  <div class="form-group">
+                      <label for="f_inicial">Fecha Inicial</label>
+                      <div class='input-group date' id='datetimepicker_inicial_pago' data-date-format="YYYY-MM-DD">
+                          <input type='text' class="form-control" name="f_inicial_pago" required="required"/>
+                          <span class="input-group-addon">
+                              <span class="glyphicon glyphicon-time"></span>
+                          </span>
+                      </div>                      
+                  </div>
+              </div>
+              <div class="col-xs-12 col-md-6">
+                  <div class="form-group">
+                      <label for="f_final">Fecha Final</label>
+                      <div class='input-group date' id='datetimepicker_final_pago' data-date-format="YYYY-MM-DD">
+                          <input type='text' class="form-control" name="f_final_pago" required="required"/>
+                          <span class="input-group-addon">
+                              <span class="glyphicon glyphicon-time"></span>
+                          </span>
+                      </div>                       
+                  </div>
+              </div>
+              <div class="col-xs-12">
+               <legend>Filtros adicionales</legend>
+               </div>
               <div class="col-xs-12 col-md-6 btn-pdf">
                   <div class="form-group">
                       <label for="tipoEst">Tipo Estampilla</label>
