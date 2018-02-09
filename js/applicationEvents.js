@@ -309,8 +309,10 @@ function identificarVistaChosen()
 */
 function generarInformeRangoImpresiones(e)
 {
-    var fecha_inicial = $('#m_rango').find('[name="f_inicial"]').val();
-    var fecha_final   = $('#m_rango').find('[name="f_final"]').val();
+    var fecha_inicial_impr = $('#m_rango').find('[name="f_inicial_impr"]').val();
+    var fecha_final_impr   = $('#m_rango').find('[name="f_final_impr"]').val();
+    var fecha_inicial_pago = $('#m_rango').find('[name="f_inicial_pago"]').val();
+    var fecha_final_pago   = $('#m_rango').find('[name="f_final_pago"]').val();
     var tipoEst       = $('#tipoEst').val();
     var tipoActo      = $('#tipoActo').val();
     var subTipoActo   = $('#subTipoActo').val();
@@ -320,21 +322,40 @@ function generarInformeRangoImpresiones(e)
     * Se valida numericamente que las fechas tengan valor
     * distinto de vacio
     */
-    if(fecha_inicial != '')
+    if(fecha_inicial_impr != '')
     {
-        var fe_i = 1;
+        var fe_i_impr = 1;
     }else
         {
-            var fe_i = 0;
+            var fe_i_impr = 0;
         }
     
-    if(fecha_final != '')
+    if(fecha_final_impr != '')
     {
-        var fe_f = 1;
+        var fe_f_impr = 1;
     }else
         {
-            var fe_f = 0;
+            var fe_f_impr = 0;
         }
+    
+    if(fecha_inicial_pago != '')
+    {
+        var fe_i_pago = 1;
+    }else
+        {
+            var fe_i_pago = 0;
+        }
+
+    if(fecha_final_pago != '')
+    {
+        var fe_f_pago = 1;
+    }else
+        {
+            var fe_f_pago = 0;
+        }
+
+    var sumBandFechasImpr = fe_i_impr + fe_f_impr;
+    var sumBandFechasPago = fe_i_pago + fe_f_pago;
 
     /*
     * Se validan los checkbox de agrupación
@@ -376,7 +397,7 @@ function generarInformeRangoImpresiones(e)
         bandAgrupar       = 1;
     }
 
-    if((fe_i+fe_f) > 0)
+    if(sumBandFechasImpr > 0 || sumBandFechasPago > 0)
     {
         /*
         * Valida cual boton generó el evento si pdf o excel
@@ -385,8 +406,11 @@ function generarInformeRangoImpresiones(e)
         var tipoInforme = $(this).attr('documento');
         if(tipoInforme == 'pdf')
         {
-            window.open(base_url+'index.php/liquidaciones/renderizarDetalleRangoPDF?fecha_I='+fecha_inicial
-                +'&fecha_F='+fecha_final
+            window.open(base_url+'index.php/liquidaciones/renderizarDetalleRangoPDF?'
+                +'fecha_I_impr='+fecha_inicial_impr
+                +'&fecha_F_impr='+fecha_final_impr
+                +'&fecha_I_pago=' + fecha_inicial_pago
+                +'&fecha_F_pago=' + fecha_final_pago
                 +'&est='+tipoEst
                 +'&acto='+tipoActo
                 +'&subtipo='+subTipoActo
@@ -394,8 +418,11 @@ function generarInformeRangoImpresiones(e)
                 +'&agrupar=0');
         }else if(tipoInforme == 'excel')
             {
-                window.open(base_url+'index.php/liquidaciones/renderizarDetalleRangoExcel?fecha_I='+fecha_inicial
-                    +'&fecha_F='+fecha_final
+                window.open(base_url+'index.php/liquidaciones/renderizarDetalleRangoExcel?'
+                    +'fecha_I_impr=' + fecha_inicial_impr
+                    +'&fecha_F_impr=' + fecha_final_impr
+                    +'&fecha_I_pago=' + fecha_inicial_pago
+                    +'&fecha_F_pago=' + fecha_final_pago
                     +'&est='+tipoEst
                     +'&acto='+tipoActo
                     +'&subtipo='+subTipoActo
@@ -403,8 +430,11 @@ function generarInformeRangoImpresiones(e)
                     +'&agrupar=0');
             }else if(tipoInforme == 'consolidado_pdf')
                 {
-                    window.open(base_url+'index.php/liquidaciones/renderizarConsolidadoRangoImpresionesPDF?fecha_I='+fecha_inicial
-                        +'&fecha_F='+fecha_final
+                    window.open(base_url+'index.php/liquidaciones/renderizarConsolidadoRangoImpresionesPDF?'
+                        +'fecha_I_impr=' + fecha_inicial_impr
+                        +'&fecha_F_impr=' + fecha_final_impr
+                        +'&fecha_I_pago=' + fecha_inicial_pago
+                        +'&fecha_F_pago=' + fecha_final_pago
                         +'&est='+tipoEst
                         +'&acto='+tipoActo
                         +'&subtipo='+subTipoActo
@@ -802,10 +832,17 @@ function identificarVistaDatetimepicker()
     if(n > 0)
     {
         //Evento para el timepicker del rango de impresiones
-        $('#datetimepicker_inicial').datetimepicker({
+        $('#datetimepicker_inicial_impr').datetimepicker({
             pickTime: false
         });
-        $('#datetimepicker_final').datetimepicker({
+        $('#datetimepicker_final_impr').datetimepicker({
+            pickTime: false
+        });
+        //Evento para el timepicker del rango de impresiones
+        $('#datetimepicker_inicial_pago').datetimepicker({
+            pickTime: false
+        });
+        $('#datetimepicker_final_pago').datetimepicker({
             pickTime: false
         });
     }

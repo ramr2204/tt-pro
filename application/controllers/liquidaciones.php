@@ -2167,31 +2167,71 @@ function renderizarDetalleRangoPDF()
         ini_set('memory_limit', '-1');
         ini_set('max_execution_time', 0);
 
-        $fecha_inicial = $vectorGet['fecha_I'];
+        $bandFiltroFechaImpresion = true;
+        $bandFiltroFechaPago = true;
+
+        /*
+        * Valida cuales fechas llegan
+        */
+        $fecha_inicial_impr = "";
+        $fecha_final_impr   = "";
+        $fecha_inicial_pago = "";
+        $fecha_inicial_pago = "";
+        if(isset($vectorGet['fecha_I_impr']) && !empty($vectorGet['fecha_I_impr']))
+        {
+            $fecha_inicial_impr = $vectorGet['fecha_I_impr'];
+        }else
+            {
+                $bandFiltroFechaImpresion = false;
+            }
+
+        if(isset($vectorGet['fecha_F_impr']) && !empty($vectorGet['fecha_F_impr']))
+        {
+            $fecha_final_impr = $vectorGet['fecha_F_impr'];
+        }else
+            {
+                $bandFiltroFechaImpresion = false;
+            }
+
+        if(isset($vectorGet['fecha_I_pago']) && !empty($vectorGet['fecha_I_pago']))
+        {
+            $fecha_inicial_pago = $vectorGet['fecha_I_pago'];
+        }else
+            {
+                $bandFiltroFechaPago = false;
+            }
+
+        if(isset($vectorGet['fecha_F_pago']) && !empty($vectorGet['fecha_F_pago']))
+        {
+            $fecha_final_pago = $vectorGet['fecha_F_pago'];
+        }else
+            {
+                $bandFiltroFechaPago = false;
+            }
+
+        /*
+        * Valida que lleguen fechas solamente para un tipo de filtro
+        * impresión o pago
+        */
+        if($bandFiltroFechaImpresion && $bandFiltroFechaPago)
+        {
+            $this->session->set_flashdata('errormessage', 'Debe Elegir solamente un Rango de Fechas para el informe (Fecha de pago o Fecha de Impresi&oacute;n)!');
+            redirect(base_url().'index.php/liquidaciones/consultar');
+        }
+
+        /*
+        * Valida que lleguen fechas para por lo menos un tipo de filtro
+        */
+        if(!$bandFiltroFechaImpresion && !$bandFiltroFechaPago)
+        {
+            $this->session->set_flashdata('errormessage', 'Debe Elegir un Rango de Fechas valido para el informe (Fecha de pago o Fecha de Impresi&oacute;n)!');
+            redirect(base_url().'index.php/liquidaciones/consultar');
+        }
+        
         $tipoEst       = $vectorGet['est'];
         $tipoActo      = $vectorGet['acto'];
         $subTipoActo   = $vectorGet['subtipo'];
         $contribuyente = $vectorGet['contribuyente'];
-
-        /*
-        * Valida si llega la fecha final o no
-        */
-        if(isset($vectorGet['fecha_F']))
-        {
-            $fecha_final = $vectorGet['fecha_F'];
-        }else
-            {
-                $fecha_final = "";
-            }
-
-        /*
-        * Valida que lleguen fechas
-        */
-        if($fecha_inicial == "" && $fecha_final == "")
-        {
-            $this->session->set_flashdata('errormessage', 'Debe Elegir un Rango de Fechas Valido!');
-            redirect(base_url().'index.php/liquidaciones/consultar');
-        }
 
         /*
          * Extrae el posible subtipo de acto (tipo de tramite o tipo de contrato)
@@ -2241,21 +2281,15 @@ function renderizarDetalleRangoPDF()
         * Se Validan los valores que llegan para construir el where
         */
         $where = 'WHERE imp.impr_estado = 1 ';
-        if($fecha_inicial != "" && $fecha_final != "")
+
+        if($bandFiltroFechaImpresion)
         {
-            $where .= ' AND date_format(imp.impr_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial.'" AND "'.$fecha_final.'"';
+            $where .= ' AND date_format(imp.impr_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial_impr.'" AND "'.$fecha_final_impr.'"';
         }
-        if($fecha_inicial != "" && $fecha_final == "")
+
+        if($bandFiltroFechaPago)
         {
-            $where .= ' AND date_format(imp.impr_fecha,"%Y-%m-%d") = "'.$fecha_inicial.'"';
-            //Bandera para la leyenda de la fecha
-            $fechaUnica = $fecha_inicial;
-        }
-        if($fecha_final != "" && $fecha_inicial == "")
-        {
-            $where .= ' AND date_format(imp.impr_fecha,"%Y-%m-%d") = "'.$fecha_final.'"';
-            //Bandera para la leyenda de la fecha
-            $fechaUnica = $fecha_final;
+            $where .= ' AND date_format(pag.pago_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial_pago.'" AND "'.$fecha_final_pago.'"';
         }
 
         if($tipoEst != '0')
@@ -2352,7 +2386,7 @@ function renderizarDetalleRangoPDF()
 
             $whereTramites = $where. ' AND liq.liqu_contratoid = 0';
             $liquidacionesTramites = $this->codegen_model->getSelect('est_impresiones imp',$camposTramites,$whereTramites,$joinTramites, $groupBy);
-            
+
             /*
             * Datos para contratos
             */
@@ -2360,7 +2394,7 @@ function renderizarDetalleRangoPDF()
             $campos .= ', concat("tipocontrato_",con2.cntr_tipocontratoid) as subtipoacto';
             $where .= ' AND liq.liqu_contratoid <> 0';
             $liquidacionesContratos = $this->codegen_model->getSelect('est_impresiones imp',$campos,$where,$join, $groupBy);
-            
+
             /*
             * Datos consolidados
             */
