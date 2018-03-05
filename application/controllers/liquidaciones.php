@@ -2284,11 +2284,15 @@ function renderizarDetalleRangoPDF()
 
         if($bandFiltroFechaImpresion)
         {
+            $fecha_inicial = $fecha_inicial_impr;
+            $fecha_final   = $fecha_final_impr;
             $where .= ' AND date_format(imp.impr_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial_impr.'" AND "'.$fecha_final_impr.'"';
         }
 
         if($bandFiltroFechaPago)
         {
+            $fecha_inicial = $fecha_inicial_pago;
+            $fecha_final   = $fecha_final_pago;
             $where .= ' AND date_format(pag.pago_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial_pago.'" AND "'.$fecha_final_pago.'"';
         }
 
