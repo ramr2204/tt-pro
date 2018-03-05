@@ -56,9 +56,9 @@ echo Liquidaciones::fechaEnLetras(date('Y-m-d'));
 <table><tr><td style="height: 2mm; color:white">espaciador</td></tr></table>
 
 <p>
-Doctora<br>
-<b>LUZ AIDA LARA BAHAMON</b><br>
-Directora de Rentas<br>
+Doctor<br>
+<b>JHON EDWIN MASIAS</b><br>
+Director de Rentas<br>
 Gobernación del Tolima<br>
 Ibagué<br>
 </p>
@@ -71,7 +71,7 @@ Ibagué<br>
 </p>
 
 
-<p>De conformidad con lo establecido en la circular 010 del 4 de mayo de 2014 </p>
+<p>De conformidad con lo establecido en la circular 001 del 3 de enero de 2018 </p>
 <table>            
     <tbody> 
                  
