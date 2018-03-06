@@ -2167,6 +2167,9 @@ function renderizarDetalleRangoPDF()
         ini_set('memory_limit', '-1');
         ini_set('max_execution_time', 0);
 
+        $strTipoFechaFiltrada = "";
+
+        $bandFiltroFechaLiquidacion = true;
         $bandFiltroFechaImpresion = true;
         $bandFiltroFechaPago = true;
 
@@ -2176,7 +2179,9 @@ function renderizarDetalleRangoPDF()
         $fecha_inicial_impr = "";
         $fecha_final_impr   = "";
         $fecha_inicial_pago = "";
-        $fecha_inicial_pago = "";
+        $fecha_final_pago   = "";
+        $fecha_inicial_liqu = "";
+        $fecha_final_liqu   = "";
         if(isset($vectorGet['fecha_I_impr']) && !empty($vectorGet['fecha_I_impr']))
         {
             $fecha_inicial_impr = $vectorGet['fecha_I_impr'];
@@ -2208,23 +2213,39 @@ function renderizarDetalleRangoPDF()
             {
                 $bandFiltroFechaPago = false;
             }
+        
+        if(isset($vectorGet['fecha_I_liqu']) && !empty($vectorGet['fecha_I_liqu']))
+        {
+            $fecha_inicial_liqu = $vectorGet['fecha_I_liqu'];
+        }else
+            {
+                $bandFiltroFechaLiquidacion = false;
+            }
+
+        if(isset($vectorGet['fecha_F_liqu']) && !empty($vectorGet['fecha_F_liqu']))
+        {
+            $fecha_final_liqu = $vectorGet['fecha_F_liqu'];
+        }else
+            {
+                $bandFiltroFechaLiquidacion = false;
+            }
 
         /*
         * Valida que lleguen fechas solamente para un tipo de filtro
         * impresión o pago
         */
-        if($bandFiltroFechaImpresion && $bandFiltroFechaPago)
+        if(($bandFiltroFechaImpresion && $bandFiltroFechaPago) || ($bandFiltroFechaImpresion && $bandFiltroFechaLiquidacion) || ($bandFiltroFechaPago && $bandFiltroFechaLiquidacion) || ($bandFiltroFechaPago && $bandFiltroFechaLiquidacion && $bandFiltroFechaImpresion))
         {
-            $this->session->set_flashdata('errormessage', 'Debe Elegir solamente un Rango de Fechas para el informe (Fecha de pago o Fecha de Impresi&oacute;n)!');
+            $this->session->set_flashdata('errormessage', 'Debe Elegir solamente un Rango de Fechas para el informe (Fecha de pago o Fecha de Impresi&oacute;n o Fecha de Liquidaci&oacute;n)!');
             redirect(base_url().'index.php/liquidaciones/consultar');
         }
 
         /*
         * Valida que lleguen fechas para por lo menos un tipo de filtro
         */
-        if(!$bandFiltroFechaImpresion && !$bandFiltroFechaPago)
+        if(!$bandFiltroFechaImpresion && !$bandFiltroFechaPago && !$bandFiltroFechaLiquidacion)
         {
-            $this->session->set_flashdata('errormessage', 'Debe Elegir un Rango de Fechas valido para el informe (Fecha de pago o Fecha de Impresi&oacute;n)!');
+            $this->session->set_flashdata('errormessage', 'Debe Elegir un Rango de Fechas valido para el informe (Fecha de pago o Fecha de Impresi&oacute;n o Fecha de Liquidaci&oacute;n)!');
             redirect(base_url().'index.php/liquidaciones/consultar');
         }
         
@@ -2286,6 +2307,7 @@ function renderizarDetalleRangoPDF()
         {
             $fecha_inicial = $fecha_inicial_impr;
             $fecha_final   = $fecha_final_impr;
+            $strTipoFechaFiltrada = "FECHA DE IMPRESIÓN";
             $where .= ' AND date_format(imp.impr_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial_impr.'" AND "'.$fecha_final_impr.'"';
         }
 
@@ -2293,7 +2315,16 @@ function renderizarDetalleRangoPDF()
         {
             $fecha_inicial = $fecha_inicial_pago;
             $fecha_final   = $fecha_final_pago;
+            $strTipoFechaFiltrada = "FECHA DE PAGO";
             $where .= ' AND date_format(pag.pago_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial_pago.'" AND "'.$fecha_final_pago.'"';
+        }
+
+        if($bandFiltroFechaLiquidacion)
+        {
+            $fecha_inicial = $fecha_inicial_liqu;
+            $fecha_final   = $fecha_final_liqu;
+            $strTipoFechaFiltrada = "FECHA DE LIQUIDACIÓN";
+            $where .= ' AND date_format(liq.liqu_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial_liqu.'" AND "'.$fecha_final_liqu.'"';
         }
 
         if($tipoEst != '0')
@@ -2440,7 +2471,8 @@ function renderizarDetalleRangoPDF()
         }else
             {
                 $fecha = 'PERIODO COMPRENDIDO ENTRE LAS FECHAS '. Liquidaciones::fechaEnLetras($fecha_inicial)
-                    .' Y '. Liquidaciones::fechaEnLetras($fecha_final);
+                    .' Y '. Liquidaciones::fechaEnLetras($fecha_final)
+                    .', FILTRO REALIZADO POR '. $strTipoFechaFiltrada;
             }
 
         return array(

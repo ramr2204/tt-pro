@@ -313,6 +313,8 @@ function generarInformeRangoImpresiones(e)
     var fecha_final_impr   = $('#m_rango').find('[name="f_final_impr"]').val();
     var fecha_inicial_pago = $('#m_rango').find('[name="f_inicial_pago"]').val();
     var fecha_final_pago   = $('#m_rango').find('[name="f_final_pago"]').val();
+    var fecha_inicial_liquidacion = $('#m_rango').find('[name="f_inicial_liquidacion"]').val();
+    var fecha_final_liquidacion   = $('#m_rango').find('[name="f_final_liquidacion"]').val();
     var tipoEst       = $('#tipoEst').val();
     var tipoActo      = $('#tipoActo').val();
     var subTipoActo   = $('#subTipoActo').val();
@@ -353,9 +355,26 @@ function generarInformeRangoImpresiones(e)
         {
             var fe_f_pago = 0;
         }
+    
+    if(fecha_inicial_liquidacion != '')
+    {
+        var fe_i_liquidacion = 1;
+    }else
+        {
+            var fe_i_liquidacion = 0;
+        }
+
+    if(fecha_final_liquidacion != '')
+    {
+        var fe_f_liquidacion = 1;
+    }else
+        {
+            var fe_f_liquidacion = 0;
+        }
 
     var sumBandFechasImpr = fe_i_impr + fe_f_impr;
     var sumBandFechasPago = fe_i_pago + fe_f_pago;
+    var sumBandFechasLiqu = fe_i_liquidacion + fe_f_liquidacion;
 
     /*
     * Se validan los checkbox de agrupación
@@ -397,7 +416,7 @@ function generarInformeRangoImpresiones(e)
         bandAgrupar       = 1;
     }
 
-    if(sumBandFechasImpr > 0 || sumBandFechasPago > 0)
+    if(sumBandFechasImpr > 0 || sumBandFechasPago > 0 || sumBandFechasLiqu > 0)
     {
         /*
         * Valida cual boton generó el evento si pdf o excel
@@ -411,6 +430,8 @@ function generarInformeRangoImpresiones(e)
                 +'&fecha_F_impr='+fecha_final_impr
                 +'&fecha_I_pago=' + fecha_inicial_pago
                 +'&fecha_F_pago=' + fecha_final_pago
+                +'&fecha_I_liqu=' + fecha_inicial_liquidacion
+                +'&fecha_F_liqu=' + fecha_final_liquidacion
                 +'&est='+tipoEst
                 +'&acto='+tipoActo
                 +'&subtipo='+subTipoActo
@@ -423,6 +444,8 @@ function generarInformeRangoImpresiones(e)
                     +'&fecha_F_impr=' + fecha_final_impr
                     +'&fecha_I_pago=' + fecha_inicial_pago
                     +'&fecha_F_pago=' + fecha_final_pago
+                    +'&fecha_I_liqu=' + fecha_inicial_liquidacion
+                    +'&fecha_F_liqu=' + fecha_final_liquidacion
                     +'&est='+tipoEst
                     +'&acto='+tipoActo
                     +'&subtipo='+subTipoActo
@@ -435,6 +458,8 @@ function generarInformeRangoImpresiones(e)
                         +'&fecha_F_impr=' + fecha_final_impr
                         +'&fecha_I_pago=' + fecha_inicial_pago
                         +'&fecha_F_pago=' + fecha_final_pago
+                        +'&fecha_I_liqu=' + fecha_inicial_liquidacion
+                        +'&fecha_F_liqu=' + fecha_final_liquidacion
                         +'&est='+tipoEst
                         +'&acto='+tipoActo
                         +'&subtipo='+subTipoActo
@@ -832,6 +857,7 @@ function identificarVistaDatetimepicker()
     if(n > 0)
     {
         //Evento para el timepicker del rango de impresiones
+        //por fecha de impresion
         $('#datetimepicker_inicial_impr').datetimepicker({
             pickTime: false
         });
@@ -839,10 +865,19 @@ function identificarVistaDatetimepicker()
             pickTime: false
         });
         //Evento para el timepicker del rango de impresiones
+        //por fecha de pago
         $('#datetimepicker_inicial_pago').datetimepicker({
             pickTime: false
         });
         $('#datetimepicker_final_pago').datetimepicker({
+            pickTime: false
+        });
+        //Evento para el timepicker del rango de impresiones
+        //por fecha de liquidacion
+        $('#datetimepicker_inicial_liquidacion').datetimepicker({
+            pickTime: false
+        });
+        $('#datetimepicker_final_liquidacion').datetimepicker({
             pickTime: false
         });
     }
