@@ -182,7 +182,7 @@ var oTable = $('#tablaq').dataTable( {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title text-center" id="myModalLabel">Consultar por Rango (Fecha Generacion Estampilla)</h4>
+        <h4 class="modal-title text-center" id="myModalLabel">Consultar por Rango de fechas</h4>
       </div>
       <div class="modal-body">      
           <div class="row">
@@ -309,7 +309,7 @@ var oTable = $('#tablaq').dataTable( {
                   </div>
               </div>
               <div class="col-xs-12 btn-pdf">
-                  <label>(Sólo informe Consolidado) Agrupar por :</label>
+                  <label>(Sólo informe Relaci&oacute;n) Agrupar por :</label>
               </div>
               <div class="col-xs-12 btn-pdf text-center">
                     <label class="checkbox-inline">
