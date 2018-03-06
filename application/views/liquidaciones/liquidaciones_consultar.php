@@ -182,18 +182,18 @@ var oTable = $('#tablaq').dataTable( {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title text-center" id="myModalLabel">Consultar por Rango (Fecha Generacion Estampilla)</h4>
+        <h4 class="modal-title text-center" id="myModalLabel">Consultar por Rango de fechas</h4>
       </div>
       <div class="modal-body">      
           <div class="row">
-            <div class="col-xs-12">
-               <legend>Filtrar por fecha de Impresi&oacute;n</legend>
-            </div>
+              <div class="col-xs-12">
+               <legend>Filtrar por fecha de liquidaci&oacute;n</legend>
+              </div>
               <div class="col-xs-12 col-md-6">
                   <div class="form-group">
                       <label for="f_inicial">Fecha Inicial</label>
-                      <div class='input-group date' id='datetimepicker_inicial_impr' data-date-format="YYYY-MM-DD">
-                          <input type='text' class="form-control" name="f_inicial_impr" required="required"/>
+                      <div class='input-group date' id='datetimepicker_inicial_liquidacion' data-date-format="YYYY-MM-DD">
+                          <input type='text' class="form-control" name="f_inicial_liquidacion" required="required"/>
                           <span class="input-group-addon">
                               <span class="glyphicon glyphicon-time"></span>
                           </span>
@@ -203,8 +203,8 @@ var oTable = $('#tablaq').dataTable( {
               <div class="col-xs-12 col-md-6">
                   <div class="form-group">
                       <label for="f_final">Fecha Final</label>
-                      <div class='input-group date' id='datetimepicker_final_impr' data-date-format="YYYY-MM-DD">
-                          <input type='text' class="form-control" name="f_final_impr" required="required"/>
+                      <div class='input-group date' id='datetimepicker_final_liquidacion' data-date-format="YYYY-MM-DD">
+                          <input type='text' class="form-control" name="f_final_liquidacion" required="required"/>
                           <span class="input-group-addon">
                               <span class="glyphicon glyphicon-time"></span>
                           </span>
@@ -230,6 +230,31 @@ var oTable = $('#tablaq').dataTable( {
                       <label for="f_final">Fecha Final</label>
                       <div class='input-group date' id='datetimepicker_final_pago' data-date-format="YYYY-MM-DD">
                           <input type='text' class="form-control" name="f_final_pago" required="required"/>
+                          <span class="input-group-addon">
+                              <span class="glyphicon glyphicon-time"></span>
+                          </span>
+                      </div>                       
+                  </div>
+              </div>
+            <div class="col-xs-12">
+               <legend>Filtrar por fecha de Impresi&oacute;n</legend>
+            </div>
+              <div class="col-xs-12 col-md-6">
+                  <div class="form-group">
+                      <label for="f_inicial">Fecha Inicial</label>
+                      <div class='input-group date' id='datetimepicker_inicial_impr' data-date-format="YYYY-MM-DD">
+                          <input type='text' class="form-control" name="f_inicial_impr" required="required"/>
+                          <span class="input-group-addon">
+                              <span class="glyphicon glyphicon-time"></span>
+                          </span>
+                      </div>                      
+                  </div>
+              </div>
+              <div class="col-xs-12 col-md-6">
+                  <div class="form-group">
+                      <label for="f_final">Fecha Final</label>
+                      <div class='input-group date' id='datetimepicker_final_impr' data-date-format="YYYY-MM-DD">
+                          <input type='text' class="form-control" name="f_final_impr" required="required"/>
                           <span class="input-group-addon">
                               <span class="glyphicon glyphicon-time"></span>
                           </span>
@@ -284,7 +309,7 @@ var oTable = $('#tablaq').dataTable( {
                   </div>
               </div>
               <div class="col-xs-12 btn-pdf">
-                  <label>(Sólo informe Consolidado) Agrupar por :</label>
+                  <label>(Sólo informe Relaci&oacute;n) Agrupar por :</label>
               </div>
               <div class="col-xs-12 btn-pdf text-center">
                     <label class="checkbox-inline">
