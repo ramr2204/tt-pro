@@ -21,7 +21,7 @@
                             <div class="panel-body">
                                 <div class="col-md-5">                               
                                   <fieldset>
-                                    <?php echo form_open(current_url(),'role="form"');?>
+                                    <?php echo form_open('users/postEditMe');?>
                                          <legend>Datos Personales</legend>
                                          <div class="form-group">
                                                  <label for="id">Identificación</label>

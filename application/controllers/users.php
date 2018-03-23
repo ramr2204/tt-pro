@@ -152,13 +152,30 @@ class Users extends MY_Controller {
 	//change password
 	function editme()
 	{
+		if (!$this->ion_auth->logged_in()) 
+		{
+			redirect('users/login', 'refresh');
+		}
+
+        $user = $this->ion_auth->user()->row();
+	    $this->data['result'] = $user;
+       
+		//display the form
+		//set the flash data error message if there is one
+		$this->data['errormessage'] = $this->session->flashdata('errormessage');
+		$this->data['successmessage'] = $this->session->flashdata('successmessage');
+		$this->template->load($this->config->item('admin_template'),'users/change_password', $this->data);
+	}
+
+	function postEditMe()
+	{
 		if (!$this->ion_auth->logged_in()) {
 			redirect('users/login', 'refresh');
 		}
 
         $user = $this->ion_auth->user()->row();
 	    $this->data['result']=$user;   
-        //validate form input
+        
         if ($user->email != $this->input->post('email'))  {
            $this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'required|valid_email|is_unique[users.email]');
        
@@ -166,8 +183,6 @@ class Users extends MY_Controller {
             $this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'required|valid_email');
 
         }
-
-		
 		
 		if ($this->input->post('password')){
 			 $this->form_validation->set_rules('oldpassword', $this->lang->line('change_password_validation_old_password_label'), 'required');
@@ -182,42 +197,41 @@ class Users extends MY_Controller {
 		$this->form_validation->set_rules('apellidos', $this->lang->line('create_user_validation_apellidos_label'), 'required|min_length[4]|max_length[40]');
         $this->form_validation->set_rules('nombres', $this->lang->line('create_user_validation_nombres_label'), 'required|min_length[4]|max_length[40]');
 
-		if ($this->form_validation->run() == false) {
+		if($this->form_validation->run() == false)
+		{
 			//display the form
 			//set the flash data error message if there is one
-			$this->data['errormessage'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('errormessage');
-			$this->data['successmessage']=$this->session->flashdata('successmessage');
-			$this->template->load($this->config->item('admin_template'),'users/change_password', $this->data);
+			$this->session->set_flashdata('errormessage', validation_errors());
+			redirect(base_url().'index.php/users/editme');
+		}else
+		    {
+			    $identity = $this->session->userdata($this->config->item('identity', 'ion_auth'));
+                
+                $data = array(
+				        'email' => $this->input->post('email'),
+				        'first_name' => $this->input->post('nombres'),
+				        'last_name' => $this->input->post('apellidos'),
+				        'phone' => $this->input->post('telefono')
+			        );
+				$this->ion_auth->update($user->id, $data);
+				$this->session->set_flashdata('successmessage', 'Ha editado sus datos con éxito');
 
-		}
-		else {
-			$identity = $this->session->userdata($this->config->item('identity', 'ion_auth'));
-            
-            $data = array(
-				    'email' => $this->input->post('email'),
-				    'first_name' => $this->input->post('nombres'),
-				    'last_name' => $this->input->post('apellidos'),
-				    'phone' => $this->input->post('telefono')
-			      );
-				  $this->ion_auth->update($user->id, $data); 
-				  $this->session->set_flashdata('successmessage', 'Ha editado sus datos con éxito');
-				  
-
-            if ($this->input->post('password')){
-            	$change = $this->ion_auth->change_password($identity, $this->input->post('oldpassword'), $this->input->post('password'));
-			   
-			    if ($change) {
-				    //if the password was successfully changed
-				    $this->session->set_flashdata('successmessage', $this->ion_auth->messages());
-				    $this->logout();
-			    }
-			    else {
-				    $this->session->set_flashdata('errormessage', $this->ion_auth->errors());
-				    redirect('users/change_password', 'refresh');
-			    }
-            }
-            redirect("users/editme", 'refresh');
-			
+				if($this->input->post('password'))
+				{
+            	    $change = $this->ion_auth->change_password($identity, $this->input->post('oldpassword'), $this->input->post('password'));
+    			   
+					if($change)
+					{
+				        //if the password was successfully changed
+				        $this->session->set_flashdata('successmessage', $this->ion_auth->messages());
+				        $this->logout();
+					}else
+					    {
+				            $this->session->set_flashdata('errormessage', $this->ion_auth->errors());
+				            redirect(base_url().'index.php/users/editme');
+			            }
+                }
+                redirect(base_url().'index.php/users/editme');
 		}
 	}
 
