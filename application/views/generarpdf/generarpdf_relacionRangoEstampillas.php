@@ -57,7 +57,7 @@ echo Liquidaciones::fechaEnLetras(date('Y-m-d'));
 
 <p>
 Doctor<br>
-<b>JHON EDWIN MASIAS</b><br>
+<b>YENNY MILENA GONZALEZ CRUZ</b><br>
 Director de Rentas<br>
 Gobernación del Tolima<br>
 Ibagué<br>
