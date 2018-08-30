@@ -72,6 +72,41 @@ Ibagué<br>
 
 
 <p>De conformidad con lo establecido en la circular 001 del 3 de enero de 2018 </p>
+
+<table>            
+    <tbody> 
+                 
+        <tr>
+            <td class="text-center" style="height: 5mm; width:160mm;border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;" colspan="2"><b>Filtros Aplicados</b></td>
+        </tr>
+        <?php $n=0;
+        foreach ($resultados['vec_filtros'] as $nom_filtro => $valor_filtro) 
+        {
+            if($valor_filtro != '')
+            {
+                $nom_filtro = ucwords(str_replace('_',' ',$nom_filtro));
+                $valor_filtro = str_replace('Ó','ó',$valor_filtro);
+        ?>        	
+            <tr>
+            	<td  style="height: 5mm; width:80mm;border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;"><b> <?php echo $nom_filtro; ?></b></td>            	
+                <td class="text-center" style="height: 5mm; width:80mm;border-top: 0.5px solid black;
+                        border-right: 0.5px solid black;
+                        border-left: 0.5px solid black;
+                        border-bottom: 0.5px solid black;"> <?php echo $valor_filtro; ?> </td>
+            </tr>
+        <?php
+            }
+        }
+        ?>
+    </tbody>       
+</table>
+<br><br>
 <table>            
     <tbody> 
                  
@@ -174,7 +209,7 @@ Ibagué<br>
 
       for ($i=1; $i <=$n ; $i++) 
       { 
-          echo '<table><tr><td style="height: 12mm; color:white">espaciador</td></tr></table>';
+          //echo '<table><tr><td style="height: 12mm; color:white">espaciador</td></tr></table>';
       }
 ?>
 

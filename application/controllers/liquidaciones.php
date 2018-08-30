@@ -2167,6 +2167,15 @@ function renderizarDetalleRangoPDF()
         ini_set('memory_limit', '-1');
         ini_set('max_execution_time', 0);
 
+        $vecFiltrosAplicados = array(
+            'tipo_fecha' => '',
+            'tipo_estampilla' => '',
+            'tipo_acto' => '',
+            'tipo_contrato' => '',
+            'tipo_tramite' => '',
+            'contribuyente' => '',
+        );
+
         $strTipoFechaFiltrada = "";
 
         $bandFiltroFechaLiquidacion = true;
@@ -2327,10 +2336,14 @@ function renderizarDetalleRangoPDF()
             $where .= ' AND date_format(liq.liqu_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial_liqu.'" AND "'.$fecha_final_liqu.'"';
         }
 
+        $vecFiltrosAplicados['tipo_fecha'] = ucfirst(strtolower($strTipoFechaFiltrada));
+
         if($tipoEst != '0')
         {
             $where = Liquidaciones::concatenarWhere($where);
             $where .= ' fac.`fact_estampillaid` = '.$tipoEst;
+
+            $vecFiltrosAplicados['tipo_estampilla'] = $tipoEst;
         }
 
         if($contribuyente != '0')
@@ -2338,6 +2351,8 @@ function renderizarDetalleRangoPDF()
             $where = Liquidaciones::concatenarWhere($where);
             preg_match('/^[t|c]_([0-9\-]+)$/',$contribuyente,$coincidencia);
             $where .= ' liq.liqu_nit = "'. $coincidencia[1] .'" ';
+
+            $vecFiltrosAplicados['contribuyente'] = $coincidencia[1];
         }
 
         if($tipoActo != '0')
@@ -2346,10 +2361,14 @@ function renderizarDetalleRangoPDF()
             {
                 $where = Liquidaciones::concatenarWhere($where);
                 $where .= ' liq.liqu_contratoid <> 0';
+
+                $vecFiltrosAplicados['tipo_acto'] = 'Contrato';
             }elseif($tipoActo == '2') //Valida si se solicitan solo tramites
                 {
                     $where = Liquidaciones::concatenarWhere($where);
                     $where .= ' liq.liqu_contratoid = 0';
+
+                    $vecFiltrosAplicados['tipo_acto'] = 'Tramite';
                 }
         }
 
@@ -2364,6 +2383,8 @@ function renderizarDetalleRangoPDF()
 
                 $where = Liquidaciones::concatenarWhere($where);
                 $where .= ' con.`cntr_tipocontratoid` = '.$id_subtipoacto;
+
+                $vecFiltrosAplicados['tipo_contrato'] = $id_subtipoacto;
             }
     
             if($t_acto == 'tramite')
@@ -2375,6 +2396,8 @@ function renderizarDetalleRangoPDF()
 
                 $where = Liquidaciones::concatenarWhere($where);
                 $where .= ' liqt.`litr_tramiteid` = '.$id_subtipoacto;
+
+                $vecFiltrosAplicados['tipo_tramite'] = $id_subtipoacto;
             }
         }
 
@@ -2475,7 +2498,10 @@ function renderizarDetalleRangoPDF()
                     .', FILTRO REALIZADO POR '. $strTipoFechaFiltrada;
             }
 
+        $vecFiltrosAplicados = $this->extraerInformacionFiltrosAplicados($vecFiltrosAplicados);
+
         return array(
+            'vec_filtros'            => $vecFiltrosAplicados,
             'vec_liquidaciones'      => $liquidaciones,
             'vec_estampillas'        => $vEstampillas,
             'cant_agrupacion'        => $cant_agrupaciones,
@@ -2735,6 +2761,66 @@ function renderizarDetalleRangoPDF()
         $objValidar->valor_estampilla += (double)$objFactura->fact_valor;
         
         return array('vec' => $objEstampillas, 'cant_agrupacion' => $cant_agrupacion);
+    }
+
+    /**
+     * Retorna el vector con informacion de filtros aplicados
+     */
+    function extraerInformacionFiltrosAplicados($vecFiltrosAplicados)
+    {
+        if($vecFiltrosAplicados['tipo_contrato'] != '')
+        {
+            $tipoContrato = $this->codegen_model->getSelect("con_tiposcontratos","*",
+                " WHERE tico_id = '". $vecFiltrosAplicados['tipo_contrato'] ."'");
+            if(count($tipoContrato) > 0)
+            {
+                $vecFiltrosAplicados['tipo_contrato'] = $tipoContrato[0]->tico_nombre;
+            }
+
+            if($vecFiltrosAplicados['contribuyente'] != '')
+            {
+                $contribuyente = $this->codegen_model->getSelect("con_contratistas","*",
+                    " WHERE cont_nit = '". $vecFiltrosAplicados['contribuyente'] ."'");
+                if(count($contribuyente) > 0)
+                {
+                    $vecFiltrosAplicados['contribuyente'] = $contribuyente[0]->cont_nombre;
+                }
+            }
+        }
+
+        if($vecFiltrosAplicados['tipo_tramite'] != '') 
+        {
+            $tipoTramite = $this->codegen_model->getSelect("est_tramites","*",
+                " WHERE tram_id = '" . $vecFiltrosAplicados['tipo_tramite'] . "'"
+            );
+            if (count($tipoTramite) > 0) 
+            {
+                $vecFiltrosAplicados['tipo_tramite'] = $tipoTramite[0]->tram_nombre;
+            }
+
+            if($vecFiltrosAplicados['contribuyente'] != '')
+            {
+                $contribuyente = $this->codegen_model->getSelect("est_liquidartramites","*",
+                    " WHERE litr_tramitadorid = '". $vecFiltrosAplicados['contribuyente'] ."'");
+                if(count($contribuyente) > 0)
+                {
+                    $vecFiltrosAplicados['contribuyente'] = $contribuyente[0]->litr_tramitadornombre;
+                }
+            }
+        }
+
+        if($vecFiltrosAplicados['tipo_estampilla'] != '') 
+        {
+            $tipoEstampilla = $this->codegen_model->getSelect("est_estampillas","*",
+                " WHERE estm_id = '" . $vecFiltrosAplicados['tipo_estampilla'] . "'"
+            );
+            if (count($tipoEstampilla) > 0) 
+            {
+                $vecFiltrosAplicados['tipo_estampilla'] = $tipoEstampilla[0]->estm_nombre;
+            }
+        }
+        
+        return $vecFiltrosAplicados;
     }
 
     /*
