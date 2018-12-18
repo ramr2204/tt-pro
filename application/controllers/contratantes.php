@@ -57,7 +57,7 @@ class Contratantes extends MY_Controller {
             redirect(base_url().'index.php/users/login');
         }    
     }
-
+ 
 	function add()
     {
         if ($this->ion_auth->logged_in()) 
