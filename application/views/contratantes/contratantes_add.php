@@ -1,11 +1,11 @@
 <?php if( ! defined('BASEPATH') ) exit('No direct script access allowed'); 
 
 /**
-*   Nombre:            admin template
+*   Nombre:            contratantes_add
 *   Ruta:              /application/views/contratantes/contratantes_add.php
 *   Descripcion:       permite crear un nuevo contratante
 *   Fecha Creacion:    18/dic/2018
-*   @author            Iván Viña <ivandariovinam@gmail.com>
+*   @author            Michael Angelo Ortiz Trivinio <engineermikeortiz@gmail.com>
 *   @version           2018-12-08
 *
 */
@@ -17,11 +17,11 @@
                         </div>
                         <div class="col-md-4 column">
                            <div class="panel panel-default">
-                            <div class="panel-heading"><h1>Crear un nuevo contratista</h1></div>
+                            <div class="panel-heading"><h1>Crear un nuevo contratante</h1></div>
                              <div class="panel-body">
                               <?php echo form_open(current_url()); ?>
                                      <div class="form-group">
-                                           <label for="tipocontratistaid">Tipo de contratista</label>
+                                           <label for="tipocontratistaid">Tipo de contratante</label>
                                            <select class="form-control" id="tipocontratistaid" name="tipocontratistaid" required="required" >
                                            <option value="0">Seleccione...</option>
                                              <?php  foreach($tiposcontratistas as $row) { ?>
@@ -40,18 +40,6 @@
                                            <label for="nombre">Nombre</label>
                                            <input class="form-control" id="nombre" type="nombre" name="nombre" value="<?php echo set_value('nombre'); ?>" required="required" maxlength="128" />
                                            <?php echo form_error('nombre','<span class="text-danger">','</span>'); ?>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                           <label for="direccion">Dirección</label>
-                                           <input class="form-control" id="direccion" type="direccion" name="direccion" value="<?php echo set_value('direccion'); ?>" required="required" maxlength="256" />
-                                           <?php echo form_error('direccion','<span class="text-danger">','</span>'); ?>
-                                    </div>
-
-                                    <div class="form-group">
-                                           <label for="telefono">Telefono</label>
-                                           <input class="form-control" id="telefono" type="telefono" name="telefono" value="<?php echo set_value('telefono'); ?>" maxlength="15" />
-                                           <?php echo form_error('telefono','<span class="text-danger">','</span>'); ?>
                                     </div>
 
                                     <div class="form-group">
@@ -76,7 +64,7 @@
                                            <?php echo form_error('regimenid','<span class="text-danger">','</span>'); ?>
                                     </div>
                                     <div class="pull-right">
-                                     <?php  echo anchor('contratistas', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
+                                     <?php  echo anchor('contratantes', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
                                     <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
                                     </div>
                                 <?php echo form_close();?>

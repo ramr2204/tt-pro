@@ -20,7 +20,7 @@
     "bServerSide": true,
     "sAjaxSource": "<?php echo base_url(); ?>index.php/contratantes/dataTable",
     "sServerMethod": "POST",
-    "aoColumns": [ 
+    "aoColumns": [
                           { "sClass": "center"}, /*id 0*/
                           { "sClass": "item" }, 
                           { "sClass": "item" }, 
@@ -28,10 +28,7 @@
                           { "sClass": "item" },
                           { "sClass": "item" },  
                           { "sClass": "item" },
-                          { "sClass": "item" },
                           { "sClass": "center","bSortable": false,"bSearchable": false},
-    
-                        
                           ],    
     } );
     
@@ -45,7 +42,7 @@
         <?php
         if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratantes/add')) 
         {
-            echo anchor(base_url().'contratantes/add','<i class="fa fa-plus"></i> Nuevo contratantes ','class="btn btn-large  btn-primary"');
+            echo anchor(base_url().'contratantes/add','<i class="fa fa-plus"></i> Nuevo contratante ','class="btn btn-large  btn-primary"');
         }
         ?>
         <br><br> 
