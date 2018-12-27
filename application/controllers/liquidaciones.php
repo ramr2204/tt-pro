@@ -1668,6 +1668,7 @@ function consultar()
               /*
                * Extrae los contratistas creados para filtrar por contratos
                */
+              $contratantes = $this->codegen_model->getSelect('con_contratantes',"id,nombre,nit");
               $contratistas = $this->codegen_model->getSelect('con_contratistas',"cont_id,cont_nombre,cont_nit");
               $tramitadores = $this->codegen_model->getSelect('est_liquidartramites',"litr_id,litr_tramitadornombre,litr_tramitadorid",'','','GROUP BY litr_tramitadorid');
 
@@ -1688,7 +1689,18 @@ function consultar()
                   }
               }
 
+              $vecContratantes = array();
+              if(count($contratantes) > 0)
+              {
+                  foreach($contratantes as $contratante)
+                  {
+                      $vecContratantes[$contratante->id] = $contratante->nit.' - '.$contratante->nombre;
+                  }
+              }
+
               $this->data['contribuyentes'] = $vecContribuyentes;
+              $this->data['contratantes']   = $vecContratantes;
+              $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 29');
 
               $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_consultar', $this->data);
               
@@ -2093,6 +2105,7 @@ function renderizarDetalleRangoPDF()
             $datos['liquidaciones']    = $resultadosFiltros['vec_liquidaciones'];
             $datos['totalRecaudado']   = $resultadosFiltros['total_recaudado'];
             $datos['totalEstampillas'] = $resultadosFiltros['cant_total_estampillas'];
+            $datos['vec_filtros']      = $resultadosFiltros['vec_filtros'];
 
             //Creación del PDF
             $this->load->library("Pdf");                  
@@ -2174,6 +2187,8 @@ function renderizarDetalleRangoPDF()
             'tipo_contrato' => '',
             'tipo_tramite' => '',
             'contribuyente' => '',
+            'contratante' => '',
+            'municipio' => '',
         );
 
         $strTipoFechaFiltrada = "";
@@ -2262,6 +2277,8 @@ function renderizarDetalleRangoPDF()
         $tipoActo      = $vectorGet['acto'];
         $subTipoActo   = $vectorGet['subtipo'];
         $contribuyente = $vectorGet['contribuyente'];
+        $contratante   = $vectorGet['contratante'];
+        $municipio     = $vectorGet['municipio'];
 
         /*
          * Extrae el posible subtipo de acto (tipo de tramite o tipo de contrato)
@@ -2399,6 +2416,32 @@ function renderizarDetalleRangoPDF()
 
                 $vecFiltrosAplicados['tipo_tramite'] = $id_subtipoacto;
             }
+        }
+
+        if($contratante != '0')
+        {
+            $where = Liquidaciones::concatenarWhere($where);
+            $where .= ' liq.liqu_contratoid <> 0';
+
+            $join .= ' INNER JOIN `con_contratos` conn ON conn.`cntr_id` = liq.`liqu_contratoid`';
+
+            $where = Liquidaciones::concatenarWhere($where);
+            $where .= ' conn.`cntr_contratanteid` = ' . $contratante;
+
+            $vecFiltrosAplicados['contratante'] = $contratante;
+        }
+
+        if($municipio)
+        {
+            $where = Liquidaciones::concatenarWhere($where);
+            $where .= ' liq.liqu_contratoid <> 0 ';
+
+            $join .= ' INNER JOIN `con_contratos` connt ON connt.`cntr_id` = liq.`liqu_contratoid` ';
+
+            $where = Liquidaciones::concatenarWhere($where);
+            $where .= ' connt.`cntr_municipio_origen` = '. $municipio;
+
+            $vecFiltrosAplicados['municipio'] = $municipio;
         }
 
         /*
@@ -2819,6 +2862,28 @@ function renderizarDetalleRangoPDF()
                 $vecFiltrosAplicados['tipo_estampilla'] = $tipoEstampilla[0]->estm_nombre;
             }
         }
+
+        if($vecFiltrosAplicados['contratante'] != '')
+        {
+            $infoContratante = $this->codegen_model->getSelect("con_contratantes","*",
+                " WHERE id = '" . $vecFiltrosAplicados['contratante'] . "'"
+            );
+            if (count($infoContratante) > 0) 
+            {
+                $vecFiltrosAplicados['contratante'] = $infoContratante[0]->nombre;
+            }
+        }
+
+        if($vecFiltrosAplicados['municipio'] != '')
+        {
+            $infoMunicipio = $this->codegen_model->getSelect("par_municipios","*",
+                " WHERE muni_id = '" . $vecFiltrosAplicados['municipio'] . "'"
+            );
+            if (count($infoMunicipio) > 0) 
+            {
+                $vecFiltrosAplicados['municipio'] = $infoMunicipio[0]->muni_nombre;
+            }
+        }
         
         return $vecFiltrosAplicados;
     }
@@ -3131,6 +3196,7 @@ function renderizarDetalleRangoExcel()
             $datos['liquidaciones']    = $resultadosFiltros['vec_liquidaciones'];
             $datos['totalRecaudado']   = $resultadosFiltros['total_recaudado'];
             $datos['totalEstampillas'] = $resultadosFiltros['cant_total_estampillas'];
+            $datos['vec_filtros']      = $resultadosFiltros['vec_filtros'];
             
             session_start();
             $_SESSION['fecha_informe_excel'] = $datos['fecha'];

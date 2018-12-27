@@ -47,6 +47,24 @@
                                        </div>
                                      </div>
 
+                                     <div class="col-md-12 column">
+                                        <div class="form-group">
+                                           <label for="contratanteid">Contratante</label>
+                                           <select class="form-control chosen" id="contratanteid" name="contratanteid" required="required" >
+                                           <option value="0">Seleccione...</option>
+                                             <?php foreach ($contratantes as $row) { ?>
+                                             <?php if ($row->id==$result->cntr_contratanteid) { ?>
+                                                 <option selected value="<?php echo $row->id; ?>" ><?php echo $row->nit.' - '.$row->nombre; ?></option>
+                                                 <?php } else { ?>
+                                                 <option value="<?php echo $row->id; ?>"><?php echo $row->nit.' - '.$row->nombre; ?></option>
+                                                 <?php } ?>
+                                             <?php 
+                                          } ?>
+                                           </select>
+                                           <?php echo form_error('contratanteid', '<span class="text-danger">', '</span>'); ?>
+                                        </div>
+                                    </div>
+
                                      <div class="col-md-6 column">
                                          <div class="form-group">
                                            <label for="tipocontratoid">Tipo de contrato</label>

@@ -27,6 +27,8 @@ var oTable = $('#tablaq').dataTable( {
                       { "sClass": "item" }, 
                       { "sClass": "item" },
                       { "sClass": "item" },
+                      { "sClass": "item" },
+                      { "sClass": "item" },
                       { "sClass": "item" },  
                       { "sClass": "item" },
                       { "sClass": "item" },
@@ -36,14 +38,23 @@ var oTable = $('#tablaq').dataTable( {
             ],   
 "fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
 
-if(aData[5] != null)
+if(aData[7] != null)
   {
-      $("td:eq(5)", nRow).html('<div class="small">' + aData[5].substr( 0, 130 )+ '...</div>');
+      $("td:eq(7)", nRow).html('<div class="small">' + aData[7].substr( 0, 130 )+ '...</div>');
   }else
       {
-           $("td:eq(5)", nRow).html('<div class="small">NO REGISTRA...</div>');     
+           $("td:eq(7)", nRow).html('<div class="small">NO REGISTRA...</div>');     
       }
 
+if(aData[4] == null)
+  {
+    $("td:eq(4)", nRow).html('<div class="small">NO REGISTRA...</div>');     
+  }
+
+if(aData[5] == null)
+  {
+    $("td:eq(5)", nRow).html('<div class="small">NO REGISTRA...</div>');     
+  }
 
  }             
    });
@@ -76,8 +87,10 @@ if(aData[5] != null)
     <tr>
      <th>Id</th>
      <th>Número</th>
-     <th>NIT</th>
+     <th>NIT Contratista</th>
      <th>Contratista</th>
+     <th>NIT Contratante</th>
+     <th>Contratante</th>
      <th>Fecha</th>
      <th>Objeto</th>
      <th>Valor</th>       
@@ -90,8 +103,10 @@ if(aData[5] != null)
    <tr>
      <th>Id</th>
      <th>Número</th>
-     <th>NIT</th>
+     <th>NIT Contratista</th>
      <th>Contratista</th>
+     <th>NIT Contratante</th>
+     <th>Contratante</th>
      <th>Fecha</th>
      <th>Objeto</th>
      <th>Valor</th>       

@@ -309,6 +309,28 @@ var oTable = $('#tablaq').dataTable( {
                   </div>
               </div>
               <div class="col-xs-12 btn-pdf">
+                  <div class="form-group">
+                      <label for="contratante">Contratante (Contratos)</label>
+                      <select class="form-control chosen-modal" id="contratante">
+                          <option value="0">Seleccione...</option>
+                          <?php  foreach($contratantes as $id => $valor) { ?>
+                              <option value="<?php echo $id; ?>"><?php echo $valor; ?></option>
+                          <?php   } ?>
+                      </select>
+                  </div>
+              </div>
+              <div class="col-xs-12 btn-pdf">
+                  <div class="form-group">
+                      <label for="municipio">Municipios (Contratos)</label>
+                      <select class="form-control chosen-modal" id="municipio">
+                          <option value="0">Seleccione...</option>
+                          <?php  foreach($municipios as $objMunicipio) { ?>
+                              <option value="<?php echo $objMunicipio->muni_id; ?>"><?php echo $objMunicipio->muni_nombre; ?></option>
+                          <?php   } ?>
+                      </select>
+                  </div>
+              </div>
+              <div class="col-xs-12 btn-pdf">
                   <label>(Sólo informe Relaci&oacute;n) Agrupar por :</label>
               </div>
               <div class="col-xs-12 btn-pdf text-center">

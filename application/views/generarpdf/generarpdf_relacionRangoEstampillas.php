@@ -56,9 +56,9 @@ echo Liquidaciones::fechaEnLetras(date('Y-m-d'));
 <table><tr><td style="height: 2mm; color:white">espaciador</td></tr></table>
 
 <p>
-Doctor<br>
+Doctora<br>
 <b>YENNY MILENA GONZALEZ CRUZ</b><br>
-Director de Rentas<br>
+Directora de Rentas<br>
 Gobernación del Tolima<br>
 Ibagué<br>
 </p>

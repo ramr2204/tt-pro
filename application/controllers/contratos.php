@@ -59,7 +59,7 @@ class Contratos extends MY_Controller {
   }
 	
  function add()
-  {        
+  {
       if ($this->ion_auth->logged_in()) {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/add')) {
@@ -81,6 +81,7 @@ class Contratos extends MY_Controller {
               
               $this->form_validation->set_rules('cntr_municipio_origen', 'Municipio Origen','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('contratistaid', 'contratista','required|trim|xss_clean|numeric|greater_than[0]');
+              $this->form_validation->set_rules('contratanteid', 'contratante', 'required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('tipocontratoid', 'Tipo de contrato','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('fecha', 'Fecha',  'required|trim|xss_clean');  
               $this->form_validation->set_rules('objeto', 'objeto',  'required|trim|xss_clean');  
@@ -96,11 +97,27 @@ class Contratos extends MY_Controller {
                     * Valida que el contratista exista en la base de datos
                     */
                     $objContratista = $this->codegen_model->get('con_contratistas','cont_regimenid','cont_id = '.$this->input->post('contratistaid'),1,NULL,true);
+                    $objContratante = $this->codegen_model->get('con_contratantes', 'regimenid', 'id = ' . $this->input->post('contratanteid'), 1, null, true);
     
-                    if(count($objContratista) > 0)
+                    $msjError = '';
+                    $bandContinuar = true;
+                    if(count($objContratista) <= 0)
+                    {
+                        $bandContinuar = false;
+                        $msjError .= '<br>No existe el contratista seleccionado!';
+                    }
+
+                    if(count($objContratante) <= 0)
+                    {
+                        $bandContinuar = false;
+                        $msjError .= '<br>No existe el contratante seleccionado!';
+                    }
+
+                    if($bandContinuar)
                     {
                         $data = array(
                             'cntr_contratistaid' => $this->input->post('contratistaid'),
+                            'cntr_contratanteid' => $this->input->post('contratanteid'),
                             'cntr_tipocontratoid' => $this->input->post('tipocontratoid'),
                             'cntr_fecha_firma' => $this->input->post('fecha'),
                             'cntr_numero' => $this->input->post('numero'),
@@ -148,10 +165,10 @@ class Contratos extends MY_Controller {
                         }
                     }else
                         {
-                            $this->data['errormessage'] = 'No existe el contratista seleccionado!';
+                            $this->data['errormessage'] = $msjError;
                         }
               }
-              $this->template->set('title', 'Nueva aplicación');
+
               $this->data['style_sheets']= array(
                         'css/chosen.css' => 'screen',
                         'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen'
@@ -161,12 +178,13 @@ class Contratos extends MY_Controller {
                         'js/plugins/bootstrap/moment.js',
                         'js/plugins/bootstrap/bootstrap-datetimepicker.js',
                         'js/autoNumeric.js'
-                    );  
-              $this->template->set('title', 'Ingreso manual de contrato');
-              $this->data['tiposcontratos']  = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
-              $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
-              $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 29');
-              $this->template->load($this->config->item('admin_template'),'contratos/contratos_add', $this->data);
+                    );
+                $this->template->set('title', 'Ingreso manual de contrato');
+                $this->data['tiposcontratos']  = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
+                $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
+                $this->data['contratantes'] = $this->codegen_model->getSelect('con_contratantes', 'id,nombre,nit');
+                $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 29');
+                $this->template->load($this->config->item('admin_template'),'contratos/contratos_add', $this->data);
              
           } else {
               redirect(base_url().'index.php/error_404');
@@ -197,6 +215,7 @@ class Contratos extends MY_Controller {
 
               $this->form_validation->set_rules('cntr_municipio_origen', 'Municipio Origen','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('contratistaid', 'contratista','required|trim|xss_clean|numeric|greater_than[0]');
+              $this->form_validation->set_rules('contratanteid', 'contratante', 'required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('tipocontratoid', 'Tipo de contrato','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('fecha', 'Fecha',  'required|trim|xss_clean');  
               $this->form_validation->set_rules('objeto', 'objeto',  'required|trim|xss_clean');  
@@ -210,14 +229,30 @@ class Contratos extends MY_Controller {
               } else {
 
                     /*
-                    * Valida que el contratista exista en la base de datos
-                    */
-                    $objContratista = $this->codegen_model->get('con_contratistas','cont_regimenid','cont_id = '.$this->input->post('contratistaid'),1,NULL,true);                      
+                     * Valida que el contratista exista en la base de datos
+                     */
+                    $objContratista = $this->codegen_model->get('con_contratistas', 'cont_regimenid', 'cont_id = ' . $this->input->post('contratistaid'), 1, null, true);
+                    $objContratante = $this->codegen_model->get('con_contratantes', 'regimenid', 'id = ' . $this->input->post('contratanteid'), 1, null, true);
 
-                    if(count($objContratista) > 0)
+                    $msjError = '';
+                    $bandContinuar = true;
+                    if (count($objContratista) <= 0) 
+                    {
+                        $bandContinuar = false;
+                        $msjError .= '<br>No existe el contratista seleccionado!';
+                    }
+
+                    if (count($objContratante) <= 0) 
+                    {
+                        $bandContinuar = false;
+                        $msjError .= '<br>No existe el contratante seleccionado!';
+                    }
+
+                    if ($bandContinuar)
                     {
                         $data = array(
                             'cntr_contratistaid' => $this->input->post('contratistaid'),
+                            'cntr_contratanteid' => $this->input->post('contratanteid'),
                             'cntr_tipocontratoid' => $this->input->post('tipocontratoid'),
                             'cntr_fecha_firma' => $this->input->post('fecha'),
                             'cntr_numero' => $this->input->post('numero'),
@@ -262,7 +297,7 @@ class Contratos extends MY_Controller {
                         }
                     }else
                         {
-                            $this->data['errormessage'] = 'No existe el contratista seleccionado!';
+                            $this->data['errormessage'] = $msjError;
                         }
               }   
                   $this->data['style_sheets']= array(
@@ -275,14 +310,15 @@ class Contratos extends MY_Controller {
                         'js/plugins/bootstrap/bootstrap-datetimepicker.js',
                         'js/autoNumeric.js'
                     );
-                
-                $this->data['result'] = $this->codegen_model->get('con_contratos','cont_regimenid,cntr_id,cntr_contratistaid,cntr_municipio_origen,cntr_tipocontratoid,cntr_fecha_firma,cntr_numero,cntr_objeto,cntr_valor,cntr_iva_otros','cntr_id = '.$idcontrato,1,NULL,true,array(),'con_contratistas','con_contratistas.cont_id = con_contratos.cntr_contratistaid');
+
+                $this->data['result'] = $this->codegen_model->get('con_contratos','cont_regimenid,cntr_id,cntr_contratistaid,cntr_contratanteid,cntr_municipio_origen,cntr_tipocontratoid,cntr_fecha_firma,cntr_numero,cntr_objeto,cntr_valor,cntr_iva_otros','cntr_id = '.$idcontrato,1,NULL,true,array(),'con_contratistas','con_contratistas.cont_id = con_contratos.cntr_contratistaid');
                 $this->data['tiposcontratos']  = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
                 $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
+                $this->data['contratantes'] = $this->codegen_model->getSelect('con_contratantes', 'id,nombre,nit');
                 $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 29');
                 $this->template->set('title', 'Editar contrato');
                 $this->template->load($this->config->item('admin_template'),'contratos/contratos_edit', $this->data);
-                        
+
           }else {
               redirect(base_url().'index.php/error_404');
           }
@@ -580,7 +616,7 @@ class Contratos extends MY_Controller {
             * para renderizar el boton de editar
             */ 
             if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/edit')) 
-            {                  
+            {
                 $this->load->library('datatables');
                 $this->datatables->add_column('edit', '<div class="btn-toolbar">
                     <div class="btn-group">
@@ -593,11 +629,11 @@ class Contratos extends MY_Controller {
                     $this->datatables->add_column('edit', '', 'c.cntr_id'); 
                 }
               
-              $this->datatables->select('c.cntr_id,c.cntr_numero,co.cont_nit,co.cont_nombre,c.cntr_fecha_firma,c.cntr_objeto,c.cntr_valor,c.cntr_vigencia');
+              $this->datatables->select('c.cntr_id,c.cntr_numero,co.cont_nit,co.cont_nombre,ctte.nit,ctte.nombre,c.cntr_fecha_firma,c.cntr_objeto,c.cntr_valor,c.cntr_vigencia');
               $this->datatables->from('con_contratos c');
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
+              $this->datatables->join('con_contratantes ctte', 'ctte.id = c.cntr_contratanteid', 'left');
 
-              
               echo $this->datatables->generate();
 
           } else {

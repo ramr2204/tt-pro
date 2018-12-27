@@ -188,8 +188,6 @@ class Users extends MY_Controller {
 			 $this->form_validation->set_rules('oldpassword', $this->lang->line('change_password_validation_old_password_label'), 'required');
 		     $this->form_validation->set_rules('password', $this->lang->line('edit_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[password_confirm]');
 		     $this->form_validation->set_rules('password_confirm', $this->lang->line('edit_user_validation_password_confirm_label'), 'required');
-
-		     $data['password'] = $this->input->post('password');
 	    }		
 
 		//valida la información personal
@@ -206,7 +204,7 @@ class Users extends MY_Controller {
 		}else
 		    {
 			    $identity = $this->session->userdata($this->config->item('identity', 'ion_auth'));
-                
+
                 $data = array(
 				        'email' => $this->input->post('email'),
 				        'first_name' => $this->input->post('nombres'),
