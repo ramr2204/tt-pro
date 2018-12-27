@@ -2420,10 +2420,10 @@ function renderizarDetalleRangoPDF()
             $where = Liquidaciones::concatenarWhere($where);
             $where .= ' liq.liqu_contratoid <> 0';
 
-            $join .= ' INNER JOIN `con_contratos` con ON con.`cntr_id` = liq.`liqu_contratoid`';
+            $join .= ' INNER JOIN `con_contratos` conn ON conn.`cntr_id` = liq.`liqu_contratoid`';
 
             $where = Liquidaciones::concatenarWhere($where);
-            $where .= ' con.`cntr_contratanteid` = ' . $contratante;
+            $where .= ' conn.`cntr_contratanteid` = ' . $contratante;
 
             $vecFiltrosAplicados['contratante'] = $contratante;
         }
