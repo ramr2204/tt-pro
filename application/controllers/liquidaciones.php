@@ -1700,6 +1700,7 @@ function consultar()
 
               $this->data['contribuyentes'] = $vecContribuyentes;
               $this->data['contratantes']   = $vecContratantes;
+              $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 29');
 
               $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_consultar', $this->data);
               
@@ -2187,6 +2188,7 @@ function renderizarDetalleRangoPDF()
             'tipo_tramite' => '',
             'contribuyente' => '',
             'contratante' => '',
+            'municipio' => '',
         );
 
         $strTipoFechaFiltrada = "";
@@ -2276,6 +2278,7 @@ function renderizarDetalleRangoPDF()
         $subTipoActo   = $vectorGet['subtipo'];
         $contribuyente = $vectorGet['contribuyente'];
         $contratante   = $vectorGet['contratante'];
+        $municipio     = $vectorGet['municipio'];
 
         /*
          * Extrae el posible subtipo de acto (tipo de tramite o tipo de contrato)
@@ -2426,6 +2429,19 @@ function renderizarDetalleRangoPDF()
             $where .= ' conn.`cntr_contratanteid` = ' . $contratante;
 
             $vecFiltrosAplicados['contratante'] = $contratante;
+        }
+
+        if($municipio)
+        {
+            $where = Liquidaciones::concatenarWhere($where);
+            $where .= ' liq.liqu_contratoid <> 0 ';
+
+            $join .= ' INNER JOIN `con_contratos` connt ON connt.`cntr_id` = liq.`liqu_contratoid` ';
+
+            $where = Liquidaciones::concatenarWhere($where);
+            $where .= ' connt.`cntr_municipio_origen` = '. $municipio;
+
+            $vecFiltrosAplicados['municipio'] = $municipio;
         }
 
         /*
@@ -2855,6 +2871,17 @@ function renderizarDetalleRangoPDF()
             if (count($infoContratante) > 0) 
             {
                 $vecFiltrosAplicados['contratante'] = $infoContratante[0]->nombre;
+            }
+        }
+
+        if($vecFiltrosAplicados['municipio'] != '')
+        {
+            $infoMunicipio = $this->codegen_model->getSelect("par_municipios","*",
+                " WHERE muni_id = '" . $vecFiltrosAplicados['municipio'] . "'"
+            );
+            if (count($infoMunicipio) > 0) 
+            {
+                $vecFiltrosAplicados['municipio'] = $infoMunicipio[0]->muni_nombre;
             }
         }
         

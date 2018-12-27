@@ -320,6 +320,7 @@ function generarInformeRangoImpresiones(e)
     var subTipoActo   = $('#subTipoActo').val();
     var contribuyente = $('#contribuyente').val();
     var contratante   = $('#contratante').val();
+    var municipio     = $('#municipio').val();
     
     /*
     * Se valida numericamente que las fechas tengan valor
@@ -438,6 +439,7 @@ function generarInformeRangoImpresiones(e)
                 +'&subtipo='+subTipoActo
                 +'&contribuyente='+contribuyente
                 +'&contratante='+contratante
+                +'&municipio='+municipio
                 +'&agrupar=0');
         }else if(tipoInforme == 'excel')
             {
@@ -453,6 +455,7 @@ function generarInformeRangoImpresiones(e)
                     +'&subtipo='+subTipoActo
                     +'&contribuyente='+contribuyente
                     +'&contratante='+contratante
+                    +'&municipio='+municipio
                     +'&agrupar=0');
             }else if(tipoInforme == 'consolidado_pdf')
                 {
@@ -468,6 +471,7 @@ function generarInformeRangoImpresiones(e)
                         +'&subtipo='+subTipoActo
                         +'&contribuyente='+contribuyente
                         +'&contratante='+contratante
+                        +'&municipio='+municipio
                         +'&group_anio='+group_anio
                         +'&group_mes='+group_mes
                         +'&group_contribuyente='+group_contribuyente
