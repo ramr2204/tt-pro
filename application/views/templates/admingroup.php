@@ -45,8 +45,7 @@
      <?php
      echo link_tag( array( 'href' => 'css/stylea.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
      echo link_tag( array( 'href' => 'css/yamm.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
-     
-    
+     echo link_tag( array( 'href' => 'css/applicationStyles.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
 
     // Add any additional stylesheets
     if( isset( $style_sheets ) )
@@ -212,7 +211,21 @@
     </div>
 <?php } //if login  && is_admin ?>
 
-
+<?php 
+    /**
+     * Notificacion para rotulos restantes
+     */
+    if ($this->ion_auth->logged_in()) {
+    $objHelper = new HelperGeneral;
+    $objHelper->obtenerCantidadPapeleriaDisponibleUsuario(93414560);
+?>
+    <div class="notification">
+        <div class="content">
+        <div class="text">Debe solicitar rotulos para impresi&oacute;n, solamente le quedan 10.</div>
+        </div>
+    </div>
+    <div class="number"><p class="glyphicon glyphicon-exclamation-sign"></p></div>
+<?php } //if login  && is_admin ?>
 
  <div class="container" id="cont_contenidogeneral">
 
@@ -279,8 +292,6 @@
       </div>
     </footer>
 </nav>
-
- 
 </body>
 </html>
 <?php

@@ -3,8 +3,14 @@
 /*
 * Clase que ofrece metodos de ayuda en general
 */
-Class HelperGeneral
+Class HelperGeneral extends CI_Controller
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->load->model('codegen_model', '', true);
+    }
+
 	public function lists($arr = array(), $val = '', $llave = '')
     {
         $vectorResultado = array();
@@ -35,5 +41,34 @@ Class HelperGeneral
             {
                 echo 'Debe Suministrar por lo menos el nombre del campo para extraer los valores del arreglo';exit();
             }
+    }
+
+    public function obtenerCantidadPapeleriaDisponibleUsuario($idUsuario, $esContingencia = 'NO')
+    {
+        $where = ' WHERE pape_usuario = ' . $idUsuario . ' AND pape_estadoContintencia = "' . $esContingencia . '"';
+        $rangosPapelUsuario = $this->codegen_model
+            ->getSelect('est_papeles',"pape_id,pape_codigoinicial,pape_codigofinal",$where);
+
+        $cantPapelesDisponibles = 0;
+        if(count($rangosPapelUsuario) > 0)
+        {
+            $idsRangosPapelUsuario = $this->lists($rangosPapelUsuario,'pape_id');
+            $where = ' WHERE impr_codigopapel != 0 AND impr_papelid IN (' . implode(',',$idsRangosPapelUsuario) .') ';
+            $group = ' GROUP BY impr_papelid ';
+
+            $cantidadesImpresas = $this->codegen_model
+                ->getSelect('est_impresiones', "COUNT(*) AS contador, impr_papelid", $where ,'', $group);
+
+            foreach($rangosPapelUsuario as $objRangoPapel)
+            {
+                $cantPapelRango = ((int)$objRangoPapel->pape_codigofinal - (int)$objRangoPapel->pape_codigoinicial) + 1;
+                echo $objRangoPapel->pape_id.' - '.$cantPapelRango;exit();
+            }
+        }
+echo'<pre>';print_r($cantPapelRango);echo'</pre>';exit();
+        
+        echo $resultado[0]->contador;
+			
+		echo'<pre>';print_r($papeles);echo'</pre>';exit();
     }
 }
