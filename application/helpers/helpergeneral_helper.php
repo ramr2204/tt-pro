@@ -59,16 +59,19 @@ Class HelperGeneral extends CI_Controller
             $cantidadesImpresas = $this->codegen_model
                 ->getSelect('est_impresiones', "COUNT(*) AS contador, impr_papelid", $where ,'', $group);
 
+            $vectorCantidadesImpresas = array();
+            if(count($cantidadesImpresas) > 0)
+            {
+                $vectorCantidadesImpresas = $this->lists($cantidadesImpresas, 'contador', 'impr_papelid');
+            }
+
             foreach($rangosPapelUsuario as $objRangoPapel)
             {
                 $cantPapelRango = ((int)$objRangoPapel->pape_codigofinal - (int)$objRangoPapel->pape_codigoinicial) + 1;
-                echo $objRangoPapel->pape_id.' - '.$cantPapelRango;exit();
+                $cantPapelesDisponibles += (int)$cantPapelRango - (int)$vectorCantidadesImpresas[$objRangoPapel->pape_id];
             }
         }
-echo'<pre>';print_r($cantPapelRango);echo'</pre>';exit();
-        
-        echo $resultado[0]->contador;
-			
-		echo'<pre>';print_r($papeles);echo'</pre>';exit();
+
+		echo'<pre>';print_r($cantPapelesDisponibles);echo'</pre>';exit();
     }
 }
