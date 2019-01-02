@@ -773,5 +773,5 @@ class Users extends MY_Controller {
        }
     
        echo json_encode($vector_usuarios);
-     }  
+	 }
 }

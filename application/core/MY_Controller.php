@@ -16,7 +16,8 @@ class MY_Controller extends CI_Controller
   		// creación dinámica del menú
   		parent::__construct();
   		header('Pragma: no-cache');
-  		$this->load->helper('array');
+          $this->load->helper('array');
+          $this->load->helper('HelperGeneral');
   		//$this->load->model('menu_usuario_model','',TRUE)
 
       $this->data['menus'] = $this->ion_auth_model->get_menus($this->session->userdata('user_id'));

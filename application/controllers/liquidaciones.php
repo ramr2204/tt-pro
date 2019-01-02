@@ -17,7 +17,7 @@ class Liquidaciones extends MY_Controller {
   {
       parent::__construct();
 	  $this->load->library('form_validation','Pdf');		
-	  $this->load->helper(array('form','url','codegen_helper'));
+      $this->load->helper(array('form','url','codegen_helper', 'HelperGeneral'));
       $this->load->model('liquidaciones_model','',TRUE);
       $this->load->model('codegen_model','',TRUE);
 	}
@@ -1815,14 +1815,8 @@ function consultar()
                             /*
                             * Variable que determina si se debe trabajar con papelería de contingencia
                             */
-                            $objContin = $this->codegen_model->get('adm_parametros','para_contingencia','para_id = 1',1,NULL,true);
-                            if($objContin->para_contingencia == 1)
-                            {
-                                $contingencia = 'SI';
-                            }else
-                                {
-                                    $contingencia = 'NO';
-                                }
+                            $objHelper = new HelperGeneral;
+                            $contingencia = $objHelper->estanActivosRotulosContingencia();
 
                             $idFactura = $this->uri->segment(3);
 
