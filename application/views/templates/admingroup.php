@@ -220,7 +220,7 @@
         $objHelper = new HelperGeneral;
         $informacionAlertaRotulosUsuario = $objHelper->solicitarInformacionAlertaRotulosMinimosUsuarioAutenticado();
 
-        if($informacionAlertaRotulosUsuario['mostrarAlerta'])
+        if($informacionAlertaRotulosUsuario['mostrarAlerta'] && !$this->ion_auth->is_admin())
         {
 ?>
             <div class="notification">
