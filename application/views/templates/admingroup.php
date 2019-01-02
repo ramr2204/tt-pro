@@ -225,7 +225,7 @@
 ?>
             <div class="notification">
                 <div class="content">
-                <div class="text">Debe solicitar rotulos para impresi&oacute;n, actualmente tiene disponibles <?php echo $informacionAlertaRotulosUsuario['cantidadRotulosDisponiblesUsuario']; ?> rotulos.</div>
+                <div class="text">Debe solicitar rotulos para impresi&oacute;n, solo le quedan <?php echo $informacionAlertaRotulosUsuario['cantidadRotulosDisponiblesUsuario']; ?> rotulos.</div>
                 </div>
             </div>
             <div class="number"><p class="glyphicon glyphicon-exclamation-sign"></p></div>
