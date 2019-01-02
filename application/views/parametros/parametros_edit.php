@@ -40,6 +40,12 @@
                                            <?php echo form_error('estampillassaldo','<span class="text-danger">','</span>'); ?>
                                     </div>
 
+                                    <div class="form-group">
+                                           <label for="rotulosminimos">Cantidad m&iacute;nima de rotulos restantes para notificación de usuario</label>
+                                           <input class="form-control" id="rotulosminimos" type="number" name="rotulosminimos" value="<?php echo $result->para_rotulosminimosusuario; ?>" required="required" />
+                                           <?php echo form_error('rotulosminimos','<span class="text-danger">','</span>'); ?>
+                                    </div>
+
                                     <div class="checkbox">
                                         <label>
                                             <?php 

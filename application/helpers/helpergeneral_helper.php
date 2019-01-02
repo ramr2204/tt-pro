@@ -43,6 +43,9 @@ Class HelperGeneral extends CI_Controller
             }
     }
 
+    /**
+     * Retorna la cantidad de rotulos disponibles para impresion para un liquidador
+     */
     public function obtenerCantidadPapeleriaDisponibleUsuario($idUsuario, $esContingencia = 'NO')
     {
         $where = ' WHERE pape_usuario = ' . $idUsuario . ' AND pape_estadoContintencia = "' . $esContingencia . '"';
@@ -67,11 +70,107 @@ Class HelperGeneral extends CI_Controller
 
             foreach($rangosPapelUsuario as $objRangoPapel)
             {
+                if(!array_key_exists($objRangoPapel->pape_id ,$vectorCantidadesImpresas))
+                {
+                    $vectorCantidadesImpresas[$objRangoPapel->pape_id] = 0;
+                }
+
                 $cantPapelRango = ((int)$objRangoPapel->pape_codigofinal - (int)$objRangoPapel->pape_codigoinicial) + 1;
-                $cantPapelesDisponibles += (int)$cantPapelRango - (int)$vectorCantidadesImpresas[$objRangoPapel->pape_id];
+
+                if($cantPapelRango > 0)
+                {
+                    $cantPapelesDisponibles += (int)$cantPapelRango - 
+                        (int)$vectorCantidadesImpresas[$objRangoPapel->pape_id];
+                }
             }
         }
 
-		echo'<pre>';print_r($cantPapelesDisponibles);echo'</pre>';exit();
+		return $cantPapelesDisponibles;
+    }
+
+    /**
+     * Retorna la cantidad minima de rotulos disponibles
+     * establecidos para usuarios en general
+     */
+    public function obtenerCantidadMinimaRotulosUsuario()
+    {
+        $objParametros = $this->codegen_model->get('adm_parametros', 'para_rotulosminimosusuario',
+            'para_id = 1', 1, null, true);
+
+        $cantidadMinimaRotulos = 0;
+        if($objParametros)
+        {
+            $cantidadMinimaRotulos = $objParametros->para_rotulosminimosusuario;
+        }
+
+        return $cantidadMinimaRotulos;
+    }
+
+    /**
+     * Retorna un string que indica si estan activados o no
+     * para impresion los rotulos de contingencia
+     */
+    public function estanActivosRotulosContingencia()
+    {
+        $objParametros = $this->codegen_model->get('adm_parametros', 'para_contingencia', 'para_id = 1', 1, null, true);
+
+        $contingencia = 'NO';
+        if($objParametros->para_contingencia == 1)
+        {
+            $contingencia = 'SI';
+        }
+
+        return $contingencia;
+    }
+
+    /**
+     * Retorna un array con informacion acerca de la alerta para rotulos
+     * disponibles para un usuario
+     */
+    public function obtenerInformacionAlertaRotulosMinimosUsuario($idUsuario)
+    {
+        $informacionAlerta = array(
+            'mostrarAlerta'   => false,
+            'noMostrarAlerta' => true,
+            'cantidadRotulosDisponiblesUsuario' => 0
+        );
+
+        $cantidadMinimaRotulos     = $this->obtenerCantidadMinimaRotulosUsuario();
+        $estadoRotulosContingencia = $this->estanActivosRotulosContingencia();
+        $cantidadRotulosDisponiblesUsuario = $this->obtenerCantidadPapeleriaDisponibleUsuario($idUsuario, 
+            $estadoRotulosContingencia);
+        
+        $informacionAlerta['cantidadRotulosDisponiblesUsuario'] = $cantidadRotulosDisponiblesUsuario;
+        if((int)$cantidadRotulosDisponiblesUsuario <= $cantidadMinimaRotulos)
+        {
+            $informacionAlerta['mostrarAlerta'] = true;
+            $informacionAlerta['noMostrarAlerta'] = false;
+        }
+
+        return $informacionAlerta;
+    }
+
+    /**
+     * Retorna un array con informacion acerca de la alerta para rotulos
+     * disponibles para el usuario autenticado en el sistema
+     */
+    public function solicitarInformacionAlertaRotulosMinimosUsuarioAutenticado()
+    {
+        $informacionAlerta = array(
+            'mostrarAlerta' => false,
+            'noMostrarAlerta' => true,
+            'cantidadRotulosDisponiblesUsuario' => 0
+        );
+
+        /*
+        * Verifica que el usuario autenticado tenga perfil liquidador
+        */
+        $usuarioLogueado = $this->ion_auth->user()->row();
+        if($usuarioLogueado->perfilid == 4)
+        {
+            $informacionAlerta = $this->obtenerInformacionAlertaRotulosMinimosUsuario($usuarioLogueado->id);
+        }
+
+        return $informacionAlerta;
     }
 }

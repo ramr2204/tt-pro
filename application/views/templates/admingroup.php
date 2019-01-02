@@ -215,17 +215,23 @@
     /**
      * Notificacion para rotulos restantes
      */
-    if ($this->ion_auth->logged_in()) {
-    $objHelper = new HelperGeneral;
-    $objHelper->obtenerCantidadPapeleriaDisponibleUsuario(93414560);
+    if ($this->ion_auth->logged_in()) 
+    {
+        $objHelper = new HelperGeneral;
+        $informacionAlertaRotulosUsuario = $objHelper->solicitarInformacionAlertaRotulosMinimosUsuarioAutenticado();
+
+        if($informacionAlertaRotulosUsuario['mostrarAlerta'])
+        {
 ?>
-    <div class="notification">
-        <div class="content">
-        <div class="text">Debe solicitar rotulos para impresi&oacute;n, solamente le quedan 10.</div>
-        </div>
-    </div>
-    <div class="number"><p class="glyphicon glyphicon-exclamation-sign"></p></div>
-<?php } //if login  && is_admin ?>
+            <div class="notification">
+                <div class="content">
+                <div class="text">Debe solicitar rotulos para impresi&oacute;n, actualmente tiene disponibles <?php echo $informacionAlertaRotulosUsuario['cantidadRotulosDisponiblesUsuario']; ?> rotulos.</div>
+                </div>
+            </div>
+            <div class="number"><p class="glyphicon glyphicon-exclamation-sign"></p></div>
+<?php 
+        } //if show alert rotulos
+    } //if login ?>
 
  <div class="container" id="cont_contenidogeneral">
 
