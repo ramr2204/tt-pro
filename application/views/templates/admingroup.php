@@ -45,7 +45,7 @@
      <?php
      echo link_tag( array( 'href' => 'css/stylea.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
      echo link_tag( array( 'href' => 'css/yamm.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
-     echo link_tag( array( 'href' => 'css/applicationStyles.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
+     echo link_tag( array( 'href' => 'css/alertRotulosStyles.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
 
     // Add any additional stylesheets
     if( isset( $style_sheets ) )
@@ -57,7 +57,7 @@
     }
 
     // jQuery  always loaded
-    echo script_tag( 'js/jquery-1.10.2.js' ) . "\n";
+    echo script_tag( 'js/jquery-1.11.0.min.js' ) . "\n";
     echo script_tag( 'js/bootstrap.min.js' ) . "\n";
     echo script_tag( 'dist/spin.min.js' ) . "\n";
     echo script_tag( 'dist/ladda.min.js' ) . "\n";
