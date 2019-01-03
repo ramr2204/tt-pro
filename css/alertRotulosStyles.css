@@ -12,6 +12,22 @@
 * @version          2019-01-03
 *
 */
+
+.notification {
+  height: 8%;
+  width: 20%;
+  background-color: #f2dede;
+  margin-top: 5%;
+  margin-left: 76%;
+  transform-origin: right;
+  -webkit-animation: notify 3s ease-in-out infinite;
+  animation: notify 3s ease-in-out infinite;
+  position: fixed;
+  top: 0;
+  z-index: 100;
+  border-color: #a94442;
+}
+
 @-webkit-keyframes notify {
   0% {transform: scaleX(0);}
   10% {transform: scaleX(1);}
