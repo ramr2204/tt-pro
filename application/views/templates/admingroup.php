@@ -45,7 +45,7 @@
      <?php
      echo link_tag( array( 'href' => 'css/stylea.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
      echo link_tag( array( 'href' => 'css/yamm.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
-     echo link_tag( array( 'href' => 'css/applicationStyles.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
+     echo link_tag( array( 'href' => 'css/alertRotulosStyles.css', 'media' => 'screen', 'rel' => 'stylesheet' ) ) . "\n";
 
     // Add any additional stylesheets
     if( isset( $style_sheets ) )
