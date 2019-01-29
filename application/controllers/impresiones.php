@@ -56,6 +56,36 @@ class Impresiones extends MY_Controller {
       }
 
   }
+
+    function anulaciones()
+    {
+        if ($this->ion_auth->logged_in()) 
+        {
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('impresiones/anulaciones')) 
+            {
+                $this->data['successmessage'] = $this->session->flashdata('successmessage');
+                $this->data['errormessage'] = $this->session->flashdata('errormessage');
+                $this->data['infomessage'] = $this->session->flashdata('infomessage');
+                //template data
+                $this->template->set('title', 'Administrar Anulaciones');
+                $this->data['style_sheets'] = array(
+                    'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
+                );
+                $this->data['javascripts'] = array(
+                    'js/jquery.dataTables.min.js',
+                    'js/plugins/dataTables/dataTables.bootstrap.js',
+                    'js/jquery.dataTables.defaults.js'
+                );
+
+                $this->template->load($this->config->item('admin_template'), 'impresiones/impresiones_list_anulaciones', $this->data);
+            } else {
+                redirect(base_url() . 'index.php/error_404');
+            }
+
+        } else {
+            redirect(base_url() . 'index.php/users/login');
+        }
+    }
 	
 function add()
 {
@@ -190,7 +220,7 @@ function add()
                         }
 
     		    }
-                
+
               $this->template->set('title', 'Nueva anulación');
               $this->data['javascripts']= array(
                         'js/plugins/typeahead/typeahead.bundle.min.js'
@@ -207,7 +237,6 @@ function add()
               $anulaciones.=']';
               $this->data['tiposanulaciones'] = $anulaciones;
               $this->template->load($this->config->item('admin_template'),'impresiones/impresiones_add', $this->data);
-             
           } else {
               redirect(base_url().'index.php/error_404');
           }
@@ -311,6 +340,122 @@ function edit()
         }
 }
 
+    function get_verificar_anulacion()
+    {
+        if ($this->ion_auth->logged_in()) {
+
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('impresiones/anulaciones')) {
+
+                $this->data['successmessage'] = $this->session->flashdata('successmessage');
+                $this->data['errormessage'] = $this->session->flashdata('errormessage');
+                $this->data['infomessage'] = $this->session->flashdata('infomessage');
+
+                $this->template->set('title', 'Verificar Anulaci&oacute;n');
+                $this->data['style_sheets'] = array(
+                    'css/jquery-ui.css' => 'screen'
+                );
+                $this->data['javascripts'] = array(
+                    'js/jquery-ui.js'
+                );
+
+                $idAnulacion = ($this->uri->segment(3)) ? $this->uri->segment(3) : '';
+                if($idAnulacion =='')
+                {
+                    $this->session->set_flashdata('infomessage', 'Debe elegir una anulaci&oacute;n para verificar');
+                    redirect(base_url().'index.php/impresiones/anulaciones');
+                }
+
+                $objAnulacion = $this->codegen_model->getSelect('est_impresiones', '*', ' where impr_id = '. $idAnulacion);
+                if($objAnulacion[0]->anulacion_verificada != 0)
+                {
+                    $this->session->set_flashdata('infomessage', 'La anulaci&oacute;n suministrada ya fu&eacute; verificada');
+                    redirect(base_url() . 'index.php/impresiones/anulaciones');
+                }
+
+                $this->data['objAnulacion'] = $objAnulacion[0];
+                $this->template->load($this->config->item('admin_template'), 'impresiones/impresiones_verificar_anulacion', $this->data);
+
+            } else {
+                redirect(base_url() . 'index.php/error_404');
+            }
+
+        } else {
+            redirect(base_url() . 'index.php/users/login');
+        }
+    }
+
+    function post_verificar_anulacion()
+    {
+        if ($this->ion_auth->logged_in()) {
+
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/getReassign')) {
+
+                $idAnulacion = ($this->uri->segment(3)) ? $this->uri->segment(3) : '';
+                if($idAnulacion =='')
+                {
+                    $this->session->set_flashdata('infomessage', 'Debe elegir una anulaci&oacute;n para verificar');
+                    redirect(base_url().'index.php/impresiones/anulaciones');
+                }
+
+                $objAnulacion = $this->codegen_model->getSelect('est_impresiones', '*', ' where impr_id = ' . $idAnulacion);
+                if(count($objAnulacion) <= 0)
+                {
+                    $this->session->set_flashdata('infomessage', 'Debe elegir una anulaci&oacute;n valida para verificar');
+                    redirect(base_url() . 'index.php/impresiones/anulaciones');
+                }
+
+                if($objAnulacion[0]->anulacion_verificada != 0)
+                {
+                    $this->session->set_flashdata('infomessage', 'La anulaci&oacute;n suministrada ya fu&eacute; verificada');
+                    redirect(base_url() . 'index.php/impresiones/anulaciones');
+                }
+
+                $this->data['successmessage'] = $this->session->flashdata('message');
+                $this->form_validation->set_rules('observaciones', 'Observaciones', 'xss_clean|max_length[250]');
+
+                if ($this->form_validation->run() == false) {
+
+                    $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);
+                } else 
+                    {
+                        $user = $this->ion_auth->user()->row();
+
+                        $data = array(
+                            'anulacion_verificada' => 1,
+                            'anulacion_verificada_observaciones' => $this->input->post('observaciones'),
+                            'anulacion_verificada_usuario' => $user->id,
+                            'anulacion_verificada_fecha' => date('Y-m-d H:i:s'),
+                        );
+    
+                        if ($this->codegen_model->edit('est_impresiones', $data, 'impr_id', $idAnulacion) == true) 
+                        {
+                            $this->session->set_flashdata('successmessage', 'Se verific&oacute; la anulaci&oacute;n del rotulo ('. $objAnulacion[0]->impr_codigopapel .') exitosamente');
+                            redirect(base_url() . 'index.php/impresiones/anulaciones/');
+                        } else 
+                            {
+                                $this->data['errormessage'] = 'No se pudo verificar la anulaci&oacute;n';
+                            }
+                    }
+
+                $this->template->set('title', 'Verificar anulaci&oacute;n papel');
+                $this->data['style_sheets'] = array(
+                    'css/jquery-ui.css' => 'screen'
+                );
+                $this->data['javascripts'] = array(
+                    'js/jquery-ui.js'
+                );
+                $this->template->load($this->config->item('admin_template'), 'impresiones/impresiones_verificar_anulacion', $this->data);
+
+
+            } else {
+                redirect(base_url() . 'index.php/error_404');
+            }
+
+        } else {
+            redirect(base_url() . 'index.php/users/login');
+        }
+    } 
+
 private function actualizarImpresionesContrato($idContrato)
 {
     /*
@@ -379,6 +524,29 @@ private function actualizarImpresionesContrato($idContrato)
               redirect(base_url().'index.php/users/login');
       }           
   }
+
+    function dataTable_anulaciones()
+    {
+        if ($this->ion_auth->logged_in()) {
+
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('impresiones/anulaciones')) {
+
+                $this->load->library('datatables');
+                $this->datatables->select('i.impr_id,i.impr_codigopapel,ta.tisa_nombre,i.impr_fecha,i.impr_observaciones,i.anulacion_verificada,i.anulacion_verificada_fecha,i.anulacion_verificada_observaciones,i.impr_estado');
+                $this->datatables->from('est_impresiones i');
+                $this->datatables->join('est_facturas f', 'f.fact_id = i.impr_facturaid', 'left');
+                $this->datatables->join('est_tiposanulaciones ta', 'ta.tisa_id = i.impr_tipoanulacionid', 'left');
+                $this->datatables->where('i.impr_estado != 1');
+                echo $this->datatables->generate();
+
+            } else {
+                redirect(base_url() . 'index.php/error_404');
+            }
+
+        } else {
+            redirect(base_url() . 'index.php/users/login');
+        }
+    }
 
 }
 
