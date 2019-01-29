@@ -89,6 +89,18 @@ Class HelperGeneral extends CI_Controller
     }
 
     /**
+     * Retorna la cantidad de rotulos anulados pendientes por verificacion
+     */
+    public function obtenerCantidadRotulosAnuladosNoVerificados()
+    {
+        $where = ' WHERE impr_estado != 1 AND anulacion_verificada = 0 ';
+        $rotulosAnuladosNoVerificados = $this->codegen_model
+            ->getSelect('est_impresiones',"count(*) as cantidad ",$where);
+
+		return $rotulosAnuladosNoVerificados[0]->cantidad;
+    }
+
+    /**
      * Retorna la cantidad minima de rotulos disponibles
      * establecidos para usuarios en general
      */
@@ -173,4 +185,28 @@ Class HelperGeneral extends CI_Controller
 
         return $informacionAlerta;
     }
+
+    /**
+     * Retorna un array con informacion acerca de la alerta para rotulos
+     * anulados sin verificar
+     */
+    public function solicitarInformacionAlertaRotulosAnuladosSinVerificar()
+    {
+        $informacionAlerta = array(
+            'mostrarAlerta' => false,
+            'noMostrarAlerta' => true,
+            'cantidadRotulosAnulados' => 0
+        );
+
+        $cantidadRotulos = $this->obtenerCantidadRotulosAnuladosNoVerificados();
+        if($cantidadRotulos > 0)
+        {
+            $informacionAlerta['mostrarAlerta'] = true;
+            $informacionAlerta['noMostrarAlerta'] = false;
+            $informacionAlerta['cantidadRotulosAnulados'] = $cantidadRotulos;
+        }
+
+        return $informacionAlerta;
+    }
+    
 }

@@ -233,6 +233,28 @@
         } //if show alert rotulos
     } //if login ?>
 
+    <?php 
+    /**
+     * Notificacion para verificacion de anulacion de rotulos
+     */
+    if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin())
+    {
+        $objHelper = new HelperGeneral;
+        $informacionAlertaRotulosAnuladosSinVerificar = $objHelper->solicitarInformacionAlertaRotulosAnuladosSinVerificar();
+
+        if($informacionAlertaRotulosAnuladosSinVerificar['mostrarAlerta'])
+        {
+?>
+            <div class="notification">
+                <div class="content">
+                <div class="text">Debe realizar la verificaci&oacute;n de rotulos anulados, hay <?php echo $informacionAlertaRotulosAnuladosSinVerificar['cantidadRotulosAnulados']; ?> rotulo(s) pendientes.</div>
+                </div>
+            </div>
+            <div class="number"><p class="glyphicon glyphicon-exclamation-sign"></p></div>
+<?php 
+        } //if show alert rotulos
+    } //if login ?>
+
  <div class="container" id="cont_contenidogeneral">
 
       <div class="content">
