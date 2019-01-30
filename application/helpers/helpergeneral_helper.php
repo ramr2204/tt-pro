@@ -93,7 +93,7 @@ Class HelperGeneral extends CI_Controller
      */
     public function obtenerCantidadRotulosAnuladosNoVerificados()
     {
-        $where = ' WHERE impr_estado != 1 AND anulacion_verificada = 0 ';
+        $where = ' WHERE impr_estado != 1 AND anulacion_verificada = 0 AND impr_codigopapel != 0 ';
         $rotulosAnuladosNoVerificados = $this->codegen_model
             ->getSelect('est_impresiones',"count(*) as cantidad ",$where);
 
