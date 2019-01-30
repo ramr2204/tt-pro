@@ -64,7 +64,7 @@ var oTable = $('#tablaq').dataTable( {
      <th>Id</th>
      <th>Código del papel</th>
      <th>Tipo de anulación</th>
-     <th>Fecha Anulaci&oacute;n</th>
+     <th>Fecha Impresi&oacute;n</th>
      <th>Observaciones Anulaci&oacute;n</th>
      <th>Verificada</th>
      <th>Fecha Verificaci&oacute;n</th>
