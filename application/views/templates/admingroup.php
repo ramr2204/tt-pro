@@ -237,7 +237,7 @@
     /**
      * Notificacion para verificacion de anulacion de rotulos
      */
-    if ($this->ion_auth->logged_in() && $this->ion_auth->is_admin())
+    if ($this->ion_auth->logged_in() && ($this->ion_auth->in_menu('impresiones/anulaciones') || $this->ion_auth->is_admin() ))
     {
         $objHelper = new HelperGeneral;
         $informacionAlertaRotulosAnuladosSinVerificar = $objHelper->solicitarInformacionAlertaRotulosAnuladosSinVerificar();
