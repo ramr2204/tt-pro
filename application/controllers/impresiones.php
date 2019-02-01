@@ -537,6 +537,7 @@ private function actualizarImpresionesContrato($idContrato)
                 $this->datatables->join('est_facturas f', 'f.fact_id = i.impr_facturaid', 'left');
                 $this->datatables->join('est_tiposanulaciones ta', 'ta.tisa_id = i.impr_tipoanulacionid', 'left');
                 $this->datatables->where('i.impr_estado != 1');
+                $this->datatables->where("i.impr_codigopapel != '0'");
                 echo $this->datatables->generate();
 
             } else {
