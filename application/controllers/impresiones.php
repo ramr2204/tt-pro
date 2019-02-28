@@ -388,7 +388,7 @@ function edit()
     {
         if ($this->ion_auth->logged_in()) {
 
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('papeles/getReassign')) {
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('impresiones/anulaciones')) {
 
                 $idAnulacion = ($this->uri->segment(3)) ? $this->uri->segment(3) : '';
                 if($idAnulacion =='')
