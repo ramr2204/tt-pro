@@ -3487,7 +3487,12 @@ function asignarCodigoParaBarras($idLiquidacion,$idEstampilla)
     $donde = 'WHERE fact_liquidacionid = '.$idLiquidacion.' AND fact_estampillaid = '.$idEstampilla;
     $join = 'INNER JOIN est_estampillas e ON e.estm_id = f.fact_estampillaid';
     $factura = $this->codegen_model->getSelect($tabla, $campos, $donde, $join);
-                                   
+
+    /*
+    * Se eliminan los decimales del valor de la factura
+    */
+    $factura[0]->fact_valor = number_format((double)$factura[0]->fact_valor, 0, '.', '');
+
     //Formatea el valor y consecutivo de la factura para que quede de 10 digitos
     $valorEstampilla = str_pad($factura[0]->fact_valor, 10, 0, STR_PAD_LEFT);
     $consecutivoFactura = str_pad($factura[0]->fact_id, 10, 0, STR_PAD_LEFT);
