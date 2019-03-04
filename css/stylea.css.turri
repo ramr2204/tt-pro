@@ -1,0 +1,176 @@
+	::selection{ background-color: #E13300; color: white; }
+	::moz-selection{ background-color: #E13300; color: white; }
+	::webkit-selection{ background-color: #E13300; color: white; }
+
+	body {
+		background-color: #fff;
+		font-size: 14px;
+		color: #4F5155;
+		margin-top: 50px;
+	}
+	h2 {
+		line-height: 60px;
+		font-size: 12px;
+	}
+	h1 {
+		font-size: 18px;
+		text-align: center;
+	}
+	.graybox{
+		width: 100%;
+		background: #4c4c4c;
+		padding: 35px;
+	}
+	.graybox a{
+		color: #fff;
+	}
+	#container{
+		/*margin-top: 250px;*/
+		margin-bottom: 50px;
+		text-align: justify;
+	}
+	
+
+
+
+	.head {
+		background: #368bcc;
+		color: #fff;
+	}
+	.navbar-default .navbar-nav > li > a { 
+       color: #fff;
+	}
+    .navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+    	color:#ccc;
+    }
+
+
+
+
+
+	.social {
+		list-style: none;
+	}
+	.social li {
+		float: left;
+		margin-left: 15px;
+	}
+	.logo img {
+		max-width: 120px;
+	}
+	.navbar-brand {
+      padding: 0 15px;
+    }
+
+    .center {
+    	text-align: center;
+    }
+    .filterMatches{
+    background-color: #D0F5A9;
+}
+.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+  background-color: #CDD9E0;
+}
+
+ .dropdown-submenu{
+    position:relative;
+}
+ 
+.dropdown-submenu > .dropdown-menu
+{
+    top:0;
+    left:100%;
+    margin-top:-6px;
+    margin-left:-1px;
+    -webkit-border-radius:0 6px 6px 6px;
+    -moz-border-radius:0 6px 6px 6px;
+    border-radius:0 6px 6px 6px;
+}
+ 
+.dropdown-submenu:hover > .dropdown-menu{
+    display:block;
+}
+ 
+.dropdown-submenu > a:after{
+    display:block;
+    content:" ";
+    float:right;
+    width:0;
+    height:0;
+    border-color:transparent;
+    border-style:solid;
+    border-width:5px 0 5px 5px;
+    border-left-color:#cccccc;
+    margin-top:5px;
+    margin-right:-10px;
+}
+ 
+.dropdown-submenu:hover > a:after{
+    border-left-color:#ffffff;
+}
+ 
+.dropdown-submenu .pull-left{
+    float:none;
+}
+ 
+.dropdown-submenu.pull-left > .dropdown-menu{
+    left:-100%;
+    margin-left:10px;
+    -webkit-border-radius:6px 0 6px 6px;
+    -moz-border-radius:6px 0 6px 6px;
+    border-radius:6px 0 6px 6px;
+}
+.cabecera {
+	background-color: #368bcc;
+	color: #FFFFFF;
+	margin-top: -50px;
+}
+
+footer{
+	background-color: #368bcc ;
+	color: #FFFFFF;
+	bottom: 1px;
+	margin-top: 30px;
+}
+.btn-primary2 {
+	background-color: #368bcc ;
+	color: #FFFFFF;
+}
+.btn-primary2:hover {
+	background-color: #466f9c;
+	color: #FFFFFF;
+}
+
+
+.navbar-brand {
+    padding: 4.5px;
+}
+
+.logoImagen {
+  width: 250px;
+  height: 40px;
+}
+
+.logoLogin {
+  width: 250px;
+  height: 50px;  
+}
+
+.contLogo {
+  padding: 19px;
+}
+
+/*.btn-success {
+
+    color: #fff;
+    background-color: #368bcc;
+    border-color: gray;
+
+}
+
+.btn-success:hover, .btn-success:focus, .btn-success:active, .btn-success.active, .open .dropdown-toggle.btn-success {
+
+    color: #fff;
+    background-color: #466f9c;
+    border-color: gray;
+}*/
