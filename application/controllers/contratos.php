@@ -210,7 +210,7 @@ class Contratos extends MY_Controller {
               }
               
               $this->data['successmessage'] = $this->session->flashdata('message');
-              $valor = str_replace('.','',$this->input->post('valor'));
+              $valor = str_replace(',', '.', str_replace('.', '', $this->input->post('valor')));
               $vigencia = explode("-", $this->input->post('fecha'));
 
               $this->form_validation->set_rules('cntr_municipio_origen', 'Municipio Origen','required|trim|xss_clean|numeric|greater_than[0]');
