@@ -2327,7 +2327,7 @@ function renderizarDetalleRangoPDF()
         {
             $fecha_inicial = $fecha_inicial_impr;
             $fecha_final   = $fecha_final_impr;
-            $strTipoFechaFiltrada = "FECHA DE IMPRESIÓN";
+            $strTipoFechaFiltrada = "FECHA DE IMPRESION";
             $where .= ' AND date_format(imp.impr_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial_impr.'" AND "'.$fecha_final_impr.'"';
         }
 
@@ -2343,7 +2343,7 @@ function renderizarDetalleRangoPDF()
         {
             $fecha_inicial = $fecha_inicial_liqu;
             $fecha_final   = $fecha_final_liqu;
-            $strTipoFechaFiltrada = "FECHA DE LIQUIDACIÓN";
+            $strTipoFechaFiltrada = "FECHA DE LIQUIDACION";
             $where .= ' AND date_format(liq.liqu_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial_liqu.'" AND "'.$fecha_final_liqu.'"';
         }
 
@@ -2528,11 +2528,13 @@ function renderizarDetalleRangoPDF()
         if(isset($fechaUnica) && $fechaUnica != '')
         {
             $fecha = Liquidaciones::fechaEnLetras($fechaUnica);
+            $fecha_nombre_archivo = 'fecha_'.$fechaUnica;
         }else
             {
                 $fecha = 'PERIODO COMPRENDIDO ENTRE LAS FECHAS '. Liquidaciones::fechaEnLetras($fecha_inicial)
                     .' Y '. Liquidaciones::fechaEnLetras($fecha_final)
                     .', FILTRO REALIZADO POR '. $strTipoFechaFiltrada;
+                $fecha_nombre_archivo = 'entre_fechas_'.$fecha_inicial.'_y_'. $fecha_final;
             }
 
         $vecFiltrosAplicados = $this->extraerInformacionFiltrosAplicados($vecFiltrosAplicados);
@@ -2544,7 +2546,8 @@ function renderizarDetalleRangoPDF()
             'cant_agrupacion'        => $cant_agrupaciones,
             'cant_total_estampillas' => $cant_total_estampillas,
             'total_recaudado'        => $total_recaudado,
-            'fecha'                  => $fecha
+            'fecha'                  => $fecha,
+            'fecha_nombre_archivo'   => $fecha_nombre_archivo,
         );
     }
 
@@ -3193,7 +3196,7 @@ function renderizarDetalleRangoExcel()
             $datos['vec_filtros']      = $resultadosFiltros['vec_filtros'];
             
             session_start();
-            $_SESSION['fecha_informe_excel'] = $datos['fecha'];
+            $_SESSION['fecha_informe_excel'] = $resultadosFiltros['fecha_nombre_archivo'];
 
             $this->template->load($this->config->item('excel_template'),'generarexcel/generarexcel_impresiones', $datos);
 
