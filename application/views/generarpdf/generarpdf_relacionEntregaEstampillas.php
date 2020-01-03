@@ -214,8 +214,8 @@ echo  strtoupper($diaNumero.' de '.$mesNombre.' de '.date('Y'));
 
 <p>
 Doctora<br>
-<b>YENNY MILENA GONZALEZ CRUZ</b><br>
-Directora de Rentas<br>
+<b>ANDRES OCTALIO LOZANO ACOSTA</b><br>
+Director de Rentas<br>
 Gobernación del Tolima<br>
 Ibagué<br>
 </p>
