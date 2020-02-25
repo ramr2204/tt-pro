@@ -104,7 +104,7 @@
  <tfoot>
    <tr>
      <th colspan="2" class="text-center">
-     <small> "Soluciones que Transforman"<br>
+     <small> "El Tolima nos une"<br>
       Edificio de la Gobernación del Tolima, carrera 3 calle 10 y 11, 9 piso <br>
       Teléfonos 2610758 - 2611111 -Ext. 209 - 305<br>
       dcontratos@outlook.com </small> 
@@ -205,7 +205,7 @@
  <tfoot>
    <tr>
      <th colspan="2" class="text-center">
-     <small> "Soluciones que Transforman"<br>
+     <small> "El Tolima nos une"<br>
       Edificio de la Gobernación del Tolima, carrera 3 calle 10 y 11, 9 piso <br>
       Teléfonos 2610758 - 2611111 -Ext. 209 - 305<br>
       dcontratos@outlook.com </small> 
@@ -309,7 +309,7 @@
  <tfoot>
    <tr>
      <th colspan="2" class="text-center">
-     <small> "Soluciones que Transforman"<br>
+     <small> "El Tolima nos une"<br>
       Edificio de la Gobernación del Tolima, carrera 3 calle 10 y 11, 9 piso <br>
       Teléfonos 2610758 - 2611111 -Ext. 209 - 305<br>
       dcontratos@outlook.com </small> 

@@ -237,7 +237,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:10;"><small> "Soluciones que Transforman"<br>Edificio de la Gobernación del Tolima<br>Carrera 3 Calles 10 y 11, Piso 9<br>Código Postal 730006</small></td>
+                        font-size:10;"><small> "El Tolima nos une"<br>Edificio de la Gobernación del Tolima<br>Carrera 3 Calles 10 y 11, Piso 9<br>Código Postal 730006</small></td>
 
                     <td class="text-center" colspan="2" style="height: 15mm; width: 38.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
