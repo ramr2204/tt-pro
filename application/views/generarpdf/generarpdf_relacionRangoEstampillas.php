@@ -228,7 +228,7 @@ PROYECTO ESTAMPILLAS PRO<br>
 
 <div class="text-center" style="font-size:8px;">
 <br>
-“Soluciones que Transforman”<br>
+“El Tolima nos une”<br>
 Gobernación del Tolima<br>
 www.tolima.gov.co
 </div>
