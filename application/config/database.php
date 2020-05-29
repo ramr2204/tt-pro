@@ -48,9 +48,9 @@
 $active_group = 'default';
 $active_record = TRUE;
 
-$db['default']['hostname'] = '192.168.77.15';
+$db['default']['hostname'] = '192.168.0.101';
 $db['default']['username'] = 'root';
-$db['default']['password'] = 'AdminTurr2014';
+$db['default']['password'] = 'Turr1syst3m0';
 $db['default']['database'] = 'estampillas_pro_putumayo';
 $db['default']['dbdriver'] = 'mysql';
 $db['default']['dbprefix'] = '';
