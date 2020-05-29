@@ -50,6 +50,7 @@ function inicial ()
 
     $('#btn-relacion').click(generarInformeRelacion);
     $('#btn-rango').click(solicitarRango);
+    $('#departamentoid_tramites').change(consultarMunicipios);
     $('#btn-consultar').click(generarInformeRangoImpresiones);
     $('#btn-consultar-detalle-pdf').click(generarInformeRangoImpresiones);
     $('#btn-consultar-detalle-excel').click(generarInformeRangoImpresiones);
@@ -66,6 +67,9 @@ function inicial ()
     */
     $('#group_mes').click(solicitarMarcarAnio);
     $('#group_anio').click(solicitarDesmarcarMes);
+    $('#archivo_asobancaria').change(cambiarNombreInputFile);
+    $('#imagen_tramite').change(cambiarNombreInputFile);
+    $('#tramite_existe').change(ponerDisabledNombre);
 
     /*
     * Solicita la identificacion de la vista de auditoria
@@ -134,6 +138,24 @@ async function validarNumeroRotuloLiquidador(event)
             alert(".:: " + mensajeError +" ::.");
         }
     );
+}
+
+function cambiarNombreInputFile()
+{
+    var file = $(this)[0].files[0].name;
+    $(this).parent().find('span').text(file);
+}
+
+function ponerDisabledNombre()
+{
+    if($(this).val() != 0)
+    {
+        $('#nombre_tramite').prop('disabled', true);
+    }
+    else
+    {
+        $('#nombre_tramite').prop('disabled', false);
+    }
 }
 
 /**
@@ -301,6 +323,25 @@ function identificarVistaChosen()
         //Evento para los select con chosen
         $('.chosen').chosen({no_results_text: "No se encuentra"});
     }
+}
+
+function consultarMunicipios()
+{
+    var departamento_tramites = $('#departamentoid_tramites').val();
+    $.ajax({
+        'method': 'GET',
+        'url': base_url+'liquidacionTramite/consultarMunicipios?depto='+departamento_tramites,
+        success: function(data)
+        {
+            var data = JSON.parse(data);
+            $('#municipioid_tramites option').remove();
+            data.forEach(function(datos)
+            {
+                $('#municipioid_tramites').append("<option value='"+datos.muni_id+"'>"+datos.muni_nombre+"</option>");
+            })
+             $('#municipioid_tramites').trigger("chosen:updated");
+        }
+    });
 }
 
 /*
