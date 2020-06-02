@@ -103,7 +103,14 @@ $(document).ready(function() {
                 <div style="display: table-cell;">
                     <select class="form-control" id="select_periodo_tramite">
                         <option value="">Seleccione una opción</option>
-                        <option value="2020">2020</option>
+                        <?php
+                            for ($i=date('2020'); $i <= date('Y'); $i++) 
+                            { 
+                                ?> 
+                                <option value="<?php echo $i ?>"><?php echo $i ?></option>
+                                <?php 
+                            }
+                        ?>
                     </select>
                 </div>
                 <div style="display: table-cell;text-align: center;">
