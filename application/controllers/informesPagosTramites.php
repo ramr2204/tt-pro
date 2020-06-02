@@ -28,7 +28,7 @@ class InformesPagosTramites extends MY_Controller {
     {
        if ($this->ion_auth->logged_in()){
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('InformesPagosTramites/index')){
 
               $this->data['errorModal']=$this->session->flashdata('errorModal');
               $this->data['successmessage']=$this->session->flashdata('successmessage');
@@ -72,7 +72,7 @@ class InformesPagosTramites extends MY_Controller {
     {
         if ($this->ion_auth->logged_in()) {
 
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('tipoLiquidacionTramite/manage') ) 
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('InformesPagosTramites/index') ) 
             { 
 
                 /*

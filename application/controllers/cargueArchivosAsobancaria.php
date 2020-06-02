@@ -28,7 +28,7 @@ class CargueArchivosAsobancaria extends MY_Controller {
     {
          if ($this->ion_auth->logged_in())
         {
-            if ($this->ion_auth->is_admin())
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('cargueArchivosAsobancaria/index'))
             {
                 $this->data['successmessage']=$this->session->flashdata('successmessage');
                 $this->data['errormessage']=$this->session->flashdata('errormessage');
@@ -65,7 +65,7 @@ class CargueArchivosAsobancaria extends MY_Controller {
     {
         if ($this->ion_auth->logged_in()) 
         {
-            if ($this->ion_auth->is_admin()) 
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('cargueArchivosAsobancaria/index')) 
             {                
                 $this->form_validation->set_rules('banco_tramite', 'Banco trámite', 'trim|xss_clean|required');
 
