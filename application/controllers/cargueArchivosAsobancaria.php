@@ -67,7 +67,6 @@ class CargueArchivosAsobancaria extends MY_Controller {
         {
             if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('cargueArchivosAsobancaria/index')) 
             {                
-                $this->form_validation->set_rules('banco_tramite', 'Banco trámite', 'trim|xss_clean|required');
 
                 if($this->form_validation->run() == false) 
                 {

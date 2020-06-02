@@ -167,13 +167,14 @@ class TipoLiquidacionTramite extends MY_Controller
 
                 $idContratista = ($this->uri->segment(3)) ? $this->uri->segment(3) : $this->input->post('id') ;
 
-                $tramites_id = $this->codegen_model->getSelect('liquidacion_tipo_tramites as lt','lt.id as lt_id, lv.id as lv_id,lt.nombre,lt.estado,lv.valor,lv.vigencia',' WHERE lt.id = '.$idContratista .'',' INNER JOIN liquidacion_valor_vigencia_tramite as lv ON lv.tramite_id = lt.id')[0];
 
                 if ($idContratista=='')
                 {
                     $this->session->set_flashdata('infomessage', 'Debe elegir un tipo trámite para editar');
                     redirect(base_url().'index.php/tipoLiquidacionTramite');
                 }
+
+                $tramites_id = $this->codegen_model->getSelect('liquidacion_tipo_tramites as lt','lt.id as lt_id, lv.id as lv_id,lt.nombre,lt.estado,lv.valor,lv.vigencia',' WHERE lt.id = '.$idContratista .'',' INNER JOIN liquidacion_valor_vigencia_tramite as lv ON lv.tramite_id = lt.id')[0];
 
                 $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]');   
                 $this->form_validation->set_rules('valor',  'Valor', 'required|trim|xss_clean|max_length[256]');
