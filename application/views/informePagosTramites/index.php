@@ -123,7 +123,7 @@ $(document).ready(function()
                 <div style="display: table-cell;">
                     <div class="form-group" style="width: 93%">
                         <label for="tipo_documento">Vigencia Trámite</label>
-                        <select name="select-tipo-tramite"id="tramite_vigencia" class="form-control select-tipo-tramite">
+                        <select name="select-tipo-tramite"id="tramite_vigencia" class="form-control">
                             <option value="">Seleccione una opción</option>
                             <?php
                             foreach ($result['vigencia_tramite'] as $vigencia) {
@@ -138,7 +138,7 @@ $(document).ready(function()
                 <div style="display: table-cell;">
                     <div class="form-group" style="width: 93%">
                         <label for="tipo_documento">Tipo Trámite</label>
-                        <select name="select-tipo-tramite" id="select-tipo-tramite" class="form-control">
+                        <select name="select-tipo-tramite" id="select-tipo-tramite" class="form-control select-tipo-tramite">
                             <option value="">Seleccione una opción</option>
                         </select>
                     </div>
