@@ -71,6 +71,60 @@ function inicial ()
     $('#imagen_tramite').change(cambiarNombreInputFile);
     $('#tramite_existe').change(ponerDisabledNombre);
 
+    $('#tramite_vigencia').change(consultarTramites);
+    $('#tramite_vigencia_totalizado').change(consultarTramites);
+    $('#select-tipo-tramite-total').change(reloadDatatableTotalizado);
+    $('#btn-reestablecer-totalizado').click(eliminarFiltrosTotalizados);
+    $('#btn-exportar-excel-tra-total').click(exportarExcelTotalizado)
+
+
+
+    ////funciones cortas
+
+    $('#desde_fecha_creacion').change(function(){
+        var oSettings = $('#tabla_informe_pagos_tramites').dataTable().fnSettings();
+        oSettings.sAjaxSource  = base_url +"index.php/informesPagosTramites/dataTable?fecha_ini="+ String($('#desde_fecha_creacion').val())+"&fecha_fin="+String($('#desde_fecha_final').val());
+        $('#tabla_informe_pagos_tramites').dataTable().fnReloadAjax();
+    });
+
+    $('#desde_fecha_final').change(function(){
+       var oSettings = $('#tabla_informe_pagos_tramites').dataTable().fnSettings();
+        oSettings.sAjaxSource  = base_url +"index.php/informesPagosTramites/dataTable?fecha_ini="+ String($('#desde_fecha_creacion').val())+"&fecha_fin="+String($('#desde_fecha_final').val());
+        $('#tabla_informe_pagos_tramites').dataTable().fnReloadAjax();
+    });
+
+    $('#select-tipo-tramite').change(function(){
+       var oSettings = $('#tabla_informe_pagos_tramites').dataTable().fnSettings();
+        oSettings.sAjaxSource  = base_url +"index.php/informesPagosTramites/dataTable?fecha_ini="+ String($('#desde_fecha_creacion').val())+"&fecha_fin="+String($('#desde_fecha_final').val() + "&tipo_tramite="+String($('#select-tipo-tramite').val()));
+        $('#tabla_informe_pagos_tramites').dataTable().fnReloadAjax();
+    });
+
+    $('.filtro_pago_tramite').change(function(){
+        $('#tabla_informe_pagos_tramites').dataTable().fnFilter($("input:radio[name=filtro_pago_tramite]:checked").val(), 12); 
+    });
+    
+    $('#btn-reestablecer').click(function(){
+        $('.filtro_pago_tramite').prop("checked", false);
+        $('#desde_fecha_final').val('');
+        $('#desde_fecha_creacion').val('');
+        $('#tramite_vigencia').val('');
+        $('#select-tipo-tramite').val('');
+        $('#tabla_informe_pagos_tramites').dataTable().fnFilter('', 12);
+
+        var oSettings = $('#tabla_informe_pagos_tramites').dataTable().fnSettings();
+        oSettings.sAjaxSource  = base_url +"index.php/informesPagosTramites/dataTable";
+        $('#tabla_informe_pagos_tramites').dataTable().fnReloadAjax();
+    });
+
+    $('#btn-exportar-excel-tra').click(function(){
+        var pagado    = $("input:radio[name=filtro_pago_tramite]:checked").val();
+        var fecha_ini = $("#desde_fecha_creacion").val();
+        var fecha_fin = $("#desde_fecha_final").val();
+        var tipo_tramite = $("#select-tipo-tramite").val();
+        window.open(base_url +"informesPagosTramites/exportarExcelFacturacion?pagado="+pagado+"&fecha_ini="+String(fecha_ini)+"&fecha_fin="+String(fecha_fin)+"&tipo_tramite="+String(tipo_tramite));
+    });
+
+
     /*
     * Solicita la identificacion de la vista de auditoria
     * para enlazar los eventos
@@ -156,6 +210,46 @@ function ponerDisabledNombre()
     {
         $('#nombre_tramite').prop('disabled', false);
     }
+}
+
+function consultarTramites(e)
+{
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    $('.select-tipo-tramite option').remove();
+    $.ajax({
+        'url': base_url + "liquidacionTramite/consultarTramite?vigencia_tramite="+$(this).val(),
+        'method': 'GET',
+        success: function(data)
+        {
+            $('.select-tipo-tramite').append('<option value="">Seleccione Opción</option>');
+            data = JSON.parse(data);
+            data.forEach(function(dato)
+            {
+                $('.select-tipo-tramite').append('<option value="'+dato.id+'">'+dato.nombre+'</option>');
+            })
+        }
+
+    })
+}
+
+function reloadDatatableTotalizado()
+{
+    var oSettings = $('#tabla_informe_totalizado_tramites').dataTable().fnSettings();
+    oSettings.sAjaxSource  = base_url +"index.php/totalizadoPersonaTramite/dataTable?tipo_tramite="+ String($('#select-tipo-tramite-total').val());
+    $('#tabla_informe_totalizado_tramites').dataTable().fnReloadAjax();
+}
+
+function eliminarFiltrosTotalizados()
+{
+    var oSettings = $('#tabla_informe_totalizado_tramites').dataTable().fnSettings();
+    oSettings.sAjaxSource  = base_url +"index.php/totalizadoPersonaTramite/dataTable";
+    $('#tabla_informe_totalizado_tramites').dataTable().fnReloadAjax();
+}
+
+function exportarExcelTotalizado()
+{
+    window.open(base_url +"totalizadoPersonaTramite/exportarExcelFacturacion?tipo_tramite="+String($('#select-tipo-tramite-total').val()));
 }
 
 /**

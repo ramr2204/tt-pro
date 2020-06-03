@@ -94,6 +94,7 @@ class LiquidacionTramite extends MY_Controller
 
         // CODE 39 EXTENDED
         $img_barcode = '<center><img src="'. base_url().'generarBarcode?generar_barcode_text='.$consultarParametros->codigo_barras.'" width="400" height="50"></center>';
+        echo $img_barcode;exit;//borar despues
 
         $pdf->writeHTMLCell(0, 0, 33, 103, $img_barcode);
 
@@ -300,8 +301,6 @@ class LiquidacionTramite extends MY_Controller
                 } 
                 else 
                 {
-
-                    $fecha_vencimiento = date("Y-m-d",strtotime(date("Y-m-d")."+ 1 month"));
                     $data = array(
                         'ndocumento'         => $this->input->post('ndocumento'),
                         'primer_nombre'      => $this->input->post('primer_nombre'),
@@ -315,8 +314,7 @@ class LiquidacionTramite extends MY_Controller
                         'tipo_documento'     => $this->input->post('tipo_documento'),
                         'departamento_residencia' => $this->input->post('departamento_residencia'),
                         'municipio'          => $this->input->post('municipio'),
-                        'fecha_creacion'     => date('Y-m-d H:i:s'),
-                        'fecha_vencimiento'  => $fecha_vencimiento
+                        'fecha_creacion'     => date('Y-m-d H:i:s')
                     );
                     
 
@@ -327,7 +325,7 @@ class LiquidacionTramite extends MY_Controller
 
                     //415 + codigo que de el banco + 820 + numerofactura + 3900 valor factura + 96 + fechavencimieno
 
-                    $tex_barcode = '415' . '000' . '8020' . $respuestaProceso->idInsercion . $consultarTramite->vigencia. '3900' .  str_pad((int) $consultarTramite->valor, 10, "0", STR_PAD_LEFT) . '96' . str_replace('-','',$fecha_vencimiento);
+                    $tex_barcode = '415' . '000' . '8020' . $respuestaProceso->idInsercion . $consultarTramite->vigencia. '3900' .  str_pad((int) $consultarTramite->valor, 10, "0", STR_PAD_LEFT) . '96' . str_replace('-','','00000000');
 
                     //editar numero_factura
                     $data_editar = array(
@@ -379,6 +377,13 @@ class LiquidacionTramite extends MY_Controller
         }
 
     }   
+
+    function consultarTramite()
+    {
+        $tramites_vigencia = $this->codegen_model->getSelect('liquidacion_valor_vigencia_tramite lv', 'lv.id, lt.nombre', 'WHERE lv.vigencia = ' . $_GET['vigencia_tramite'], 'INNER JOIN liquidacion_tipo_tramites lt on lt.id = lv.tramite_id');
+
+        echo json_encode($tramites_vigencia);
+    }
 
     function consultarMunicipios()
     {

@@ -54,6 +54,8 @@ class InformesPagosTramites extends MY_Controller {
                         'js/applicationEvents.js'
                        );
 
+            $this->data['result']['vigencia_tramite'] = $this->codegen_model->getSelect('liquidacion_valor_vigencia_tramite lv', 'lv.vigencia', 'GROUP BY lv.vigencia');
+
 
             $this->template->load($this->config->item('admin_template'),'informePagosTramites/index', $this->data);
               
@@ -99,7 +101,6 @@ class InformesPagosTramites extends MY_Controller {
                                             muni.muni_nombre,
                                             lt.nombre as nombre_tramite,
                                             lp.fecha_creacion,
-                                            lp.fecha_vencimiento,
                                             lp.pagado,
                                             td.nombre,
                                             lp.codigo_barras,
@@ -117,6 +118,25 @@ class InformesPagosTramites extends MY_Controller {
                 $this->datatables->join('tipo_documento td', 'td.id = lp.tipo_documento', 'INNER');
                 $this->datatables->join('par_bancos bancos', 'bancos.banc_id = lp.banco', 'LEFT');
 
+                if(isset($_GET["fecha_ini"]) || isset($_GET["fecha_fin"]))
+                {
+                    if($_GET["fecha_ini"] == "" && $_GET["fecha_fin"] != "")
+                    {
+                        $this->datatables->where("lp.fecha_creacion <= '" . $_GET["fecha_fin"] . "'");
+                    }else if($_GET["fecha_ini"] != "" && $_GET["fecha_fin"] == "")
+                    {
+                        $this->datatables->where("lp.fecha_creacion >= '" . $_GET["fecha_ini"] . "'");
+
+                    }else if($_GET["fecha_ini"] != "" && $_GET["fecha_fin"] != "")
+                    {
+                        $this->datatables->where("lp.fecha_creacion >= '" . $_GET["fecha_ini"] . "' " . "AND lp.fecha_creacion <= '". $_GET["fecha_fin"] . "'");
+                    }
+                }
+
+                if(isset($_GET['tipo_tramite']))
+                {
+                    $this->datatables->where("lp.tipo_tramite_valor = ". $_GET['tipo_tramite'] );
+                }
 
                 echo $this->datatables->generate();
 
@@ -135,6 +155,10 @@ class InformesPagosTramites extends MY_Controller {
 
     function exportarExcelFacturacion()
     {   
+        $pagado    = '';
+        $fecha_ini = '';
+        $fecha_fin = '';
+        $wheres    = '';
 
         $columnas = 'lp.primer_nombre,
                     lp.segundo_nombre,
@@ -147,7 +171,6 @@ class InformesPagosTramites extends MY_Controller {
                     muni.muni_nombre,
                     lt.nombre as nombre_tramite,
                     lp.fecha_creacion,
-                    lp.fecha_vencimiento,
                     lp.pagado,
                     td.nombre,
                     lp.codigo_barras,
@@ -167,7 +190,6 @@ class InformesPagosTramites extends MY_Controller {
                     'Municipio',
                     'Trámite',
                     'Fecha Creación',
-                    'Fecha Vencimiento',
                     'Pagado',
                     'Documento',
                     'Codigo Barras',
@@ -185,15 +207,66 @@ class InformesPagosTramites extends MY_Controller {
         " INNER JOIN `tipo_documento` td ON `td`.`id` = `lp`.`tipo_documento`".
         " LEFT JOIN `par_bancos` bancos ON `bancos`.`banc_id` = `lp`.`banco`";
 
-        $wheres = " ";
 
-        if($_GET['pagado'] != 'undefined' && $_GET['anho_periodo'] != '' ){
-            $wheres .= " WHERE lp.pagado = ". $_GET['pagado'] ." AND YEAR(lp.fecha_creacion) = ".$_GET['anho_periodo'] ." ";
-        }else if($_GET['pagado'] != 'undefined' && $_GET['anho_periodo'] == '' ){
-            $wheres .= " WHERE lp.pagado = ". $_GET['pagado'] . " ";
-        }else if($_GET['pagado'] === 'undefined' && $_GET['anho_periodo'] != '' ){
+        if($_GET['pagado'] != 'undefined')
+        {
+            $pagado .= " lp.pagado = ". $_GET['pagado'];
+        }
 
-            $wheres .= " WHERE YEAR(lp.fecha_creacion) = ".$_GET['anho_periodo'] . " ";
+        if($_GET['fecha_ini'] != '')
+        {
+            $fecha_ini .= " lp.fecha_creacion >= '" . $_GET['fecha_ini'] . "'";
+        }
+
+        if($_GET['fecha_fin'] != '')
+        {
+            $fecha_fin.= " lp.fecha_creacion <= '" . $_GET['fecha_fin'] . "'";
+        }
+
+        if($_GET['tipo_tramite'] != '')
+        {
+            $tipo_tramite .= " lp.tipo_tramite_valor =" . $_GET["tipo_tramite"];
+        }
+
+        if($pagado != '')
+        {
+            $wheres .= ' WHERE ' . $pagado ;
+        }
+
+        if($fecha_ini != '')
+        {
+            if($wheres != '')
+            {
+                $wheres .= ' AND ' . $fecha_ini;
+            }
+            else
+            {
+                $wheres .= ' WHERE '. $fecha_ini;
+            }
+        }
+
+        if($fecha_fin != '')
+        {
+            if($wheres != '')
+            {
+                $wheres .= ' AND '. $fecha_fin;
+            }
+            else
+            {
+                $wheres .= ' WHERE '. $fecha_ini;
+            }
+        }
+
+        if($tipo_tramite != '')
+        {
+            if($wheres != '')
+            {
+                $wheres .= ' AND '. $tipo_tramite;
+            }
+            else
+            {
+                $wheres .= ' WHERE '. $tipo_tramite;
+            }
         }
 
         $results = $this->codegen_model->getSelect('liquidar_tramite_persona lp', $columnas, $wheres, $joins);

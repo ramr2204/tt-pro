@@ -307,7 +307,7 @@ class TipoLiquidacionTramite extends MY_Controller
                 $this->datatables->select('lt.id,lt.nombre,lt.estado,lv.valor,lv.vigencia');
                 $this->datatables->from('liquidacion_tipo_tramites lt');
 
-              $this->datatables->join('liquidacion_valor_vigencia_tramite lv', 'lt.id = lv.tramite_id', 'INNER');
+                $this->datatables->join('liquidacion_valor_vigencia_tramite lv', 'lt.id = lv.tramite_id', 'INNER');
 
 
                 echo $this->datatables->generate();

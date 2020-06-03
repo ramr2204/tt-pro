@@ -26,7 +26,8 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="banco_tramite">Banco</label>
-                                <select class="form-control" id="banco_tramite" name="banco_tramite" required="required" >
+                                <select class="form-control" id="banco_tramite" name="banco_tramite">
+                                    <option value="">Seleccione un valor</option>
                                     <?php foreach ($result['bancos'] as $banco) { ?>
                                         <option value="<?php echo $banco->banc_id ?>"><?php echo $banco->banc_nombre ?></option>
                                     <?php } ?>
