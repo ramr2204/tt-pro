@@ -68,78 +68,71 @@ class CargueArchivosAsobancaria extends MY_Controller {
             if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('cargueArchivosAsobancaria/index')) 
             {                
 
-                if($this->form_validation->run() == false) 
-                {
-                    $this->session->set_flashdata('errormessage', validation_errors());
-                    redirect(base_url().'index.php/cargueArchivosAsobancaria/index');                            
-                }
-                else
-                {   
-                    $_FILES["archivo_asobancaria"]["size"] ;
-                    $tipo_archivo = $_FILES["archivo_asobancaria"]["type"];
+                $_FILES["archivo_asobancaria"]["size"] ;
+                $tipo_archivo = $_FILES["archivo_asobancaria"]["type"];
 
-                    if (isset($_FILES["archivo_asobancaria"]) && is_uploaded_file($_FILES['archivo_asobancaria']['tmp_name'])) 
+                if (isset($_FILES["archivo_asobancaria"]) && is_uploaded_file($_FILES['archivo_asobancaria']['tmp_name'])) 
+                {
+
+                    if (count(strpos($tipo_archivo, "text"))>0 || count(strpos($tipo_archivo, "octet-stream"))>0)
                     {
 
-                        if (count(strpos($tipo_archivo, "text"))>0 || count(strpos($tipo_archivo, "octet-stream"))>0)
-                        {
-  
-                            //SE ABRE EL archivo_asobancaria EN MODO LECTURA
-                            $fp = fopen($_FILES['archivo_asobancaria']['tmp_name'], "r");
-                            //SE RECORRE
-                            $contarFacturas = 0;
-                            while (!feof($fp))
-                            { 
-                                //SI SE LEE SEPARADO POR COMAS
-                                $data  = explode(",", fgets($fp));
+                        //SE ABRE EL archivo_asobancaria EN MODO LECTURA
+                        $fp = fopen($_FILES['archivo_asobancaria']['tmp_name'], "r");
+                        //SE RECORRE
+                        $contarFacturas = 0;
+                        while (!feof($fp))
+                        { 
+                            //SI SE LEE SEPARADO POR COMAS
+                            $data  = explode(",", fgets($fp));
 
-                                /*
-                                * Valida que el número de factura exista
-                                */
-                                $data = trim($data[0]);
+                            /*
+                            * Valida que el número de factura exista
+                            */
+                            $data = trim($data[0]);
 
-                                $vFactura = $this->codegen_model->getSelect("liquidar_tramite_persona","id", "WHERE numero_factura = '".$data ."' AND pagado = 0");
+                            $vFactura = $this->codegen_model->getSelect("liquidar_tramite_persona","id", "WHERE numero_factura = '".$data ."' AND pagado = 0");
 
+                            
+                            if(!count($vFactura) == 0)
+                            {
+                                $data_edit = array(
+                                    'banco' => $this->input->post('banco_tramite') == '' ? NULL : $this->input->post('banco_tramite'),
+                                    'pagado' => 1,
+                                );
                                 
-                                if(!count($vFactura) == 0)
-                                {
-                                    $data_edit = array(
-                                        'banco' => $this->input->post('banco_tramite'),
-                                        'pagado' => 1,
-                                    );
-                                    
-                                    $editarFactura = $this->codegen_model->edit('liquidar_tramite_persona',$data_edit,'numero_factura',$data);
-                                    
-                                    $contarFacturas++;
-                                }
-
-                            } 
-
-                            if($contarFacturas == 0)
-                            {
-                                $this->session->set_flashdata('errormessage', 'Ninguna factura correspondiente al archivo pertenece al sistema');
-                                redirect(base_url().'index.php/cargueArchivosAsobancaria/index');
+                                $editarFactura = $this->codegen_model->edit('liquidar_tramite_persona',$data_edit,'numero_factura',$data);
+                                
+                                $contarFacturas++;
                             }
-                            else
-                            {
-                                $this->session->set_flashdata('successmessage', 'Se insertaron correctamente un total de '. $contarFacturas . ' facturas.');
-                                redirect(base_url().'index.php/cargueArchivosAsobancaria/index');
-                            }
+
+                        } 
+
+                        if($contarFacturas == 0)
+                        {
+                            $this->session->set_flashdata('errormessage', 'Ninguna factura correspondiente al archivo pertenece al sistema');
+                            redirect(base_url().'index.php/cargueArchivosAsobancaria/index');
                         }
                         else
                         {
-                            $this->session->set_flashdata('errormessage', 'Solo se permiten extensiones .txt');
+                            $this->session->set_flashdata('successmessage', 'Se insertaron correctamente un total de '. $contarFacturas . ' facturas.');
                             redirect(base_url().'index.php/cargueArchivosAsobancaria/index');
                         }
-    
-                    } 
+                    }
                     else
                     {
-                        $this->session->set_flashdata('errormessage', 'Error de subida');
+                        $this->session->set_flashdata('errormessage', 'Solo se permiten extensiones .txt');
                         redirect(base_url().'index.php/cargueArchivosAsobancaria/index');
                     }
 
+                } 
+                else
+                {
+                    $this->session->set_flashdata('errormessage', 'Error de subida');
+                    redirect(base_url().'index.php/cargueArchivosAsobancaria/index');
                 }
+
+            
             }
             else 
             {
