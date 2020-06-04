@@ -132,7 +132,7 @@ class TotalizadoPersonaTramite extends MY_Controller {
 
         $groupBy = "GROUP BY lp.tipo_tramite_valor";
 
-        if(isset($_GET['tipo_tramite']) && $_GET['tipo_tramite'] != '')
+        if(isset($_GET['tipo_tramite']) && $_GET['tipo_tramite'] != '' && $_GET['tipo_tramite'] != 'null')
         {
             $wheres = 'WHERE lp.tipo_tramite_valor = '. $_GET['tipo_tramite'];
         }
