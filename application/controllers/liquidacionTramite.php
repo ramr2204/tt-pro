@@ -2,10 +2,10 @@
 error_reporting(0);
 /**
 *   Nombre:            contratistas
-*   Ruta:              /application/controllers/contratistas.php
-*   Descripcion:       controlador de contratistas
+*   Ruta:              /application/controllers/liquidacionTramite.php
+*   Descripcion:       controlador de liquidaciones trramites
 *   Fecha Creacion:    20/may/2014
-*   @author            IvÃ¡n ViÃ±a <ivandariovinam@gmail.com>
+*   @author            Maria Monica Gutierrez Torres <monica.gutierrez@turrisystem.com>
 *   @version           2014-05-20
 *
 */
@@ -171,7 +171,7 @@ class LiquidacionTramite extends MY_Controller
             </style>
             <table cellpadding="2" cellspacing="3">
                 <tr>
-                    <td class="letra-tama encabezados">CÃ“DIGO</td>
+                    <td class="letra-tama encabezados">CÓDIGO</td>
                     <td class="letra-tama">'.$consultarParametros->numero_factura.'</td>
                     <td class="letra-tama encabezados">FECHA</td>
                     <td class="letra-tama">'.$consultarParametros->fecha_creacion.'</td>
@@ -220,8 +220,8 @@ class LiquidacionTramite extends MY_Controller
             </style>
             <table style="border-collapse: collapse;">
                 <tr>
-                    <td class="letra-tama encabezados">CODIGO TRÃMITE</td>
-                    <td class="letra-tama encabezados">TIPO TRÃMITE</td>
+                    <td class="letra-tama encabezados">CODIGO TRÁMITE</td>
+                    <td class="letra-tama encabezados">TIPO TRÁMITE</td>
                     <td class="letra-tama encabezados">VIGENCIA</td>
                     <td class="letra-tama encabezados">VALOR</td>
                     <td></td>
@@ -252,16 +252,16 @@ class LiquidacionTramite extends MY_Controller
                             <td style="font-size:10px">GOBERNACION DEL PUTUMAYO</td>
                         </tr>
                         <tr>
-                            <td style="font-size:10px">SecretarÃ­a de hacienda departamental</td>
+                            <td style="font-size:10px">Secretaría de hacienda departamental</td>
                         </tr>
                         <tr>
                             <td style="font-size:10px">Nit: 800094164-4</td>
                         </tr>
                         <tr>
-                            <td style="font-size:10px">LiquidaciÃ³n de impuestos</td>
+                            <td style="font-size:10px">Liquidación de impuestos</td>
                         </tr>
                         <tr>
-                            <td style="font-size:10px">NÃºmero liquidaciÃ³n: '.$_GET['id'].'</td>
+                            <td style="font-size:10px">Número liquidación: '.$_GET['id'].'</td>
                         </tr>
                     </table>';
 
@@ -286,7 +286,7 @@ class LiquidacionTramite extends MY_Controller
             {
 
                 $this->data['successmessage']=$this->session->flashdata('message');  
-                $this->form_validation->set_rules('ndocumento', 'NÃºmero documento', 'required|numeric');
+                $this->form_validation->set_rules('ndocumento', 'Número documento', 'required|numeric');
                 $this->form_validation->set_rules('tipo_documento', 'Tipo documento', 'required|numeric');
                 $this->form_validation->set_rules('primer_nombre', 'Primer nombre', 'required');
                 $this->form_validation->set_rules('segundo_nombre', 'Segundo nombre', 'required');
@@ -350,18 +350,18 @@ class LiquidacionTramite extends MY_Controller
 
                     if ($respuestaProceso->bandRegistroExitoso) {
 
-                        $this->session->set_flashdata('message', 'La liquidaciÃ³n trÃ¡mite se ha creado con Ã©xito');
+                        $this->session->set_flashdata('message', 'La liquidación trámite se ha creado con exito');
                         $this->session->set_flashdata('id', $respuestaProceso->idInsercion);
                         redirect(base_url().'index.php/liquidacionTramite/add');
                     } else {
 
-                        $this->data['errormessage'] = 'No se pudo registrar la liquidaciÃ³n';
+                        $this->data['errormessage'] = 'No se pudo registrar la liquidación';
 
                     }
 
                 }
 
-                $this->template->set('title', 'Nueva aplicaciÃ³n');
+                $this->template->set('title', 'Nueva aplicación');
                 $this->data['style_sheets']= array(
                 'css/chosen.css' => 'screen'
                 );
@@ -376,7 +376,7 @@ class LiquidacionTramite extends MY_Controller
                     'tipo_documento' => $this->codegen_model->getSelect('tipo_documento','id,nombre,sigla'),
                 );
 
-                $this->template->set('title', 'Nueva liquidaciÃ³n trÃ¡mite');
+                $this->template->set('title', 'Nueva liquidación trámite');
                 $this->template->load($this->config->item('admin_template'),'liquidacionTramites/liquidacionpersonatramite', $this->data);
 
             } 
@@ -405,40 +405,41 @@ class LiquidacionTramite extends MY_Controller
         echo json_encode($deptos);
     }
 
-      function barcode ($code) {
-    $text = $code;
-                  
-    // The arguments are R, G, B for color.
-    $color_black = new BCGColor(0, 0, 0);
-    $color_white = new BCGColor(255, 255, 255);
+    function barcode ($code) {
+        $text = $code;
+                      
+        // The arguments are R, G, B for color.
+        $color_black = new BCGColor(0, 0, 0);
+        $color_white = new BCGColor(255, 255, 255);
 
-    $drawException = null;
-    try {
-        $code = new BCGgs1128();
-        $code->setScale(2); // Resolution
-        $code->setThickness(30); // Thickness
-        $code->setForegroundColor($color_black); // Color of bars
-        $code->setBackgroundColor($color_white); // Color of spaces
-        $code->setFont(0); // Font (or 0)
-        $code->parse($text); // Text
-    } catch(Exception $exception) {
-        $drawException = $exception;
-    }
-    $text = str_ireplace(array('~F1', '(390y)'), array('', '(3900)'), $text);
-    /* Here is the list of the arguments
-    1 - Filename (empty : display on screen)
-    2 - Background color */
-    $drawing = new BCGDrawing(APPPATH.'/libraries/barcodegen/'.$text.'.png', $color_white);
-    if($drawException) {
-        $drawing->drawException($drawException);
-    } else {
-        $drawing->setBarcode($code);
-        $drawing->draw();
-    }
+        $drawException = null;
+        try {
+            $code = new BCGgs1128();
+            $code->setScale(2); // Resolution
+            $code->setThickness(30); // Thickness
+            $code->setForegroundColor($color_black); // Color of bars
+            $code->setBackgroundColor($color_white); // Color of spaces
+            $code->setFont(0); // Font (or 0)
+            $code->parse($text); // Text
+        } catch(Exception $exception) {
+            $drawException = $exception;
+        }
+
+        $text = str_ireplace(array('~F1', '(390y)'), array('', '(3900)'), $text);
+        /* Here is the list of the arguments
+        1 - Filename (empty : display on screen)
+        2 - Background color */
+        $drawing = new BCGDrawing(APPPATH.'/libraries/barcodegen/'.$text.'.png', $color_white);
+        if($drawException) {
+            $drawing->drawException($drawException);
+        } else {
+            $drawing->setBarcode($code);
+            $drawing->draw();
+        }
 
     
-    // Draw (or save) the image into PNG format.
-    $drawing->finish(BCGDrawing::IMG_FORMAT_PNG);
-  }
+        // Draw (or save) the image into PNG format.
+        $drawing->finish(BCGDrawing::IMG_FORMAT_PNG);
+    }
     
 }
