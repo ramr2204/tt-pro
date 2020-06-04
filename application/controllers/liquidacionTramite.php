@@ -5,7 +5,7 @@ error_reporting(0);
 *   Ruta:              /application/controllers/contratistas.php
 *   Descripcion:       controlador de contratistas
 *   Fecha Creacion:    20/may/2014
-*   @author            Iván Viña <ivandariovinam@gmail.com>
+*   @author            IvÃ¡n ViÃ±a <ivandariovinam@gmail.com>
 *   @version           2014-05-20
 *
 */
@@ -43,17 +43,17 @@ class LiquidacionTramite extends MY_Controller
     function __construct() 
     {
         parent::__construct();
-	    $this->load->library('form_validation');
+        $this->load->library('form_validation');
         $this->load->helper('HelperGeneral');
         $this->load->helper('MYPDF');
         $this->load->helper(array('form','url','codegen_helper'));
         $this->load->model('codegen_model','',TRUE);
-	}	
-	
-	function index()
+    }   
+    
+    function index()
     {
-		$this->manage();
-	}
+        $this->manage();
+    }
 
     function pdf()
     {
@@ -171,7 +171,7 @@ class LiquidacionTramite extends MY_Controller
             </style>
             <table cellpadding="2" cellspacing="3">
                 <tr>
-                    <td class="letra-tama encabezados">CÓDIGO</td>
+                    <td class="letra-tama encabezados">CÃ“DIGO</td>
                     <td class="letra-tama">'.$consultarParametros->numero_factura.'</td>
                     <td class="letra-tama encabezados">FECHA</td>
                     <td class="letra-tama">'.$consultarParametros->fecha_creacion.'</td>
@@ -220,8 +220,8 @@ class LiquidacionTramite extends MY_Controller
             </style>
             <table style="border-collapse: collapse;">
                 <tr>
-                    <td class="letra-tama encabezados">CODIGO TRÁMITE</td>
-                    <td class="letra-tama encabezados">TIPO TRÁMITE</td>
+                    <td class="letra-tama encabezados">CODIGO TRÃMITE</td>
+                    <td class="letra-tama encabezados">TIPO TRÃMITE</td>
                     <td class="letra-tama encabezados">VIGENCIA</td>
                     <td class="letra-tama encabezados">VALOR</td>
                     <td></td>
@@ -252,16 +252,16 @@ class LiquidacionTramite extends MY_Controller
                             <td style="font-size:10px">GOBERNACION DEL PUTUMAYO</td>
                         </tr>
                         <tr>
-                            <td style="font-size:10px">Secretaría de hacienda departamental</td>
+                            <td style="font-size:10px">SecretarÃ­a de hacienda departamental</td>
                         </tr>
                         <tr>
                             <td style="font-size:10px">Nit: 800094164-4</td>
                         </tr>
                         <tr>
-                            <td style="font-size:10px">Liquidación de impuestos</td>
+                            <td style="font-size:10px">LiquidaciÃ³n de impuestos</td>
                         </tr>
                         <tr>
-                            <td style="font-size:10px">Número liquidación: '.$_GET['id'].'</td>
+                            <td style="font-size:10px">NÃºmero liquidaciÃ³n: '.$_GET['id'].'</td>
                         </tr>
                     </table>';
 
@@ -286,7 +286,7 @@ class LiquidacionTramite extends MY_Controller
             {
 
                 $this->data['successmessage']=$this->session->flashdata('message');  
-                $this->form_validation->set_rules('ndocumento', 'Número documento', 'required|numeric');
+                $this->form_validation->set_rules('ndocumento', 'NÃºmero documento', 'required|numeric');
                 $this->form_validation->set_rules('tipo_documento', 'Tipo documento', 'required|numeric');
                 $this->form_validation->set_rules('primer_nombre', 'Primer nombre', 'required');
                 $this->form_validation->set_rules('segundo_nombre', 'Segundo nombre', 'required');
@@ -335,9 +335,10 @@ class LiquidacionTramite extends MY_Controller
 
                     $numerofactura = $respuestaProceso->idInsercion . $consultarTramite->vigencia;
                     $valorFactura = str_pad($consultarTramite->valor, 10, 0, STR_PAD_LEFT);
-                    $consecutivoFactura = str_pad($factura[0]->fact_id, 10, 0, STR_PAD_LEFT);
+                    $consecutivoFactura = str_pad($numero, 10, 0, STR_PAD_LEFT);
 
-                    $codigoParaBarra='(415)'.'000'.'~F1(8020)'.$consecutivoFactura.'~F1(390y)'.$valorFactura;
+                    //por ahora 7709085131274
+                    $codigoParaBarra='(415)'.'7709085131274'.'~F1(8020)'.$consecutivoFactura.'~F1(390y)'.$valorFactura;
 
                     //editar numero_factura
                     $data_editar = array(
@@ -349,18 +350,18 @@ class LiquidacionTramite extends MY_Controller
 
                     if ($respuestaProceso->bandRegistroExitoso) {
 
-                        $this->session->set_flashdata('message', 'La liquidación trámite se ha creado con éxito');
+                        $this->session->set_flashdata('message', 'La liquidaciÃ³n trÃ¡mite se ha creado con Ã©xito');
                         $this->session->set_flashdata('id', $respuestaProceso->idInsercion);
                         redirect(base_url().'index.php/liquidacionTramite/add');
                     } else {
 
-                        $this->data['errormessage'] = 'No se pudo registrar la liquidación';
+                        $this->data['errormessage'] = 'No se pudo registrar la liquidaciÃ³n';
 
                     }
 
                 }
 
-                $this->template->set('title', 'Nueva aplicación');
+                $this->template->set('title', 'Nueva aplicaciÃ³n');
                 $this->data['style_sheets']= array(
                 'css/chosen.css' => 'screen'
                 );
@@ -375,7 +376,7 @@ class LiquidacionTramite extends MY_Controller
                     'tipo_documento' => $this->codegen_model->getSelect('tipo_documento','id,nombre,sigla'),
                 );
 
-                $this->template->set('title', 'Nueva liquidación trámite');
+                $this->template->set('title', 'Nueva liquidaciÃ³n trÃ¡mite');
                 $this->template->load($this->config->item('admin_template'),'liquidacionTramites/liquidacionpersonatramite', $this->data);
 
             } 
@@ -439,5 +440,5 @@ class LiquidacionTramite extends MY_Controller
     // Draw (or save) the image into PNG format.
     $drawing->finish(BCGDrawing::IMG_FORMAT_PNG);
   }
-	
+    
 }
