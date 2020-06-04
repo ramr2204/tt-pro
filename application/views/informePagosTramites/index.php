@@ -57,7 +57,6 @@ $(document).ready(function()
             { "sClass": "item" },
             { "sClass": "item" },
             { "sClass": "item" },
-            { "sClass": "item" },
             { "sClass": "center", "bSortable": false, "bSearchable": false},
             { "sClass": "center", "bSortable": false, "bSearchable": false},
         ],
@@ -67,13 +66,20 @@ $(document).ready(function()
                 return val == 1 ? 'Si' : 'No';
             } 
         },
-        { "aTargets": [18], 
+        { "aTargets": [17], 
             "fnRender": function(o, val) { 
-                return '<div class="btn-toolbar">'
-                        +'<div>'
-                        +'<a href="<?php echo base_url(); ?>'+val+'" class="btn btn-success btn-xs" title="Ver Soporte Factura"><i class="fa fa-file-image-o" aria-hidden="true"></i></a>'
-                        +'</div>'
-                        +'</div>'
+                if(val != '')
+                {
+                    return '<div class="btn-toolbar">'
+                            +'<div>'
+                            +'<a href="<?php echo base_url(); ?>'+val+'" class="btn btn-success btn-xs" title="Ver Soporte Factura"><i class="fa fa-file-image-o" aria-hidden="true"></i></a>'
+                            +'</div>'
+                            +'</div>';
+                }
+                else
+                {
+                    return 'No adjuntó';
+                }
             } 
         }
         ]
@@ -192,7 +198,6 @@ $(document).ready(function()
                         <td>Fecha Creación</td>
                         <td>Pagado</td>
                         <td>Documento</td>
-                        <td>Codigo Barras</td>
                         <td>Fecha Pago</td>
                         <td>Banco</td>
                         <td>Numero Factura</td>

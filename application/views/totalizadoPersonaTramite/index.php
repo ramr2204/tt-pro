@@ -112,9 +112,9 @@ $(document).ready(function()
                 <thead>
                     <tr>
                         <td>Id</td>
-                        <td>Nombre Trámite</td>
                         <td>Vigencia</td>
                         <td>Valor Individual</td>
+                        <td>Nombre Trámite</td>
                         <td>Cantidad Personas</td>
                         <td>Total</td>
                    </tr>

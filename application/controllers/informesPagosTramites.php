@@ -103,7 +103,7 @@ class InformesPagosTramites extends MY_Controller {
                                             lp.fecha_creacion,
                                             lp.pagado,
                                             td.nombre,
-                                            lp.codigo_barras,
+                    
                                             lp.fecha_pago,
                                             bancos.banc_nombre,
                                             lp.numero_factura,
@@ -173,7 +173,6 @@ class InformesPagosTramites extends MY_Controller {
                     lp.fecha_creacion,
                     lp.pagado,
                     td.nombre,
-                    lp.codigo_barras,
                     lp.fecha_pago,
                     bancos.banc_nombre,
                     lp.numero_factura';
@@ -192,7 +191,6 @@ class InformesPagosTramites extends MY_Controller {
                     'Fecha Creación',
                     'Pagado',
                     'Documento',
-                    'Codigo Barras',
                     'Fecha Pago',
                     'Banco',
                     'Numero Factura');
@@ -223,7 +221,7 @@ class InformesPagosTramites extends MY_Controller {
             $fecha_fin.= " lp.fecha_creacion <= '" . $_GET['fecha_fin'] . "'";
         }
 
-        if($_GET['tipo_tramite'] != '')
+        if($_GET['tipo_tramite'] != '' && $_GET['tipo_tramite'] != 'null')
         {
             $tipo_tramite .= " lp.tipo_tramite_valor =" . $_GET["tipo_tramite"];
         }

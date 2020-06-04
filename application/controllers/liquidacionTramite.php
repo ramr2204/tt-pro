@@ -2,10 +2,10 @@
 error_reporting(0);
 /**
 *   Nombre:            contratistas
-*   Ruta:              /application/controllers/contratistas.php
-*   Descripcion:       controlador de contratistas
+*   Ruta:              /application/controllers/liquidacionTramite.php
+*   Descripcion:       controlador de liquidaciones trramites
 *   Fecha Creacion:    20/may/2014
-*   @author            Iván Viña <ivandariovinam@gmail.com>
+*   @author            Maria Monica Gutierrez Torres <monica.gutierrez@turrisystem.com>
 *   @version           2014-05-20
 *
 */
@@ -43,17 +43,17 @@ class LiquidacionTramite extends MY_Controller
     function __construct() 
     {
         parent::__construct();
-	    $this->load->library('form_validation');
+        $this->load->library('form_validation');
         $this->load->helper('HelperGeneral');
         $this->load->helper('MYPDF');
         $this->load->helper(array('form','url','codegen_helper'));
         $this->load->model('codegen_model','',TRUE);
-	}	
-	
-	function index()
+    }   
+    
+    function index()
     {
-		$this->manage();
-	}
+        $this->manage();
+    }
 
     function pdf()
     {
@@ -335,9 +335,10 @@ class LiquidacionTramite extends MY_Controller
 
                     $numerofactura = $respuestaProceso->idInsercion . $consultarTramite->vigencia;
                     $valorFactura = str_pad($consultarTramite->valor, 10, 0, STR_PAD_LEFT);
-                    $consecutivoFactura = str_pad($factura[0]->fact_id, 10, 0, STR_PAD_LEFT);
+                    $consecutivoFactura = str_pad($numerofactura, 10, 0, STR_PAD_LEFT);
 
-                    $codigoParaBarra='(415)'.'000'.'~F1(8020)'.$consecutivoFactura.'~F1(390y)'.$valorFactura;
+                    //por ahora 7709085131274
+                    $codigoParaBarra='(415)'.'7709085131274'.'~F1(8020)'.$consecutivoFactura.'~F1(390y)'.$valorFactura;
 
                     //editar numero_factura
                     $data_editar = array(
@@ -349,7 +350,7 @@ class LiquidacionTramite extends MY_Controller
 
                     if ($respuestaProceso->bandRegistroExitoso) {
 
-                        $this->session->set_flashdata('message', 'La liquidación trámite se ha creado con éxito');
+                        $this->session->set_flashdata('message', 'La liquidación trámite se ha creado con exito');
                         $this->session->set_flashdata('id', $respuestaProceso->idInsercion);
                         redirect(base_url().'index.php/liquidacionTramite/add');
                     } else {
@@ -404,40 +405,41 @@ class LiquidacionTramite extends MY_Controller
         echo json_encode($deptos);
     }
 
-      function barcode ($code) {
-    $text = $code;
-                  
-    // The arguments are R, G, B for color.
-    $color_black = new BCGColor(0, 0, 0);
-    $color_white = new BCGColor(255, 255, 255);
+    function barcode ($code) {
+        $text = $code;
+                      
+        // The arguments are R, G, B for color.
+        $color_black = new BCGColor(0, 0, 0);
+        $color_white = new BCGColor(255, 255, 255);
 
-    $drawException = null;
-    try {
-        $code = new BCGgs1128();
-        $code->setScale(2); // Resolution
-        $code->setThickness(30); // Thickness
-        $code->setForegroundColor($color_black); // Color of bars
-        $code->setBackgroundColor($color_white); // Color of spaces
-        $code->setFont(0); // Font (or 0)
-        $code->parse($text); // Text
-    } catch(Exception $exception) {
-        $drawException = $exception;
-    }
-    $text = str_ireplace(array('~F1', '(390y)'), array('', '(3900)'), $text);
-    /* Here is the list of the arguments
-    1 - Filename (empty : display on screen)
-    2 - Background color */
-    $drawing = new BCGDrawing(APPPATH.'/libraries/barcodegen/'.$text.'.png', $color_white);
-    if($drawException) {
-        $drawing->drawException($drawException);
-    } else {
-        $drawing->setBarcode($code);
-        $drawing->draw();
-    }
+        $drawException = null;
+        try {
+            $code = new BCGgs1128();
+            $code->setScale(2); // Resolution
+            $code->setThickness(30); // Thickness
+            $code->setForegroundColor($color_black); // Color of bars
+            $code->setBackgroundColor($color_white); // Color of spaces
+            $code->setFont(0); // Font (or 0)
+            $code->parse($text); // Text
+        } catch(Exception $exception) {
+            $drawException = $exception;
+        }
+
+        $text = str_ireplace(array('~F1', '(390y)'), array('', '(3900)'), $text);
+        /* Here is the list of the arguments
+        1 - Filename (empty : display on screen)
+        2 - Background color */
+        $drawing = new BCGDrawing(APPPATH.'/libraries/barcodegen/'.$text.'.png', $color_white);
+        if($drawException) {
+            $drawing->drawException($drawException);
+        } else {
+            $drawing->setBarcode($code);
+            $drawing->draw();
+        }
 
     
-    // Draw (or save) the image into PNG format.
-    $drawing->finish(BCGDrawing::IMG_FORMAT_PNG);
-  }
-	
+        // Draw (or save) the image into PNG format.
+        $drawing->finish(BCGDrawing::IMG_FORMAT_PNG);
+    }
+    
 }

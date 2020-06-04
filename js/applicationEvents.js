@@ -77,8 +77,6 @@ function inicial ()
     $('#btn-reestablecer-totalizado').click(eliminarFiltrosTotalizados);
     $('#btn-exportar-excel-tra-total').click(exportarExcelTotalizado)
 
-
-
     ////funciones cortas
 
     $('#desde_fecha_creacion').change(function(){
@@ -110,7 +108,7 @@ function inicial ()
         $('#tramite_vigencia').val('');
         $('#select-tipo-tramite').val('');
         $('.select-tipo-tramite option').remove();
-        $('#tramite_vigencia').value('');
+        $('#tramite_vigencia').val('');
         $('#tabla_informe_pagos_tramites').dataTable().fnFilter('', 12);
 
         var oSettings = $('#tabla_informe_pagos_tramites').dataTable().fnSettings();
@@ -245,7 +243,7 @@ function reloadDatatableTotalizado()
 function eliminarFiltrosTotalizados()
 {
     $('.select-tipo-tramite option').remove();
-    $('#tramite_vigencia_totalizado').val();
+    $('#tramite_vigencia_totalizado').val('');
     var oSettings = $('#tabla_informe_totalizado_tramites').dataTable().fnSettings();
     oSettings.sAjaxSource  = base_url +"index.php/totalizadoPersonaTramite/dataTable";
     $('#tabla_informe_totalizado_tramites').dataTable().fnReloadAjax();
