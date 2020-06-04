@@ -94,7 +94,6 @@ class LiquidacionTramite extends MY_Controller
 
         // CODE 39 EXTENDED
         $img_barcode = '<center><img src="'. base_url().'generarBarcode?generar_barcode_text='.$consultarParametros->codigo_barras.'" width="400" height="50"></center>';
-        echo $img_barcode;exit;//borar despues
 
         $pdf->writeHTMLCell(0, 0, 33, 103, $img_barcode);
 
