@@ -335,7 +335,7 @@ class LiquidacionTramite extends MY_Controller
 
                     $numerofactura = $respuestaProceso->idInsercion . $consultarTramite->vigencia;
                     $valorFactura = str_pad($consultarTramite->valor, 10, 0, STR_PAD_LEFT);
-                    $consecutivoFactura = str_pad($numero, 10, 0, STR_PAD_LEFT);
+                    $consecutivoFactura = str_pad($numerofactura, 10, 0, STR_PAD_LEFT);
 
                     //por ahora 7709085131274
                     $codigoParaBarra='(415)'.'7709085131274'.'~F1(8020)'.$consecutivoFactura.'~F1(390y)'.$valorFactura;
