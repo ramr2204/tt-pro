@@ -11,10 +11,10 @@ error_reporting(0);
 */
 require_once(APPPATH.'libraries/tcpdf/tcpdf.php');
 require_once(APPPATH.'libraries/numeroletras/src/NumeroALetras.php');
-require_once(APPPATH.'libraries/barcodegen/class/BCGFontFile.php');
-require_once(APPPATH.'libraries/barcodegen/class/BCGColor.php');
-require_once(APPPATH.'libraries/barcodegen/class/BCGDrawing.php');
-require_once(APPPATH.'libraries/barcodegen/class/BCGcode128.barcode.php');
+require_once APPPATH.'libraries/barcodegen/class/BCGFontFile.php';
+require_once APPPATH.'libraries/barcodegen/class/BCGColor.php';
+require_once APPPATH.'libraries/barcodegen/class/BCGDrawing.php';
+require_once APPPATH.'libraries/barcodegen/class/BCGgs1128.barcode.php';
 
 if(isset($_GET['generar_barcode_text']))
 {
@@ -93,9 +93,13 @@ class LiquidacionTramite extends MY_Controller
         $pdf->writeHTMLCell(0, 0, '', '93', $div_pesos);
 
         // CODE 39 EXTENDED
-        $img_barcode = '<center><img src="'. base_url().'generarBarcode?generar_barcode_text='.$consultarParametros->codigo_barras.'" width="400" height="50"></center>';
+        $this->barcode($consultarParametros->codigo_barras);
 
-        $pdf->writeHTMLCell(0, 0, 33, 103, $img_barcode);
+        $this->data['codebar'] = str_ireplace(array('~F1', '(390y)'), array('', '(3900)'), $consultarParametros->codigo_barras);
+
+        $html_barcode = $this->load->view('generarBarcode/barcodeFacturas', $this->data, TRUE);  
+
+        $pdf->writeHTMLCell(0,0,34,103,$html_barcode);
 
         $pdf->Ln();
 
@@ -134,7 +138,7 @@ class LiquidacionTramite extends MY_Controller
 
         $pdf->writeHTMLCell(0, 0, '', '234', $div_pesos);
 
-        $pdf->writeHTMLCell(0, 0, 33, 245, $img_barcode);
+        $pdf->writeHTMLCell(0, 0, 33, 245, $html_barcode);
 
         $pdf->Ln();
 
@@ -326,10 +330,19 @@ class LiquidacionTramite extends MY_Controller
 
                     $tex_barcode = '415' . '000' . '8020' . $respuestaProceso->idInsercion . $consultarTramite->vigencia. '3900' .  str_pad((int) $consultarTramite->valor, 10, "0", STR_PAD_LEFT) . '96' . str_replace('-','','00000000');
 
+                    //Deben quedar de 10 digitos donde
+                    //415 + codigo que de el banco + 820 + numerofactura + 3900 valor factura + 96 + fechavencimieno
+
+                    $numerofactura = $respuestaProceso->idInsercion . $consultarTramite->vigencia;
+                    $valorFactura = str_pad($consultarTramite->valor, 10, 0, STR_PAD_LEFT);
+                    $consecutivoFactura = str_pad($factura[0]->fact_id, 10, 0, STR_PAD_LEFT);
+
+                    $codigoParaBarra='(415)'.'000'.'~F1(8020)'.$consecutivoFactura.'~F1(390y)'.$valorFactura;
+
                     //editar numero_factura
                     $data_editar = array(
                         'numero_factura' => $respuestaProceso->idInsercion . $consultarTramite->vigencia,
-                        'codigo_barras'  => $tex_barcode,
+                        'codigo_barras'  => $codigoParaBarra,
                     );
 
                     $this->codegen_model->edit('liquidar_tramite_persona',$data_editar,'id',$respuestaProceso->idInsercion);
@@ -390,5 +403,41 @@ class LiquidacionTramite extends MY_Controller
 
         echo json_encode($deptos);
     }
+
+      function barcode ($code) {
+    $text = $code;
+                  
+    // The arguments are R, G, B for color.
+    $color_black = new BCGColor(0, 0, 0);
+    $color_white = new BCGColor(255, 255, 255);
+
+    $drawException = null;
+    try {
+        $code = new BCGgs1128();
+        $code->setScale(2); // Resolution
+        $code->setThickness(30); // Thickness
+        $code->setForegroundColor($color_black); // Color of bars
+        $code->setBackgroundColor($color_white); // Color of spaces
+        $code->setFont(0); // Font (or 0)
+        $code->parse($text); // Text
+    } catch(Exception $exception) {
+        $drawException = $exception;
+    }
+    $text = str_ireplace(array('~F1', '(390y)'), array('', '(3900)'), $text);
+    /* Here is the list of the arguments
+    1 - Filename (empty : display on screen)
+    2 - Background color */
+    $drawing = new BCGDrawing(APPPATH.'/libraries/barcodegen/'.$text.'.png', $color_white);
+    if($drawException) {
+        $drawing->drawException($drawException);
+    } else {
+        $drawing->setBarcode($code);
+        $drawing->draw();
+    }
+
+    
+    // Draw (or save) the image into PNG format.
+    $drawing->finish(BCGDrawing::IMG_FORMAT_PNG);
+  }
 	
 }
