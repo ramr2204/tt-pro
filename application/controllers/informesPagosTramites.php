@@ -103,7 +103,6 @@ class InformesPagosTramites extends MY_Controller {
                                             lp.fecha_creacion,
                                             lp.pagado,
                                             td.nombre,
-                    
                                             lp.fecha_pago,
                                             bancos.banc_nombre,
                                             lp.numero_factura,
@@ -122,14 +121,14 @@ class InformesPagosTramites extends MY_Controller {
                 {
                     if($_GET["fecha_ini"] == "" && $_GET["fecha_fin"] != "")
                     {
-                        $this->datatables->where("lp.fecha_creacion <= '" . $_GET["fecha_fin"] . "'");
+                        $this->datatables->where("DATE(lp.fecha_creacion) <= '" . $_GET["fecha_fin"] . "'");
                     }else if($_GET["fecha_ini"] != "" && $_GET["fecha_fin"] == "")
                     {
-                        $this->datatables->where("lp.fecha_creacion >= '" . $_GET["fecha_ini"] . "'");
+                        $this->datatables->where("DATE(lp.fecha_creacion) >= '" . $_GET["fecha_ini"] . "'");
 
                     }else if($_GET["fecha_ini"] != "" && $_GET["fecha_fin"] != "")
                     {
-                        $this->datatables->where("lp.fecha_creacion >= '" . $_GET["fecha_ini"] . "' " . "AND lp.fecha_creacion <= '". $_GET["fecha_fin"] . "'");
+                        $this->datatables->where("DATE(lp.fecha_creacion) >= '" . $_GET["fecha_ini"] . "' " . "AND DATE(lp.fecha_creacion) <= '". $_GET["fecha_fin"] . "'");
                     }
                 }
 
@@ -213,17 +212,17 @@ class InformesPagosTramites extends MY_Controller {
 
         if($_GET['fecha_ini'] != '')
         {
-            $fecha_ini .= " lp.fecha_creacion >= '" . $_GET['fecha_ini'] . "'";
+            $fecha_ini .= "DATE(lp.fecha_creacion) >= '" . $_GET['fecha_ini'] . "'";
         }
 
         if($_GET['fecha_fin'] != '')
         {
-            $fecha_fin.= " lp.fecha_creacion <= '" . $_GET['fecha_fin'] . "'";
+            $fecha_fin.= "DATE(lp.fecha_creacion) <= '" . $_GET['fecha_fin'] . "'";
         }
 
         if($_GET['tipo_tramite'] != '' && $_GET['tipo_tramite'] != 'null')
         {
-            $tipo_tramite .= " lp.tipo_tramite_valor =" . $_GET["tipo_tramite"];
+            $tipo_tramite .= "DATE(lp.tipo_tramite_valor) =" . $_GET["tipo_tramite"];
         }
 
         if($pagado != '')
@@ -277,6 +276,7 @@ class InformesPagosTramites extends MY_Controller {
             'columnasOcultar'    => array(),
             'condicionAdicional' => array('campo'=> 'pagado','comparar'=>'1','condicionIf' => "Sí", 'condicionElse' => 'No')//opcional
         );
+
         include APPPATH.'views/templates/exportar_excel_datatable.php';
     }
 

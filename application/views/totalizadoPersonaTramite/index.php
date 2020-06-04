@@ -26,6 +26,14 @@
 //generación de la tabla mediante json
 $(document).ready(function() 
 {
+    $('#desde_fecha_creacion_totalizado').datepicker({
+      dateFormat: 'yy-mm-dd',
+    });
+
+    $('#desde_fecha_final_totalizado').datepicker({
+      dateFormat: 'yy-mm-dd',
+    });
+
     var oTable = $('#tabla_informe_totalizado_tramites').dataTable( {
         "bProcessing": true,
         "bServerSide": true,
@@ -71,7 +79,19 @@ $(document).ready(function()
         <div class="container">
             <div style="display: table;width:100%">
                 <div style="display: table-cell;">
-                    <div class="form-group" style="width: 80%">
+                    <div class="form-group" style="width: 93%">
+                        <label for="tipo_documento">Fecha Inicio</label>
+                        <input id="desde_fecha_creacion_totalizado" type="text" name="desde_fecha_creacion_totalizado" class="form-control"/>
+                    </div>
+                </div>
+                <div style="display: table-cell;">
+                    <div class="form-group" style="width: 93%">
+                        <label for="tipo_documento">Fecha Final</label>
+                        <input id="desde_fecha_final_totalizado" type="text" name="desde_fecha_final_totalizado" class="form-control"/>
+                    </div>
+                </div>
+                <div style="display: table-cell;">
+                    <div class="form-group" style="width: 93%">
                         <label for="tipo_documento">Vigencia Trámite</label>
                         <select name="select-tipo-tramite"id="tramite_vigencia_totalizado" class="form-control ">
                             <option value="">Seleccione una opción</option>
@@ -86,7 +106,7 @@ $(document).ready(function()
                     </div>
                 </div>
                 <div style="display: table-cell;">
-                    <div class="form-group" style="width: 80%">
+                    <div class="form-group" style="width: 93%">
                         <label for="tipo_documento">Tipo Trámite</label>
                         <select name="select-tipo-tramite" id="select-tipo-tramite-total" class="form-control select-tipo-tramite">
                             <option value="">Seleccione una opción</option>

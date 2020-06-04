@@ -91,7 +91,25 @@ class TotalizadoPersonaTramite extends MY_Controller {
                 $this->datatables->join('liquidar_tramite_persona lp', 'lp.tipo_tramite_valor = lv.id', 'INNER');
                 $this->datatables->group_by('lp.tipo_tramite_valor');
 
-                if(isset($_GET['tipo_tramite']) && $_GET['tipo_tramite'] != '')
+                if(isset($_GET["fecha_ini"]) || isset($_GET["fecha_fin"]))
+                {
+                    if($_GET["fecha_ini"] == "" && $_GET["fecha_fin"] != "")
+                    {
+                        $this->datatables->where("DATE(lp.fecha_creacion) <= '" . $_GET["fecha_fin"] . "'");
+
+                    }
+                    else if($_GET["fecha_ini"] != "" && $_GET["fecha_fin"] == "")
+                    {
+                        $this->datatables->where("DATE(lp.fecha_creacion) >= '" . $_GET["fecha_ini"] . "'");
+
+                    }
+                    else if($_GET["fecha_ini"] != "" && $_GET["fecha_fin"] != "")
+                    {
+                        $this->datatables->where("DATE(lp.fecha_creacion) >= '" . $_GET["fecha_ini"] . "' " . "AND DATE(lp.fecha_creacion) <= '". $_GET["fecha_fin"] . "'");
+                    }
+                }
+
+                if(isset($_GET['tipo_tramite']) && $_GET['tipo_tramite'] != '' && $_GET['tipo_tramite'] != 'null')
                 {
                     $this->datatables->where('lp.tipo_tramite_valor = '. $_GET['tipo_tramite']);
                 }
