@@ -31,7 +31,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:9;"><br><br>GOBERNACIÓN DEL TOLIMA <br>Estampilla Departamental</td>
+                        font-size:9;"><br><br>GOBERNACIÓN DEL PUTUMAYO <br>Estampilla Departamental</td>
 
                     <td style="height: 19mm; width: 26mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
@@ -237,7 +237,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:10;"><small> "El Tolima nos une"<br>Edificio de la Gobernación del Tolima<br>Carrera 3 Calles 10 y 11, Piso 9<br>Código Postal 730006</small></td>
+                        font-size:10;"><small>"Vale ser legal"<br>Calle 8 Número 7-40<br>Código Postal 860001</small></td>
 
                     <td class="text-center" colspan="2" style="height: 15mm; width: 38.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;

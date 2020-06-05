@@ -2110,7 +2110,7 @@ function renderizarDetalleRangoPDF()
             $pdf->SetCreator(PDF_CREATOR);
             $pdf->SetAuthor('turrisystem');
             $pdf->SetTitle('Listado de Impresiones');
-            $pdf->SetSubject('Gobernación del Tolima');
+            $pdf->SetSubject('Gobernación del Putumayo');
             $pdf->SetKeywords('estampillas,gobernación');
             $pdf->SetPrintHeader(false);
             $pdf->SetPrintFooter(false);
@@ -3304,7 +3304,7 @@ function renderizarDetalleRangoExcel()
                     $pdf->SetCreator(PDF_CREATOR);
                     $pdf->SetAuthor('turrisystem');
                     $pdf->SetTitle('Relacion Entrega Estampillas');
-                    $pdf->SetSubject('Gobernación del Tolima');
+                    $pdf->SetSubject('Gobernación del Putumayo');
                     $pdf->SetKeywords('estampillas,gobernación');
                     $pdf->SetPrintHeader(false);
                     $pdf->SetPrintFooter(false);
@@ -3399,7 +3399,7 @@ function renderizarConsolidadoRangoImpresionesPDF()
                 $pdf->SetCreator(PDF_CREATOR);
                 $pdf->SetAuthor('turrisystem');
                 $pdf->SetTitle('Relacion Estampillas Impresas Rango');
-                $pdf->SetSubject('Gobernación del Tolima');
+                $pdf->SetSubject('Gobernación del Putumayo');
                 $pdf->SetKeywords('estampillas,gobernación');
                 $pdf->SetPrintHeader(false);
                 $pdf->SetPrintFooter(false);

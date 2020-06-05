@@ -19,9 +19,9 @@
  <thead>
     <tr>
      <th colspan="1" class="text-center small" width="25%">
-           <img src="<?php echo base_url() ?>images/gobernacion_tolima1.jpg" height="50" width="40" >
+           <img src="<?php echo base_url() ?>images/gobernacion_tolima1.jpg" height="60" width="70" >
      </th>
-     <th colspan="2" class="text-center small" width="50%">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
+     <th colspan="2" class="text-center small" width="50%">Gobernación del putumayo <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
      <th colspan="1" class="text-center small" width="25%">
            <img src="<?php echo base_url() ?>images/gobernacion_tolima2.png" height="50" width="80" >
      </th>
@@ -160,10 +160,10 @@ $cuentas='';
  <tfoot>
    <tr>
      <th colspan="4" class="text-center">
-     <small> "El Tolima nos une"<br>
-      Edificio de la Gobernación del Tolima, carrera 3 calle 10 y 11, 9 piso <br>
-      Teléfonos 2610758 - 2611111 -Ext. 209 - 305<br>
-      dcontratos@outlook.com </small> 
+     <small> "Vale ser legal"<br>
+      Calle 8 Número 7-40 <br>
+      Teléfonos (57+8) 4206600 Ext. 101 Fax: 4295196<br>
+      contactenos@putumayo.gov.co </small> 
      </th>
    </tr>
  </tfoot>

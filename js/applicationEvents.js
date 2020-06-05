@@ -73,12 +73,12 @@ function inicial ()
 
     $('#tramite_vigencia').change(consultarTramites);
     $('#tramite_vigencia_totalizado').change(consultarTramites);
-    $('#select-tipo-tramite-total').change(reloadDatatableTotalizado);
+    $('#select-tipo-tramite-total').change(filtrarTotalizado);
     $('#btn-reestablecer-totalizado').click(eliminarFiltrosTotalizados);
     $('#btn-exportar-excel-tra-total').click(exportarExcelTotalizado);
 
-    $('#desde_fecha_creacion_totalizado').change(filtrarPorFechaTotalizado);
-    $('#desde_fecha_final_totalizado').change(filtrarPorFechaTotalizado);
+    $('#desde_fecha_creacion_totalizado').change(filtrarTotalizado);
+    $('#desde_fecha_final_totalizado').change(filtrarTotalizado);
 
 
     ////funciones cortas
@@ -198,11 +198,14 @@ async function validarNumeroRotuloLiquidador(event)
     );
 }
 
-function filtrarPorFechaTotalizado()
+function filtrarTotalizado()
 {
     var oSettings = $('#tabla_informe_totalizado_tramites').dataTable().fnSettings();
+
     oSettings.sAjaxSource  = base_url +"index.php/totalizadoPersonaTramite/dataTable?fecha_ini="+
-    String($('#desde_fecha_creacion_totalizado').val())+"&fecha_fin="+String($('#desde_fecha_final_totalizado').val());
+    String($('#desde_fecha_creacion_totalizado').val())+"&fecha_fin="+String($('#desde_fecha_final_totalizado').val())
+    +"&tipo_tramite="+ String($('#select-tipo-tramite-total').val());
+
     $('#tabla_informe_totalizado_tramites').dataTable().fnReloadAjax();
 }
 
