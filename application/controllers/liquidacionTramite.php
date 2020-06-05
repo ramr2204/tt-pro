@@ -120,11 +120,11 @@ class LiquidacionTramite extends MY_Controller
         $pdf->writeHTMLCell(0, 0, '', '147', $divHead);
 
         //LOGOS
-        $image_escudo = K_PATH_IMAGES.'escudo_putuma.jpg';
-        $image_refran = K_PATH_IMAGES.'refran_gog_putumayo.jpg';
+        $image_escudo = K_PATH_IMAGES.'gobernacion_tolima1.png';
+        $image_refran = K_PATH_IMAGES.'gobernacion_tolima2.png';
 
-        $pdf->Image($image_refran, 160, 150, 36, 15, 'jpg', '', 'T', true, 600, '', false, false, 0, false, false, false);
-        $pdf->Image($image_escudo, 13, 145, 35, 25, 'jpg', '', 'T', true, 100, '', false, false, 0, false, false, false);
+        $pdf->Image($image_refran, 160, 150, 36, 15, 'png', '', 'T', true, 600, '', false, false, 0, false, false, false);
+        $pdf->Image($image_escudo, 13, 145, 35, 25, 'png', '', 'T', true, 100, '', false, false, 0, false, false, false);
 
 
         // output the HTML content
