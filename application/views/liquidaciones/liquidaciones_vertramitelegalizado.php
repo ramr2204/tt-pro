@@ -19,9 +19,9 @@
  <thead>
     <tr>
      <th colspan="1" class="text-center small" width="22%">
-           <img src="<?php echo base_url() ?>images/gobernacion_tolima1.jpg" height="50" width="40" >
+           <img src="<?php echo base_url() ?>images/gobernacion_tolima1.jpg" height="60" width="70" >
      </th>
-     <th colspan="3" class="text-center small" width="56%">Gobernación del Tolima <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
+     <th colspan="3" class="text-center small" width="56%">Gobernación del Putumayo <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
      <th colspan="1" class="text-center small" width="22%">
            <img src="<?php echo base_url() ?>images/gobernacion_tolima2.png" height="50" width="80" >
      </th>

@@ -64,7 +64,7 @@ function q()
                   $pdf->SetCreator(PDF_CREATOR);
                   $pdf->SetAuthor('turrisystem');
                   $pdf->SetTitle('Liquidación de estampillas');
-                  $pdf->SetSubject('Gobernación del Tolima');
+                  $pdf->SetSubject('Gobernación del Putumayo');
                   $pdf->SetKeywords('estampillas,gobernación');
                   $pdf->SetPrintHeader(false);
                   $pdf->SetPrintFooter(false);

@@ -99,7 +99,8 @@ class LiquidacionTramite extends MY_Controller
 
         $html_barcode = $this->load->view('generarBarcode/barcodeFacturas', $this->data, TRUE);  
 
-        $pdf->writeHTMLCell(0,0,34,103,$html_barcode);
+        $pdf->writeHTMLCell(0,0,50,104,$html_barcode);
+        $pdf->writeHTMLCell(0,0,64,119, '<br> <small>'.$this->data['codebar'].'</small>');
 
         $pdf->Ln();
 
@@ -119,11 +120,11 @@ class LiquidacionTramite extends MY_Controller
         $pdf->writeHTMLCell(0, 0, '', '147', $divHead);
 
         //LOGOS
-        $image_escudo = K_PATH_IMAGES.'escudo_putuma.jpg';
-        $image_refran = K_PATH_IMAGES.'refran_gog_putumayo.jpg';
+        $image_escudo = K_PATH_IMAGES.'gobernacion_tolima1.png';
+        $image_refran = K_PATH_IMAGES.'gobernacion_tolima2.png';
 
-        $pdf->Image($image_refran, 160, 150, 36, 15, 'jpg', '', 'T', true, 600, '', false, false, 0, false, false, false);
-        $pdf->Image($image_escudo, 13, 145, 35, 25, 'jpg', '', 'T', true, 100, '', false, false, 0, false, false, false);
+        $pdf->Image($image_refran, 160, 150, 36, 15, 'png', '', 'T', true, 600, '', false, false, 0, false, false, false);
+        $pdf->Image($image_escudo, 13, 145, 35, 25, 'png', '', 'T', true, 100, '', false, false, 0, false, false, false);
 
 
         // output the HTML content
@@ -138,7 +139,9 @@ class LiquidacionTramite extends MY_Controller
 
         $pdf->writeHTMLCell(0, 0, '', '234', $div_pesos);
 
-        $pdf->writeHTMLCell(0, 0, 33, 245, $html_barcode);
+        $pdf->writeHTMLCell(0, 0, 50, 245, $html_barcode);
+
+        $pdf->writeHTMLCell(0,0,64,260, '<br> <small>'.$this->data['codebar'].'</small>');
 
         $pdf->Ln();
 

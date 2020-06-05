@@ -28,6 +28,11 @@ $(document).ready(function()
 {
     $('#desde_fecha_creacion').datepicker({
       dateFormat: 'yy-mm-dd',
+       onSelect: function(dateText, inst) {
+        var lockDate = new Date($('#desde_fecha_creacion').datepicker('getDate'));
+        //lockDate.setDate(lockDate.getDate() + 1);
+        $('input#desde_fecha_final').datepicker('option', 'minDate', lockDate);
+      }
     });
 
     $('#desde_fecha_final').datepicker({
