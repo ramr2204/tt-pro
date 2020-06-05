@@ -99,7 +99,8 @@ class LiquidacionTramite extends MY_Controller
 
         $html_barcode = $this->load->view('generarBarcode/barcodeFacturas', $this->data, TRUE);  
 
-        $pdf->writeHTMLCell(0,0,34,103,$html_barcode);
+        $pdf->writeHTMLCell(0,0,50,104,$html_barcode);
+        $pdf->writeHTMLCell(0,0,64,119, '<br> <small>'.$this->data['codebar'].'</small>');
 
         $pdf->Ln();
 
@@ -138,7 +139,9 @@ class LiquidacionTramite extends MY_Controller
 
         $pdf->writeHTMLCell(0, 0, '', '234', $div_pesos);
 
-        $pdf->writeHTMLCell(0, 0, 33, 245, $html_barcode);
+        $pdf->writeHTMLCell(0, 0, 50, 245, $html_barcode);
+
+        $pdf->writeHTMLCell(0,0,64,260, '<br> <small>'.$this->data['codebar'].'</small>');
 
         $pdf->Ln();
 
