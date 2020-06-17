@@ -75,11 +75,11 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" id="myModalLabel">¿Confirma que quiere eliminar EL contratista?</h4>
+                    <h4 class="modal-title" id="myModalLabel">¿Confirma que quiere eliminar este Tipo Trámite?</h4>
                 </div>
                     <div class="modal-body">
                     <input class="form-control" id="id" type="hidden" name="id" value="<?php echo $result->lt_id; ?>,<?php echo $result->lv_id; ?>"/>
-                     Si oprime confirmar no podrá recuperar la información de este contratista <br>
+                     Si oprime confirmar no podrá recuperar la información de este tipo trámite <br>
                      ¿Realmente desea eliminarlo?
                 </div>
                 <div class="modal-footer">
