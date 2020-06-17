@@ -255,13 +255,13 @@ class TipoLiquidacionTramite extends MY_Controller
                     $this->codegen_model->delete('liquidacion_valor_vigencia_tramite','id',$codigos[1]);
                     $this->codegen_model->delete('liquidacion_tipo_tramites','id',$codigos[0]);
 
-                    $this->session->set_flashdata('successmessage', 'El contratista se ha eliminado con éxito');
+                    $this->session->set_flashdata('successmessage', 'El Tipo Trámite se ha eliminado con éxito');
                     redirect(base_url().'index.php/tipoLiquidacionTramite'); 
                 } 
                 else 
                 {
-                    $this->session->set_flashdata('errormessage', 'El contratista se encuentra en uso, no es posible eliminarlo.');
-                    redirect(base_url().'index.php/tipoLiquidacionTramite/edit/'.$this->input->post('id'));
+                    $this->session->set_flashdata('errormessage', 'El Tipo Trámite se encuentra en uso, no es posible eliminarlo.');
+                    redirect(base_url().'index.php/tipoLiquidacionTramite/edit/'.$codigos[0]);
 
                 }
 
@@ -296,19 +296,18 @@ class TipoLiquidacionTramite extends MY_Controller
                         .'<div>'
                         .'<a href="'.base_url().'index.php/tipoLiquidacionTramite/edit/$1" class="btn btn-success btn-xs" title="Editar tipo trámite"><i class="fa fa-pencil-square-o"></i></a>'
                         .'</div>'
-                        .'</div>', 'lt.id');
+                        .'</div>', 'lt_id');
                 }
                 else 
                 {             
                     $this->load->library('datatables');     
-                    $this->datatables->add_column('edit', '', 'lt.id');
+                    $this->datatables->add_column('edit', '', 'lv.id');
                 }
 
-                $this->datatables->select('lt.id,lt.nombre,lt.estado,lv.valor,lv.vigencia');
-                $this->datatables->from('liquidacion_tipo_tramites lt');
+                $this->datatables->select('lv.id AS lv_id,lv.valor,lv.vigencia,lt.id AS lt_id,lt.nombre,lt.estado');
+                $this->datatables->from('liquidacion_valor_vigencia_tramite lv');
 
-                $this->datatables->join('liquidacion_valor_vigencia_tramite lv', 'lt.id = lv.tramite_id', 'INNER');
-
+                $this->datatables->join('liquidacion_tipo_tramites lt', 'lt.id = lv.tramite_id', 'INNER');
 
                 echo $this->datatables->generate();
 

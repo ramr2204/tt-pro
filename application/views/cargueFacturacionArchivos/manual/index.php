@@ -24,7 +24,7 @@
                         <?php echo form_open_multipart('cargueArchivosManual/save');?>
 
                          <div class="col-md-6">
-                            <div class="form-group">
+                            <div class="">
                                 <label for="fecha_pago_tramite">Fecha Pago</label>
                                 <div class="input-group">
                                     <input id="fecha_pago_tramite" type="text" name="fecha_pago_tramite" class="form-control date" required="required" value="<?php echo date('Y-m-d') ?>"/>                      

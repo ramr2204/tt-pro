@@ -26,14 +26,22 @@ $(document).ready(function() {
             { "sClass": "item" }, 
             { "sClass": "item" },
             { "sClass": "item" },
+            { "sClass": "item" },
             { "sClass": "center", "bSortable": false, "bSearchable": false},
         ],
         "aoColumnDefs": [ 
-        { "aTargets": [2], 
-            "fnRender": function(o, val) { 
-                return val == 1 ? 'Activo' : 'Inactivo';
-            } 
-        }]
+
+            { 
+                "aTargets": [5], 
+                "fnRender": function(o, val) { 
+                    return val == 1 ? 'Activo' : 'Inactivo';
+                }
+            },
+            { 
+                "bVisible": false,
+                "aTargets": [3]
+            }
+        ]
     });
 
     oTable.fnSearchHighlighting();
@@ -56,10 +64,11 @@ $(document).ready(function() {
                 <thead>
                     <tr>
                        <th>Id</th>
-                       <th>Nombre</th>
-                       <th>Estado</th>
                        <th>Valor</th>
                        <th>Vigencia</th>
+                       <th>escondida</th>
+                       <th>Nombre</th>
+                       <th>Estado</th>
                        <th>Acciones</th>
                    </tr>
                </thead>
