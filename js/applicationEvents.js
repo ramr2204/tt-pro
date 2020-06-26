@@ -128,6 +128,13 @@ function inicial ()
         window.open(base_url +"informesPagosTramites/exportarExcelFacturacion?pagado="+pagado+"&fecha_ini="+String(fecha_ini)+"&fecha_fin="+String(fecha_fin)+"&tipo_tramite="+String(tipo_tramite));
     });
 
+    $('#agregarConceptos').click(mostrarConceptos);
+
+    $('#validarTramitesConceptos').click(validarTramitesConceptos);
+    $('#validarTramitesConceptosEdit').click(validarTramitesConceptosEdit);
+
+    $('#table-concepto-tramites tbody').on('click', '.btn-consultar-modal-conceptos', consultatTramitesConceptos);
+
 
     /*
     * Solicita la identificacion de la vista de auditoria
@@ -219,11 +226,11 @@ function ponerDisabledNombre()
 {
     if($(this).val() != 0)
     {
-        $('#nombre_tramite').prop('disabled', true);
+        $('#nombre_tramite_concepto').prop('disabled', true);
     }
     else
     {
-        $('#nombre_tramite').prop('disabled', false);
+        $('#nombre_tramite_concepto').prop('disabled', false);
     }
 }
 
@@ -270,6 +277,173 @@ function eliminarFiltrosTotalizados()
 function exportarExcelTotalizado()
 {
     window.open(base_url +"totalizadoPersonaTramite/exportarExcelFacturacion?tipo_tramite="+String($('#select-tipo-tramite-total').val()));
+}
+
+function mostrarConceptos()
+{
+    $('.conceptos').append(
+        '<div>'+
+            '<hr>'+
+            '<button type="button" id="eliminarConceptos" class="btn btn-danger btn-sm" style="float: right;margin-bottom: 10px" onclick="$(this).parent().remove()"><i class="fa fa-trash-o"></i></button>'+
+            '<div class="form-group">'+
+                '<label for="valor">Nombre Concepto</label>'+
+                '<input class="form-control" name="nombre_concepto[]" required="required" maxlength="128" />'+
+            '</div>'+
+            '<div class="form-group">'+
+                '<label for="valor">Valor Concepto</label>'+
+                '<input class="form-control" name="valor_concepto[]" required="required" maxlength="128" />'+
+            '</div>'+
+        '</div>'
+    );
+}
+
+function validarTramitesConceptos()
+{
+    var arrayErrores = [];
+    var band = true;
+
+    if($('#vigencia_concepto').val() == '')
+    {
+        arrayErrores.push('La vigencia concepto es requerida');
+    }
+
+    if($('#nombre_tramite_concepto').val() == '' && $('#tramite_existe').val() == 0)
+    {
+        arrayErrores.push('El nombre trámite es requerido');
+    }
+
+
+    if($('input[name^="nombre_concepto"]').val() == undefined)
+    {
+        arrayErrores.push('Debe existir por lo menos un nombre concepto');
+    }
+    else
+    {
+        $('input[name^="nombre_concepto"]').each(function(index, data) {
+            if($(this).val() == '')
+            {
+                arrayErrores.push('El nombre trámite del concepto es requerido en la posición ' + (index+1));
+            }
+        });
+    }
+
+    if($('input[name^="valor_concepto"]').val() == undefined)
+    {
+        arrayErrores.push('Debe existir por lo menos un valor concepto');
+    }
+    else
+    {
+
+        $('input[name^="valor_concepto"]').each(function(index, data) {
+            if($(this).val() == '')
+            {
+                arrayErrores.push('El valor concepto es requerido en la posición ' + (index+1));
+            }
+        });
+
+    }
+
+    if(arrayErrores.length > 0)
+    {
+        band = false;
+    }
+
+    if(band)
+    {
+        $('.alert-danger-conceptos').css('display', 'none');
+
+        $('.alert-conceptos').html('');
+
+        $('#formulario_conceptos_tramites').submit();
+    }
+    else
+    {
+        $('.alert-danger-conceptos').css('display', 'block');
+        $('.alert-conceptos').html('');
+        arrayErrores.forEach(function(data, index)
+        { 
+            $('.alert-conceptos').append(
+                '<li>'+data+'</li>'
+            );
+        })
+    }
+
+}
+
+function validarTramitesConceptosEdit()
+{
+    var arrayErrores = [];
+    var band = true;
+
+    if($('#nombre_tramite_edit').val() == '')
+    {
+        arrayErrores.push('El nombre trámite es requerido');
+    }
+
+
+    if($('input[name^="nombre_concepto"]').val() == undefined)
+    {
+        arrayErrores.push('Debe existir por lo menos un nombre concepto');
+    }
+    else
+    {
+        $('input[name^="nombre_concepto"]').each(function(index, data) {
+            if($(this).val() == '')
+            {
+                arrayErrores.push('El nombre trámite del concepto es requerido en la posición ' + (index+1));
+            }
+        });
+    }
+
+    if($('input[name^="valor_concepto"]').val() == undefined)
+    {
+        arrayErrores.push('Debe existir por lo menos un valor concepto');
+    }
+    else
+    {
+
+        $('input[name^="valor_concepto"]').each(function(index, data) {
+            if($(this).val() == '')
+            {
+                arrayErrores.push('El valor concepto es requerido en la posición ' + (index+1));
+            }
+        });
+
+    }
+
+    if(arrayErrores.length > 0)
+    {
+        band = false;
+    }
+
+    if(band)
+    {
+        $('.alert-danger-conceptos').css('display', 'none');
+
+        $('.alert-conceptos').html('');
+
+        $('#formulario_conceptos_tramites_edit').submit();
+    }
+    else
+    {
+        $('.alert-danger-conceptos').css('display', 'block');
+        $('.alert-conceptos').html('');
+        arrayErrores.forEach(function(data, index)
+        { 
+            $('.alert-conceptos').append(
+                '<li>'+data+'</li>'
+            );
+        })
+    }
+}
+
+function consultatTramitesConceptos()
+{
+    $('#conceptos-tramites-modal').modal('show');
+
+    var oSettings = $('#table-concepto-tramites-modal').dataTable().fnSettings();
+    oSettings.sAjaxSource  = base_url +"index.php/tipoLiquidacionTramite/dataTableConceptos?id="+$(this).val();
+    $('#table-concepto-tramites-modal').dataTable().fnReloadAjax();
 }
 
 /**

@@ -14,6 +14,11 @@
 
 <div class="row clearfix">
     <div class="col-md-12 column">
+        <div class="alert alert-danger alert-danger-conceptos" role="alert" style="display: none">
+            <ul class="alert-conceptos">
+            
+            </ul>
+        </div>
         <div class="row clearfix">
             <div class="col-md-4 column">
             </div>
@@ -21,28 +26,50 @@
                 <div class="panel panel-default">
                     <div class="panel-heading"><h1>Editar tipo trámite</h1></div>
                     <div class="panel-body">
-                        <?php echo form_open(current_url(),'role="form"');?>
+                        <?php echo form_open(current_url(),'role="form" id="formulario_conceptos_tramites_edit"');?>
 
                         <div class="form-group">
                             <label for="nombre">Nombre</label>
-                            <input class="form-control" id="nombre" type="text" name="nombre" value="<?php echo $result->nombre; ?>" required="required" />
+                            <input class="form-control" id="nombre_tramite_edit" type="text" name="nombre" value="<?php echo $result['tramites']->nombre; ?>" required="required" />
                             <?php echo form_error('nombre','<span class="text-danger">','</span>'); ?>
                         </div>
-
-                        <div class="form-group">
-                            <label for="valor">Valor</label>
-                            <input class="form-control" id="valor" type="text" name="valor" value="<?php echo $result->valor; ?>" required="required" />
-                            <?php echo form_error('valor','<span class="text-danger">','</span>'); ?>
-                        </div>
-
+                        
                         <div class="form-group">
                             <label for="estado">Estado</label>
                             <select class="form-control" id="tipocontratistaid" name="estado" required="required" >
-                                <option <?php if($result->estado == 1) { ?> selected <?php }?>  value="1">Activo</option>
-                                <option <?php if($result->estado == 0) { ?> selected <?php }?>  value="0">Inactivo</option>
+                                <option <?php if($result['tramites']->estado == 1) { ?> selected <?php }?>  value="1">Activo</option>
+                                <option <?php if($result['tramites']->estado == 0) { ?> selected <?php }?>  value="0">Inactivo</option>
                                  
                             </select>
                             <?php echo form_error('estado','<span class="text-danger">','</span>'); ?>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="button" id="agregarConceptos" class="btn btn-info btn-block">Agregar Liquidación Concepto <i class="fa fa-plus"></i>
+                            </button>
+                        </div>
+
+                        <div class="conceptos" style="background-color: #f9f9f95c">
+                            <?php 
+                            foreach ($result['conceptos'] as $concepto) 
+                            {
+                            ?>
+                                <div>
+                                    <hr>
+                                    <button type="button" id="eliminarConceptos" class="btn btn-danger btn-sm" style="float: right;margin-bottom: 10px" onclick="$(this).parent().remove()"><i class="fa fa-trash-o"></i></button>
+
+                                    <div class="form-group">
+                                        <label for="valor">Nombre Concepto</label>
+                                        <input class="form-control" name="nombre_concepto[]" required="required" maxlength="128" value="<?php echo $concepto->nombre_concepto ?>">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="valor">Valor Concepto</label>
+                                        <input class="form-control" name="valor_concepto[]" required="required" maxlength="128" value="<?php echo $concepto->valor_concepto ?>">
+                                    </div>
+                                </div>
+                            <?php 
+                            } 
+                            ?>
                         </div>
 
                         <div class="pull-right">
@@ -52,7 +79,7 @@
                                 <a class="btn btn-danger" data-toggle="modal" data-target="#myModal"><i class="fa fa-trash-o"></i> Eliminar</a>
                             <?php } ?>
 
-                            <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
+                            <button type="button" id="validarTramitesConceptosEdit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
                         </div>
 
                        <?php echo form_close();?>
@@ -78,7 +105,7 @@
                     <h4 class="modal-title" id="myModalLabel">¿Confirma que quiere eliminar este Tipo Trámite?</h4>
                 </div>
                     <div class="modal-body">
-                    <input class="form-control" id="id" type="hidden" name="id" value="<?php echo $result->lt_id; ?>,<?php echo $result->lv_id; ?>"/>
+                    <input class="form-control" id="id" type="hidden" name="id" value="<?php echo $result['tramites']->lv_id; ?>"/>
                      Si oprime confirmar no podrá recuperar la información de este tipo trámite <br>
                      ¿Realmente desea eliminarlo?
                 </div>

@@ -16,26 +16,6 @@ require_once APPPATH.'libraries/barcodegen/class/BCGColor.php';
 require_once APPPATH.'libraries/barcodegen/class/BCGDrawing.php';
 require_once APPPATH.'libraries/barcodegen/class/BCGgs1128.barcode.php';
 
-if(isset($_GET['generar_barcode_text']))
-{
-    $colorFront = new BCGColor(0, 0, 0);
-    $colorBack = new BCGColor(255, 255, 255);
-
-    $code = new BCGcode128();
-    $code->setScale(2);
-    $code->setThickness(20);
-    $code->setForegroundColor($colorFront);
-    $code->setBackgroundColor($colorBack);
-    $code->parse($_GET['generar_barcode_text']);
-
-    $drawing = new BCGDrawing('', $colorBack);
-    $drawing->setBarcode($code);
-
-    $drawing->draw();
-    $drawing->finish(BCGDrawing::IMG_FORMAT_PNG);
-}
-
-
 class LiquidacionTramite extends MY_Controller
 {
 
@@ -54,232 +34,6 @@ class LiquidacionTramite extends MY_Controller
     {
         $this->manage();
     }
-
-    function pdf()
-    {
-        error_reporting(0);
-        ob_end_clean();
-
-        $joins = ' INNER JOIN liquidacion_valor_vigencia_tramite ON liquidacion_valor_vigencia_tramite.id = liquidar_tramite_persona.tipo_tramite_valor'.
-            ' INNER JOIN liquidacion_tipo_tramites ON liquidacion_tipo_tramites.id = liquidacion_valor_vigencia_tramite.tramite_id'.
-            ' INNER JOIN par_departamentos ON par_departamentos.depa_id = liquidar_tramite_persona.departamento_residencia'.
-            ' INNER JOIN par_municipios ON par_municipios.muni_id = liquidar_tramite_persona.municipio'.
-            ' INNER JOIN tipo_documento ON tipo_documento.id = liquidar_tramite_persona.tipo_documento'
-            ;
-
-        $consultarParametros = $this->codegen_model->getSelect('liquidar_tramite_persona','*,tipo_documento.nombre AS nombre_documento, liquidacion_tipo_tramites.nombre AS nombre_tramite, liquidacion_valor_vigencia_tramite.id AS id_tipo_tramite, liquidar_tramite_persona.id AS persona_tramite ',' WHERE liquidar_tramite_persona.id = '.$_GET['id'], $joins)[0];
-
-        //establecerHTML
-        $htmlDivs = self::establecerHTMLpdf($consultarParametros);
-            
-        $pdf = new MYPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
-        // add a page
-        $pdf->AddPage();
-
-        // set some text to print
-        $html = $htmlDivs['htmlInformacion'];
-
-        // output the HTML content
-        $pdf->writeHTMLCell(0, 0, '', '36', $html);
-
-        $tabla_valores = $htmlDivs['htmlTablaValores'];
-
-
-        $pdf->writeHTMLCell(0, 0, '', '74', $tabla_valores);
-
-        $div_pesos = $htmlDivs['htmlDivPrecios'];
-
-        $pdf->writeHTMLCell(0, 0, '', '93', $div_pesos);
-
-        // CODE 39 EXTENDED
-        $this->barcode($consultarParametros->codigo_barras);
-
-        $this->data['codebar'] = str_ireplace(array('~F1', '(390y)'), array('', '(3900)'), $consultarParametros->codigo_barras);
-
-        $html_barcode = $this->load->view('generarBarcode/barcodeFacturas', $this->data, TRUE);  
-
-        $pdf->writeHTMLCell(0,0,50,104,$html_barcode);
-        $pdf->writeHTMLCell(0,0,64,119, '<br> <small>'.$this->data['codebar'].'</small>');
-
-        $pdf->Ln();
-
-        $div_fecha = '<div style="font-size:9px">'.date('d/m/Y H:i:s').'</div>';
-
-        $pdf->writeHTMLCell(0, 0, '', '128', $div_fecha);
-
-        $div_fecha = '<div style="font-size:9px">--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</div>';
-
-        $pdf->writeHTMLCell(0, 0, '', '137', $div_fecha);
-
-        //////////////////////////////////////////////////////////////////
-        //OTRO HEAD
-
-        $divHead = $htmlDivs['htmlHead'];
-
-        $pdf->writeHTMLCell(0, 0, '', '147', $divHead);
-
-        //LOGOS
-        $image_escudo = K_PATH_IMAGES.'gobernacion_tolima1.jpg';
-        $image_refran = K_PATH_IMAGES.'gobernacion_tolima2.png';
-
-        $pdf->Image($image_refran, 160, 150, 36, 15, 'png', '', 'T', true, 600, '', false, false, 0, false, false, false);
-        $pdf->Image($image_escudo, 13, 145, 35, 25, 'png', '', 'T', true, 100, '', false, false, 0, false, false, false);
-
-
-        // output the HTML content
-        $pdf->writeHTMLCell(0, 0, '', '176', $html);
-
-        $tabla_valores = $htmlDivs['htmlTablaValores'];
-
-
-        $pdf->writeHTMLCell(0, 0, '', '215', $tabla_valores);
-
-        $div_pesos = $htmlDivs['htmlDivPrecios'];
-
-        $pdf->writeHTMLCell(0, 0, '', '234', $div_pesos);
-
-        $pdf->writeHTMLCell(0, 0, 50, 245, $html_barcode);
-
-        $pdf->writeHTMLCell(0,0,64,260, '<br> <small>'.$this->data['codebar'].'</small>');
-
-        $pdf->Ln();
-
-        $div_fecha = '<div style="font-size:9px">'.date('d/m/Y H:i:s').'</div>';
-
-        $pdf->writeHTMLCell(0, 0, '', '270', $div_fecha);
-
-
-        // ---------------------------------------------------------
-
-        //Close and output PDF document
-        $pdf->Output('example_003.pdf', 'I');
-    }
-
-    public function establecerHTMLpdf($consultarParametros)
-    {
-        $numeroLetras = new NumeroAletras;
-        // set some text to print
-        $htmlInformacion = '
-            <style>
-                .letra-tama
-                {
-                    font-size:10px;
-                    font-style: italic;
-                }
-                .encabezados
-                {
-                    font-weight: bold;
-                }
-            </style>
-            <table cellpadding="2" cellspacing="3">
-                <tr>
-                    <td class="letra-tama encabezados">CÓDIGO</td>
-                    <td class="letra-tama">'.$consultarParametros->numero_factura.'</td>
-                    <td class="letra-tama encabezados">FECHA</td>
-                    <td class="letra-tama">'.$consultarParametros->fecha_creacion.'</td>
-                </tr>
-                <tr>
-                    <td class="letra-tama encabezados">DOCUMENTO</td>
-                    <td class="letra-tama">'.$consultarParametros->nombre_documento.'</td>
-                    <td class="letra-tama encabezados">NUMERO DOCUMENTO</td>
-                    <td class="letra-tama">'.$consultarParametros->ndocumento.'</td>
-                </tr>
-                <tr> 
-                    <td class="letra-tama encabezados">DIRECCION</td>
-                    <td class="letra-tama">'.$consultarParametros->direccion.'</td>
-                    <td class="letra-tama encabezados">TELEFONO</td>
-                    <td class="letra-tama">'.$consultarParametros->telefono1.'</td>
-                </tr>
-                <tr>
-                    
-                </tr>
-                <tr>
-                    <td class="letra-tama encabezados">TELEFONO 2</td>
-                    <td class="letra-tama">'.$consultarParametros->telefono2.'</td>
-                    <td class="letra-tama encabezados">NOMBRE</td>
-                    <td class="letra-tama">'.$consultarParametros->primer_nombre. ' '. $consultarParametros->segundo_nombre. ' '. $consultarParametros->primer_apellido . ' '. $consultarParametros->segundo_apellido.'</td>
-                <tr>
-            </table>';
-
-        $htmlTablaValores = '
-            <style>
-                .letra-tama
-                {
-                    font-size:10px;
-                    font-style: italic;
-                }
-                .encabezados
-                {
-                    font-weight: bold;
-                }
-                table td {
-                  border: 1px solid black;
-                  padding: 2px;
-                }
-                .sin-borde {
-                  border: none
-                }
-            </style>
-            <table style="border-collapse: collapse;">
-                <tr>
-                    <td class="letra-tama encabezados">CODIGO TRÁMITE</td>
-                    <td class="letra-tama encabezados">TIPO TRÁMITE</td>
-                    <td class="letra-tama encabezados">VIGENCIA</td>
-                    <td class="letra-tama encabezados">VALOR</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td class="letra-tama">'.$consultarParametros->id_tipo_tramite.'</td>
-                    <td class="letra-tama">'.$consultarParametros->nombre_tramite.'</td>
-                    <td class="letra-tama">'.$consultarParametros->vigencia.'</td>
-                    <td class="letra-tama">'.$consultarParametros->valor.'</td>
-                    
-                    <td></td>
-                    
-                </tr>
-                <tr>
-                    <td class="letra-tama sin-borde"></td>
-                    <td class="letra-tama sin-borde"></td>
-                    <td class="letra-tama sin-borde"></td>
-                    <td class="letra-tama sin-borde encabezados">SUBTOTAL</td>
-                    <td class="letra-tama sin-borde">'.$consultarParametros->valor.'</td>
-                </tr>
-            </table>';
-
-        $htmlDivPrecios =  '<div>'.$numeroLetras::convertir($consultarParametros->valor).'PESOS MDA, CTE.'.'</div>';
-
-
-        $htmlHead = '<table align="center" cellspacing="">
-                        <tr>
-                            <td style="font-size:10px">GOBERNACION DEL PUTUMAYO</td>
-                        </tr>
-                        <tr>
-                            <td style="font-size:10px">Secretaría de hacienda departamental</td>
-                        </tr>
-                        <tr>
-                            <td style="font-size:10px">Nit: 800094164-4</td>
-                        </tr>
-                        <tr>
-                            <td style="font-size:10px">Liquidación de impuestos</td>
-                        </tr>
-                        <tr>
-                            <td style="font-size:10px">Número liquidación: '.$_GET['id'].'</td>
-                        </tr>
-                    </table>';
-
-        return array(
-            'htmlInformacion'  => $htmlInformacion,
-            'htmlTablaValores' => $htmlTablaValores,
-            'htmlDivPrecios'   => $htmlDivPrecios,
-            'htmlHead'         => $htmlHead,
-            'imageEscudo'      => K_PATH_IMAGES.'escudo_putuma.jpg',
-            'imageRefran'      => K_PATH_IMAGES.'refran_gog_putumayo.jpg',
-        );
-
-    }
-
-
 
     function add()
     {        
@@ -323,22 +77,23 @@ class LiquidacionTramite extends MY_Controller
                         'fecha_creacion'     => date('Y-m-d H:i:s')
                     );
                     
-
                     $respuestaProceso = $this->codegen_model->add('liquidar_tramite_persona',$data);
+
                     //consultar vigencia
-                    $consultarTramite = $this->codegen_model->getSelect('liquidacion_valor_vigencia_tramite','vigencia,valor', ' WHERE id = '. $this->input->post('tipo_tramite'))[0];
-                            
+                    $consultarTramite = $this->codegen_model->getSelect('liquidacion_valor_vigencia_tramite','vigencia', ' WHERE id = '. $this->input->post('tipo_tramite'))[0];
+
+                    //suma de conceptos
+                    $sumConceptos = $this->codegen_model->getSelect('tramites_conceptos','SUM(valor_concepto) AS valor', ' WHERE tramite_valor_id = '. $this->input->post('tipo_tramite'))[0];
 
                     //415 + codigo que de el banco + 820 + numerofactura + 3900 valor factura + 96 + fechavencimieno
 
-                    $tex_barcode = '415' . '000' . '8020' . $respuestaProceso->idInsercion . $consultarTramite->vigencia. '3900' .  str_pad((int) $consultarTramite->valor, 10, "0", STR_PAD_LEFT) . '96' . str_replace('-','','00000000');
+                    //$tex_barcode = '415' . '000' . '8020' . $respuestaProceso->idInsercion . $consultarTramite->vigencia. '3900' .  str_pad((int) $sumConceptos, 10, "0", STR_PAD_LEFT) . '96' . str_replace('-','','00000000');
 
                     //Deben quedar de 10 digitos donde
                     //415 + codigo que de el banco + 820 + numerofactura + 3900 valor factura + 96 + fechavencimieno
 
-                    $numerofactura = $respuestaProceso->idInsercion . $consultarTramite->vigencia;
-                    $valorFactura = str_pad($consultarTramite->valor, 10, 0, STR_PAD_LEFT);
-                    $consecutivoFactura = str_pad($numerofactura, 10, 0, STR_PAD_LEFT);
+                    $valorFactura       = str_pad($sumConceptos->valor, 10, 0, STR_PAD_LEFT);
+                    $consecutivoFactura = $respuestaProceso->idInsercion . $consultarTramite->vigencia;
 
                     //por ahora 7709085131274
                     $codigoParaBarra='(415)'.'7709085131274'.'~F1(8020)'.$consecutivoFactura.'~F1(390y)'.$valorFactura;
@@ -375,7 +130,7 @@ class LiquidacionTramite extends MY_Controller
 
                  $this->data['result'] = array(
                     'departamentos' => $this->codegen_model->getSelect('par_departamentos','depa_id,depa_nombre'),
-                    'tipo_tramites' => $this->codegen_model->getSelect('liquidacion_tipo_tramites as lt','lv.id,lt.nombre,lv.vigencia', 'WHERE lv.vigencia = '. date('Y'), 'INNER JOIN liquidacion_valor_vigencia_tramite as lv on lt.id = lv.tramite_id'),
+                    'tipo_tramites' => $this->codegen_model->getSelect('liquidacion_tipo_tramites as lt','lv.id as lv_id,lt.nombre,lv.vigencia', 'WHERE lv.vigencia = '. date('Y'), 'INNER JOIN liquidacion_valor_vigencia_tramite as lv on lt.id = lv.tramite_id'),
                     'tipo_documento' => $this->codegen_model->getSelect('tipo_documento','id,nombre,sigla'),
                 );
 
@@ -407,6 +162,63 @@ class LiquidacionTramite extends MY_Controller
 
         echo json_encode($deptos);
     }
+
+    function pdf()
+    {
+        error_reporting(0);
+        ob_end_clean();
+
+        $joins = ' INNER JOIN liquidacion_valor_vigencia_tramite ON liquidacion_valor_vigencia_tramite.id = liquidar_tramite_persona.tipo_tramite_valor'.
+            ' INNER JOIN liquidacion_tipo_tramites ON liquidacion_tipo_tramites.id = liquidacion_valor_vigencia_tramite.tramite_id'.
+            ' INNER JOIN par_departamentos ON par_departamentos.depa_id = liquidar_tramite_persona.departamento_residencia'.
+            ' INNER JOIN par_municipios ON par_municipios.muni_id = liquidar_tramite_persona.municipio'.
+            ' INNER JOIN tipo_documento ON tipo_documento.id = liquidar_tramite_persona.tipo_documento'
+            ;
+
+        $consultarParametros = $this->codegen_model->getSelect('liquidar_tramite_persona','*,tipo_documento.nombre AS nombre_documento, liquidacion_tipo_tramites.nombre AS nombre_tramite, liquidacion_valor_vigencia_tramite.id AS id_tipo_tramite, liquidar_tramite_persona.id AS persona_tramite ',' WHERE liquidar_tramite_persona.id = '.$_GET['id'], $joins)[0];
+
+        $conceptos = $this->codegen_model->getSelect('tramites_conceptos', '*', 'WHERE tramite_valor_id = '. $consultarParametros->id_tipo_tramite);
+        $sumConceptos = $this->codegen_model->getSelect('tramites_conceptos', 'SUM(valor_concepto) AS valor', 'WHERE tramite_valor_id = '. $consultarParametros->id_tipo_tramite)[0];
+
+        //establecerHTML
+        
+            
+        $pdf = new MYPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+        // add a page
+        $pdf->AddPage();
+
+        $this->barcode($consultarParametros->codigo_barras);
+
+        // CODE 39 EXTENDED
+        $this->data['codebar'] = str_ireplace(array('~F1', '(390y)'), array('', '(3900)'), $consultarParametros->codigo_barras);
+
+        $numeroLetras = new NumeroAletras;
+        $this->data['consultarParametros'] = $consultarParametros;
+        $this->data['conceptos'] =  $conceptos;
+        $this->data['sumConceptos'] =  $sumConceptos->valor;
+        $this->data['numeroLetras'] = $numeroLetras::convertir($sumConceptos->valor);
+        $this->data['id'] = $_GET['id'];
+
+        $html_barcode = $this->load->view('generarBarcode/barcodeFacturas', $this->data, TRUE);  
+
+        $tabla_valores .= $html_barcode;
+
+        $tabla_valores .= $div_fecha;
+
+        $pdf->writeHTML($tabla_valores, true, false, true, false, '');
+
+        // ---------------------------------------------------------
+
+        //Close and output PDF document
+        $pdf->Output('example_003.pdf', 'I');
+    }
+
+    public function establecerHTMLpdf($consultarParametros, $conceptos)
+    {
+       
+    }
+
 
     function barcode ($code) {
         $text = $code;
