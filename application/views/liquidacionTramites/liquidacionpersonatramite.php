@@ -104,7 +104,7 @@
                                 <label for="tipo_tramite">Tipo Trámite</label>
                                 <select class="form-control" id="tipo_tramite" name="tipo_tramite" required="required" >
                                     <?php  foreach($result['tipo_tramites'] as $row) { ?>
-                                        <option value="<?php echo $row->id; ?>"><?php echo $row->nombre . ' - ' . $row->vigencia; ?></option>
+                                        <option value="<?php echo $row->lv_id; ?>"><?php echo $row->nombre . ' - ' . $row->vigencia; ?></option>
                                     <?php   } ?>
                                 </select>
                                 <?php echo form_error('tipo_tramite','<span class="text-danger">','</span>'); ?>

@@ -15,7 +15,7 @@
 //generación de la tabla mediante json
 $(document).ready(function() {
 
-    var oTable = $('#tablaq').dataTable( {
+    var oTable = $('#table-concepto-tramites').dataTable( {
         "bProcessing": true,
         "bServerSide": true,
         "sAjaxSource": "<?php echo base_url(); ?>index.php/tipoLiquidacionTramite/dataTable",
@@ -26,29 +26,75 @@ $(document).ready(function() {
             { "sClass": "item" }, 
             { "sClass": "item" },
             { "sClass": "item" },
-            { "sClass": "item" },
             { "sClass": "center", "bSortable": false, "bSearchable": false},
         ],
         "aoColumnDefs": [ 
 
             { 
-                "aTargets": [5], 
+                "aTargets": [4], 
                 "fnRender": function(o, val) { 
                     return val == 1 ? 'Activo' : 'Inactivo';
                 }
             },
             { 
                 "bVisible": false,
-                "aTargets": [3]
+                "aTargets": [2]
             }
         ]
     });
 
     oTable.fnSearchHighlighting();
+
+    var modal_conceptos = $('#table-concepto-tramites-modal').dataTable( {
+        "bProcessing": true,
+        "bServerSide": true,
+        "sAjaxSource": base_url + "index.php/tipoLiquidacionTramite/dataTableConceptos?id="+$(this).val(),
+        "sServerMethod": "POST",
+        "aoColumns": [ 
+            { "sClass": "center"}, /*id 0*/
+            { "sClass": "item" }, 
+            { "sClass": "item" }
+        ]
+    });
+
+    modal_conceptos.fnSearchHighlighting();
 } );
+
 </script>
 
 <div class="row"> 
+
+    <!-- Modal -->
+    <div class="modal fade" id="conceptos-tramites-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <p style="font-size: 18px;text-align: center" class="modal-title" id="exampleModalLabel">Conceptos Valor Trámite</p>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered table-hover" id="table-concepto-tramites-modal">
+                            <thead>
+                                <tr>
+                                   <th>Id</th>
+                                   <th>Concepto</th>
+                                   <th>Valor</th>
+                               </tr>
+                           </thead>
+                            <tbody></tbody>     
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="col-sm-12">    
         <h1>Tipo Trámites</h1>
 
@@ -60,11 +106,10 @@ $(document).ready(function() {
 
         <br><br> 
         <div class="table-responsive">
-            <table class="table table-striped table-bordered table-hover" id="tablaq">
+            <table class="table table-striped table-bordered table-hover" id="table-concepto-tramites">
                 <thead>
                     <tr>
                        <th>Id</th>
-                       <th>Valor</th>
                        <th>Vigencia</th>
                        <th>escondida</th>
                        <th>Nombre</th>

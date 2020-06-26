@@ -84,12 +84,15 @@ class TotalizadoPersonaTramite extends MY_Controller {
         
                 $this->load->library('datatables');   
 
-                $this->datatables->select('lp.id,lv.vigencia,lv.valor,lt.nombre, COUNT(lp.id) AS personas, SUM(lv.valor) AS total');
-                $this->datatables->from('liquidacion_valor_vigencia_tramite lv');
+                $this->datatables->select('lp.id,lv.vigencia,lt.nombre, COUNT(lp.id) AS personas, conceptos.total AS total_individual, SUM(conceptos.total) AS total_agrupado');
 
                 $this->datatables->join('liquidacion_tipo_tramites lt', 'lt.id = lv.tramite_id', 'INNER');
                 $this->datatables->join('liquidar_tramite_persona lp', 'lp.tipo_tramite_valor = lv.id', 'INNER');
-                $this->datatables->group_by('lp.tipo_tramite_valor');
+
+                $this->datatables->join('(SELECT SUM(valor_concepto) AS total, tramite_valor_id FROM tramites_conceptos GROUP BY tramite_valor_id) AS conceptos', 'conceptos.tramite_valor_id = lv.id', 'INNER');
+
+                $this->datatables->from('liquidacion_valor_vigencia_tramite lv');
+                $this->datatables->group_by('lv.id');
 
                 if(isset($_GET["fecha_ini"]) || isset($_GET["fecha_fin"]))
                 {

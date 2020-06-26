@@ -138,9 +138,9 @@ $(document).ready(function()
                     <tr>
                         <td>Id</td>
                         <td>Vigencia</td>
-                        <td>Valor Individual</td>
                         <td>Nombre Trámite</td>
                         <td>Cantidad Personas</td>
+                        <td>Valor Individual Por Conceptos</td>
                         <td>Total</td>
                    </tr>
                </thead>
