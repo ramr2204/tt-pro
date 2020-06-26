@@ -285,7 +285,7 @@ class TipoLiquidacionTramite extends MY_Controller
                 else 
                 {
                     $this->session->set_flashdata('errormessage', 'El Tipo Trámite se encuentra en uso, no es posible eliminarlo.');
-                    redirect(base_url().'index.php/tipoLiquidacionTramite/edit/'.$codigos[0]);
+                    redirect(base_url().'index.php/tipoLiquidacionTramite/edit/'.$id);
 
                 }
 
