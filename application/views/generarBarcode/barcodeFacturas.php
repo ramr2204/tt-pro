@@ -31,7 +31,7 @@
     <tbody>
     	<tr>
     		<td>
-    			<img src="<?php echo base_url() ?>images/gobernacion_tolima1.png" width="110" height="70" align="center">
+    			<img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima1.jpg" width="110" height="70" align="center">
     		</td>
     		<td>
     			
@@ -43,7 +43,7 @@
 			  
     		</td>
     		<td>
-    			<img src="<?php echo base_url() ?>images/gobernacion_tolima2_PDF.png" width="110" height="67" align="center" style="margin-top: 80px">
+    			<img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima2_PDF.png" width="110" height="67" align="center" style="margin-top: 80px">
     		</td>
     	</tr>
 	</tbody>
@@ -109,11 +109,12 @@
 </table>
 <br>
 <div style="font-size:9px">--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</div>
+<br>
 <table align="center" cellspacing="">
     <tbody>
     	<tr>
     		<td>
-    			<img src="<?php echo base_url() ?>images/gobernacion_tolima1.png" width="110" height="70" align="center">
+    			<img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima1.jpg" width="110" height="70" align="center">
     		</td>
     		<td>
     			
@@ -125,7 +126,7 @@
 			  
     		</td>
     		<td>
-    			<img src="<?php echo base_url() ?>images/gobernacion_tolima2_PDF.png" width="110" height="67" align="center" style="margin-top: 80px">
+    			<img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima2_PDF.png" width="110" height="67" align="center" style="margin-top: 80px">
     		</td>
     	</tr>
 	</tbody>
