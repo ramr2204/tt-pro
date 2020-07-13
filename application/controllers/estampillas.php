@@ -64,9 +64,9 @@ class Estampillas extends MY_Controller {
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('estampillas/add')) {
 
               $this->data['successmessage']=$this->session->flashdata('message');  
-        		  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
-              $this->form_validation->set_rules('codigoB', 'Codigo Barras', 'required|trim|xss_clean|numeric|max_length[128]|is_unique[est_estampillas.estm_codigoB]');
-              $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]|is_unique[est_estampillas.estm_cuenta]');   
+              $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
+              $this->form_validation->set_rules('codigoB', 'Codigo Barras', 'required|trim|xss_clean|numeric|max_length[128]');
+              $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]');
               $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[256]');
               $this->form_validation->set_rules('bancoid', 'Banco',  'required|numeric|greater_than[0]');
               
