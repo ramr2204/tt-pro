@@ -604,7 +604,8 @@ class BCGgs1128 extends BCGcode128 {
                 /* we need to check the checksum */
                 $checksum = self::getAiContentChecksum(substr($content, 0, -1));
                 if (intval($content[$nbCharContent - 1]) !== $checksum) {
-                    throw new BCGParseException('gs1128', 'The checksum of "(' . $id . ') ' . $content . '" must be: ' . $checksum);
+                    // Se quita la validacion porque no sirve con los codigos de barras usados
+                    // throw new BCGParseException('gs1128', 'The checksum of "(' . $id . ') ' . $content . '" must be: ' . $checksum);
                 }
             }
         }
