@@ -44,7 +44,7 @@ class Generarpdf extends CI_controller {
               $liquidacion = $this->data['result'];
               $this->data['facturas'] = $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
               
-  // create new PDF document
+                // create new PDF document
               $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
               // set document information
@@ -75,64 +75,31 @@ class Generarpdf extends CI_controller {
                   $pdf->setLanguageArray($l);
               }
 
-// ---------------------------------------------------------
-            
-               // set font
-               $pdf->SetFont('times', 'BI', 10);
+                // ---------------------------------------------------------
 
-               //Extrae el codigo del departamento según
-               //los parametros en la BD
-               $parametros=$this->codegen_model->get('adm_parametros','para_codigodepartamento','para_id = 1',1,NULL,true);
-               $this->data['codigodepto'] = $parametros->para_codigodepartamento;
-              
-               
-               foreach ($this->data['facturas'] as $key => $value) { 
+                // set font
+                $pdf->SetFont('times', 'BI', 10);
 
-                $this->barcode($value->fact_codigo);
-                $this->data['codebar'] = str_ireplace(array('~F1', '(390y)'), array('', '(3900)'), $value->fact_codigo);
+                //Extrae el codigo del departamento según
+                //los parametros en la BD
+                $parametros=$this->codegen_model->get('adm_parametros','para_codigodepartamento','para_id = 1',1,NULL,true);
+                $this->data['codigodepto'] = $parametros->para_codigodepartamento;
+
+                foreach ($this->data['facturas'] as $key => $value)
+                {
+                    $this->barcode($value->fact_codigo);
+                    $this->data['facturas'][$key]->codigo_barras = str_ireplace(array('~F1', '(390y)'), array('', '(3900)'), $value->fact_codigo);
+
+                    // $numerofactura=str_pad($value->fact_id, 10, '0', STR_PAD_LEFT);
+                    // $this->data['facturaestampilla']=$value;
+                    $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array('(415)7709998009530~F1(8020)7341711081~F1(390y)000000760000', 'C128', '', '', 80, 17, 0.4, array('position'=>'C','align' => 'C', 'border-top'=>true, 'padding'=>2,'margin-top'=>2, 'fgcolor'=>array(0,0,0), 'bgcolor'=>'', 'text'=>false, 'font'=>'helvetica', 'fontsize'=>6, 'stretchtext'=>4), 'N'));
+                }
 
                 $pdf->AddPage();
-                $numerofactura=str_pad($value->fact_id, 10, '0', STR_PAD_LEFT);
-                $this->data['facturaestampilla']=$value;
-                $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array('(415)7709998009530~F1(8020)7341711081~F1(390y)000000760000', 'C128', '', '', 80, 17, 0.4, array('position'=>'C','align' => 'C', 'border-top'=>true, 'padding'=>2,'margin-top'=>2, 'fgcolor'=>array(0,0,0), 'bgcolor'=>'', 'text'=>false, 'font'=>'helvetica', 'fontsize'=>6, 'stretchtext'=>4), 'N'));
-                $html = $this->load->view('generarpdf/generarpdf_reciboestampilla', $this->data, TRUE);  
+                $html = $this->load->view('generarpdf/generarpdf_reciboestampilla', $this->data, TRUE);
                 $pdf->writeHTML($html, true, false, true, false, '');
 
-                /*
-                * Se establecen las etiquetas para destino del recibo
-                */
-                $pdf->StartTransform();
-                $pdf->Rotate(90,8,64);
-                $pdf->text(8,64,'--Gobernación--');
-                $pdf->StopTransform();
-
-                $pdf->StartTransform();
-                $pdf->Rotate(90,200,64);
-                $pdf->text(200,64,'--Gobernación--');
-                $pdf->StopTransform();
-
-                $pdf->StartTransform();
-                $pdf->Rotate(90,200,150);
-                $pdf->text(200,150,'--Contribuyente--');
-                $pdf->StopTransform();
-
-                $pdf->StartTransform();
-                $pdf->Rotate(90,8,150);
-                $pdf->text(8,150,'--Contribuyente--');
-                $pdf->StopTransform();
-
-                $pdf->StartTransform();
-                $pdf->Rotate(90,200,230);
-                $pdf->text(200,230,'--Banco--');
-                $pdf->StopTransform();
-
-                $pdf->StartTransform();
-                $pdf->Rotate(90,8,230);
-                $pdf->text(8,230,'--Banco--');
-                $pdf->StopTransform();
-               }
-
-               // ---------------------------------------------------------
+                // ---------------------------------------------------------
 
                //Close and output PDF document
                $pdf->Output('recibos_'.$liquidacion->liqu_contratoid.'.pdf', 'I');            
