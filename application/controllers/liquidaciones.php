@@ -1700,7 +1700,7 @@ function consultar()
 
               $this->data['contribuyentes'] = $vecContribuyentes;
               $this->data['contratantes']   = $vecContratantes;
-              $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 29');
+              $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 23');
 
               $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_consultar', $this->data);
               

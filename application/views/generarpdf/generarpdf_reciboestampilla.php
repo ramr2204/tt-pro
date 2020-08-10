@@ -32,7 +32,7 @@
             <th colspan="1" class="text-center small">
                 <img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima1.jpg" height="60" width="70" >
             </th>
-            <th colspan="2" class="text-center small">Gobernación del Putumayo <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
+            <th colspan="2" class="text-center small">Gobernación del Putumayo <br> Secretaría de Hacienda Departamental <br> Oficina Rentas</th>
             <th colspan="1" class="text-center small">
                 <img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima2.png" height="50" width="90" >
             </th>
