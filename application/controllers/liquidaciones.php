@@ -502,6 +502,8 @@ class Liquidaciones extends MY_Controller {
               $liquidacion = $this->data['result'];
               $this->data['facturas'] = $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
 
+                $contrato = $this->codegen_model->getSelect('con_contratos','date_format(fecha_insercion,"%Y-%m-%d") AS fecha_insercion', 'WHERE cntr_id = "'.$idcontrato.'"');
+                $this->data['contrato'] = $contrato[0];
 
               //$todopago variable bandera indica si la totalidad de facturas 
               //no se han pagado

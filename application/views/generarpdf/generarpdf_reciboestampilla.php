@@ -70,24 +70,31 @@
         <tr>
             <td colspan="1"><strong>Tipo de contrato</strong></td>
             <td colspan="1"><?php echo $result->liqu_tipocontrato; ?></td>
-            <td colspan="2" class="text-center"><strong>Régimen <?php echo $result->liqu_regimen; ?></strong></td>
+            <td colspan="1"><strong>Fecha de generación</strong></td>
+            <td colspan="1"><?php echo $contrato->fecha_insercion ?></td>
         </tr>
+    </tbody>
+</table>
 
+<table class="table table-striped table-bordered " id="tablaq" border="1" cellpadding="1">
+    <thead>
         <tr>
-            <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
-            <td colspan="1" class="text-center"><strong>Valor</strong></td>
-            <td colspan="2" class="text-center"><strong>Código de barras</strong></td>
-
+            <td width="25%" class="text-center"><strong>Estampilla</strong></td>
+            <td width="13%" class="text-center"><strong>Valor</strong></td>
+            <td width="12%" class="text-center"><strong>Factura</strong></td>
+            <td width="50%" class="text-center"><strong>Código de barras</strong></td>
         </tr>
-
+    </thead>
+    <tbody>
         <?php
             foreach($facturas as $factura)
             {
                 ?>
                 <tr>
-                    <td colspan="1"><?php echo $factura->fact_nombre; ?></td>
-                    <td colspan="1" class="text-right"><?php echo '$'.number_format($factura->fact_valor, 2, ',', '.'); ?></td>
-                    <td colspan="2" class="text-center">
+                    <td width="25%"><?php echo $factura->fact_nombre; ?></td>
+                    <td width="13%" class="text-right"><?php echo '$'.number_format($factura->fact_valor, 2, ',', '.'); ?></td>
+                    <td width="12%" class="text-right"><?php echo $codigodepto.'-'.$factura->fact_id; ?></td>
+                    <td width="50%" class="text-center">
                         <img src="<?php echo $this->config->item('application_root'); ?>application/libraries/barcodegen/<?php echo $factura->codigo_barras ?>.png" width="300" height="40">
                         <small><?php echo $factura->codigo_barras; ?></small>
                     </td>
