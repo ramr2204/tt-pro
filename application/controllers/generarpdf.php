@@ -130,7 +130,10 @@ class Generarpdf extends CI_controller {
               $this->data['result'] = $this->liquidaciones_model->getrecibostramites($idcontrato);
               $liquidacion = $this->data['result'];
               $this->data['facturas'] = $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
-              
+
+                $tramite = $this->codegen_model->getSelect('est_liquidartramites','date_format(litr_fechaliquidacion,"%Y-%m-%d") AS litr_fechaliquidacion', 'WHERE litr_id = "'.$idcontrato.'"');
+                $this->data['tramite'] = $tramite[0];
+
              // create new PDF document
               $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
@@ -172,53 +175,19 @@ class Generarpdf extends CI_controller {
                //los parametros en la BD
                $parametros=$this->codegen_model->get('adm_parametros','para_codigodepartamento','para_id = 1',1,NULL,true);
                $this->data['codigodepto'] = $parametros->para_codigodepartamento;
-                          
 
-               foreach ($this->data['facturas'] as $key => $value) { 
+                foreach ($this->data['facturas'] as $key => $value) {
 
-                $this->barcode($value->fact_codigo);
-                $this->data['codebar'] = str_ireplace(array('~F1', '(390y)'), array('', '(3900)'), $value->fact_codigo);
-                
+                    $this->barcode($value->fact_codigo);
+                    $this->data['facturas'][$key]->codigo_barras = str_ireplace(array('~F1', '(390y)'), array('', '(3900)'), $value->fact_codigo);
+
+                    // $numerofactura=str_pad($value->fact_id, 10, '0', STR_PAD_LEFT);
+                    // $this->data['facturaestampilla']=$value;
+                }
+
                 $pdf->AddPage();
-                $numerofactura=str_pad($value->fact_id, 10, '0', STR_PAD_LEFT);
-                $this->data['facturaestampilla']=$value;
-                                               
                 $html = $this->load->view('generarpdf/generarpdf_reciboestampillatramite', $this->data, TRUE);  
                 $pdf->writeHTML($html, true, false, true, false, '');
-
-                /*
-                * Se establecen las etiquetas para destino del recibo
-                */
-                $pdf->StartTransform();
-                $pdf->Rotate(90,8,64);
-                $pdf->text(8,64,'--Gobernación--');
-                $pdf->StopTransform();
-
-                $pdf->StartTransform();
-                $pdf->Rotate(90,200,64);
-                $pdf->text(200,64,'--Gobernación--');
-                $pdf->StopTransform();
-
-                $pdf->StartTransform();
-                $pdf->Rotate(90,200,145);
-                $pdf->text(200,145,'--Contribuyente--');
-                $pdf->StopTransform();
-
-                $pdf->StartTransform();
-                $pdf->Rotate(90,8,145);
-                $pdf->text(8,145,'--Contribuyente--');
-                $pdf->StopTransform();
-
-                $pdf->StartTransform();
-                $pdf->Rotate(90,200,220);
-                $pdf->text(200,220,'--Banco--');
-                $pdf->StopTransform();
-
-                $pdf->StartTransform();
-                $pdf->Rotate(90,8,220);
-                $pdf->text(8,220,'--Banco--');
-                $pdf->StopTransform();
-               }
 
                // ---------------------------------------------------------
 
