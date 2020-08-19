@@ -26,6 +26,8 @@
 
 </style>
 
+<br><br>
+
 <table class="table table-striped table-bordered " id="tablaq" border="1" cellpadding="1">
     <thead>
         <tr>
@@ -87,6 +89,8 @@
     </thead>
     <tbody>
         <?php
+            $totalValor = 0;
+
             foreach($facturas as $factura)
             {
                 ?>
@@ -100,7 +104,14 @@
                     </td>
                 </tr>
                 <?php
+
+                $totalValor += $factura->fact_valor;
             }
         ?>
+        <tr>
+            <td>Total</td>
+            <td class="text-right"><?php echo '$'.number_format($totalValor, 2, ',', '.'); ?></td>
+            <td colspan="2"></td>
+        </tr>
     </tbody>
 </table>
