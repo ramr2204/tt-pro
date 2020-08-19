@@ -83,11 +83,6 @@ class Generarpdf extends CI_controller {
                 // set font
                 $pdf->SetFont('times', 'BI', 10);
 
-                //Extrae el codigo del departamento según
-                //los parametros en la BD
-                $parametros=$this->codegen_model->get('adm_parametros','para_codigodepartamento','para_id = 1',1,NULL,true);
-                $this->data['codigodepto'] = $parametros->para_codigodepartamento;
-
                 foreach ($this->data['facturas'] as $key => $value)
                 {
                     $this->barcode($value->fact_codigo);
@@ -165,19 +160,13 @@ class Generarpdf extends CI_controller {
                   $pdf->setLanguageArray($l);
               }
 
-// ---------------------------------------------------------
-            
-               // set font
-               $pdf->SetFont('times', 'BI', 10);
+                // ---------------------------------------------------------
 
+                // set font
+                $pdf->SetFont('times', 'BI', 10);
 
-               //Extrae el codigo del departamento según
-               //los parametros en la BD
-               $parametros=$this->codegen_model->get('adm_parametros','para_codigodepartamento','para_id = 1',1,NULL,true);
-               $this->data['codigodepto'] = $parametros->para_codigodepartamento;
-
-                foreach ($this->data['facturas'] as $key => $value) {
-
+                foreach ($this->data['facturas'] as $key => $value)
+                {
                     $this->barcode($value->fact_codigo);
                     $this->data['facturas'][$key]->codigo_barras = str_ireplace(array('~F1', '(390y)'), array('', '(3900)'), $value->fact_codigo);
 

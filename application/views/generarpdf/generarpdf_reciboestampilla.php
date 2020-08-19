@@ -97,7 +97,7 @@
                 <tr>
                     <td width="25%"><?php echo $factura->fact_nombre; ?></td>
                     <td width="13%" class="text-right"><?php echo '$'.number_format($factura->fact_valor, 2, ',', '.'); ?></td>
-                    <td width="12%" class="text-right"><?php echo $codigodepto.'-'.$factura->fact_id; ?></td>
+                    <td width="12%" class="text-right"><?php echo $factura->fact_id; ?></td>
                     <td width="50%" class="text-center">
                         <img src="<?php echo $this->config->item('application_root'); ?>application/libraries/barcodegen/<?php echo $factura->codigo_barras ?>.png" width="300" height="40">
                         <small><?php echo $factura->codigo_barras; ?></small>
