@@ -53,7 +53,8 @@
           </tr>
 
           <tr>
-               <td colspan="4"><strong></strong></td>
+               <td colspan="1"><strong>Trámite</strong></td>
+               <td colspan="3"><?php echo $tramite->tram_nombre; ?></td>
           </tr>
           <tr>
                <td colspan="1"><strong>Base</strong></td>

@@ -126,7 +126,12 @@ class Generarpdf extends CI_controller {
               $liquidacion = $this->data['result'];
               $this->data['facturas'] = $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
 
-                $tramite = $this->codegen_model->getSelect('est_liquidartramites','date_format(litr_fechaliquidacion,"%Y-%m-%d") AS litr_fechaliquidacion', 'WHERE litr_id = "'.$idcontrato.'"');
+                $tramite = $this->codegen_model->getSelect(
+                    'est_liquidartramites liquidacion',
+                    'date_format(liquidacion.litr_fechaliquidacion,"%Y-%m-%d") AS litr_fechaliquidacion, est_tramites.tram_nombre',
+                    'WHERE litr_id = "'.$idcontrato.'"',
+                    'LEFT JOIN est_tramites ON(est_tramites.tram_id = liquidacion.litr_tramiteid)'
+                );
                 $this->data['tramite'] = $tramite[0];
 
              // create new PDF document
