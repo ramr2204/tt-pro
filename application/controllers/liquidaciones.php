@@ -1041,7 +1041,7 @@ function verliquidartramite()
                 if($bandRegistrarFactura)
                 {
                     $totalestampilla[$value->estm_id] = (($salarioMinimoDiario*$value->estr_porcentaje)/100);
-                    $totalestampilla[$value->estm_id] = Liquidaciones::ceiling($totalestampilla[$value->estm_id], 1000);                 
+                    $totalestampilla[$value->estm_id] = Liquidaciones::rounding($totalestampilla[$value->estm_id], 1000);                 
                     $valortotal+=$totalestampilla[$value->estm_id];
                 }
             }
@@ -1066,9 +1066,9 @@ function verliquidartramite()
   * Funcion de apoyo que redondea hacia arriba
   * la cifra dada dependiendo del grado de redondeo
   */
-  function ceiling($number, $significance = 1)
+  function rounding($number, $significance = 1)
   {
-        return ( is_numeric($number) && is_numeric($significance) ) ? (ceil($number/$significance)*$significance) : false;
+        return ( is_numeric($number) && is_numeric($significance) ) ? (round($number/$significance)*$significance) : false;
   }
  
  function procesarliquidaciontramite()
