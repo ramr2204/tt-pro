@@ -66,6 +66,12 @@
                                            <input class="form-control" id="telefono" type="telefono" name="telefono" value="<?php echo $result->cont_telefono; ?>" maxlength="15" />
                                            <?php echo form_error('telefono','<span class="text-danger">','</span>'); ?>
                                     </div>
+
+                                    <div class="form-group">
+                                           <label for="email">Email</label>
+                                           <input class="form-control" id="email" type="email" name="email" value="<?php echo $result->cont_email; ?>" maxlength="15" />
+                                           <?php echo form_error('email','<span class="text-danger">','</span>'); ?>
+                                    </div>
                                       
                                     <div class="form-group">
                                            <label for="municipioid">Municipio</label>

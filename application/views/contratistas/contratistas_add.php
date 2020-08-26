@@ -50,9 +50,15 @@
 
                                     <div class="form-group">
                                            <label for="telefono">Telefono</label>
-                                           <input class="form-control" id="telefono" type="telefono" name="telefono" value="<?php echo set_value('telefono'); ?>" maxlength="15" />
+                                           <input class="form-control" id="telefono" type="telefono" name="telefono" value="<?php echo set_value('telefono'); ?>" required="required" maxlength="15" />
                                            <?php echo form_error('telefono','<span class="text-danger">','</span>'); ?>
                                     </div>
+
+                                   <div class="form-group">
+                                          <label for="email">Email</label>
+                                          <input class="form-control" id="email" type="email" name="email" value="<?php echo set_value('email'); ?>" required="required" />
+                                          <?php echo form_error('email','<span class="text-danger">','</span>'); ?>
+                                   </div>
 
                                     <div class="form-group">
                                            <label for="municipioid">Municipio</label>

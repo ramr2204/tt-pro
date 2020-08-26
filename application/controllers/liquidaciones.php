@@ -999,7 +999,7 @@ function vercontratolegalizado()
   }
 
 function verliquidartramite()
-  {        
+  {
       if ($this->ion_auth->logged_in()) {
           if ($this->uri->segment(3)==''){
                redirect(base_url().'index.php/error_404');
@@ -1016,7 +1016,7 @@ function verliquidartramite()
               */
               if($tramite->litr_placaVehiculo != '')
               {
-                  $this->data['result']->litr_tramitadornombre = $tramite->litr_tramitadornombre.' - Numero de Placa ('.$tramite->litr_placaVehiculo.')';
+                  $this->data['result']->tramitador_nombre = $tramite->tramitador_nombre.' - Numero de Placa ('.$tramite->litr_placaVehiculo.')';
               }
 
               $parametros=$this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo','para_id = 1',1,NULL,true);
@@ -1316,19 +1316,32 @@ function verliquidartramite()
 
 
  function addtramite()
-  {        
+  {
       if ($this->ion_auth->logged_in()) {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
 
-              $this->data['successmessage']=$this->session->flashdata('message');  
-              $this->data['infomessage']= $this->session->flashdata('infomessage');  
+              $this->data['successmessage']=$this->session->flashdata('message');
+              $this->data['infomessage']= $this->session->flashdata('infomessage');
+
+                # Comprobar si el tramitador ya ha sido registrado con anterioridad
+                $tramitador = $this->codegen_model->get('tramitadores','nit,id','nit = "'.$this->input->post('documento').'"',1,NULL,true);
+                $existeTramitador = !empty($tramitador);
+
+                if($existeTramitador){
+                    $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
+                    $this->form_validation->set_rules('documento', 'Documento',  'required|trim|xss_clean');
+                }else{
+                    $this->form_validation->set_rules('email', 'Email', 'required|valid_email|is_unique[tramitadores.email]');
+                    $this->form_validation->set_rules('documento', 'Documento',  'required|trim|xss_clean|is_unique[tramitadores.nit]');
+                }
 
               $this->form_validation->set_rules('encontrado', 'encontrado','required|trim|xss_clean|numeric');
-              $this->form_validation->set_rules('documento', 'Documento',  'required|trim|xss_clean');  
-              $this->form_validation->set_rules('nombre', 'Nombre',  'required|trim|xss_clean');  
+              $this->form_validation->set_rules('nombre', 'Nombre',  'required|trim|xss_clean');
+              $this->form_validation->set_rules('direccion', 'Dirección', 'required|trim|xss_clean|max_length[256]');
+              $this->form_validation->set_rules('telefono', 'Telefono', 'required|numeric|trim|xss_clean|max_length[15]');
               $this->form_validation->set_rules('tramiteid', 'Trámite','required|trim|xss_clean|numeric|greater_than[0]');
-              $this->form_validation->set_rules('observaciones', 'Observaciones','trim|xss_clean'); 
+              $this->form_validation->set_rules('observaciones', 'Observaciones','trim|xss_clean');
 
             /*
             * Extrae el usuario autenticado para establecer que usuario
@@ -1339,51 +1352,76 @@ function verliquidartramite()
             if ($this->form_validation->run() == false) 
             {
                 $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
-            }else 
-                {   
-                    $data = array(
-                        'litr_tramiteid' => $this->input->post('tramiteid'),
-                        'litr_tramitadorid' => $this->input->post('documento'),
-                        'litr_tramitadornombre' => $this->input->post('nombre'),
-                        'litr_fechaliquidacion' => date("Y-m-d H:i:s"),
-                        'litr_usuarioliquidacion' => $usuario->id,
-                        'litr_estadolocalid' => 0,
-                        'litr_observaciones' => $this->input->post('observaciones')
-                        );
+            }else
+                {
+                    $tramitadorId = null;
 
-                    /*
-                    * Valida si el tramite suministrado es 16
-                    * certificado de paz y salvo de impuesto de vehiculos
-                    * se valida que llegue una placa
-                    */
-                    if($this->input->post('tramiteid') == 16)
+                    if($existeTramitador)
                     {
-                        $this->form_validation->set_rules('placa', 'Placa del Vehiculo','required|trim|xss_clean');
-                        if ($this->form_validation->run() == false) 
-                        {
-                            $this->session->set_flashdata('infomessage', validation_errors());
-                            redirect(base_url().'index.php/liquidaciones/addtramite');                            
-                        }else
-                            {
-                                /*
-                                * Se incluye el numero de la placa para registrarlo
-                                * en el tramite
-                                */
-                                $data['litr_placaVehiculo'] = $this->input->post('placa');
-                            }
-                    }                                       
-                     
-                    $respuestaProceso = $this->codegen_model->add('est_liquidartramites',$data);
-                    if ($respuestaProceso->bandRegistroExitoso) 
-                    {
-                        $id = $respuestaProceso->idInsercion;
-                        $this->session->set_flashdata('message','La liquidación se realizó con éxito');
-                        $this->session->set_flashdata('accion', 'creado');
-                        redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
-                    }else 
-                        {
-                            $this->data['errormessage'] = 'No se pudo realizar la liquidación';
+                        $tramitadorId = $tramitador->id;
+                    }else{
+                        $respuestaTramitador = $this->codegen_model->add('tramitadores',array(
+                            'nit'       => $this->input->post('documento'),
+                            'nombre'    => $this->input->post('nombre'),
+                            'direccion' => $this->input->post('direccion'),
+                            'telefono'  => $this->input->post('telefono'),
+                            'email'     => $this->input->post('email'),
+                        ));
+
+                        if ($respuestaTramitador->bandRegistroExitoso){
+                            $tramitadorId = $respuestaTramitador->idInsercion;
                         }
+                    }
+
+                    if($tramitadorId)
+                    {
+                        $data = array(
+                            'litr_tramiteid' => $this->input->post('tramiteid'),
+                            'litr_tramitadorid' => $tramitadorId,
+                            'litr_fechaliquidacion' => date("Y-m-d H:i:s"),
+                            'litr_usuarioliquidacion' => $usuario->id,
+                            'litr_estadolocalid' => 0,
+                            'litr_observaciones' => $this->input->post('observaciones')
+                            );
+    
+                        /*
+                        * Valida si el tramite suministrado es 16
+                        * certificado de paz y salvo de impuesto de vehiculos
+                        * se valida que llegue una placa
+                        */
+                        if($this->input->post('tramiteid') == 16)
+                        {
+                            $this->form_validation->set_rules('placa', 'Placa del Vehiculo','required|trim|xss_clean');
+                            if ($this->form_validation->run() == false) 
+                            {
+                                $this->session->set_flashdata('infomessage', validation_errors());
+                                redirect(base_url().'index.php/liquidaciones/addtramite');
+                            }else
+                                {
+                                    /*
+                                    * Se incluye el numero de la placa para registrarlo
+                                    * en el tramite
+                                    */
+                                    $data['litr_placaVehiculo'] = $this->input->post('placa');
+                                }
+                        }
+
+                        $respuestaProceso = $this->codegen_model->add('est_liquidartramites',$data);
+                        if ($respuestaProceso->bandRegistroExitoso) 
+                        {
+                            $id = $respuestaProceso->idInsercion;
+                            $this->session->set_flashdata('message','La liquidación se realizó con éxito');
+                            $this->session->set_flashdata('accion', 'creado');
+                            redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
+                        }else 
+                            {
+                                $this->data['errormessage'] = 'No se pudo realizar la liquidación';
+                            }
+                    }else
+                        {
+                            $this->data['errormessage'] = 'No se pudo realizar la liquidación, ocurrio un error al procesar los datos del tramitador';
+                        }
+
                 }
 
               $this->template->set('title', 'Liquidar trámites');
@@ -1404,18 +1442,23 @@ function verliquidartramite()
           redirect(base_url().'index.php/users/login');
       }
 
-  } 
-  
+  }
+
 
   function consultardocumento()
-  {        
+  {
       if ($this->ion_auth->logged_in()) {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
-            
-              $tramitador= $this->codegen_model->get('est_liquidartramites','litr_tramitadorid,litr_tramitadornombre','litr_tramitadorid = '.$this->input->post('documento'),1,NULL,true);
+
+              $tramitador= $this->codegen_model->get('tramitadores','nombre,telefono,email,direccion','nit = '.$this->input->post('documento'),1,NULL,true);
               if ($tramitador) {
-                 echo $tramitador->litr_tramitadornombre;
+                    echo json_encode(array(
+                        'nombre' => $tramitador->nombre,
+                        'telefono' => $tramitador->telefono,
+                        'email' => $tramitador->email,
+                        'direccion' => $tramitador->direccion,
+                    ));
               } else {
                 echo 0;
               }
@@ -1436,10 +1479,11 @@ function verliquidartramite()
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
               
               $this->load->library('datatables');
-              $this->datatables->select('l.litr_id,l.litr_tramitadorid,l.litr_tramitadornombre,tr.tram_nombre,l.litr_fechaliquidacion,l.litr_observaciones,el.eslo_nombre');
-              $this->datatables->from('est_liquidartramites l');              
+              $this->datatables->select('l.litr_id,tramitadores.nit,tramitadores.nombre,tr.tram_nombre,l.litr_fechaliquidacion,l.litr_observaciones,el.eslo_nombre');
+              $this->datatables->from('est_liquidartramites l');
               $this->datatables->join('est_tramites tr', 'tr.tram_id = l.litr_tramiteid', 'left');
               $this->datatables->join('con_estadoslocales el', 'el.eslo_id = l.litr_estadolocalid', 'left');
+              $this->datatables->join('tramitadores', 'tramitadores.id = l.litr_tramitadorid', 'left');
               $this->datatables->add_column('edit', '-');
               echo $this->datatables->generate();
 
@@ -1672,7 +1716,7 @@ function consultar()
                */
               $contratantes = $this->codegen_model->getSelect('con_contratantes',"id,nombre,nit");
               $contratistas = $this->codegen_model->getSelect('con_contratistas',"cont_id,cont_nombre,cont_nit");
-              $tramitadores = $this->codegen_model->getSelect('est_liquidartramites',"litr_id,litr_tramitadornombre,litr_tramitadorid",'','','GROUP BY litr_tramitadorid');
+              $tramitadores = $this->codegen_model->getSelect('tramitadores','id,nit,nombre','','','GROUP BY nit');
 
               $vecContribuyentes = array();
               if(count($contratistas) > 0)
@@ -1687,7 +1731,7 @@ function consultar()
               {
                   foreach($tramitadores as $tramitador)
                   {
-                      $vecContribuyentes['t_'.$tramitador->litr_tramitadorid] = $tramitador->litr_tramitadorid.' - '.$tramitador->litr_tramitadornombre.' ( Tramitador )';
+                      $vecContribuyentes['t_'.$tramitador->nit] = $tramitador->nit.' - '.$tramitador->nombre.' ( Tramitador )';
                   }
               }
 
@@ -2842,11 +2886,11 @@ function renderizarDetalleRangoPDF()
 
             if($vecFiltrosAplicados['contribuyente'] != '')
             {
-                $contribuyente = $this->codegen_model->getSelect("est_liquidartramites","*",
-                    " WHERE litr_tramitadorid = '". $vecFiltrosAplicados['contribuyente'] ."'");
+                $contribuyente = $this->codegen_model->getSelect('tramitadores','nombre',
+                    " WHERE nit = '". $vecFiltrosAplicados['contribuyente'] ."'");
                 if(count($contribuyente) > 0)
                 {
-                    $vecFiltrosAplicados['contribuyente'] = $contribuyente[0]->litr_tramitadornombre;
+                    $vecFiltrosAplicados['contribuyente'] = $contribuyente[0]->nombre;
                 }
             }
         }
