@@ -46,9 +46,11 @@ class Generarpdf extends CI_controller {
 
                 $contrato = $this->codegen_model->getSelect('con_contratos','date_format(fecha_insercion,"%Y-%m-%d") AS fecha_insercion,cntr_contratistaid,cntr_objeto', 'WHERE cntr_id = "'.$idcontrato.'"');
                 $contratista = $this->codegen_model->getSelect('con_contratistas','cont_direccion,cont_telefono,cont_email', 'WHERE cont_id = "'.$contrato[0]->cntr_contratistaid.'"');
+                $liquidador = $this->codegen_model->getSelect('users','first_name,last_name','WHERE id = "'.$liquidacion->liqu_usuarioliquida.'"','');
 
                 $this->data['contrato'] = $contrato[0];
                 $this->data['contratista'] = $contratista[0];
+                $this->data['liquidador'] = $liquidador[0];
 
                 // create new PDF document
               $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
@@ -137,6 +139,9 @@ class Generarpdf extends CI_controller {
                     LEFT JOIN tramitadores ON(tramitadores.id = liquidacion.litr_tramitadorid)'
                 );
                 $this->data['tramite'] = $tramite[0];
+
+                $liquidador = $this->codegen_model->getSelect('users','first_name,last_name','WHERE id = "'.$liquidacion->liqu_usuarioliquida.'"','');
+                $this->data['liquidador'] = $liquidador[0];
 
              // create new PDF document
               $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);

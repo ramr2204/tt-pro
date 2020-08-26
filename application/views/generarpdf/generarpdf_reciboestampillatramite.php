@@ -69,9 +69,10 @@
                          <td colspan="3"><?php echo $tramite->tram_nombre; ?></td>
                     </tr>
                     <tr>
+                         <td colspan="1"><strong>Liquidador</strong></td>
+                         <td colspan="1"><?php echo $liquidador->first_name . ' ' . $liquidador->last_name; ?></td>
                          <td colspan="1"><strong>Base</strong></td>
-                         <td colspan="3"><?php echo '$'.number_format($result->liqu_valorsiniva, 2, ',', '.'); ?>
-                         </td>
+                         <td colspan="1"><?php echo '$'.number_format($result->liqu_valorsiniva, 2, ',', '.'); ?></td>
                     </tr>
                     <tr>
                          <td colspan="1"><strong>Fecha de generación</strong></td>

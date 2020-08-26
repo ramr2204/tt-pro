@@ -88,6 +88,10 @@
                     <td colspan="1"><?php echo $contrato->fecha_insercion ?></td>
                 </tr>
                 <tr>
+                    <td colspan="1"><strong>Liquidador</strong></td>
+                    <td colspan="3"><?php echo $liquidador->first_name . ' ' . $liquidador->last_name; ?></td>
+                </tr>
+                <tr>
                     <td colspan="1"><strong>Objeto</strong></td>
                     <td colspan="3"><?php echo $contrato->cntr_objeto; ?></td>
                 </tr>
