@@ -47,13 +47,21 @@
                <tbody>
                     <tr>
                          <td colspan="1"><strong>Nombre </strong></td>
-                         <td colspan="3"><?php echo $result->liqu_nombrecontratista; ?>
-                         </td>
+                         <td width="33%" colspan="1"><?php echo $result->liqu_nombrecontratista; ?></td>
+                         <td width="17%" colspan="1"><strong>Documento</strong></td>
+                         <td colspan="1"><?php echo $result->liqu_nit; ?></td>
                     </tr>
 
                     <tr>
-                         <td colspan="1"><strong>Documento</strong></td>
-                         <td colspan="3"><?php echo $result->liqu_nit; ?></td>
+                         <td colspan="1"><strong>Dirección</strong></td>
+                         <td colspan="1"><?php echo $tramite->tramitador_direccion; ?></td>
+                         <td colspan="1"><strong>Telefono</strong></td>
+                         <td colspan="1"><?php echo $tramite->tramitador_telefono; ?></td>
+                    </tr>
+
+                    <tr>
+                         <td colspan="1"><strong>Correo electrónico</strong></td>
+                         <td colspan="3"><?php echo $tramite->tramitador_email; ?></td>
                     </tr>
 
                     <tr>
@@ -61,14 +69,19 @@
                          <td colspan="3"><?php echo $tramite->tram_nombre; ?></td>
                     </tr>
                     <tr>
+                         <td colspan="1"><strong>Liquidador</strong></td>
+                         <td colspan="1"><?php echo $liquidador->first_name . ' ' . $liquidador->last_name; ?></td>
                          <td colspan="1"><strong>Base</strong></td>
-                         <td colspan="3"><?php echo '$'.number_format($result->liqu_valorsiniva, 2, ',', '.'); ?>
-                         </td>
+                         <td colspan="1"><?php echo '$'.number_format($result->liqu_valorsiniva, 2, ',', '.'); ?></td>
                     </tr>
                     <tr>
                          <td colspan="1"><strong>Fecha de generación</strong></td>
                          <td colspan="3"><?php echo $tramite->litr_fechaliquidacion ?></td>
                     </tr>
+                    <tr>
+                    <td colspan="1"><strong>Observación</strong></td>
+                    <td colspan="3"><?php echo $tramite->litr_observaciones; ?></td>
+                </tr>
                </tbody>
           </table>
 

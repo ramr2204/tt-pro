@@ -42,15 +42,15 @@
 </tr>
 <tr>
      <td colspan="1"><strong>Nombre del Tramitador</strong></td>
-     <td colspan="3"><?php echo $result->litr_tramitadornombre; ?>
-     <input type="hidden" name="nombretramitador" value="<?php echo $result->litr_tramitadornombre; ?>">
+     <td colspan="3"><?php echo $result->tramitador_nombre; ?>
+     <input type="hidden" name="nombretramitador" value="<?php echo $result->tramitador_nombre; ?>">
      </td>
 </tr>
 
  <tr>
      <td colspan="1"><strong>Número de documento</strong></td>
-     <td colspan="3"><?php echo $result->litr_tramitadorid; ?>
-     <input type="hidden" name="idtramitador" value="<?php echo $result->litr_tramitadorid; ?>">
+     <td colspan="3"><?php echo $result->tramitador_nit; ?>
+     <input type="hidden" name="idtramitador" value="<?php echo $result->tramitador_nit; ?>">
      </td>
 </tr>
 <tr>

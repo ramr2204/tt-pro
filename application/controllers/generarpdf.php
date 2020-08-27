@@ -44,8 +44,13 @@ class Generarpdf extends CI_controller {
               $liquidacion = $this->data['result'];
               $this->data['facturas'] = $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
 
-                $contrato = $this->codegen_model->getSelect('con_contratos','date_format(fecha_insercion,"%Y-%m-%d") AS fecha_insercion', 'WHERE cntr_id = "'.$idcontrato.'"');
+                $contrato = $this->codegen_model->getSelect('con_contratos','date_format(fecha_insercion,"%Y-%m-%d") AS fecha_insercion,cntr_contratistaid,cntr_objeto', 'WHERE cntr_id = "'.$idcontrato.'"');
+                $contratista = $this->codegen_model->getSelect('con_contratistas','cont_direccion,cont_telefono,cont_email', 'WHERE cont_id = "'.$contrato[0]->cntr_contratistaid.'"');
+                $liquidador = $this->codegen_model->getSelect('users','first_name,last_name','WHERE id = "'.$liquidacion->liqu_usuarioliquida.'"','');
+
                 $this->data['contrato'] = $contrato[0];
+                $this->data['contratista'] = $contratista[0];
+                $this->data['liquidador'] = $liquidador[0];
 
                 // create new PDF document
               $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
@@ -128,11 +133,15 @@ class Generarpdf extends CI_controller {
 
                 $tramite = $this->codegen_model->getSelect(
                     'est_liquidartramites liquidacion',
-                    'date_format(liquidacion.litr_fechaliquidacion,"%Y-%m-%d") AS litr_fechaliquidacion, est_tramites.tram_nombre',
+                    'date_format(liquidacion.litr_fechaliquidacion,"%Y-%m-%d") AS litr_fechaliquidacion, est_tramites.tram_nombre, tramitadores.email as tramitador_email,tramitadores.direccion as tramitador_direccion,tramitadores.telefono as tramitador_telefono,liquidacion.litr_observaciones',
                     'WHERE litr_id = "'.$idcontrato.'"',
-                    'LEFT JOIN est_tramites ON(est_tramites.tram_id = liquidacion.litr_tramiteid)'
+                    'LEFT JOIN est_tramites ON(est_tramites.tram_id = liquidacion.litr_tramiteid)
+                    LEFT JOIN tramitadores ON(tramitadores.id = liquidacion.litr_tramitadorid)'
                 );
                 $this->data['tramite'] = $tramite[0];
+
+                $liquidador = $this->codegen_model->getSelect('users','first_name,last_name','WHERE id = "'.$liquidacion->liqu_usuarioliquida.'"','');
+                $this->data['liquidador'] = $liquidador[0];
 
              // create new PDF document
               $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);

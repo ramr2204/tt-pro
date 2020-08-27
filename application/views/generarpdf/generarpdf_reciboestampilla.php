@@ -48,13 +48,21 @@
 
                 <tr>
                     <td colspan="1"><strong>Nombre del contratista</strong></td>
-                    <td colspan="3"><?php echo $result->liqu_nombrecontratista; ?>
-                    </td>
+                    <td width="33%" colspan="1"><?php echo $result->liqu_nombrecontratista; ?></td>
+                    <td width="17%" colspan="1"><strong>C.C. o NIT</strong></td>
+                    <td colspan="1"><?php echo $result->liqu_nit; ?></td>
                 </tr>
 
                 <tr>
-                    <td colspan="1"><strong>C.C. o NIT</strong></td>
-                    <td colspan="1"><?php echo $result->liqu_nit; ?></td>
+                    <td colspan="1"><strong>Dirección</strong></td>
+                    <td colspan="1"><?php echo $contratista->cont_direccion; ?></td>
+                    <td colspan="1"><strong>Telefono</strong></td>
+                    <td colspan="1"><?php echo $contratista->cont_telefono; ?></td>
+                </tr>
+
+                <tr>
+                    <td colspan="1"><strong>Correo electrónico</strong></td>
+                    <td colspan="1"><?php echo $contratista->cont_email; ?></td>
                     <td colspan="1"><strong>Tipo de contratista</strong></td>
                     <td colspan="1"><?php echo $result->liqu_tipocontratista; ?></td>
                 </tr>
@@ -76,8 +84,16 @@
                 <tr>
                     <td colspan="1"><strong>Tipo de contrato</strong></td>
                     <td colspan="1"><?php echo $result->liqu_tipocontrato; ?></td>
-                    <td colspan="1"><strong>Fecha de generación</strong></td>
+                    <td colspan="1"><strong>Fecha generación</strong></td>
                     <td colspan="1"><?php echo $contrato->fecha_insercion ?></td>
+                </tr>
+                <tr>
+                    <td colspan="1"><strong>Liquidador</strong></td>
+                    <td colspan="3"><?php echo $liquidador->first_name . ' ' . $liquidador->last_name; ?></td>
+                </tr>
+                <tr>
+                    <td colspan="1"><strong>Objeto</strong></td>
+                    <td colspan="3"><?php echo $contrato->cntr_objeto; ?></td>
                 </tr>
             </tbody>
         </table>

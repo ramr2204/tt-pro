@@ -43,7 +43,30 @@
                                           </div>
                                         </div>
 
-                                     
+                                        <div class="col-md-4 column">
+                                            <div class="form-group">
+                                                <label for="telefono">Telefono</label>
+                                                <input class="form-control" id="telefono" type="telefono" name="telefono" value="<?php echo set_value('telefono'); ?>" required="required" maxlength="15" />
+                                                <?php echo form_error('telefono','<span class="text-danger">','</span>'); ?>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-8 column">
+                                            <div class="form-group">
+                                                <label for="email">Email</label>
+                                                <input class="form-control" id="email" type="email" name="email" value="<?php echo set_value('email'); ?>" required="required" />
+                                                <?php echo form_error('email','<span class="text-danger">','</span>'); ?>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12 column">
+                                            <div class="form-group">
+                                                <label for="direccion">Dirección</label>
+                                                <input class="form-control" id="direccion" type="direccion" name="direccion" value="<?php echo set_value('direccion'); ?>" required="required" maxlength="256" />
+                                                <?php echo form_error('direccion','<span class="text-danger">','</span>'); ?>
+                                            </div>
+                                        </div>
+
                                      <div class="col-md-12 column">
                                          <div class="form-group">
                                            <label for="tramiteid">Trámite</label>
@@ -114,26 +137,33 @@
             $('#contene_placaVehiculo').slideDown(300);                
         }else
             {
-                $('#contene_placaVehiculo').slideUp(300);                
+                $('#contene_placaVehiculo').slideUp(300);
             }
     }
   </script>
   <script type="text/javascript">
       $( "#documento" ).change(function() {
          var documento = $(this).val();
-         var nombre = $('#nombre').val();
+         var campos = ['nombre','telefono','email','direccion'];
          $.ajax({
             type: "POST",
             url: "<?php echo base_url(); ?>index.php/liquidaciones/consultardocumento",
             data: { documento: documento }
           }).done(function( msg ) {
             if (msg==0) {
-                $('#encontrado').val(0);  
-                $('#nombre').val(nombre);
+                campos.forEach(function(campo){
+                    $('#'+campo).attr('readonly', false);
+                    $('#'+campo).val('');
+                });
+                $('#encontrado').val(0);
             } else {
-                $('#nombre').attr('readonly', 'readonly');
-                $('#nombre').val(msg);
-                $('#encontrado').val(1); 
+                var tramitador = JSON.parse(msg);
+
+                campos.forEach(function(campo){
+                    $('#'+campo).attr('readonly', 'readonly');
+                    $('#'+campo).val(tramitador[campo]);
+                });
+                $('#encontrado').val(1);
             }
             
          });
