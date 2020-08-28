@@ -69,14 +69,10 @@
                          <td colspan="3"><?php echo $tramite->tram_nombre; ?></td>
                     </tr>
                     <tr>
-                         <td colspan="1"><strong>Liquidador</strong></td>
-                         <td colspan="1"><?php echo $liquidador->first_name . ' ' . $liquidador->last_name; ?></td>
+                         <td colspan="1"><strong>Fecha de generación</strong></td>
+                         <td colspan="1"><?php echo $tramite->litr_fechaliquidacion ?></td>
                          <td colspan="1"><strong>Base</strong></td>
                          <td colspan="1"><?php echo '$'.number_format($result->liqu_valorsiniva, 2, ',', '.'); ?></td>
-                    </tr>
-                    <tr>
-                         <td colspan="1"><strong>Fecha de generación</strong></td>
-                         <td colspan="3"><?php echo $tramite->litr_fechaliquidacion ?></td>
                     </tr>
                     <tr>
                     <td colspan="1"><strong>Observación</strong></td>
@@ -119,7 +115,7 @@
                     <tr>
                          <td>Total</td>
                          <td class="text-right"><?php echo '$'.number_format($totalValor, 2, ',', '.'); ?></td>
-                         <td colspan="2"></td>
+                         <td colspan="2" class="text-right"><?php echo $liquidador->first_name . ' ' . $liquidador->last_name; ?></td>
                     </tr>
                </tbody>
           </table>
@@ -129,7 +125,7 @@
                {
                     ?>
                     <br>
-                    <img src="<?php echo $this->config->item('application_root'); ?>images/tijeras.png" width="25" height="25" style="vertical-align: sub;"><span>--------------------------------------------------------------------------------------------------------------------------------------------------</span>
+                    <img src="<?php echo $this->config->item('application_root'); ?>images/tijeras.png" width="25" height="25" style="vertical-align: sub;"><span>------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</span>
                     <br><br>
                     <?php
                }

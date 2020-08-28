@@ -86,7 +86,7 @@ class Generarpdf extends CI_controller {
                 // ---------------------------------------------------------
 
                 // set font
-                $pdf->SetFont('times', 'BI', 10);
+                $pdf->SetFont('times', 'BI', 8);
 
                 foreach ($this->data['facturas'] as $key => $value)
                 {
@@ -177,7 +177,7 @@ class Generarpdf extends CI_controller {
                 // ---------------------------------------------------------
 
                 // set font
-                $pdf->SetFont('times', 'BI', 10);
+                $pdf->SetFont('times', 'BI', 8);
 
                 foreach ($this->data['facturas'] as $key => $value)
                 {
