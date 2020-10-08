@@ -33,15 +33,15 @@
     <tbody>
         <tr>
                     <td class="text-left" style="height: 19mm; width: 20mm;
-                        border-bottom: 0.5px solid black;"><img id="logo_gobernacion" src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima1.jpg" style="height: 15mm; width: 20mm;"></td>
+                        border-bottom: 0.5px solid black;"><img id="logo_gobernacion" src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_cauca1.jpg" style="height: 15mm; width: 20mm;"></td>
 
                     <td class="text-center" id="leyenda_encabezado" colspan="2" style="height: 
                         19mm;width:110mm;                          
                         border-bottom: 0.5px solid black;
-                        font-size:9;"><br><br>GOBERNACIÓN DEL PUTUMAYO <br><span style="font-size:8px;">SECRETARIA DE HACIENDA<br>DIRECCION FINANCIERA DE RENTAS E INGRESOS</span></td>
+                        font-size:9;"><br><br>GOBERNACIÓN DEL CAUCA <br><span style="font-size:8px;">SECRETARIA DE HACIENDA<br>DIRECCION FINANCIERA DE RENTAS E INGRESOS</span></td>
 
                     <td style="height: 19mm; width: 26mm; 
-                        border-bottom: 0.5px solid black;"><br><br><img id="logo_gobernador" src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima2.png" style="height: 13mm; width: 25mm;" ></td>
+                        border-bottom: 0.5px solid black;"><br><br><img id="logo_gobernador" src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_cauca2.png" style="height: 13mm; width: 25mm;" ></td>
      
         </tr>
     </tbody>
@@ -216,8 +216,8 @@ echo  strtoupper($diaNumero.' de '.$mesNombre.' de '.date('Y'));
 Doctor<br>
 <b>OSCAR JAVIER ESCOBAR BRAVO </b><br>
 Secretario director servicios administrativos<br>
-Gobernación del Putumayo<br>
-Putumayo, Mocoa<br>
+Gobernación del Cauca<br>
+Cauca, Popayán<br>
 </p>
 
 
@@ -327,6 +327,6 @@ PROYECTO ESTAMPILLAS PRO<br>
 <div class="text-center" style="font-size:8px;">
 <br>
 “Vale ser legal”<br>
-Gobernación del Putumayo<br>
-www.putumayo.gov.co
+Gobernación del Cauca<br>
+https://cauca.gov.co
 </div>

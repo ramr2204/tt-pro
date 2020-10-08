@@ -281,7 +281,7 @@ var oTable = $('#tablaq').dataTable( {
        <small> "Vale ser legal"<br>
       Calle 8 Número 7-40 <br>
       Teléfonos (57+8) 4206600 Ext. 101 Fax: 4295196<br>
-      contactenos@putumayo.gov.co </small> 
+      contactenos@cauca.gov.co </small> 
       </div>
         
       </div>

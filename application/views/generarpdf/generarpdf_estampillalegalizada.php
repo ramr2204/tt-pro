@@ -25,18 +25,18 @@
                     <td class="text-center" style="height: 19mm; width: 26mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><img id="logo_gobernacion" src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima1.jpg" style="height: 15mm; width: 20mm;"></td>
+                        border-bottom: 0.5px solid black;"><img id="logo_gobernacion" src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_cauca1.jpg" style="height: 15mm; width: 20mm;"></td>
 
                     <td class="text-center" id="leyenda_encabezado" colspan="3" style="height: 19mm; width: 68mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:9;"><br><br>GOBERNACIÓN DEL PUTUMAYO <br>Estampilla Departamental</td>
+                        font-size:9;"><br><br>GOBERNACIÓN DEL CAUCA <br>Estampilla Departamental</td>
 
                     <td style="height: 19mm; width: 26mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><br><br><img id="logo_gobernador" src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_tolima2.png" style="height: 13mm; width: 25mm;" ></td>
+                        border-bottom: 0.5px solid black;"><br><br><img id="logo_gobernador" src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_cauca2.png" style="height: 13mm; width: 25mm;" ></td>
                 </tr>
  
                 <tr>

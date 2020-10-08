@@ -51,7 +51,7 @@ $active_record = TRUE;
 $db['default']['hostname'] = '192.168.0.101';
 $db['default']['username'] = 'root';
 $db['default']['password'] = 'Turr1syst3m0';
-$db['default']['database'] = 'estampillas_pro_putumayo';
+$db['default']['database'] = 'estampillas_pro_cauca';
 $db['default']['dbdriver'] = 'mysql';
 $db['default']['dbprefix'] = '';
 $db['default']['pconnect'] = TRUE;
@@ -63,7 +63,7 @@ $db['default']['dbcollat'] = 'utf8_general_ci';
 $db['default']['swap_pre'] = '';
 $db['default']['autoinit'] = TRUE;
 $db['default']['stricton'] = FALSE;
-$db['default']['port'] = 3308;
+$db['default']['port'] = 3306;
 
 
 /* End of file database.php */
