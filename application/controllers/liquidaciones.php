@@ -265,13 +265,13 @@ class Liquidaciones extends MY_Controller {
                             }
                     }
 
-              //arreglo que guarda los distintos valores
-              //de liquidacion de las estampillas    
-              $totalestampilla= array(); 
+            //arreglo que guarda los distintos valores
+            //de liquidacion de las estampillas
+            $totalestampilla= array();
 
-              $valortotal=0;
-              $parametros=$this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo','para_id = 1',1,NULL,true);
-              
+            $valortotal=0;
+            $parametros=$this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo','para_id = 1',1,NULL,true);
+
             foreach ($estampillas as $key => $value) 
             {
                 /*
@@ -283,64 +283,41 @@ class Liquidaciones extends MY_Controller {
                 if($bandRegistrarFactura)
                 {
                     /*
-                    * Valida si el tipo de estampilla es Pro-Hospitales
-                    * y el municipio del contrato es distinto a Ibagué
-                    * para no liquidar la estampilla
-                    */
-                    /************************
-                    *
-                    * SE COMENTA ESTA VALIDACION MIENTRAS EL INGENIERO EVELIO
-                    * DEFINE CUANDO DEBE SER HABILITADA
-                    * SOLO SE DEBE MODIFICAR EL MUNICIPIO DE ORIGEN AL ID DEL MUNICIPIO
-                    * QUE EL INGE EVELIO DIGA QUE NO SE DEBE COBRAR LA ESTAMPILLA PRO HOSPITALES
-                    */
-                    //if(($value->estm_id == 4 && $contrato->cntr_municipio_origen != 1028) || $value->estm_id != 4)
-                    //{
-                        //Realiza la validación para los contratos de tipo
-                        //consultoria o concesión y que el valor del contrato
-                        //sea >= 10 SMMLV para aplicar la estampilla pro grandeza de colombia                
-                        if($value->estm_id == 8)
+                     * Para la estampilla procultura y que sean contratos de obra civil,
+                     * suministros y bienes y servicios que superen los 25 salarios se
+                     * les aplica el porcentaje de la estampilla
+                     */
+                    if($value->estm_id == 2 && in_array($contrato->cntr_tipocontratoid, array(2,4,43)) )
+                    {
+                        if( $contrato->cntr_valor >= ($parametros->para_salariominimo * 25) )
                         {
-                            if($contrato->cntr_tipocontratoid==9 || $contrato->cntr_tipocontratoid==7 || $contrato->cntr_tipocontratoid==37)
-                            {
-                                 $valor10SMMLV = $parametros->para_salariominimo * 10;
-        
-                                 if($contrato->cntr_valor >= $valor10SMMLV)
-                                 {
-                                      $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
-                                      $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
-                                      array_push($this->data['estampillas'], $value);
-                                 }
-                            }else
-                                {
-                                     $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
-                                     $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
-                                     array_push($this->data['estampillas'], $value);  
-                                }
-                        }else
-                            {
-                                 $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
-                                 $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
-                                 array_push($this->data['estampillas'], $value);
-                            }                    
-                        
-                        /*
-                        * Valida si el valor establecido para la estampilla es igual a cero
-                        * para establecer el valor minimo 1000
-                        */
-                        if(isset($totalestampilla[$value->estm_id]))
-                        {
-                            if($totalestampilla[$value->estm_id] <= 0)
-                            {
-                                $totalestampilla[$value->estm_id] = 1000;
-                            }
-                            
-                            /*
-                            * Calcula el total a pagar
-                            */
-                            $valortotal += (double)$totalestampilla[$value->estm_id];
+                            $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
+                            $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
+                            array_push($this->data['estampillas'], $value);
                         }
-                    //}
+                    }else
+                        {
+                            $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
+                            $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
+                            array_push($this->data['estampillas'], $value);
+                        }
+
+                    /*
+                    * Valida si el valor establecido para la estampilla es igual a cero
+                    * para establecer el valor minimo 1000
+                    */
+                    if(isset($totalestampilla[$value->estm_id]))
+                    {
+                        if($totalestampilla[$value->estm_id] <= 0)
+                        {
+                            $totalestampilla[$value->estm_id] = 1000;
+                        }
+
+                        /*
+                        * Calcula el total a pagar
+                        */
+                        $valortotal += (double)$totalestampilla[$value->estm_id];
+                    }
                 }
             }
 
