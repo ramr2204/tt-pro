@@ -1473,7 +1473,41 @@ function verliquidartramite()
       }           
   }
 
+    function consultarLiquidacion()
+    {
+        $id = $this->uri->segment(3);
 
+        $enviar = [
+            'facturas' => $this->liquidaciones_model->getfacturas($id)
+        ];
+
+        echo json_encode($enviar, JSON_UNESCAPED_UNICODE);
+    }
+
+    function pagarContrato()
+    {
+        if ($this->ion_auth->logged_in()){
+
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar'))
+            {
+                //$this->data['band_saldoestampillas'] = true;
+
+                $this->template->load($this->config->item('admin_template'),'liquidaciones/pagarLiquidacion', $this->data);
+            } else {
+                redirect(base_url().'index.php/error_404');
+            }
+
+        } 
+        else
+        {
+            redirect(base_url().'index.php/users/login');
+        } 
+    }
+
+    function pagarContacto()
+    {
+        var_dump('le toca a david');
+    }
 
 
   function liquidaciones_datatable ()
@@ -1483,7 +1517,7 @@ function verliquidartramite()
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
               
               $this->load->library('datatables');
-              $this->datatables->select('c.cntr_id,c.cntr_numero,co.cont_nit,co.cont_nombre,c.cntr_fecha_firma,c.cntr_objeto,c.cntr_valor,el.eslo_nombre');
+              $this->datatables->select('c.cntr_id,c.cntr_numero,co.cont_nit,co.cont_nombre,c.cntr_fecha_firma,c.cntr_objeto,c.cntr_valor,el.eslo_nombre,c.pagado');
               $this->datatables->from('con_contratos c');
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
               $this->datatables->join('con_estadoslocales el', 'el.eslo_id = c.cntr_estadolocalid', 'left');
