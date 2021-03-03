@@ -65,6 +65,21 @@
                                         <input id="file" type="file" class="file" name="imagen" multiple=false>
                                     </div>
                                     <div class="form-group">
+                                      <label for="tipo">Tipo Estampilla</label>
+                                      <select class="form-control" id="tipo" name="tipo" required="required" >
+                                        <option value="0">Seleccione...</option>
+                                        <?php
+                                          foreach($tiposEstampillas as $id => $nombre)
+                                          {
+                                            ?>
+                                            <option value="<?= $id ?>"><?= ucfirst($nombre) ?></option>
+                                            <?php
+                                          }
+                                        ?>
+                                      </select>
+                                      <?php echo form_error('tipo','<span class="text-danger">','</span>'); ?>
+                                    </div>
+                                    <div class="form-group">
                                            <label for="descripcion">Descripción</label>
                                            <textarea class="form-control" id="descripcion" type="descripcion" name="descripcion" maxlength="500"><?php echo $result->estm_descripcion; ?></textarea>
                                            <?php echo form_error('descripcion','<span class="text-danger">','</span>'); ?>
@@ -77,7 +92,7 @@
                                       <a class="btn btn-danger" data-toggle="modal" data-target="#myModal"><i class="fa fa-trash-o"></i> Eliminar</a>
                                      <?php } ?>
 
-                                    <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
+                                      <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
                                     </div>
                                 <?php echo form_close();?>
                               
@@ -131,17 +146,20 @@
   </script>
   <script type="text/javascript">
     $("#file").fileinput({
-      <?php   if ($result->estm_rutaimagen != '') { ?>
-        initialPreview: ["<a href='<?php echo base_url().$result->estm_rutaimagen; ?>' target='_blank'><img src='<?php echo base_url().$result->estm_rutaimagen; ?>' class='file-preview-image' alt='The Moon' title=''></a>"
-],
-        initialCaption: "",
-      <?php } ?>
+      <?php
+        if ($result->estm_rutaimagen != '')
+        {
+          ?>
+          initialPreview: ["<a href='<?php echo base_url().$result->estm_rutaimagen; ?>' target='_blank'><img src='<?php echo base_url().$result->estm_rutaimagen; ?>' class='file-preview-image' alt='The Moon' title=''></a>"],
+          initialCaption: "",
+          <?php
+        }
+      ?>
         showCaption: false,
         browseClass: "btn btn-default btn-sm",
         browseLabel: "Cargar imagen",
         showUpload: false,
         showRemove: false,
-
     });
 
 </script>

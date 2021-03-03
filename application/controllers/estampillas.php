@@ -15,7 +15,8 @@ class Estampillas extends MY_Controller {
   {
       parent::__construct();
 	    $this->load->library('form_validation');		
-		  $this->load->helper(array('form','url','codegen_helper'));
+          $this->load->helper(array('form','url','codegen_helper'));
+          $this->load->helper('Equivalencias');
 		  $this->load->model('codegen_model','',TRUE);
 
 	}	
@@ -146,7 +147,7 @@ class Estampillas extends MY_Controller {
 
 
 	function edit()
-  {    
+    {
       if ($this->ion_auth->logged_in()) {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('estampillas/edit')) {  
@@ -260,9 +261,9 @@ class Estampillas extends MY_Controller {
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
                 	$this->data['result'] = $this->codegen_model->get('est_estampillas','estm_id,estm_nombre,estm_cuenta,estm_descripcion,estm_bancoid,estm_rutaimagen,estm_codigoB','estm_id = '.$idestampilla,1,NULL,true);                  
                   $this->data['bancos']  = $this->codegen_model->getSelect('par_bancos','banc_id,banc_nombre');
+                  $this->data['tiposEstampillas']  = Equivalencias::tiposEstampillas();
                   $this->template->set('title', 'Editar estampilla');
                   $this->template->load($this->config->item('admin_template'),'estampillas/estampillas_edit', $this->data);
-                        
           }else {
               redirect(base_url().'index.php/error_404');
           }
