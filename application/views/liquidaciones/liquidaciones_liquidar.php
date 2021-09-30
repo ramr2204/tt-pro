@@ -70,8 +70,14 @@ $(document).ready(function() {
                $("td:eq(6)", nRow).html('<div>Sin Liquidar</div>'); 
                $("td:eq(7)", nRow).html('<a href="#" class="btn btn-danger btn-xs liquidar" title="Liquidar" id="'+aData[0]+'"><i class="fa fa-file-excel-o"></i></a>');
             }
-            if (aData[8]==0) { 
-                $("td:eq(7)", nRow).append('<a href="#" class="btn btn-info btn-xs pagar-contrato" data-toggle="modal" data-target="#modalLiquidacion" title="pse" id="'+aData[0]+'"><i class="fa fa-shopping-cart"></i></a>');
+            if (aData[8]==0) {
+                // Se comenta ya que el proceso de pago aun no ha sido terminado
+                // $("td:eq(7)", nRow).append('<a href="#" class="btn btn-info btn-xs pagar-contrato" data-toggle="modal" data-target="#modalLiquidacion" title="pse" id="'+aData[0]+'"><i class="fa fa-shopping-cart"></i></a>');
+            }
+
+            // Si tiene mas de un numero de pagos es por retencion y se mostrara en todos los estados expecto sin liquidar
+            if(aData[9] > 0 && aData[7] != null) {
+                $("td:eq(7)", nRow).append('<a href="#" class="btn btn-warning btn-xs pagar-estampillas" title="Pagar estampillas por contención" id-contrato="'+aData[0]+'"><i class="fa fa-legal"></i></a>');
             }
         },
         "fnDrawCallback": function( oSettings ) {
@@ -349,44 +355,102 @@ $(document).ready(function() {
 <?php echo form_close();?>
 
 
-<?php if ($accion=='liquidado') { ?>
-<script type="text/javascript">
-    var ID = <?php echo $idcontrato; ?>;
-    
-    $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/verrecibos/'+ID,function(result){
-    <?php
-    if (isset($errorModal)) 
-    {              
-        if ($errorModal)
-        { ?>
-            var mensajeError = '<div class="alert alert-dismissable alert-danger">'+$('.alert').html();+'</div>'                    
-            $('#errorModal').html(mensajeError);
-          <?php
-        }
-    }
-    ?>
-    $('#myModal2').modal('show');
-    
-});
-        
- 
-</script>
-<?php   } ?>
-
-
-<?php if ($accion=='legalizado') { ?>
-<script type="text/javascript">
-  
-    var ID = <?php echo $idcontrato; ?>;            
+<?php
+    if ($accion=='liquidado')
+    {
+        ?>
+        <script type="text/javascript">
+            var ID = <?php echo $idcontrato; ?>;
             
-    $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vercontratolegalizado/'+ID,function(result){
+            $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/verrecibos/'+ID,function(result){
+                <?php
+                    if (isset($errorModal)) 
+                    {
+                        if ($errorModal)
+                        {
+                            ?>
+                            $('#errorModal').html( $('.alert')[0].outerHTML );
+                            <?php
+                        }
+                    }
+                ?>
+            $('#myModal2').modal('show');
+            
+        });
 
-        $('#myModal3').modal('show');
-    
-        $('.confirmar_impresion').click(validarNumeroRotuloLiquidador);
-    });
+        </script>
+        <?php
+    }
+?>
 
+
+<?php
+    if ($accion=='legalizado')
+    {
+        ?>
+        <script type="text/javascript">
+        
+            var ID = <?php echo $idcontrato; ?>;            
+                    
+            $('.termina').load('<?php echo base_url(); ?>index.php/liquidaciones/vercontratolegalizado/'+ID,function(result){
+
+                $('#myModal3').modal('show');
+            
+                $('.confirmar_impresion').click(validarNumeroRotuloLiquidador);
+            });
+        </script>
+        <?php
+    }
+?>
+
+<!-- Modal de pago de estampillas por retencion -->
+<div class="modal fade" id="pago_estampillas" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body contenedor_pago_estampillas"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).on('click', '.pagar-estampillas', onClickPagarEstampillas);
+
+    function onClickPagarEstampillas(event, ID=null, error_modal=false){
+        if(event){
+            event.preventDefault();
+        }
+        ID = ID ? ID : $(this).attr('id-contrato');
+
+        $('.contenedor_pago_estampillas').load(
+            '<?php echo base_url(); ?>index.php/liquidaciones/estampillasRetencion/'+ID,
+            function(result){
+                $('#pago_estampillas').modal('show');
+                $('#id_contrato_cont').val(ID);
+
+                if(error_modal){
+                    $('#errorModal').html( $('.alert')[0].outerHTML );
+                }
+            }
+        );
+    }
+
+    <?php
+        if ($accion=='retencion')
+        {
+            ?>
+            onClickPagarEstampillas(null, <?= $idcontrato ?>, <?= $errorModal ?>);
+            <?php
+        }
+    ?>
+
+    <?php
+        if(isset($idPagoFactura) && $idPagoFactura)
+        {
+            ?>
+            window.open($('#base').val() + 'generarpdf/certificadoPagoEstampilla/<?= $idPagoFactura ?>', '_blank');
+            <?php
+        }
+    ?>
 </script>
-<?php   } ?>
 
 

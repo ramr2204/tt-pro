@@ -58,99 +58,89 @@ class Estampillas extends MY_Controller {
 
   }
 	
-  function add()
-  {        
-      if ($this->ion_auth->logged_in()) {
+	function add()
+	{
+		if ($this->ion_auth->logged_in())
+		{
+			if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('estampillas/add'))
+			{
+				$this->data['successmessage']=$this->session->flashdata('message');  
+				$this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
+				$this->form_validation->set_rules('codigoB', 'Codigo Barras', 'required|trim|xss_clean|numeric|max_length[128]');
+				$this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]');
+				$this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[256]');
+				$this->form_validation->set_rules('bancoid', 'Banco',  'required|numeric|greater_than[0]');
+				$this->form_validation->set_rules('tipo', 'Tipo Estampilla', 'required|numeric|greater_than[0]');
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('estampillas/add')) {
+				$path = "uploads/imagenesestampillas";
+				if(!is_dir($path)) { //create the folder if it's not already exists
+					mkdir($path,0777,TRUE);      
+				}
+				$config['upload_path'] = $path;
+				$config['allowed_types'] = 'jpg|jpeg|gif|png';
+				$config['remove_spaces']=TRUE;
+				$config['max_size']    = '2048';
+				$config['file_name']=$this->input->post('nombre').'_'.date("F_d_Y");
+				//$config['overwrite']    = TRUE;
+				$this->load->library('upload');
+				$ruta='';
 
-              $this->data['successmessage']=$this->session->flashdata('message');  
-              $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
-              $this->form_validation->set_rules('codigoB', 'Codigo Barras', 'required|trim|xss_clean|numeric|max_length[128]');
-              $this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]');
-              $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[256]');
-              $this->form_validation->set_rules('bancoid', 'Banco',  'required|numeric|greater_than[0]');
-              
+				if ($this->form_validation->run() == false) {
+					$this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
+				} else {
+					$this->upload->initialize($config);
+					if ($this->upload->do_upload("imagen")) {
+						$file_data= $this->upload->data();
+						$ruta =  $path.'/'.$file_data['orig_name'];
 
-              $path = "uploads/imagenesestampillas";
-              if(!is_dir($path)) { //create the folder if it's not already exists
-                  mkdir($path,0777,TRUE);      
-              }
-              $config['upload_path'] = $path;
-              $config['allowed_types'] = 'jpg|jpeg|gif|png';
-              $config['remove_spaces']=TRUE;
-              $config['max_size']    = '2048';
-              $config['file_name']=$this->input->post('nombre').'_'.date("F_d_Y");
-              //$config['overwrite']    = TRUE;
-              $this->load->library('upload');
-              $ruta='';
-
-
-              if ($this->form_validation->run() == false) {
-
-                  $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
-              } else {    
-                      $this->upload->initialize($config);
-                   if ($this->upload->do_upload("imagen")) {
-                       $file_data= $this->upload->data();
-                       $ruta =  $path.'/'.$file_data['orig_name'];
-
-                       $data = array(
-                          'estm_nombre' => $this->input->post('nombre'),
-                          'estm_cuenta' => $this->input->post('cuenta'),
-                          'estm_descripcion' => $this->input->post('descripcion'),
-                          'estm_bancoid' => $this->input->post('bancoid'),
-                          'estm_codigoB' => $this->input->post('codigoB'),
-                          'estm_rutaimagen' => $ruta
-                       );
-                        
-                        $respuestaProceso = $this->codegen_model->add('est_estampillas',$data);
-                       if ($respuestaProceso->bandRegistroExitoso) {
-
-                           $this->session->set_flashdata('message', 'La estampilla se ha creado con éxito');
-                           redirect(base_url().'index.php/estampillas/add');
-                       } else {
-
-                           $this->data['errormessage'] = 'No se pudo registrar la estampilla';
-
-                       }
-                                                          
-                   } else {
-                       $this->data['errormessage'] =$this->upload->display_errors(); 
-                   } 
-                 
-                 
-
-    		      }
-              $this->template->set('title', 'Nueva aplicación');
-              $this->data['style_sheets']= array(
-                        'css/chosen.css' => 'screen',
-                        'css/plugins/bootstrap/fileinput.css' => 'screen'
-                    );
-              $this->data['javascripts']= array(
-                        'js/chosen.jquery.min.js',
-                        'js/plugins/bootstrap/fileinput.min.js'
-                    );  
-              $this->template->set('title', 'Nuevo estampilla');
-              $this->data['bancos']  = $this->codegen_model->getSelect('par_bancos','banc_id,banc_nombre');
-              $this->template->load($this->config->item('admin_template'),'estampillas/estampillas_add', $this->data);
-             
-          } else {
-              redirect(base_url().'index.php/error_404');
-          }
-
-      } else {
-          redirect(base_url().'index.php/users/login');
-      }
-
-  }	
+						$data = array(
+							'estm_nombre'		=> $this->input->post('nombre'),
+							'estm_cuenta'		=> $this->input->post('cuenta'),
+							'estm_descripcion'	=> $this->input->post('descripcion'),
+							'estm_bancoid'		=> $this->input->post('bancoid'),
+							'estm_codigoB'		=> $this->input->post('codigoB'),
+							'tipo'				=> $this->input->post('tipo'),
+							'estm_rutaimagen'	=> $ruta
+						);
+						
+						$respuestaProceso = $this->codegen_model->add('est_estampillas',$data);
+						if ($respuestaProceso->bandRegistroExitoso) {
+							$this->session->set_flashdata('message', 'La estampilla se ha creado con éxito');
+							redirect(base_url().'index.php/estampillas/add');
+						} else {
+							$this->data['errormessage'] = 'No se pudo registrar la estampilla';
+						}
+					} else {
+						$this->data['errormessage'] =$this->upload->display_errors(); 
+					}
+				}
+				$this->template->set('title', 'Nueva aplicación');
+				$this->data['style_sheets']= array(
+					'css/chosen.css' => 'screen',
+					'css/plugins/bootstrap/fileinput.css' => 'screen'
+				);
+				$this->data['javascripts']= array(
+					'js/chosen.jquery.min.js',
+					'js/plugins/bootstrap/fileinput.min.js'
+				);
+				$this->template->set('title', 'Nuevo estampilla');
+				$this->data['bancos'] = $this->codegen_model->getSelect('par_bancos','banc_id,banc_nombre');
+				$this->data['tiposEstampillas'] = Equivalencias::tiposEstampillas();
+				$this->template->load($this->config->item('admin_template'),'estampillas/estampillas_add', $this->data);
+			} else {
+				redirect(base_url().'index.php/error_404');
+			}
+		} else {
+			redirect(base_url().'index.php/users/login');
+		}
+	}
 
 
 	function edit()
     {
       if ($this->ion_auth->logged_in()) {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('estampillas/edit')) {  
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('estampillas/edit')) {
 
               $idestampilla = ($this->uri->segment(3)) ? $this->uri->segment(3) : $this->input->post('id') ;
               if ($idestampilla==''){
@@ -174,6 +164,7 @@ class Estampillas extends MY_Controller {
               $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]');   
               $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[256]');
               $this->form_validation->set_rules('bancoid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
+              $this->form_validation->set_rules('tipo', 'Tipo Estampilla', 'required|numeric|greater_than[0]');
               /**
               * Valida si el numero codigo para barras es el mismo al registrado
               * o no para validarlo como unique
@@ -211,23 +202,23 @@ class Estampillas extends MY_Controller {
                        $file_data= $this->upload->data();
                        $ruta =  $path.'/'.$file_data['orig_name'];
                        $data = array(
-                        'estm_nombre' => $this->input->post('nombre'),
-                        'estm_cuenta' => $this->input->post('cuenta'),
-                        'estm_descripcion' => $this->input->post('descripcion'),
-                        'estm_bancoid' => $this->input->post('bancoid'),
-                        'estm_codigoB' => $this->input->post('codigoB'),
-                        'estm_rutaimagen' => $ruta
-
+                        'estm_nombre'       => $this->input->post('nombre'),
+                        'estm_cuenta'       => $this->input->post('cuenta'),
+                        'estm_descripcion'  => $this->input->post('descripcion'),
+                        'estm_bancoid'      => $this->input->post('bancoid'),
+                        'estm_codigoB'      => $this->input->post('codigoB'),
+                        'tipo'              => $this->input->post('tipo'),
+                        'estm_rutaimagen'   => $ruta
                        );
                   } else {
                        $this->data['errormessage'] =$this->upload->display_errors();
                         $data = array(
-                        'estm_nombre' => $this->input->post('nombre'),
-                        'estm_cuenta' => $this->input->post('cuenta'),
-                        'estm_descripcion' => $this->input->post('descripcion'),
-                        'estm_codigoB' => $this->input->post('codigoB'),
-                        'estm_bancoid' => $this->input->post('bancoid')
-
+                        'estm_nombre'				=> $this->input->post('nombre'),
+                        'estm_cuenta'				=> $this->input->post('cuenta'),
+                        'estm_descripcion'	=> $this->input->post('descripcion'),
+                        'estm_codigoB'			=> $this->input->post('codigoB'),
+												'tipo'							=> $this->input->post('tipo'),
+                        'estm_bancoid'			=> $this->input->post('bancoid')
                        );
                   }
                           
@@ -259,7 +250,12 @@ class Estampillas extends MY_Controller {
                         );    
                   
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                	$this->data['result'] = $this->codegen_model->get('est_estampillas','estm_id,estm_nombre,estm_cuenta,estm_descripcion,estm_bancoid,estm_rutaimagen,estm_codigoB','estm_id = '.$idestampilla,1,NULL,true);                  
+                	$this->data['result'] = $this->codegen_model->get(
+						'est_estampillas',
+						'estm_id,estm_nombre,estm_cuenta,estm_descripcion,estm_bancoid,estm_rutaimagen,estm_codigoB,tipo',
+						'estm_id = '.$idestampilla,
+						1,NULL,true
+					);
                   $this->data['bancos']  = $this->codegen_model->getSelect('par_bancos','banc_id,banc_nombre');
                   $this->data['tiposEstampillas']  = Equivalencias::tiposEstampillas();
                   $this->template->set('title', 'Editar estampilla');

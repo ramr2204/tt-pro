@@ -11,14 +11,15 @@
 
 class Contratos extends MY_Controller {
     
-  function __construct() 
-  {
-      parent::__construct();
-	    $this->load->library('form_validation');		
-		  $this->load->helper(array('form','url','codegen_helper'));
-		  $this->load->model('codegen_model','',TRUE);
-      $this->load->model('liquidaciones_model','',TRUE);
-	}	
+	function __construct() 
+	{
+      	parent::__construct();
+		$this->load->library('form_validation');		
+		$this->load->helper(array('form','url','codegen_helper'));
+		$this->load->model('codegen_model','',TRUE);
+		$this->load->model('liquidaciones_model','',TRUE);
+		$this->load->helper('Equivalencias');
+	}
 	
 	function index()
   {
@@ -88,6 +89,12 @@ class Contratos extends MY_Controller {
               $this->form_validation->set_rules('numero', 'Número','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean'); 
 
+			  $es_retencion = $this->esContratoRetencion($this->input->post('tipocontratoid'));
+
+			  if($es_retencion){
+				$this->form_validation->set_rules('cantidad_pagos', 'Número de pagos','required|trim|xss_clean|numeric|greater_than[0]');
+			  }
+
               if ($this->form_validation->run() == false) {
 
                   $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
@@ -116,18 +123,19 @@ class Contratos extends MY_Controller {
                     if($bandContinuar)
                     {
                         $data = array(
-                            'cntr_contratistaid' => $this->input->post('contratistaid'),
-                            'cntr_contratanteid' => $this->input->post('contratanteid'),
-                            'cntr_tipocontratoid' => $this->input->post('tipocontratoid'),
-                            'cntr_fecha_firma' => $this->input->post('fecha'),
-                            'cntr_numero' => $this->input->post('numero'),
-                            'cntr_objeto' => $this->input->post('objeto'),
-                            'cntr_valor' => $valor,
-                            'cntr_vigencia' => $vigencia[0],
-                            'fecha_insercion' => date('Y-m-d H:i:s'),
-                            'cntr_usuariocrea' => $usuario->id,
-                            'cntr_municipio_origen' => $this->input->post('cntr_municipio_origen')
-                            );
+                            'cntr_contratistaid'	=> $this->input->post('contratistaid'),
+                            'cntr_contratanteid'	=> $this->input->post('contratanteid'),
+                            'cntr_tipocontratoid'	=> $this->input->post('tipocontratoid'),
+                            'cntr_fecha_firma'		=> $this->input->post('fecha'),
+                            'cntr_numero'			=> $this->input->post('numero'),
+                            'cntr_objeto'			=> $this->input->post('objeto'),
+                            'cntr_valor'			=> $valor,
+                            'cntr_vigencia'			=> $vigencia[0],
+                            'fecha_insercion'		=> date('Y-m-d H:i:s'),
+                            'cntr_usuariocrea'		=> $usuario->id,
+                            'cntr_municipio_origen'	=> $this->input->post('cntr_municipio_origen'),
+							'cantidad_pagos'		=> $es_retencion ? $this->input->post('cantidad_pagos') : 0
+						);
 
                         /*
                         * Valida si el tipo de régimen es otros
@@ -194,11 +202,49 @@ class Contratos extends MY_Controller {
           redirect(base_url().'index.php/users/login');
       }
 
-  } 
+  }
+
+	function verificarTipoRetencion()
+	{
+		$respuesta = array(
+			'exito' => false
+		);
+
+		if ($this->ion_auth->logged_in())
+		{
+			if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/add'))
+			{
+				$tipo_contrato = $this->uri->segment(3);
+
+				$respuesta['exito'] = true;
+				$respuesta['es_retencion'] = $this->esContratoRetencion($tipo_contrato);
+			}
+		}
+
+		echo json_encode( $respuesta );
+	}
+
+	function esContratoRetencion($tipo)
+	{
+		if(!$tipo){
+			return false;
+		}
+
+		$verificacion = $this->codegen_model->get(
+			'est_estampillas_tiposcontratos AS tipo',
+			'tipo.esti_id',
+			'esti_tipocontratoid = ' . $tipo . ' AND estampilla.tipo = '. Equivalencias::tipoContingencia(),
+			1, null, true, 'array',
+			'est_estampillas estampilla',
+			'estampilla.estm_id = tipo.esti_estampillaid'
+		);
+
+		return !empty($verificacion);
+	}
 
 
 	function edit()
-  {    
+	{
       if ($this->ion_auth->logged_in()) {
 
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/edit')) {  

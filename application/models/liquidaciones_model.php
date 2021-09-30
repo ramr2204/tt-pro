@@ -3,6 +3,7 @@ class Liquidaciones_model extends CI_Model {
 
     function __construct() {
         parent::__construct();
+        $this->load->helper('Equivalencias');
     }
 
     
@@ -33,10 +34,21 @@ class Liquidaciones_model extends CI_Model {
         return $result;
     }
 
-    function getrecibos($id){
-        $this->db->select('liqu_id, liqu_codigo,liqu_nombreestampilla,liqu_nombrecontratista,liqu_tipocontratista,liqu_nit, liqu_numero,liqu_vigencia,liqu_valorsiniva,liqu_valorconiva,liqu_valortotal,liqu_tipocontrato,liqu_regimen,liqu_cuentas,liqu_porcentajes,liqu_contratoid,liqu_soporteobjeto,liqu_usuarioliquida');
+    function getrecibos($id, $id_liquidacion=null){
+        $this->db->select('liqu_id, liqu_codigo,liqu_nombreestampilla,
+            liqu_nombrecontratista,liqu_tipocontratista,liqu_nit,
+            liqu_numero,liqu_vigencia,liqu_valorsiniva,
+            liqu_valorconiva,liqu_valortotal,liqu_tipocontrato,
+            liqu_regimen,liqu_cuentas,liqu_porcentajes,
+            liqu_contratoid,liqu_soporteobjeto,liqu_usuarioliquida'
+        );
         $this->db->from('est_liquidaciones li');
-        $this->db->where('li.liqu_contratoid',$id);
+
+        if($id_liquidacion){
+            $this->db->where('li.liqu_id',$id_liquidacion);
+        } else {
+            $this->db->where('li.liqu_contratoid',$id);
+        }
   
         $query = $this->db->get();
         
@@ -81,6 +93,7 @@ class Liquidaciones_model extends CI_Model {
         $this->db->join('est_pagos pa', 'pa.pago_facturaid = f.fact_id', 'left');
         $this->db->join('est_impresiones im', 'im.impr_facturaid = f.fact_id', 'left');
         $this->db->where('f.fact_liquidacionid',$id);
+        $this->db->where('f.tipo !=', Equivalencias::tipoContingencia());
         $query = $this->db->get();
         return $query->result();
     }
@@ -131,6 +144,23 @@ class Liquidaciones_model extends CI_Model {
         $this->db->join('est_impresiones im', 'im.impr_facturaid = f.fact_id AND impr_estado=1', 'left');
         $this->db->where('f.fact_id',$id);
         $query = $this->db->get();
+        return $query->result();
+    }
+
+    function obtenerFacturasRetencion($id_liquidacion = null, $id_factura = null){
+        $query = $this->db->query('
+            SELECT factura.fact_id, factura.fact_nombre, factura.fact_valor AS valor_total,
+                contrato.cantidad_pagos, (factura.fact_valor / contrato.cantidad_pagos) AS valor_cuota,
+                COALESCE(MAX(pago.numero), 0) AS numero_cuota, factura.fact_rutaimagen
+            FROM est_facturas AS factura
+            INNER JOIN est_liquidaciones liquidacion ON liquidacion.liqu_id = factura.fact_liquidacionid
+            INNER JOIN con_contratos contrato ON contrato.cntr_id = liquidacion.liqu_contratoid
+            LEFT JOIN pagos_estampillas pago ON pago.factura_id = factura.fact_id
+            WHERE factura.tipo = "'. Equivalencias::tipoContingencia() .'"
+                '. ($id_liquidacion ? ' AND factura.fact_liquidacionid = "'. $id_liquidacion .'"' : '') .'
+                '. ($id_factura ? ' AND factura.fact_id = "'. $id_factura .'"' : '') .'
+            GROUP BY factura.fact_id
+        ');
         return $query->result();
     }
 

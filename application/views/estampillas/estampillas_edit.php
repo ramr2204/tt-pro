@@ -72,7 +72,7 @@
                                           foreach($tiposEstampillas as $id => $nombre)
                                           {
                                             ?>
-                                            <option value="<?= $id ?>"><?= ucfirst($nombre) ?></option>
+                                            <option value="<?= $id ?>" <?= ($result->tipo == $id ? 'selected' : '') ?>><?= ucfirst($nombre) ?></option>
                                             <?php
                                           }
                                         ?>

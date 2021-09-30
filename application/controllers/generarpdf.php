@@ -372,4 +372,125 @@ class Generarpdf extends CI_controller {
     $drawing->finish(BCGDrawing::IMG_FORMAT_PNG);
   }
 
+    function certificadoPagoEstampilla()
+    {
+        if ($this->ion_auth->logged_in())
+        {
+            if ($this->uri->segment(3)==''){
+                 redirect(base_url().'index.php/error_404');
+            }
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
+                $this->load->library("Pdf");
+
+                $id_pago = $this->uri->segment(3);
+
+                $pago = $this->codegen_model->get(
+                    'pagos_estampillas AS pago',
+                    'factura.fact_liquidacionid AS id_liquidacion, pago.valor AS valor_cuota, factura.fact_valor AS valor_total,
+                        pago.numero AS cuota, factura.fact_nombre',
+                    'pago.id = "' . $id_pago . '"',
+                    1, null, true, 'array',
+                    'est_facturas factura',
+                    'factura.fact_id = pago.factura_id'
+                );
+
+                $this->data['result'] = $this->liquidaciones_model->getrecibos(null, $pago->id_liquidacion);
+                $liquidacion = $this->data['result'];
+  
+                $contrato = $this->codegen_model->getSelect(
+                      'con_contratos',
+                      'date_format(fecha_insercion,"%Y-%m-%d") AS fecha_insercion,cntr_contratistaid,cntr_objeto,cantidad_pagos',
+                      'WHERE cntr_id = "'.$liquidacion->liqu_contratoid.'"'
+                );
+                $contratista = $this->codegen_model->getSelect(
+                    'con_contratistas',
+                    'cont_direccion,cont_telefono,cont_email',
+                    'WHERE cont_id = "'.$contrato[0]->cntr_contratistaid.'"'
+                );
+                $liquidador = $this->codegen_model->getSelect(
+                    'users',
+                    'first_name,last_name',
+                    'WHERE id = "'.$liquidacion->liqu_usuarioliquida.'"',
+                    ''
+                );
+
+                $this->data['contrato']     = $contrato[0];
+                $this->data['contratista']  = $contratista[0];
+                $this->data['liquidador']   = $liquidador[0];
+                $this->data['pago']         = $pago;
+  
+                  // create new PDF document
+                $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+  
+                // set document information
+                $pdf->SetCreator(PDF_CREATOR);
+                $pdf->SetAuthor('turrisystem');
+                $pdf->SetTitle('Pago de estampilla');
+                $pdf->SetSubject('Gobernación del Putumayo');
+                $pdf->SetKeywords('estampillas,gobernación');
+                $pdf->SetPrintHeader(false);
+                $pdf->SetPrintFooter(false);
+                // set default monospaced font
+                $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+  
+                // set margins
+                $pdf->SetMargins(PDF_MARGIN_LEFT, 2, PDF_MARGIN_RIGHT);
+                $pdf->SetHeaderMargin(0);
+                $pdf->SetFooterMargin(0);
+  
+                // set auto page breaks
+                $pdf->SetAutoPageBreak(TRUE, 2);
+  
+                // set image scale factor
+                $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+  
+                // set some language-dependent strings (optional)
+                if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+                    require_once(dirname(__FILE__).'/lang/eng.php');
+                    $pdf->setLanguageArray($l);
+                }
+  
+                // ---------------------------------------------------------
+  
+                // set font
+                $pdf->SetFont('times', 'BI', 8);
+  
+                $pdf->AddPage();
+
+                // set style for barcode
+                $style = array(
+                    'position' => 'C',
+                    'padding' => 'auto',
+                    'fgcolor' => array(0,0,0),
+                    'bgcolor' => false, //array(255,255,255)
+                    'module_width' => 1, // width of a single module in points
+                    'module_height' => 1 // height of a single module in points
+                );
+
+                $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array(
+                    base_url().'generarpdf/certificadoPagoEstampilla/'.$id_pago,
+                    'QRCODE,H',
+                    '',# Posicion x
+                    '',# Posicion y
+                    23,# Ancho
+                    23,# Alto
+                    $style,
+                    'B'# Alineacion
+                ));
+
+                $html = $this->load->view('generarpdf/generarpdf_recibo_pago_estampilla', $this->data, TRUE);
+                $pdf->writeHTML($html, true, false, true, false, '');
+  
+                // ---------------------------------------------------------
+  
+                //Close and output PDF document
+                $pdf->Output('recibos_estampilla_'.$id_pago.'.pdf', 'I');
+            } else {
+                redirect(base_url().'index.php/error_404');
+            }
+  
+        } else {
+                redirect(base_url().'index.php/users/login');
+        }
+    }
 }
