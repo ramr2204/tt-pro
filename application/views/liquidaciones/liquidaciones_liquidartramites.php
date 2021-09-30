@@ -245,10 +245,10 @@ var oTable = $('#tablaq').dataTable( {
       </div>
       <div class="modal-footer">
       <div class="text-center">
-        <small> "Vale ser legal"<br>
-      Calle 8 Número 7-40 <br>
-      Teléfonos (57+8) 4206600 Ext. 101 Fax: 4295196<br>
-      contactenos@cauca.gov.co </small> 
+        <small> "Boyacá Avanza"<br>
+      Palacio de la Torre, Calle 20 No. 9 – 90 <br>
+      Teléfono PBX+(57)608742 0150<br>
+      contactenos@boyaca.gov.co </small> 
       </div>
         
       </div>

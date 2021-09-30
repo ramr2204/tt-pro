@@ -31,11 +31,11 @@
     <tbody>
     	<tr>
     		<td>
-    			<img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_cauca1.jpg" width="110" height="70" align="center">
+    			<img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion.jpg" width="110" height="70" align="center">
     		</td>
     		<td>
     			
-		        <span style="font-size:9px">GOBERNACION DEL CAUCA</span><br>
+		        <span style="font-size:9px">GOBERNACION DE BOYACÁ</span><br>
 			    <span style="font-size:9px">Secretaría de hacienda departamental</span><br>
 			    <span style="font-size:9px">Nit: 800094164-4</span><br>
 			    <span style="font-size:9px">Liquidación de impuestos</span><br>
@@ -43,7 +43,7 @@
 			  
     		</td>
     		<td>
-    			<img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_cauca2_PDF.png" width="110" height="67" align="center" style="margin-top: 80px">
+    			<img src="<?php echo $this->config->item('application_root'); ?>/images/logo_pdf.png" width="110" height="67" align="center" style="margin-top: 80px">
     		</td>
     	</tr>
 	</tbody>
@@ -114,11 +114,11 @@
     <tbody>
     	<tr>
     		<td>
-    			<img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_cauca1.jpg" width="110" height="70" align="center">
+    			<img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion.jpg" width="110" height="70" align="center">
     		</td>
     		<td>
     			
-		        <span style="font-size:9px">GOBERNACION DEL CAUCA</span><br>
+		        <span style="font-size:9px">GOBERNACION DE BOYACÁ</span><br>
 			    <span style="font-size:9px">Secretaría de hacienda departamental</span><br>
 			    <span style="font-size:9px">Nit: 800094164-4</span><br>
 			    <span style="font-size:9px">Liquidación de impuestos</span><br>
@@ -126,7 +126,7 @@
 			  
     		</td>
     		<td>
-    			<img src="<?php echo $this->config->item('application_root'); ?>/images/gobernacion_cauca2_PDF.png" width="110" height="67" align="center" style="margin-top: 80px">
+    			<img src="<?php echo $this->config->item('application_root'); ?>/images/logo_pdf.png" width="110" height="67" align="center" style="margin-top: 80px">
     		</td>
     	</tr>
 	</tbody>
