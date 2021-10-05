@@ -16,78 +16,55 @@
 //generación de la tabla mediante json
 $(document).ready(function() {
 
-var oTable = $('#tablaq').dataTable( {
-"bProcessing": true,
-"bServerSide": true,
-"sAjaxSource": "<?php echo base_url(); ?>index.php/liquidaciones/consultas_dataTable",
-"sServerMethod": "POST",
-"iDisplayLength": 5,
-"aoColumns": [                      
-                      { "sClass": "item1 center" }, 
-                      { "sClass": "item2" },
-                      { "sClass": "center" },
-                      { "sClass": "item" },
-                      { "sClass": "item" },  
-                      { "sClass": "item2"},
-                      { "sClass": "item2"},
-                      { "sClass": "item2"},
-                      { "sClass": "item8"},
-                      { "sClass": "center","bSortable": false,"bSearchable": false},
+    var oTable = $('#tablaq').dataTable( {
+        "bProcessing": true,
+        "bServerSide": true,
+        "sAjaxSource": "<?php echo base_url(); ?>index.php/liquidaciones/consultas_dataTable",
+        "sServerMethod": "POST",
+        "iDisplayLength": 5,
+        "aoColumns": [
+            { "sClass": "item1 center" }, 
+            { "sClass": "item2" },
+            { "sClass": "center" },
+            { "sClass": "item" },
+            { "sClass": "item" },  
+            { "sClass": "item2"},
+            { "sClass": "item2"},
+            { "sClass": "item2"},
+            { "sClass": "item8"},
+        ],
+        "fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+            var number= accounting.formatMoney(aData[4], "$", 2, ".", ","); // €4.999,99
+            $("td:eq(4)", nRow).html('<div class="">' + number + '</div>');
 
-                    
-            ],   
-"fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
-    
-  var number= accounting.formatMoney(aData[4], "$", 2, ".", ","); // €4.999,99
-  $("td:eq(4)", nRow).html('<div class="">' + number + '</div>');  
+            // Se vacia la columna fecha de pago
+            $("td:eq(6)", nRow).empty();
 
-  var liquidacion = aData[0];
+            var number= accounting.formatMoney(aData[7], "$", 2, ".", ","); // €4.999,99
+            $("td:eq(7)", nRow).html('<div class="">' + number + '</div>');
+        },
+        "fnDrawCallback": function( oSettings ) {
+            //eventos a los elementos del data table
+        }
+    }).columnFilter(
+        {
+            aoColumns: [
+                null,
+                null,
+                null,
+                null,
+                null,
+                {
+                    type: "date",
+                    sSelector: "#buscarfecha"
+                },
+                null,
+                null
+            ]
+        }
+    );
 
-  $.ajax({
-      type: "POST",
-      dataType: "json",
-      data: {id : liquidacion},
-      url: base_url+"index.php/liquidaciones/extraerFacturas",
-      success: function(data) {              
-          $("td:eq(9)", nRow).html('<div class="text-left">' + data.estampillas + '</div>');                                        
-      }
-  });
-
- },
-  "fnDrawCallback": function( oSettings ) {
-      //eventos a los elementos del data table
-   
-    }     
-
-
-
-
-   }).columnFilter(
-
-{
-                     aoColumns: [
-                                    
-                                    null,
-                                    null,
-                                    null,
-                                    null,
-                                    null,
-                                    {
-                                         type: "date",
-                                         sSelector: "#buscarfecha"
-                                    },
-                                    null,
-                                    null
-
-                                    
-                                 ]
-               }
-
-
-);
-    
     oTable.fnSearchHighlighting();
-    
 
 } );
 
@@ -124,7 +101,7 @@ var oTable = $('#tablaq').dataTable( {
 
 <div class="row">     
     <div class="col-xs-12 col-md-3 col-custom-chosen">
-        Fecha (Generacion Estampilla):<div align="center" id="buscarfecha"></div>                
+        Fecha (Generacion Estampilla):<div align="center" id="buscarfecha"></div>
     </div>
     <div class="col-xs-12 col-md-9 btn-pdf">
         <div class="btn-group group-custom-chosen pull-right">
@@ -154,7 +131,6 @@ var oTable = $('#tablaq').dataTable( {
                          <th>Fecha Pago</th> 
                          <th>Valor Factura</th> 
                          <th>Concepto</th>
-                         <th>Estampillas</th>                             
                      </tr>
                  </thead>
                  <tbody></tbody>     
