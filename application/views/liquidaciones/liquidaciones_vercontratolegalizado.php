@@ -23,7 +23,7 @@
      <th colspan="1" class="text-center small" width="22%">
            <img src="<?php echo base_url() ?>images/gobernacion.jpg" height="60" width="70" >
      </th>
-     <th colspan="3" class="text-center small" width="56%">Gobernación de Boyacá <br> Departamento Administrativo de Asuntos Jurídicos <br> Dirección de Contratación</th>
+     <th colspan="3" class="text-center small" width="56%">Gobernación de Boyacá <br> Secretaría de Hacienda <br> Dirección de Recaudo y Fiscalización</th>
      <th colspan="1" class="text-center small" width="22%">
            <img src="<?php echo base_url() ?>images/logo.png" height="50" width="80" >
      </th>
