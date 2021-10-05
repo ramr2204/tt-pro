@@ -1793,16 +1793,16 @@ function consultar()
 
               /**
               * Valida si es administrador o Usuario conciliación para mostrar todas las impresiones
-              */              
+              */
               $usuario = $this->ion_auth->user()->row();
               if($this->ion_auth->is_admin() || $usuario->perfilid == 5)
               {
-                  $where = '';              
+                  $where = '';
                   $join = 'join est_papeles p on p.pape_id = i.impr_papelid';  
               }else
                   {
                       //Extrae los id de las facturas para las que se han hecho impresiones
-                      $where = 'where pape_usuario = '.$usuario->id;              
+                      $where = 'where pape_usuario = '.$usuario->id;
                       $join = 'join est_papeles p on p.pape_id = i.impr_papelid';
                   }              
 
@@ -1829,12 +1829,24 @@ function consultar()
               $idLiquidaciones .= '0)';
               $whereIn = 'l.liqu_id in '.$idLiquidaciones;
 
+              /* 
+              p.pago_fecha,
+              */
               $this->load->library('datatables');
-              $this->datatables->select('l.liqu_id,l.liqu_tipocontrato,l.liqu_nit,l.liqu_nombrecontratista,l.liqu_valortotal,l.liqu_fecha, p.pago_fecha, f.fact_valor, f.fact_nombre');              
-              $this->datatables->from('est_facturas f');  
+              $this->datatables->select('
+                  l.liqu_id,l.liqu_tipocontrato,
+                  l.liqu_nit,
+                  l.liqu_nombrecontratista,
+                  l.liqu_valortotal,
+                  l.liqu_fecha,
+                  l.liqu_id AS pago_fecha,
+                  f.fact_valor,
+                  f.fact_nombre
+              ');
+              $this->datatables->from('est_facturas f');
               $this->datatables->join('est_liquidaciones l', 'l.liqu_id = f.fact_liquidacionid', 'left');
-              $this->datatables->join('est_pagos p', 'p.pago_facturaid = f.fact_id', 'left');
-              $this->datatables->where($whereIn);
+            //   $this->datatables->join('est_pagos p', 'p.pago_facturaid = f.fact_id', 'left');
+            //   $this->datatables->where($whereIn);
 
                        /*
                * Extrae el listado de tipos de actos liquidados para realizar
@@ -2375,28 +2387,26 @@ function renderizarDetalleRangoPDF()
             .' fac.`fact_nombre`,'
             .' fac.fact_valor,'
             .' fac.fact_estampillaid,'
-            .' imp.impr_codigopapel,'
-            .' imp.impr_fecha,'
+            .' "" AS impr_codigopapel,'
+            .' "" AS impr_fecha,'
             .' pag.pago_fecha,'
             .' concat(u.first_name," ",u.last_name) as liquidador';
         
-        $join = ' INNER JOIN est_facturas fac ON imp.`impr_facturaid` = fac.`fact_id`'
-            .' INNER JOIN `est_liquidaciones` liq ON liq.`liqu_id` = fac.`fact_liquidacionid`'
-            .' INNER JOIN est_pagos pag ON pag.pago_facturaid = fac.`fact_id`'
-            .' INNER JOIN est_papeles pap ON imp.impr_papelid = pap.pape_id'
-            .' INNER JOIN users u ON u.id = pap.pape_usuario';
+        $join = ' INNER JOIN `est_liquidaciones` liq ON liq.`liqu_id` = fac.`fact_liquidacionid`'
+            .' LEFT JOIN est_pagos pag ON pag.pago_facturaid = fac.`fact_id`'
+            .' INNER JOIN users u ON u.id = liq.liqu_usuarioliquida';
 
         /*
         * Se Validan los valores que llegan para construir el where
         */
-        $where = 'WHERE imp.impr_estado = 1 ';
+        $where = 'WHERE 1 = 1 ';
 
         if($bandFiltroFechaImpresion)
         {
-            $fecha_inicial = $fecha_inicial_impr;
-            $fecha_final   = $fecha_final_impr;
-            $strTipoFechaFiltrada = "FECHA DE IMPRESION";
-            $where .= ' AND date_format(imp.impr_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial_impr.'" AND "'.$fecha_final_impr.'"';
+            // $fecha_inicial = $fecha_inicial_impr;
+            // $fecha_final   = $fecha_final_impr;
+            // $strTipoFechaFiltrada = "FECHA DE IMPRESION";
+            // $where .= ' AND date_format(imp.impr_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial_impr.'" AND "'.$fecha_final_impr.'"';
         }
 
         if($bandFiltroFechaPago)
@@ -2548,7 +2558,7 @@ function renderizarDetalleRangoPDF()
                 .' concat("tipotramite_",liqt2.litr_tramiteid) as subtipoacto';
 
             $whereTramites = $where. ' AND liq.liqu_contratoid = 0';
-            $liquidacionesTramites = $this->codegen_model->getSelect('est_impresiones imp',$camposTramites,$whereTramites,$joinTramites, $groupBy);
+            $liquidacionesTramites = $this->codegen_model->getSelect('est_facturas fac',$camposTramites,$whereTramites,$joinTramites, $groupBy);
 
             /*
             * Datos para contratos
@@ -2556,7 +2566,7 @@ function renderizarDetalleRangoPDF()
             $join .= ' INNER JOIN con_contratos con2 ON con2.cntr_id = liq.liqu_contratoid';
             $campos .= ', concat("tipocontrato_",con2.cntr_tipocontratoid) as subtipoacto';
             $where .= ' AND liq.liqu_contratoid <> 0';
-            $liquidacionesContratos = $this->codegen_model->getSelect('est_impresiones imp',$campos,$where,$join, $groupBy);
+            $liquidacionesContratos = $this->codegen_model->getSelect('est_facturas fac',$campos,$where,$join, $groupBy);
 
             /*
             * Datos consolidados
@@ -2578,7 +2588,7 @@ function renderizarDetalleRangoPDF()
         */
         if(!$bandDetallado)
         {
-            $liquidaciones = $this->codegen_model->getSelect('est_impresiones imp',$campos,$where,$join, $groupBy);
+            $liquidaciones = $this->codegen_model->getSelect('est_facturas fac',$campos,$where,$join, $groupBy);
 
             $vEstampillas = $liquidaciones;
             $total_recaudado = 0;
@@ -3071,7 +3081,7 @@ function renderizarDetalleRangoPDF()
     /*
     * Funcion de apoyo para extraer la fecha en letras segun los valores especificados
     */
-    function fechaEnLetras($fecha = '', $vDiaSemana = '')
+    public static function fechaEnLetras($fecha = '', $vDiaSemana = '')
     {
         /*
         * Separa la fecha en un arreglo segun la expresion regular
