@@ -376,13 +376,15 @@ class Generarpdf extends CI_controller {
     {
         if ($this->ion_auth->logged_in())
         {
-            if ($this->uri->segment(3)==''){
+            if (!isset($_GET['id'])){
                  redirect(base_url().'index.php/error_404');
             }
             if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
-                $this->load->library("Pdf");
+                $this->load->library('Pdf');
+                $this->load->library('encrypt');
 
-                $id_pago = $this->uri->segment(3);
+                $hash = $_GET['id'];
+                $id_pago = $this->encrypt->decode($hash, Equivalencias::generadorHash());
 
                 $pago = $this->codegen_model->get(
                     'pagos_estampillas AS pago',
@@ -468,12 +470,12 @@ class Generarpdf extends CI_controller {
                 );
 
                 $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array(
-                    base_url().'generarpdf/certificadoPagoEstampilla/'.$id_pago,
+                    base_url().'generarpdf/generar_estampilla_retencion?id='.urlencode($hash),
                     'QRCODE,H',
                     '',# Posicion x
                     '',# Posicion y
-                    23,# Ancho
-                    23,# Alto
+                    30,# Ancho
+                    30,# Alto
                     $style,
                     'B'# Alineacion
                 ));
@@ -484,7 +486,7 @@ class Generarpdf extends CI_controller {
                 // ---------------------------------------------------------
   
                 //Close and output PDF document
-                $pdf->Output('recibos_estampilla_'.$id_pago.'.pdf', 'I');
+                $pdf->Output('recibos_estampilla.pdf', 'I');
             } else {
                 redirect(base_url().'index.php/error_404');
             }
@@ -492,5 +494,143 @@ class Generarpdf extends CI_controller {
         } else {
                 redirect(base_url().'index.php/users/login');
         }
+    }
+
+    function generar_estampilla_retencion()
+    {
+        if (!isset($_GET['id'])){
+            redirect(base_url().'index.php/error_404');
+        }
+
+        $this->load->library('Pdf');
+        $this->load->library('encrypt');
+
+        $hash = $_GET['id'];
+        $id_pago = $this->encrypt->decode($hash, Equivalencias::generadorHash());
+
+        $ultimo_pago = $this->codegen_model->get(
+            'pagos_estampillas AS pago',
+            'pago.factura_id, pago.fecha_insercion',
+            'pago.id = "' . $id_pago . '"',
+            1, null, true, ''
+        );
+
+        $pago = $this->liquidaciones_model->obtenerFacturasRetencion('factura.fact_id', $ultimo_pago->factura_id);
+        $pago = $pago[0];
+
+        # Valida si la estampilla se generará para un contrato o para un trámite
+
+        $verificacionTramite = $this->codegen_model->get(
+            'est_liquidaciones l',
+            'l.liqu_tipocontrato',
+            'l.liqu_id = '.$pago->id_liquidacion,
+            1, null, true, ''
+        );
+
+        if($verificacionTramite->liqu_tipocontrato == 'Tramite')
+        {
+            $estampilla = $this->liquidaciones_model->getfactura_legalizada_tramite($pago->fact_id); 
+            $estampilla->cntr_vigencia = date('Y', strtotime($estampilla->cntr_vigencia));
+
+        }else
+            {
+                $estampilla = $this->liquidaciones_model->getfactura_legalizada($pago->fact_id); 
+            }
+
+        /*
+        * Determina la distancia en y para imprimir el codigo qr
+        * dependiendo de la logitud del nombre del contribuyente
+        */
+        if(strlen($estampilla->cont_nombre) <= 146)
+        {
+            $distQRenY = 57.5;
+        }else
+            {
+                $distQRenY = 61;
+            }
+
+        $pdf = new PDF(PDF_PAGE_ORIENTATION,'mm',array(92,141), true, 'UTF-8', false);
+
+        // set document information
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('turrisystem');
+        $pdf->SetTitle('Liquidación de estampillas');
+        $pdf->SetSubject('Gobernación del Putumayo');
+        $pdf->SetKeywords('estampillas,gobernación');
+        $pdf->SetPrintHeader(false);
+        $pdf->SetPrintFooter(false);
+        // set default monospaced font
+        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+        // set margins
+        $pdf->setPageUnit('mm');
+        $pdf->SetMargins(16, 2.5, 4.9, true);
+
+        // set auto page breaks
+        $pdf->SetAutoPageBreak(FALSE, 1);
+
+        // set some language-dependent strings (optional)
+        if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+            require_once(dirname(__FILE__).'/lang/eng.php');
+            $pdf->setLanguageArray($l);
+        }
+
+        // set style for barcode
+        $style = array(
+            'border' => 2,
+            'vpadding' => 1,
+            'hpadding' => 1,
+            'fgcolor' => array(0,0,0),
+            'bgcolor' => false, //array(255,255,255)
+            'module_width' => 1, // width of a single module in points
+            'module_height' => 1 // height of a single module in points
+        );
+
+        /*
+        * Variable que determina si se debe trabajar con papelería de contingencia
+        */
+        $objContin = $this->codegen_model->get('adm_parametros','para_contingencia','para_id = 1',1,NULL,true);
+        if($objContin->para_contingencia == 1)
+        {
+            $this->data['contingencia'] = 'C';
+        }else
+            {
+                $this->data['contingencia'] = '';
+            }
+
+        // set font
+        $pdf->SetFont('times', '', 8);
+        $pdf->AddPage('L',array(92,141));
+        $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array(
+            'http://qrcol.com/EPP/f.php?c='.$pago->fact_id,
+            'QRCODE,H',
+            110,
+            $distQRenY,
+            16,
+            16,
+            $style,
+            'T'
+        ));
+
+        $pagado = ($pago->valor_total - $pago->valor_pagado) == 0;
+
+        if($pagado){
+            $estampilla->pago_fecha = $ultimo_pago->fecha_insercion;
+        }
+
+        $this->data['estampilla'] = $estampilla;
+        $html = $this->load->view('generarpdf/generarpdf_estampillalegalizada', $this->data, TRUE);  
+        
+        $pdf->writeHTML($html, true, false, true, false, '');
+
+        if($pagado)
+        {
+            $pdf->SetAlpha(0.4);
+            $pdf->Image($this->config->item('application_root') . 'images/pagado.png', 0, 0, 160, 100, '', '', '', false, 300, '', false, false, 0);
+            $pdf->SetAlpha(1);
+        }
+
+        //Close and output PDF document
+        $pdf->Output('estampilla_'.$estampilla->impr_codigopapel.'.pdf', 'I'); 
     }
 }

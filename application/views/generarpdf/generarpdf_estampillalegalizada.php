@@ -228,7 +228,7 @@
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
                         font-size:6;
-                        text-align: center;"><?php echo date('Y-m-d',strtotime($estampilla->impr_fecha)); ?></td>                    
+                        text-align: center;"><?= $estampilla->impr_fecha ? date('Y-m-d',strtotime($estampilla->impr_fecha)) : ''; ?></td>                    
                 </tr>
 
 
