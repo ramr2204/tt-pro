@@ -425,7 +425,7 @@ $(document).ready(function() {
             '<?php echo base_url(); ?>index.php/liquidaciones/estampillasRetencion/'+ID,
             function(result){
                 $('#pago_estampillas').modal('show');
-                $('#id_contrato_cont').val(ID);
+                $('.id_contrato_cont').val(ID);
 
                 if(error_modal){
                     $('#errorModal').html( $('.alert')[0].outerHTML );
@@ -447,7 +447,7 @@ $(document).ready(function() {
         if(isset($idPagoFactura) && $idPagoFactura)
         {
             ?>
-            window.open($('#base').val() + 'generarpdf/certificadoPagoEstampilla/<?= $idPagoFactura ?>', '_blank');
+            window.open($('#base').val() + 'generarpdf/certificadoPagoEstampilla?id=<?= urlencode($idPagoFactura) ?>', '_blank');
             <?php
         }
     ?>

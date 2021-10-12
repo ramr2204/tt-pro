@@ -87,7 +87,7 @@ class Contratos extends MY_Controller {
               $this->form_validation->set_rules('fecha', 'Fecha',  'required|trim|xss_clean');  
               $this->form_validation->set_rules('objeto', 'objeto',  'required|trim|xss_clean');  
               $this->form_validation->set_rules('numero', 'Número','required|trim|xss_clean|numeric|greater_than[0]');
-              $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean'); 
+              $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');
 
 			  $es_retencion = $this->esContratoRetencion($this->input->post('tipocontratoid'));
 
@@ -233,7 +233,7 @@ class Contratos extends MY_Controller {
 		$verificacion = $this->codegen_model->get(
 			'est_estampillas_tiposcontratos AS tipo',
 			'tipo.esti_id',
-			'esti_tipocontratoid = ' . $tipo . ' AND estampilla.tipo = '. Equivalencias::tipoContingencia(),
+			'esti_tipocontratoid = ' . $tipo . ' AND estampilla.tipo = '. Equivalencias::tipoRetencion(),
 			1, null, true, 'array',
 			'est_estampillas estampilla',
 			'estampilla.estm_id = tipo.esti_estampillaid'

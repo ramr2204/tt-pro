@@ -36,8 +36,13 @@
                          <tr>
                               <td colspan="1"><strong>Nombre del contratista</strong></td>
                               <td colspan="3"><?php echo $result->liqu_nombrecontratista; ?></td>
-                              <td colspan="1"><?php echo anchor(base_url().'generarpdf/generar_liquidacion/'.$result->liqu_contratoid,'<i class="fa fa-file-pdf-o fa-2x"></i> PDF','class="btn btn-large  btn-default" target="_blank"'); ?></td>
-
+                              <td colspan="1">
+                                   <?=
+                                        (count($facturas) > 0) ?
+                                             anchor(base_url().'generarpdf/generar_liquidacion/'.$result->liqu_contratoid,'<i class="fa fa-file-pdf-o fa-2x"></i> PDF','class="btn btn-large  btn-default" target="_blank"') :
+                                             '';
+                                   ?>
+                              </td>
                          </tr>
 
                          <tr>

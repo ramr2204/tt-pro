@@ -20,6 +20,7 @@ class Liquidaciones extends MY_Controller {
       $this->load->helper(array('form','url','codegen_helper', 'HelperGeneral'));
       $this->load->model('liquidaciones_model','',TRUE);
       $this->load->model('codegen_model','',TRUE);
+      $this->load->helper('Equivalencias');
 	}
 	
 	function index()
@@ -54,15 +55,16 @@ class Liquidaciones extends MY_Controller {
                             'css/plugins/bootstrap/bootstrap-switch.css' => 'screen'
                         );
               $this->data['javascripts']= array(
-                        'js/jquery.dataTables.min.js',
-                        'js/plugins/dataTables/dataTables.bootstrap.js',
-                        'js/jquery.dataTables.defaults.js',
-                        'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
-                        'js/accounting.min.js',
-                        'js/plugins/bootstrap/fileinput.min.js',
-                        'js/plugins/bootstrap/bootstrap-switch.min.js',
-                        'js/applicationEvents.js'
-                       );
+                'js/jquery.dataTables.min.js',
+                'js/plugins/dataTables/dataTables.bootstrap.js',
+                'js/jquery.dataTables.defaults.js',
+                'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
+                'js/accounting.min.js',
+                'js/plugins/bootstrap/fileinput.min.js',
+                'js/plugins/bootstrap/bootstrap-switch.min.js',
+                'js/autoNumeric.js',
+                'js/applicationEvents.js'
+              );
               $resultado = $this->codegen_model->max('con_contratos','cntr_fecha_firma');
               
               foreach ($resultado as $key => $value) {
@@ -2109,10 +2111,10 @@ function consultar()
             if ($usuarioLogueado->perfilid==4)
             { 
                  mt_srand(strtotime(date('H:i:s')));
-                 $alea = mt_rand();               
+                 $alea = mt_rand();
                  $codificado = '73-'.$tipoEstampilla.substr($nit, -5).date('d').date('m').date('y').substr($alea, -4);
                  
-                 return $codificado;              
+                 return $codificado;
 
             } else {
                 redirect(base_url().'index.php/error_404');
@@ -3931,10 +3933,15 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 			if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) 
 			{
 				$this->data['successmessage'] = $this->session->flashdata('message');
-				$this->data['errormessage'] = ''; 
+				$this->data['errormessage'] = '';
+
+                # Se da formato al valor para que guarde los valores decimales
+                $valor = str_replace(',', '.', str_replace('.','',$this->input->post('valor')));
+
 				$this->form_validation->set_rules('id_factura', 'Identificador de la facturas', 'trim|xss_clean|numeric|integer|greater_than[0]');
 				$this->form_validation->set_rules('fecha', 'Fecha', 'required|trim|xss_clean|required');
 				$this->form_validation->set_rules('observaciones', 'Observaciones', 'trim|xss_clean');
+                $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');
 
 				if ($this->form_validation->run() == false) {
 					$this->session->set_flashdata('errorModal', true);
@@ -3947,8 +3954,8 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 
 				if (!isset($_FILES['upload_field_name']) && !is_uploaded_file($_FILES['soporte']['tmp_name'])) 
 				{
-					$this->session->set_flashdata('errorModal', true);
-					$this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe cargar el soporte del pago.');
+					// $this->session->set_flashdata('errorModal', true);
+					// $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe cargar el soporte del pago.');
 				}
 				else
 				{
@@ -3982,18 +3989,20 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 					}
 				}
 
-				if(!$ruta_soporte){
-					$this->session->set_flashdata('accion', 'retencion');
-					redirect(base_url().'index.php/liquidaciones/liquidar/'.$this->input->post('id_contrato'));
-				}
+				$factura = $this->liquidaciones_model->obtenerFacturasRetencion('factura.fact_id', $this->input->post('id_factura'));
 
-				$factura = $this->liquidaciones_model->obtenerFacturasRetencion(null, $this->input->post('id_factura'));
+                if( $valor > (($factura[0]->valor_total - $factura[0]->valor_pagado)) ){
+                    $this->session->set_flashdata('errorModal', true);
+					$this->session->set_flashdata('errormessage', '<strong>Error!</strong> El valor del pago no puede ser mayor que el saldo.');
+                    $this->session->set_flashdata('accion', 'retencion');
+					redirect(base_url().'index.php/liquidaciones/liquidar/'.$this->input->post('id_contrato'));
+                }
 
 				$guardo = $this->codegen_model->add(
 					'pagos_estampillas',
 					array(
 						'factura_id'		=> $this->input->post('id_factura'),
-						'valor'				=> $factura[0]->valor_cuota,
+						'valor'				=> $valor,
 						'numero'			=> ($factura[0]->numero_cuota + 1),
 						'soporte'			=> $ruta_soporte,
 						'fecha'				=> $this->input->post('fecha'),
@@ -4003,9 +4012,11 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 				);
 
 				if ($guardo->bandRegistroExitoso){
+                    $this->load->library('encrypt');
+   
 					$this->session->set_flashdata('errorModal', true);
 					$this->session->set_flashdata('successmessage', 'Se pagó con éxito la factura');
-					$this->session->set_flashdata('idPagoFactura', $guardo->idInsercion);
+					$this->session->set_flashdata('idPagoFactura', $this->encrypt->encode($guardo->idInsercion, Equivalencias::generadorHash()));
 				}
 				else{
 					$this->session->set_flashdata('errorModal', true);
@@ -4034,7 +4045,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 				$this->data['result'] = $this->liquidaciones_model->getrecibos($idcontrato);
 				$liquidacion = $this->data['result'];
 
-				$this->data['facturas_retencion'] = $this->liquidaciones_model->obtenerFacturasRetencion($liquidacion->liqu_id);
+				$this->data['facturas_retencion'] = $this->liquidaciones_model->obtenerFacturasRetencion('factura.fact_liquidacionid', $liquidacion->liqu_id);
 				$this->template->set('title', 'Contrato liquidado');
 				$this->load->view('liquidaciones/liquidaciones_ver_facturas_retencion', $this->data); 
 			} else {
@@ -4043,6 +4054,59 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 		} else {
 			redirect(base_url().'index.php/users/login');
 		}
+	}
+
+    function descuentoEstampilla()
+	{
+		if ($this->ion_auth->logged_in())
+		{
+			if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) 
+			{
+				$this->data['successmessage'] = $this->session->flashdata('message');
+				$this->data['errormessage'] = '';
+
+                # Se da formato al valor para que guarde los valores decimales
+                $valor = str_replace(',', '.', str_replace('.','',$this->input->post('valor')));
+
+				$this->form_validation->set_rules('id_factura', 'Identificador de la facturas', 'trim|xss_clean|numeric|integer|greater_than[0]');
+				$this->form_validation->set_rules('observaciones', 'Observaciones', 'trim|xss_clean');
+                $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');
+
+				if ($this->form_validation->run() == false) {
+					$this->session->set_flashdata('errorModal', true);
+					$this->session->set_flashdata('errormessage', (validation_errors() ? validation_errors(): false));
+					$this->session->set_flashdata('accion', 'retencion');
+					redirect(base_url().'index.php/liquidaciones/liquidar/'.$this->input->post('id_contrato'));
+				}
+
+				$guardo = $this->codegen_model->add(
+					'descuentos_estampillas',
+					array(
+						'factura_id'		=> $this->input->post('id_factura'),
+						'valor'				=> $valor,
+						'observaciones'		=> $this->input->post('observaciones'),
+						'fecha_insercion'	=> date('Y-m-d H:i:s')
+					)
+				);
+
+				if ($guardo->bandRegistroExitoso){
+					$this->session->set_flashdata('errorModal', true);
+					$this->session->set_flashdata('successmessage', 'Se agregó el descuento con éxito la factura');
+				}
+				else{
+					$this->session->set_flashdata('errorModal', true);
+					$this->session->set_flashdata('errormessage', '<strong>Error!</strong> Ocurrió un error al registrar el pago.');
+				}
+
+				$this->session->set_flashdata('accion', 'retencion');
+				redirect(base_url().'index.php/liquidaciones/liquidar/'.$this->input->post('id_contrato'));
+			}
+			else {
+				redirect(base_url().'index.php/error_404');
+			}
+		} else {
+            redirect(base_url().'index.php/users/login');
+        }
 	}
 
 }
