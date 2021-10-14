@@ -30,7 +30,10 @@
                                 <select class="form-control chosen" id="contratistaid" name="contratistaid" required="required" >
                                 <option value="0">Seleccione...</option>
                                     <?php  foreach($contratistas as $row) { ?>
-                                    <option value="<?php echo $row->cont_id; ?>"><?php echo $row->cont_nit.' - '.$row->cont_nombre; ?></option>
+                                    <option
+                                        value="<?= $row->cont_id; ?>"
+                                        <?= set_value('contratistaid') == $row->cont_id ? 'selected' : '' ?>
+                                    ><?php echo $row->cont_nit.' - '.$row->cont_nombre; ?></option>
                                     <?php   } ?>
                                 </select>
                                 <?php echo form_error('contratistaid','<span class="text-danger">','</span>'); ?>
@@ -41,9 +44,17 @@
                                 <label for="contratanteid">Contratante</label>
                                 <select class="form-control chosen" id="contratanteid" name="contratanteid" required="required" >
                                 <option value="0">Seleccione...</option>
-                                    <?php  foreach($contratantes as $row) { ?>
-                                    <option value="<?php echo $row->id; ?>"><?php echo $row->nit.' - '.$row->nombre; ?></option>
-                                    <?php   } ?>
+                                    <?php
+                                        foreach($contratantes as $row)
+                                        {
+                                            ?>
+                                            <option
+                                                value="<?= $row->id; ?>"
+                                                <?= set_value('contratanteid') == $row->id ? 'selected' : '' ?>
+                                            ><?php echo $row->nit.' - '.$row->nombre; ?></option>
+                                            <?php
+                                        }
+                                    ?>
                                 </select>
                                 <?php echo form_error('contratanteid','<span class="text-danger">','</span>'); ?>
                                 </div>
@@ -53,9 +64,17 @@
                                     <label for="tipocontratoid">Tipo de contrato</label>
                                     <select class="form-control" id="tipocontratoid" name="tipocontratoid" required="required" >
                                     <option value="0">Seleccione...</option>
-                                    <?php  foreach($tiposcontratos as $row) { ?>
-                                    <option value="<?php echo $row->tico_id; ?>"><?php echo $row->tico_nombre; ?></option>
-                                    <?php   } ?>
+                                    <?php
+                                        foreach($tiposcontratos as $row)
+                                        {
+                                            ?>
+                                            <option
+                                                value="<?php echo $row->tico_id; ?>"
+                                                <?= set_value('tipocontratoid') == $row->tico_id ? 'selected' : '' ?>
+                                            ><?php echo $row->tico_nombre; ?></option>
+                                            <?php
+                                        }
+                                    ?>
                                     </select>
                                     <?php echo form_error('estadoid','<span class="text-danger">','</span>'); ?>
                                 </div>
@@ -112,12 +131,49 @@
                                             foreach($municipios as $row)
                                             {
                                                 ?>
-                                                <option value="<?php echo $row->muni_id; ?>"><?php echo $row->muni_nombre; ?></option>
+                                                <option
+                                                    value="<?= $row->muni_id; ?>"
+                                                    <?= set_value('cntr_municipio_origen') == $row->muni_id ? 'selected' : '' ?>
+                                                ><?php echo $row->muni_nombre; ?></option>
                                                 <?php
                                             }
                                         ?>
                                     </select>
                                     <?php echo form_error('cntr_municipio_origen','<span class="text-danger">','</span>'); ?>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 column">
+                                <div class="form-group">
+                                    <label for="clasificacion_contrato">Clasificación del contrato</label>
+                                    <select class="form-control" id="clasificacion_contrato" name="clasificacion_contrato" required="required" >
+                                        <option value="0">Seleccione...</option>
+                                        <?php
+                                            foreach($clasificacion_contrato AS $id => $nombre)
+                                            {
+                                                ?>
+                                                <option value="<?= $id ?>"
+                                                    <?= set_value('clasificacion_contrato') == $id ? 'selected' : '' ?>
+                                                ><?= $nombre ?></option>
+                                                <?php
+                                            }
+                                        ?>
+                                    </select>
+                                    <?php echo form_error('clasificacion_contrato','<span class="text-danger">','</span>'); ?>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 column" style="display:none">
+                                <div class="form-group">
+                                    <label for="contrato_relacionado">Número de contrato relacionado</label>
+                                    <input
+                                        class="form-control"
+                                        id="contrato_relacionado"
+                                        type="number"
+                                        name="contrato_relacionado"
+                                        value="<?php echo set_value('contrato_relacionado'); ?>"
+                                        min="0" />
+                                    <?php echo form_error('contrato_relacionado','<span class="text-danger">','</span>'); ?>
                                 </div>
                             </div>
 
@@ -175,8 +231,9 @@
     //style selects
     var config = {
       '#municipioid'  : {disable_search_threshold: 10},
-      '#tipocontratoid'  : {disable_search_threshold: 10},      
-      '#cntr_municipio_origen'  : {disable_search_threshold: 10}
+      '#tipocontratoid'  : {disable_search_threshold: 10},
+      '#cntr_municipio_origen'  : {disable_search_threshold: 10},
+      '#clasificacion_contrato'  : {disable_search_threshold: 10}
     }
     for (var selector in config) {
         $(selector).chosen(config[selector]);
@@ -196,13 +253,15 @@
 
             $('#tipocontratoid').change(consultarContratoRetencion);
             $('#tipocontratoid').change();
+
+            $('#clasificacion_contrato').change(handlerClasificacionContrato);
+            $('#clasificacion_contrato').change();
       });
 
         function consultarContratoRetencion()
         {
             if($(this).val())
             {
-                console.log('sera?');
                 $('#cantidad_pagos').attr('disabled', true)
                 $('#cantidad_pagos').closest('.column').hide();
 
@@ -217,6 +276,18 @@
                         }
                     }
                 });
+            }
+        }
+
+        function handlerClasificacionContrato()
+        {
+            var valor = $(this).val();
+
+            if(valor != '0' && valor != '<?= $contrato_normal ?>')
+            {
+                $('#contrato_relacionado').closest('.column').show();
+            }else{
+                $('#contrato_relacionado').closest('.column').hide();
             }
         }
   </script>

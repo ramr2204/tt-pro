@@ -12,6 +12,16 @@ Class Equivalencias extends CI_Controller
     # Codigo (salt) usado para generar hashes
     private static $generadorHash = '729se32sm3owg=.we__hl';
 
+    private static $clasificacionCOntratos = array(
+        1 => 'Normal',
+        2 => 'Adición',
+        3 => 'Ajuste',
+    );
+    
+    private static $contratoNormal = 1;
+    private static $contratoAdicion = 2;
+    private static $contratoAjuste = 3;
+
     public static function tiposEstampillas(){
         return self::$tiposEstampillas;
     }
@@ -22,5 +32,21 @@ Class Equivalencias extends CI_Controller
 
     public static function generadorHash(){
         return self::$generadorHash;
+    }
+
+    public static function clasificacionCOntratos(){
+        return self::$clasificacionCOntratos;
+    }
+
+    public static function contratoNormal(){
+        return self::$contratoNormal;
+    }
+
+    public static function contratoAdicion(){
+        return self::$contratoAdicion;
+    }
+
+    public static function contratoAjuste(){
+        return self::$contratoAjuste;
     }
 }

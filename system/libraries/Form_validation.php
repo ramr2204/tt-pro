@@ -956,6 +956,19 @@ class CI_Form_validation {
 		return $query->num_rows() === 0;
     }
 
+	/**
+	 * Match one field to another
+	 *
+	 * @access	public
+	 * @param	string
+	 * @param	field
+	 * @return	bool
+	 */
+	public function is_exists($str, $field)
+	{
+		return !$this->is_unique($str, $field);
+    }
+
 	// --------------------------------------------------------------------
 
 	/**
