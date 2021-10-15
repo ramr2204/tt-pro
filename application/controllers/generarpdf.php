@@ -384,19 +384,22 @@ class Generarpdf extends CI_controller {
                 $this->load->library('encrypt');
 
                 $hash = $_GET['id'];
-                $id_pago = $this->encrypt->decode($hash, Equivalencias::generadorHash());
+                $ids_pago = $this->encrypt->decode($hash, Equivalencias::generadorHash());
 
-                $pago = $this->codegen_model->get(
+                # Para que valide que sean numeros separados por coma (tambien acepta uno)
+                if(!preg_match('/^[0-9]+((,[0-9]+)*)?$/', $ids_pago)){
+                    redirect(base_url().'index.php/error_404');
+                }
+
+                $pagos = $this->codegen_model->getSelect(
                     'pagos_estampillas AS pago',
                     'factura.fact_liquidacionid AS id_liquidacion, pago.valor AS valor_cuota, factura.fact_valor AS valor_total,
-                        pago.numero AS cuota, factura.fact_nombre',
-                    'pago.id = "' . $id_pago . '"',
-                    1, null, true, 'array',
-                    'est_facturas factura',
-                    'factura.fact_id = pago.factura_id'
+                        pago.numero AS cuota, factura.fact_nombre, pago.id',
+                    'WHERE pago.id IN (' . $ids_pago . ')',
+                    'INNER JOIN est_facturas factura ON factura.fact_id = pago.factura_id'
                 );
 
-                $this->data['result'] = $this->liquidaciones_model->getrecibos(null, $pago->id_liquidacion);
+                $this->data['result'] = $this->liquidaciones_model->getrecibos(null, $pagos[0]->id_liquidacion);
                 $liquidacion = $this->data['result'];
   
                 $contrato = $this->codegen_model->getSelect(
@@ -419,9 +422,9 @@ class Generarpdf extends CI_controller {
                 $this->data['contrato']     = $contrato[0];
                 $this->data['contratista']  = $contratista[0];
                 $this->data['liquidador']   = $liquidador[0];
-                $this->data['pago']         = $pago;
+                $this->data['pagos']        = $pagos;
   
-                  // create new PDF document
+                // create new PDF document
                 $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
   
                 // set document information
@@ -469,8 +472,8 @@ class Generarpdf extends CI_controller {
                     'module_height' => 1 // height of a single module in points
                 );
 
-                $this->data['params'] = TCPDF_STATIC::serializeTCPDFtagParameters(array(
-                    base_url().'generarpdf/generar_estampilla_retencion?id='.urlencode($hash),
+                $this->data['estilos_qr'] = array(
+                    '',
                     'QRCODE,H',
                     '',# Posicion x
                     '',# Posicion y
@@ -478,7 +481,7 @@ class Generarpdf extends CI_controller {
                     30,# Alto
                     $style,
                     'B'# Alineacion
-                ));
+                );
 
                 $html = $this->load->view('generarpdf/generarpdf_recibo_pago_estampilla', $this->data, TRUE);
                 $pdf->writeHTML($html, true, false, true, false, '');
@@ -612,7 +615,7 @@ class Generarpdf extends CI_controller {
             'T'
         ));
 
-        $pagado = ($pago->valor_total - $pago->valor_pagado) == 0;
+        $pagado = floor($pago->valor_total - $pago->valor_pagado) == 0;
 
         if($pagado){
             $estampilla->pago_fecha = $ultimo_pago->fecha_insercion;

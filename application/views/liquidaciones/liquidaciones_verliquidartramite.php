@@ -102,23 +102,23 @@ $cuentas='';
 ?>
 <tr>
      <td colspan="1"><?php echo $row2->estm_nombre; ?>
-     <input type="hidden" name="nombreestampilla<?php echo $x; ?>" value="<?php echo $row2->estm_nombre; ?>">
-     <input type="hidden" name="idestampilla<?php echo $x; ?>" value="<?php echo $row2->estm_id; ?>">
-     <?php if ($row2->estm_rutaimagen) { ?>
-     <img src="<?php echo base_url().$row2->estm_rutaimagen; ?>" height="60" width="60" >
-    <?php } ?>
+          <input type="hidden" name="nombreestampilla<?php echo $x; ?>" value="<?php echo $row2->estm_nombre; ?>">
+          <input type="hidden" name="idestampilla<?php echo $x; ?>" value="<?php echo $row2->estm_id; ?>">
+          <?php if ($row2->estm_rutaimagen) { ?>
+          <img src="<?php echo base_url().$row2->estm_rutaimagen; ?>" height="60" width="60" >
+          <?php } ?>
      </td>
      <td colspan="1" class="text-center"><?php echo $row2->estm_cuenta; ?><br><?php echo $row2->banc_nombre; ?>
-     <input type="hidden" name="cuenta<?php echo $x; ?>" value="<?php echo $row2->estm_cuenta; ?>">
-     <input type="hidden" name="banco<?php echo $x; ?>" value="<?php echo $row2->banc_nombre; ?>">
+          <input type="hidden" name="cuenta<?php echo $x; ?>" value="<?php echo $row2->estm_cuenta; ?>">
+          <input type="hidden" name="banco<?php echo $x; ?>" value="<?php echo $row2->banc_nombre; ?>">
      </td>
      <td colspan="1" class="text-center"><?php echo $row2->estr_porcentaje; ?>%
-     <input type="hidden" name="porcentaje<?php echo $x; ?>" value="<?php echo $row2->estr_porcentaje; ?>">
-     <input type="hidden" name="rutaimagen<?php echo $x; ?>" value="<?php echo $row2->estm_rutaimagen; ?>">
+          <input type="hidden" name="porcentaje<?php echo $x; ?>" value="<?php echo $row2->estr_porcentaje; ?>">
+          <input type="hidden" name="rutaimagen<?php echo $x; ?>" value="<?php echo $row2->estm_rutaimagen; ?>">
      </td>
      <td colspan="1" class="text-right"><?php echo '$'.number_format($est_totalestampilla[$row2->estm_id], 2, ',', '.'); ?>
-     <br>
-     <input type="hidden" name="totalestampilla<?php echo $x; ?>" value="<?php echo $est_totalestampilla[$row2->estm_id]; ?>">
+          <br>
+          <input type="hidden" name="totalestampilla<?php echo $x; ?>" value="<?php echo $est_totalestampilla[$row2->estm_id]; ?>">
      </td>
 </tr>
 <?php 

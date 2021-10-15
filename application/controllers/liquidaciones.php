@@ -3935,9 +3935,6 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 				$this->data['successmessage'] = $this->session->flashdata('message');
 				$this->data['errormessage'] = '';
 
-                # Se da formato al valor para que guarde los valores decimales
-                $valor = str_replace(',', '.', str_replace('.','',$this->input->post('valor')));
-
 				$this->form_validation->set_rules('id_factura', 'Identificador de la facturas', 'trim|xss_clean|numeric|integer|greater_than[0]');
 				$this->form_validation->set_rules('fecha', 'Fecha', 'required|trim|xss_clean|required');
 				$this->form_validation->set_rules('observaciones', 'Observaciones', 'trim|xss_clean');
@@ -3950,73 +3947,64 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 					redirect(base_url().'index.php/liquidaciones/liquidar/'.$this->input->post('id_contrato'));
 				}
 
-				$ruta_soporte = '';
+                $is_pagos = array();
 
-				if (!isset($_FILES['upload_field_name']) && !is_uploaded_file($_FILES['soporte']['tmp_name'])) 
-				{
-					// $this->session->set_flashdata('errorModal', true);
-					// $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe cargar el soporte del pago.');
-				}
-				else
-				{
-					$path = 'uploads/pagosFacturas';
-					if(!is_dir($path)) { //crea la carpeta para los objetos si no existe
-						mkdir($path,0777,TRUE);      
-					}
-					$config['upload_path'] = $path;
-					$config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
-					$config['remove_spaces']=TRUE;
-					$config['max_size']    = '99999';
-					$config['overwrite']    = TRUE;
-					$this->load->library('upload');
+                if($this->input->post('todos') != '1')
+                {
+                    # Se da formato al valor para que guarde los valores decimales
+                    $valor = str_replace(',', '.', str_replace('.','',$this->input->post('valor')));
 
-					$config['file_name'] = $this->input->post('id_factura').'_'.date("F_d_Y");
-					$this->upload->initialize($config);
+                    $guardo = $this->pagarEstampillaIndividual(
+                        $this->input->post('id_factura'),
+                        $this->input->post('id_contrato'),
+                        $this->input->post('fecha'),
+                        $this->input->post('observaciones'),
+                        $valor
+                    );
+                    $is_pagos[] = $guardo->idInsercion;
+                }
+                else
+                {
+                    # Se toma una factura de todo el contrato para obtener la liquidacion y buscar las demas
+                    $factura_muestra = $this->codegen_model->get(
+                        'est_facturas',
+                        'fact_liquidacionid AS id_liquidacion',
+                        'fact_id = "' . $this->input->post('id_factura') . '"',
+                        1, null, true
+                    );
 
-					//Valida si se carga correctamente el soporte
-					if ($this->upload->do_upload("soporte"))
-					{
-						/*
-						* Establece la informacion para actualizar la liquidacion
-						* en este caso la ruta de la copia del objeto del contrato
-						*/
-						$file_datos= $this->upload->data();
-						$ruta_soporte = $path.'/'.$file_datos['orig_name'];
-					}
-					else {
-						$this->session->set_flashdata('errorModal', true);
-						$this->session->set_flashdata('errormessage', '<strong>Error!</strong> '.$this->upload->display_errors());
-					}
-				}
+                    $facturas = $this->liquidaciones_model->obtenerFacturasRetencion('factura.fact_liquidacionid', $factura_muestra->id_liquidacion);
 
-				$factura = $this->liquidaciones_model->obtenerFacturasRetencion('factura.fact_id', $this->input->post('id_factura'));
-
-                if( $valor > (($factura[0]->valor_total - $factura[0]->valor_pagado)) ){
-                    $this->session->set_flashdata('errorModal', true);
-					$this->session->set_flashdata('errormessage', '<strong>Error!</strong> El valor del pago no puede ser mayor que el saldo.');
-                    $this->session->set_flashdata('accion', 'retencion');
-					redirect(base_url().'index.php/liquidaciones/liquidar/'.$this->input->post('id_contrato'));
+                    foreach($facturas AS $factura)
+                    {
+                        # Si el saldo no es cero, es decir no ha sido pagada
+                        if(floor($factura->valor_total - $factura->valor_pagado) != 0)
+                        {
+                            $guardo = $this->pagarEstampillaIndividual(
+                                $factura->fact_id,
+                                $this->input->post('id_contrato'),
+                                $this->input->post('fecha'),
+                                $this->input->post('observaciones'),
+                                $factura->valor_cuota,
+                                $factura
+                            );
+                            $is_pagos[] = $guardo->idInsercion;
+    
+                            # Si falla algun proceso rompa el for y se valide despues
+                            if (!$guardo->bandRegistroExitoso){
+                                break;
+                            }
+                        }
+                    }
                 }
 
-				$guardo = $this->codegen_model->add(
-					'pagos_estampillas',
-					array(
-						'factura_id'		=> $this->input->post('id_factura'),
-						'valor'				=> $valor,
-						'numero'			=> ($factura[0]->numero_cuota + 1),
-						'soporte'			=> $ruta_soporte,
-						'fecha'				=> $this->input->post('fecha'),
-						'observaciones'		=> $this->input->post('observaciones'),
-						'fecha_insercion'	=> date('Y-m-d H:i:s')
-					)
-				);
-
-				if ($guardo->bandRegistroExitoso){
+				if ($guardo->bandRegistroExitoso)
+                {
                     $this->load->library('encrypt');
    
 					$this->session->set_flashdata('errorModal', true);
 					$this->session->set_flashdata('successmessage', 'Se pagó con éxito la factura');
-					$this->session->set_flashdata('idPagoFactura', $this->encrypt->encode($guardo->idInsercion, Equivalencias::generadorHash()));
+					$this->session->set_flashdata('idPagoFactura', $this->encrypt->encode(implode(',', $is_pagos), Equivalencias::generadorHash()));
 				}
 				else{
 					$this->session->set_flashdata('errorModal', true);
@@ -4033,6 +4021,78 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
             redirect(base_url().'index.php/users/login');
         }
 	}
+
+    private function pagarEstampillaIndividual($id_factura, $id_contrato, $fecha, $observaciones, $valor, $factura = null)
+    {
+        $ruta_soporte = '';
+
+        if (!isset($_FILES['upload_field_name']) && !is_uploaded_file($_FILES['soporte']['tmp_name'])) 
+        {
+            // $this->session->set_flashdata('errorModal', true);
+            // $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe cargar el soporte del pago.');
+        }
+        else
+        {
+            $path = 'uploads/pagosFacturas';
+            if(!is_dir($path)) { //crea la carpeta para los objetos si no existe
+                mkdir($path,0777,TRUE);
+            }
+            $config['upload_path'] = $path;
+            $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
+            $config['remove_spaces']=TRUE;
+            $config['max_size']    = '99999';
+            $config['overwrite']    = TRUE;
+            $this->load->library('upload');
+
+            $config['file_name'] = $id_factura.'_'.date("F_d_Y");
+            $this->upload->initialize($config);
+
+            //Valida si se carga correctamente el soporte
+            if ($this->upload->do_upload("soporte"))
+            {
+                /*
+                * Establece la informacion para actualizar la liquidacion
+                * en este caso la ruta de la copia del objeto del contrato
+                */
+                $file_datos= $this->upload->data();
+                $ruta_soporte = $path.'/'.$file_datos['orig_name'];
+            }
+            else {
+                $this->session->set_flashdata('errorModal', true);
+                $this->session->set_flashdata('errormessage', '<strong>Error!</strong> '.$this->upload->display_errors());
+                $this->session->set_flashdata('accion', 'retencion');
+                redirect(base_url().'index.php/liquidaciones/liquidar/'.$id_contrato);
+            }
+        }
+
+        if($factura === null){
+            $factura = $this->liquidaciones_model->obtenerFacturasRetencion('factura.fact_id', $id_factura);
+            $factura = $factura[0];
+        }
+
+        # Si lo que paga supera el saldo, lo que debe pagar
+        if( $valor > floor($factura->valor_total - $factura->valor_pagado) ){
+            $this->session->set_flashdata('errorModal', true);
+            $this->session->set_flashdata('errormessage', '<strong>Error!</strong> El valor del pago no puede ser mayor que el saldo.');
+            $this->session->set_flashdata('accion', 'retencion');
+            redirect(base_url().'index.php/liquidaciones/liquidar/'.$id_contrato);
+        }
+
+        $guardo = $this->codegen_model->add(
+            'pagos_estampillas',
+            array(
+                'factura_id'		=> $id_factura,
+                'valor'				=> $valor,
+                'numero'			=> ($factura->numero_cuota + 1),
+                'soporte'			=> $ruta_soporte,
+                'fecha'				=> $fecha,
+                'observaciones'		=> $observaciones,
+                'fecha_insercion'	=> date('Y-m-d H:i:s')
+            )
+        );
+
+        return $guardo;
+    }
 
     function estampillasRetencion()
     {

@@ -88,6 +88,13 @@ class Contratos extends MY_Controller {
               $this->form_validation->set_rules('objeto', 'objeto',  'required|trim|xss_clean');  
               $this->form_validation->set_rules('numero', 'Número','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');
+              $this->form_validation->set_rules('clasificacion_contrato', 'Clasificación del contrato','required|trim|xss_clean|numeric|greater_than[0]');
+
+				$aplica_numero_relacionado = $this->input->post('clasificacion_contrato') != Equivalencias::contratoNormal();
+
+              if($aplica_numero_relacionado){
+                $this->form_validation->set_rules('contrato_relacionado', 'Número de contrato relacionado','required|trim|xss_clean|is_exists[con_contratos.cntr_numero]');
+              }
 
 			  $es_retencion = $this->esContratoRetencion($this->input->post('tipocontratoid'));
 
@@ -134,7 +141,9 @@ class Contratos extends MY_Controller {
                             'fecha_insercion'		=> date('Y-m-d H:i:s'),
                             'cntr_usuariocrea'		=> $usuario->id,
                             'cntr_municipio_origen'	=> $this->input->post('cntr_municipio_origen'),
-							'cantidad_pagos'		=> $es_retencion ? $this->input->post('cantidad_pagos') : 0
+							'cantidad_pagos'		=> $es_retencion ? $this->input->post('cantidad_pagos') : 0,
+                            'clasificacion'			=> $this->input->post('clasificacion_contrato'),
+                            'numero_relacionado'	=> $aplica_numero_relacionado ? $this->input->post('contrato_relacionado') : null,
 						);
 
                         /*
@@ -192,6 +201,8 @@ class Contratos extends MY_Controller {
                 $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
                 $this->data['contratantes'] = $this->codegen_model->getSelect('con_contratantes', 'id,nombre,nit');
                 $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 6');
+                $this->data['clasificacion_contrato']  = Equivalencias::clasificacionCOntratos();
+                $this->data['contrato_normal']  = Equivalencias::contratoNormal();
                 $this->template->load($this->config->item('admin_template'),'contratos/contratos_add', $this->data);
              
           } else {
@@ -267,6 +278,19 @@ class Contratos extends MY_Controller {
               $this->form_validation->set_rules('objeto', 'objeto',  'required|trim|xss_clean');  
               $this->form_validation->set_rules('numero', 'Número','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');  
+			  $this->form_validation->set_rules('clasificacion_contrato', 'Clasificación del contrato','required|trim|xss_clean|numeric|greater_than[0]');
+
+			  $aplica_numero_relacionado = $this->input->post('clasificacion_contrato') != Equivalencias::contratoNormal();
+
+              if($aplica_numero_relacionado){
+                $this->form_validation->set_rules('contrato_relacionado', 'Número de contrato relacionado','required|trim|xss_clean|is_exists[con_contratos.cntr_numero]');
+              }
+
+			  $es_retencion = $this->esContratoRetencion($this->input->post('tipocontratoid'));
+
+			  if($es_retencion){
+				$this->form_validation->set_rules('cantidad_pagos', 'Número de pagos','required|trim|xss_clean|numeric|greater_than[0]');
+			  }
 
               if ($this->form_validation->run() == false) {
                   
@@ -305,8 +329,11 @@ class Contratos extends MY_Controller {
                             'cntr_objeto' => $this->input->post('objeto'),
                             'cntr_valor' => $valor,
                             'cntr_vigencia' => $vigencia[0],
-                            'cntr_municipio_origen' => $this->input->post('cntr_municipio_origen')
-                            );
+                            'cntr_municipio_origen' => $this->input->post('cntr_municipio_origen'),
+							'cantidad_pagos'		=> $es_retencion ? $this->input->post('cantidad_pagos') : 0,
+                            'clasificacion'			=> $this->input->post('clasificacion_contrato'),
+                            'numero_relacionado'	=> $aplica_numero_relacionado ? $this->input->post('contrato_relacionado') : null,
+						);
 
                         /*
                         * Valida si el tipo de régimen es otros
@@ -357,11 +384,22 @@ class Contratos extends MY_Controller {
                         'js/autoNumeric.js'
                     );
 
-                $this->data['result'] = $this->codegen_model->get('con_contratos','cont_regimenid,cntr_id,cntr_contratistaid,cntr_contratanteid,cntr_municipio_origen,cntr_tipocontratoid,cntr_fecha_firma,cntr_numero,cntr_objeto,cntr_valor,cntr_iva_otros','cntr_id = '.$idcontrato,1,NULL,true,array(),'con_contratistas','con_contratistas.cont_id = con_contratos.cntr_contratistaid');
+                $this->data['result'] = $this->codegen_model->get(
+                    'con_contratos',
+                    'cont_regimenid,cntr_id,cntr_contratistaid,cntr_contratanteid,cntr_municipio_origen,
+                        cntr_tipocontratoid,cntr_fecha_firma,cntr_numero,cntr_objeto,cntr_valor,
+                        cntr_iva_otros,cantidad_pagos,clasificacion,numero_relacionado',
+                    'cntr_id = '.$idcontrato,
+                    1,NULL,true,array(),
+                    'con_contratistas',
+                    'con_contratistas.cont_id = con_contratos.cntr_contratistaid'
+                );
                 $this->data['tiposcontratos']  = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
                 $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
                 $this->data['contratantes'] = $this->codegen_model->getSelect('con_contratantes', 'id,nombre,nit');
                 $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 6');
+				$this->data['clasificacion_contrato']  = Equivalencias::clasificacionCOntratos();
+                $this->data['contrato_normal']  = Equivalencias::contratoNormal();
                 $this->template->set('title', 'Editar contrato');
                 $this->template->load($this->config->item('admin_template'),'contratos/contratos_edit', $this->data);
 

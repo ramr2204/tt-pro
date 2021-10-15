@@ -161,10 +161,10 @@ class Liquidaciones_model extends CI_Model {
             factura.fact_id, factura.fact_nombre, (factura.fact_valor - COALESCE(descuento.valor, 0)) AS valor_total,
             contrato.cantidad_pagos,
             (
-                (
+                FLOOR(
                     ( factura.fact_valor - COALESCE(descuento.valor, 0) ) - COALESCE(SUM(pago.valor), 0)
                 ) /
-                if(COALESCE(MAX(pago.numero), 0) >= contrato.cantidad_pagos, 1, (contrato.cantidad_pagos - COALESCE(MAX(pago.numero), 0)))
+                IF(COALESCE(MAX(pago.numero), 0) >= contrato.cantidad_pagos, 1, (contrato.cantidad_pagos - COALESCE(MAX(pago.numero), 0)))
             ) AS valor_cuota,
             COALESCE(MAX(pago.numero), 0) AS numero_cuota,
             factura.fact_rutaimagen, factura.fact_liquidacionid AS id_liquidacion,

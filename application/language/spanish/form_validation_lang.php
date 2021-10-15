@@ -23,6 +23,7 @@ $lang['decimal']			= "El Campo %s debe contener un numero decimal.";
 $lang['less_than']			= "EL campo %s debe contener un numero menor a %s.";
 $lang['greater_than']		= "El campo %s debe cotener un numero mayor a %s.";
 $lang['is_unique']			= "Ya existe un campo con este valor. Elija otro."; //no esta en los demas idiomas
+$lang['is_exists']			= "No se encuentra otro registro para el campo %s."; //no esta en los demas idiomas
 $lang['blank']				= "No puede dejar el campo en blanco";
 
 /* End of file form_validation_lang.php */

@@ -21,7 +21,7 @@
                            <div class="panel panel-default">
                            <div class="panel-heading"><h1>Editar contrato</h1></div>
                              <div class="panel-body">
-                              <?php echo form_open(current_url(),'role="form"');?>
+                                <?php echo form_open(current_url(),'role="form"');?>
 
                                    <div class="form-group">
                                            <input class="form-control" id="id" type="hidden" name="id" value="<?php echo $result->cntr_id; ?>"/>
@@ -33,15 +33,22 @@
                                        <div class="form-group">
                                            <label for="contratistaid">Contratista</label>
                                            <select class="form-control" id="contratistaid" name="contratistaid" required="required" >
-                                             <option value="0">Seleccione...</option>
-                                             <?php  foreach($contratistas as $row) { ?>
-                                                 <?php if ($row->cont_id==$result->cntr_contratistaid) { ?>
-                                                 <option selected value="<?php echo $row->cont_id; ?>" ><?php echo $row->cont_nit.' - '.$row->cont_nombre; ?></option>
-                                                 <?php } else { ?>
-                                                 <option value="<?php echo $row->cont_id; ?>"><?php echo $row->cont_nit.' - '.$row->cont_nombre; ?></option>
-                                                 <?php } ?>
-
-                                             <?php   } ?>
+                                                <option value="0">Seleccione...</option>
+                                                <?php
+                                                    foreach($contratistas as $row)
+                                                    {
+                                                        if ($row->cont_id==$result->cntr_contratistaid)
+                                                        {
+                                                            ?>
+                                                            <option selected value="<?php echo $row->cont_id; ?>" ><?php echo $row->cont_nit.' - '.$row->cont_nombre; ?></option>
+                                                            <?php
+                                                        } else {
+                                                            ?>
+                                                            <option value="<?php echo $row->cont_id; ?>"><?php echo $row->cont_nit.' - '.$row->cont_nombre; ?></option>
+                                                            <?php
+                                                        }
+                                                    }
+                                                ?>
                                            </select>
                                            <?php echo form_error('contratistaid','<span class="text-danger">','</span>'); ?>
                                        </div>
@@ -142,20 +149,79 @@
                                         </div>
                                     </div>
 
-                                     <div class="col-md-12 column">
-                                      <div class="form-group">
-                                           <label for="cntr_municipio_origen">Municipio Origen del Contrato</label>
-                                           <select class="form-control" id="cntr_municipio_origen" name="cntr_municipio_origen" required="required" >
-                                           <option value="0">Seleccione...</option>
-                                             <?php  foreach($municipios as $row) { ?>
-                                                <?php if ($row->muni_id==$result->cntr_municipio_origen) { ?>                                                    
-                                                    <option selected value="<?php echo $row->muni_id; ?>"><?php echo $row->muni_nombre; ?></option>
-                                                    <?php } else { ?>
-                                                    <option value="<?php echo $row->muni_id; ?>"><?php echo $row->muni_nombre; ?></option>
-                                                    <?php } ?>                                             
-                                             <?php   } ?>
-                                           </select>
-                                           <?php echo form_error('cntr_municipio_origen','<span class="text-danger">','</span>'); ?>
+                                    <div class="col-md-6 column">
+                                        <div class="form-group">
+                                            <label for="cntr_municipio_origen">Municipio Origen del Contrato</label>
+                                            <select class="form-control" id="cntr_municipio_origen" name="cntr_municipio_origen" required="required" >
+                                                <option value="0">Seleccione...</option>
+                                                <?php
+                                                    foreach($municipios as $row)
+                                                    {
+                                                        if ($row->muni_id==$result->cntr_municipio_origen)
+                                                        {
+                                                            ?>
+                                                                <option selected value="<?php echo $row->muni_id; ?>"><?php echo $row->muni_nombre; ?></option>
+                                                            <?php
+                                                        } else {
+                                                            ?>
+                                                                <option value="<?php echo $row->muni_id; ?>"><?php echo $row->muni_nombre; ?></option>
+                                                            <?php
+                                                        }
+                                                    }
+                                                ?>
+                                            </select>
+                                            <?php echo form_error('cntr_municipio_origen','<span class="text-danger">','</span>'); ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 column">
+                                        <div class="form-group">
+                                            <label for="clasificacion_contrato">Clasificación del contrato</label>
+                                            <select class="form-control" id="clasificacion_contrato" name="clasificacion_contrato" required="required" >
+                                                <option value="0">Seleccione...</option>
+                                                <?php
+                                                    foreach($clasificacion_contrato AS $id => $nombre)
+                                                    {
+                                                        ?>
+                                                        <option value="<?= $id ?>"
+                                                            <?= $result->clasificacion == $id ? 'selected' : '' ?>
+                                                        ><?= $nombre ?></option>
+                                                        <?php
+                                                    }
+                                                ?>
+                                            </select>
+                                            <?php echo form_error('clasificacion_contrato','<span class="text-danger">','</span>'); ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 column" style="display:none">
+                                        <div class="form-group">
+                                            <label for="contrato_relacionado">Número de contrato relacionado</label>
+                                            <input
+                                                class="form-control"
+                                                id="contrato_relacionado"
+                                                type="number"
+                                                name="contrato_relacionado"
+                                                value="<?= $result->numero_relacionado ?>"
+                                                min="0" />
+                                            <?php echo form_error('contrato_relacionado','<span class="text-danger">','</span>'); ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 column" style="display:none">
+                                        <div class="form-group">
+                                            <label for="cantidad_pagos">Número de pagos</label>
+                                            <input
+                                                disabled
+                                                class="form-control"
+                                                id="cantidad_pagos"
+                                                type="number"
+                                                name="cantidad_pagos"
+                                                value="<?= $result->cantidad_pagos; ?>"
+                                                required="required"
+                                                min="0" />
+                                            <?php echo form_error('cantidad_pagos','<span class="text-danger">','</span>'); ?>
+                                        </div>
                                     </div>
 
                                      <div class="col-md-12 column">
@@ -170,17 +236,21 @@
                 
 
                                     <div class="pull-right">
-                                     <?php  echo anchor('contratos', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
-                                     
-                                     <?php if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/delete')) { ?>
-                                      <a class="btn btn-danger" data-toggle="modal" data-target="#myModal"><i class="fa fa-trash-o"></i> Eliminar</a>
-                                     <?php } ?>
+                                        <?php  echo anchor('contratos', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
 
-                                    <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
+                                        <?php
+                                            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/delete'))
+                                            {
+                                                ?>
+                                                    <a class="btn btn-danger" data-toggle="modal" data-target="#myModal"><i class="fa fa-trash-o"></i> Eliminar</a>
+                                                <?php
+                                            }
+                                        ?>
+
+                                        <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o"></i> Guardar</button>
                                     </div>
                                 <?php echo form_close();?>
-                              
-                              </div>
+
                              </div>
        
                         </div>
@@ -226,7 +296,8 @@
     //style selects
     var config = {
       '#tipocontratoid'  : {disable_search_threshold: 10},
-      '#cntr_municipio_origen'  : {disable_search_threshold: 10}
+      '#cntr_municipio_origen'  : {disable_search_threshold: 10},
+      '#clasificacion_contrato'  : {disable_search_threshold: 10}
     }
     for (var selector in config) {
         $(selector).chosen(config[selector]);
@@ -239,8 +310,47 @@
     $('#contratistaid').chosen({disable_search_threshold: 10}).change(validarRegimenContratista);
 
     $(function () {
-            $('#valor').autoNumeric('init',{aSep: '.' , aDec: ',' }); 
-            $('#valor_iva_otros').autoNumeric('init',{aSep: '.' , aDec: ',' }); 
-      });
+        $('#valor').autoNumeric('init',{aSep: '.' , aDec: ',' }); 
+        $('#valor_iva_otros').autoNumeric('init',{aSep: '.' , aDec: ',' });
+
+        $('#tipocontratoid').change(consultarContratoRetencion);
+        $('#tipocontratoid').change();
+
+        $('#clasificacion_contrato').change(handlerClasificacionContrato);
+        $('#clasificacion_contrato').change();
+    });
+
+    function consultarContratoRetencion()
+    {
+        if($(this).val())
+        {
+            $('#cantidad_pagos').attr('disabled', true)
+            $('#cantidad_pagos').closest('.column').hide();
+
+            $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                url: base_url + 'index.php/contratos/verificarTipoRetencion/'+$(this).val(),
+                success: function (data) {
+                    if(data.exito && data.es_retencion){
+                        $('#cantidad_pagos').attr('disabled', false)
+                        $('#cantidad_pagos').closest('.column').show();
+                    }
+                }
+            });
+        }
+    }
+
+    function handlerClasificacionContrato()
+    {
+        var valor = $(this).val();
+
+        if(valor != '0' && valor != '<?= $contrato_normal ?>')
+        {
+            $('#contrato_relacionado').closest('.column').show();
+        }else{
+            $('#contrato_relacionado').closest('.column').hide();
+        }
+    }
 
   </script>

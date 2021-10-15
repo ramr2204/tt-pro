@@ -92,13 +92,23 @@
         </tr>
     </thead>
     <tbody>
-        <tr>
-            <td width="25%" class="text-center"><?= $pago->fact_nombre ?></td>
-            <td width="13%" class="text-center"><?= $pago->cuota ?> / <?= $contrato->cantidad_pagos ?></td>
-            <td width="12%" class="text-center">$<?= number_format($pago->valor_cuota, 2, ',', '.') ?></td>
-            <td width="50%" class="text-center">
-                <tcpdf method="write2DBarcode" params="<?= $params; ?>" />
-            </td>
-        </tr>
+        <?
+            foreach($pagos AS $pago)
+            {
+                $estilos_qr[0] = base_url().'generarpdf/generar_estampilla_retencion?id='.urlencode($this->encrypt->encode($pago->id, Equivalencias::generadorHash()));
+                $params = TCPDF_STATIC::serializeTCPDFtagParameters($estilos_qr);
+
+                ?>
+                <tr>
+                    <td width="25%" class="text-center"><?= $pago->fact_nombre ?></td>
+                    <td width="13%" class="text-center"><?= $pago->cuota ?> / <?= $contrato->cantidad_pagos ?></td>
+                    <td width="12%" class="text-center">$<?= number_format($pago->valor_cuota, 2, ',', '.') ?></td>
+                    <td width="50%" class="text-center">
+                        <tcpdf method="write2DBarcode" params="<?= $params; ?>" />
+                    </td>
+                </tr>
+                <?
+            }
+        ?>
     </tbody>
 </table>

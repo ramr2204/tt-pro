@@ -49,10 +49,11 @@
                             <?php
                                     $total = 0;
                                     $saldo_total = 0;
+                                    $estampillas_pagadas = 0;
 
                                     foreach($facturas_retencion as $factura)
                                     {
-                                        $saldo = $factura->valor_total - $factura->valor_pagado;
+                                        $saldo = floor($factura->valor_total - $factura->valor_pagado);
                                         ?>
                                         <tr>
                                             <td colspan="1">
@@ -100,6 +101,11 @@
                                         <?php
                                             $total += $factura->valor_total;
                                             $saldo_total += $saldo;
+
+                                            if($saldo == 0)
+                                            {
+                                                $estampillas_pagadas++;
+                                            }
                                     }
                             ?>
                             <tr>
@@ -116,12 +122,23 @@
             </table>
         </div>
     </div>
+    <?
+        if($estampillas_pagadas != count($facturas_retencion))
+        {
+            ?>
+            <div class="col-sm-12 text-center">
+                <button class="btn btn-info" id="pagar_todo">Pagar Todo</button>
+            </div>
+            <?
+        }
+    ?>
     <div class="col-sm-12" style="display:none" id="form_pago_estampilla">
         <div class="row">
             <hr>
             <?= form_open_multipart('liquidaciones/pagarEstampilla','role="form"') ?>
                 <input type="hidden" name="id_factura" id="id_factura_cont">
                 <input type="hidden" name="id_contrato" class="id_contrato_cont">
+                <input type="hidden" name="todos" class="todos_cont" value="0">
 
                 <h4 class="text-center"><b>Pago de Estampillas por Retención</b></h4>
 
@@ -196,12 +213,15 @@
 
     $(document).on('click', '.pagar-estampilla', function(){
         $('#form_descuento_estampilla').hide();
+        $('#valor_cont').closest('.form-group').show();
 
         $('#id_factura_cont').val($(this).attr('id-factura'));
         $('#nombre_estampilla').val($(this).attr('fact-nombre'));
 
         // El blur es para activar la libreria autoNumeric
         $('#valor_cont').val($(this).attr('valor')).blur();
+
+        $('.todos_cont').val(0);
 
         $('#form_pago_estampilla').slideDown();
     });
@@ -212,6 +232,15 @@
         $('#id_factura_desc').val($(this).attr('id-factura'));
         $('#nombre_estampilla_desc').val($(this).attr('fact-nombre'));
         $('#form_descuento_estampilla').slideDown();
+    });
+
+    $(document).on('click', '#pagar_todo', function() {
+        // Simula como se hubiera clickeado la primera estampilla a pagar
+        $('.pagar-estampilla')[0].click();
+
+        $('.todos_cont').val(1);
+        $('#nombre_estampilla').val('Todas una cuota');
+        $('#valor_cont').closest('.form-group').hide();
     });
 
     $("#soporte_cont").fileinput({
