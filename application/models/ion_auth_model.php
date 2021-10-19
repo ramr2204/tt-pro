@@ -1826,6 +1826,7 @@ public function get_menus($id = 0)
                 $this->db->join('adm_modulos mo','mo.modu_id=me.menu_moduloid and mo.modu_estadoid=1','inner');
                 $this->db->join('adm_aplicaciones a','a.apli_id=mo.modu_aplicacionid and a.apli_estadoid=1','inner');
                 $this->db->join('adm_procesos p','p.proc_id=a.apli_procesoid and p.proc_estadoid=1','inner');
+				$this->db->where('menu_estadoid', 1);
 
         	} else {	
 
@@ -1836,6 +1837,7 @@ public function get_menus($id = 0)
                 $this->db->join('adm_modulos mo','mo.modu_id=me.menu_moduloid and mo.modu_estadoid=1 and u.active=1','inner');
                 $this->db->join('adm_aplicaciones a','a.apli_id=mo.modu_aplicacionid and a.apli_estadoid=1 and u.active=1','inner');
                 $this->db->join('adm_procesos p','p.proc_id=a.apli_procesoid and p.proc_estadoid=1 and u.active=1','inner');
+				$this->db->where('menu_estadoid', 1);
 
             }
             $query = $this->db->get();
