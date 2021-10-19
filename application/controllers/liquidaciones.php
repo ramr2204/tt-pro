@@ -40,7 +40,6 @@ class Liquidaciones extends MY_Controller {
               $this->data['errormessage']   = $this->session->flashdata('errormessage');
               $this->data['infomessage']    = $this->session->flashdata('infomessage');
               $this->data['accion']         = $this->session->flashdata('accion');
-              $this->data['idPagoFactura']  = $this->session->flashdata('idPagoFactura');
 
               if ($this->uri->segment(3)>0){
                   $this->data['idcontrato']= $this->uri->segment(3);
@@ -234,103 +233,11 @@ class Liquidaciones extends MY_Controller {
                redirect(base_url().'index.php/error_404');
           }    
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
-              $idcontrato=$this->uri->segment(3);
-              $this->data['result'] = $this->liquidaciones_model->get($idcontrato);
-              $contrato = $this->data['result'];
-   
-              $estampillas = $this->liquidaciones_model->getestampillas($contrato->cntr_tipocontratoid);  
-              $this->data['estampillas'] = [];
+                $idcontrato = $this->uri->segment(3);
+                $this->data = $this->obtenerInfoFacturas($idcontrato);
 
-                /*
-                * Valida si el régimen del contratista es otros para calcular el valor
-                * restando el valor del IVA suministrado en la creación del contrato
-                */
-                if($contrato->regi_id == 6 || $contrato->regi_id == 8)
-                {
-                    $valorsiniva = (float)$contrato->cntr_valor - (float)$contrato->cntr_iva_otros;
-                }else
-                    {
-                        //valida el valor del porcentaje según el regimen
-                        //del contratista para realizar un calcúlo acertado
-                        if($contrato->regi_iva > 0)
-                        {
-                            $valorsiniva = (float)$contrato->cntr_valor/(((float)$contrato->regi_iva/100)+1);
-          
-                            //Formatea el resultado del calculo de valor sin iva
-                            //para que redondee por decimales y unidades de mil
-                            //ej valorsiniva=204519396.55172 ->decimales -> 204519397 ->centenas ->204519400
-                            $sinIvaRedondeoDecimales = round($valorsiniva);
-                            $sinIvaRedondeoCentenas = round($sinIvaRedondeoDecimales, -2);  
-                            unset($valorsiniva);
-                            $valorsiniva = $sinIvaRedondeoCentenas;
-                        }else
-                            {
-                                 $valorsiniva = (float)$contrato->cntr_valor;
-                            }
-                    }
-
-            //arreglo que guarda los distintos valores
-            //de liquidacion de las estampillas
-            $totalestampilla= array();
-
-            $valortotal=0;
-            $parametros=$this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo','para_id = 1',1,NULL,true);
-
-            foreach ($estampillas as $key => $value) 
-            {
-                /*
-                * Se valida si la estampilla a almacenar es pro electrificacion
-                * y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
-                * no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
-                */
-                $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($value->estm_id, $contrato->cntr_fecha_firma, $contrato->cntr_tipocontratoid);
-                if($bandRegistrarFactura)
-                {
-                    /*
-                     * Para la estampilla procultura y que sean contratos de obra civil,
-                     * suministros y bienes y servicios que superen los 25 salarios se
-                     * les aplica el porcentaje de la estampilla
-                     */
-                    if($value->estm_id == 2 && in_array($contrato->cntr_tipocontratoid, array(2,4,43)) )
-                    {
-                        if( $contrato->cntr_valor >= ($parametros->para_salariominimo * 25) )
-                        {
-                            $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
-                            $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
-                            array_push($this->data['estampillas'], $value);
-                        }
-                    }else
-                        {
-                            $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
-                            $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
-                            array_push($this->data['estampillas'], $value);
-                        }
-
-                    /*
-                    * Valida si el valor establecido para la estampilla es igual a cero
-                    * para establecer el valor minimo 1000
-                    */
-                    if(isset($totalestampilla[$value->estm_id]))
-                    {
-                        if($totalestampilla[$value->estm_id] <= 0)
-                        {
-                            $totalestampilla[$value->estm_id] = 1000;
-                        }
-
-                        /*
-                        * Calcula el total a pagar
-                        */
-                        $valortotal += (double)$totalestampilla[$value->estm_id];
-                    }
-                }
-            }
-
-              $this->data['est_totalestampilla']=$totalestampilla;
-              $this->data['cnrt_valorsiniva']=$valorsiniva;
-              $this->data['est_valortotal']=$valortotal;
-              $this->template->set('title', 'Editar contrato');
-              $this->load->view('liquidaciones/liquidaciones_liquidarcontrato', $this->data); 
-             
+                $this->template->set('title', 'Editar contrato');
+                $this->load->view('liquidaciones/liquidaciones_liquidarcontrato', $this->data); 
           } else {
               redirect(base_url().'index.php/error_404');
           }
@@ -389,72 +296,6 @@ class Liquidaciones extends MY_Controller {
 				$respuestaProceso = $this->codegen_model->add('est_liquidaciones',$data);
 				if ($respuestaProceso->bandRegistroExitoso)
 				{
-					$liquidacionid = $respuestaProceso->idInsercion;
-					for ($i=0; $i < $this->input->post('numeroestampillas'); $i++)
-					{
-						//Valida si la factura viene en valor cero
-						//no guarda factura
-						$valor = $this->input->post('totalestampilla'.$i);
-
-						if($valor > 0)
-						{
-							$estampilla = $this->codegen_model->get(
-								'est_estampillas AS estampilla',
-								'tipo',
-								'estm_id = "' . $this->input->post('idestampilla'.$i) . '"',
-								1, null, true
-							);
-
-							$data = array(
-								'fact_nombre'			=> $this->input->post('nombreestampilla'.$i),
-								'fact_porcentaje'		=> $this->input->post('porcentaje'.$i),
-								'fact_valor'			=> $this->input->post('totalestampilla'.$i),
-								'fact_banco'			=> $this->input->post('banco'.$i),
-								'fact_cuenta'			=> $this->input->post('cuenta'.$i),
-								'fact_liquidacionid'	=> $liquidacionid,
-								'fact_estampillaid'		=> $this->input->post('idestampilla'.$i),
-								'fact_rutaimagen'		=> $this->input->post('rutaimagen'.$i),
-								'tipo'					=> $estampilla->tipo,
-							);
-
-							/* 
-							* Se valida que el usuario loggeado que va a liquidar 
-							* sea heberth por si liquidan en otra parte no se 
-							* alteren los contratos el array debe ir asi
-							* idEstampilla => valor
-							$usuario = $this->ion_auth->user()->row();
-							if($usuario->id == 93414560) 
-							{     
-								$facturaExcedente = array(4 => 385, 9 => 385, 7 => 193);
-								foreach($facturaExcedente as $idEstampilla => $valorAPoner)     
-								{         
-									if($data['fact_estampillaid'] == $idEstampilla)         
-									{             
-										$data['fact_valor'] = $valorAPoner;
-									}     
-								}  
-							}
-							*/
-
-							/*
-							* Se valida si la estampilla a almacenar es pro electrificacion
-							* y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
-							* no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
-							*/
-							$bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($data['fact_estampillaid'], $contrato->cntr_fecha_firma, $contrato->cntr_tipocontratoid);
-							if($bandRegistrarFactura)
-							{
-								$respuestaProceso = $this->codegen_model->add('est_facturas',$data);
-
-								/**
-								* Solicita la Asignación del codigo para el codigo de barras
-								*/
-								$this->asignarCodigoParaBarras($liquidacionid,$this->input->post('idestampilla'.$i));
-							}
-							
-						}
-					}
-
 					$data = array(
 						'cntr_estadolocalid' => 1,
 					);
@@ -486,61 +327,11 @@ class Liquidaciones extends MY_Controller {
 			{
 				$idcontrato				= $this->uri->segment(3);
 				$this->data['result']	= $this->liquidaciones_model->getrecibos($idcontrato);
-				$liquidacion			= $this->data['result'];
-				$this->data['facturas']	= $this->liquidaciones_model->getfacturas($liquidacion->liqu_id);
+
+                $this->data['facturas']	= [];
 
 				$contrato				= $this->codegen_model->getSelect('con_contratos','date_format(fecha_insercion,"%Y-%m-%d") AS fecha_insercion', 'WHERE cntr_id = "'.$idcontrato.'"');
 				$this->data['contrato']	= $contrato[0];
-
-				//$todopago variable bandera indica si la totalidad de facturas 
-				//no se han pagado
-				$todopago				= 0;
-				$numerocomprobantes		= 0;
-				$ncomprobantescargados	= 0;
-				$totalpagado			= 0;
-				//vector $comprobantecargado
-				//almacena la relacion indice->valor
-				//tal que ==>    (id factura)->(true)
-				//si no se ha cargado comprobante para
-				//esa factura.   (id factura)->(false)
-				//si ya se cargó comprobante
-				$comprobantecargado	= array();
-				$facturapagada		= array();
-				$facturas			= $this->data['facturas']; 
-
-				//Itera por las filas de informacion de las facturas
-				//creadas para cada estampilla asignada al contrato
-				foreach ($facturas as $key => $value)
-				{
-					$totalpagado += $value->pago_valor;
-					$numerocomprobantes++;  
-
-					//si el valor en la tabla pagos es mayor o igual
-					//al valor de la factura de la estampilla
-					//se asigna al vector $facturapagada el indice 
-					//del id de la factura y el valor true
-					if ($value->pago_valor >= $value->fact_valor) {
-						$facturapagada[$value->fact_id]=true;
-					} else {
-						$todopago = 1;
-						$facturapagada[$value->fact_id] = false;
-					}
-					if ($value->fact_rutacomprobante=='') {
-						$comprobantecargado[$value->fact_id] = true;
-					} else {
-						$comprobantecargado[$value->fact_id] = false;
-						$ncomprobantescargados++;
-					}
-				}
-				
-				$this->data['comprobantecargado']		= $comprobantecargado;
-				$this->data['facturapagada']			= $facturapagada;
-				$this->data['comprobantes']				= ($numerocomprobantes == $ncomprobantescargados) ? true : false ;
-				$this->data['todopago']					= ($todopago == 1) ? false : true ;
-				$this->data['completado']				= ($todopago AND $this->data['comprobantes'] ) ? false : true ;
-				$this->data['totalpagado']				= $totalpagado;
-				$this->data['numerocomprobantes']		= $numerocomprobantes;
-				$this->data['ncomprobantescargados']	= $ncomprobantescargados;
 
 				$this->template->set('title', 'Contrato liquidado');
 				$this->load->view('liquidaciones/liquidaciones_vercontratoliquidado', $this->data); 
@@ -1529,8 +1320,7 @@ function verliquidartramite()
               $this->datatables->select(
                   'c.cntr_id,c.cntr_numero,co.cont_nit,
                   co.cont_nombre,c.cntr_fecha_firma,c.cntr_objeto,
-                  c.cntr_valor,el.eslo_nombre,c.pagado,
-                  c.cantidad_pagos');
+                  c.cntr_valor,el.eslo_nombre,c.pagado');
               $this->datatables->from('con_contratos c');
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
               $this->datatables->join('con_estadoslocales el', 'el.eslo_id = c.cntr_estadolocalid', 'left');
@@ -3944,10 +3734,18 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 					$this->session->set_flashdata('errorModal', true);
 					$this->session->set_flashdata('errormessage', (validation_errors() ? validation_errors(): false));
 					$this->session->set_flashdata('accion', 'retencion');
-					redirect(base_url().'index.php/liquidaciones/liquidar/'.$this->input->post('id_contrato'));
+					redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$this->input->post('id_contrato'));
 				}
 
                 $is_pagos = array();
+
+                # Se toma una factura de todo el contrato para obtener la liquidacion y buscar las demas
+                $factura_muestra = $this->codegen_model->get(
+                    'est_facturas',
+                    'fact_liquidacionid AS id_liquidacion, id_cuota_liquidacion',
+                    'fact_id = "' . $this->input->post('id_factura') . '"',
+                    1, null, true
+                );
 
                 if($this->input->post('todos') != '1')
                 {
@@ -3965,27 +3763,22 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                 }
                 else
                 {
-                    # Se toma una factura de todo el contrato para obtener la liquidacion y buscar las demas
-                    $factura_muestra = $this->codegen_model->get(
-                        'est_facturas',
-                        'fact_liquidacionid AS id_liquidacion',
-                        'fact_id = "' . $this->input->post('id_factura') . '"',
-                        1, null, true
-                    );
-
                     $facturas = $this->liquidaciones_model->obtenerFacturasRetencion('factura.fact_liquidacionid', $factura_muestra->id_liquidacion);
 
                     foreach($facturas AS $factura)
                     {
+                        $saldo = floor($factura->valor_total - $factura->valor_pagado);
+
                         # Si el saldo no es cero, es decir no ha sido pagada
-                        if(floor($factura->valor_total - $factura->valor_pagado) != 0)
+                        if($saldo != 0)
                         {
                             $guardo = $this->pagarEstampillaIndividual(
                                 $factura->fact_id,
                                 $this->input->post('id_contrato'),
                                 $this->input->post('fecha'),
                                 $this->input->post('observaciones'),
-                                $factura->valor_cuota,
+                                # El valor de la cuota sera el total restante (saldo)
+                                $saldo,
                                 $factura
                             );
                             $is_pagos[] = $guardo->idInsercion;
@@ -3998,21 +3791,44 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                     }
                 }
 
+                # Se obtenienen las facturas (de nuevo en el caso que se hayan pagado todas para obtener la informacion actucalizada)
+                $facturas = $this->liquidaciones_model->obtenerFacturasRetencion('factura.fact_liquidacionid', $factura_muestra->id_liquidacion);
+                $todo_pago = true;
+
+                # Se recorre para saber si todas las estampillas han sido pagadas para terminar la cuota del contrato
+                foreach($facturas AS $factura)
+                {
+                    # Si el saldo no es cero, es decir no ha sido pagada
+                    if(floor($factura->valor_total - $factura->valor_pagado) != 0) {
+                        $todo_pago = false;
+                        break;
+                    }
+                }
+
+                if($todo_pago)
+                {
+                    $this->codegen_model->edit(
+                        'cuotas_liquidacion',
+                        [
+                            'estado' => Equivalencias::cuotaPaga()
+                        ],
+                        'id', $factura_muestra->id_cuota_liquidacion
+                    );
+                }
+
 				if ($guardo->bandRegistroExitoso)
                 {
                     $this->load->library('encrypt');
    
-					$this->session->set_flashdata('errorModal', true);
 					$this->session->set_flashdata('successmessage', 'Se pagó con éxito la factura');
 					$this->session->set_flashdata('idPagoFactura', $this->encrypt->encode(implode(',', $is_pagos), Equivalencias::generadorHash()));
 				}
 				else{
-					$this->session->set_flashdata('errorModal', true);
 					$this->session->set_flashdata('errormessage', '<strong>Error!</strong> Ocurrió un error al registrar el pago.');
 				}
 
 				$this->session->set_flashdata('accion', 'retencion');
-				redirect(base_url().'index.php/liquidaciones/liquidar/'.$this->input->post('id_contrato'));
+				redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$this->input->post('id_contrato'));
 			}
 			else {
 				redirect(base_url().'index.php/error_404');
@@ -4061,7 +3877,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                 $this->session->set_flashdata('errorModal', true);
                 $this->session->set_flashdata('errormessage', '<strong>Error!</strong> '.$this->upload->display_errors());
                 $this->session->set_flashdata('accion', 'retencion');
-                redirect(base_url().'index.php/liquidaciones/liquidar/'.$id_contrato);
+                redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$id_contrato);
             }
         }
 
@@ -4075,7 +3891,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
             $this->session->set_flashdata('errorModal', true);
             $this->session->set_flashdata('errormessage', '<strong>Error!</strong> El valor del pago no puede ser mayor que el saldo.');
             $this->session->set_flashdata('accion', 'retencion');
-            redirect(base_url().'index.php/liquidaciones/liquidar/'.$id_contrato);
+            redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$id_contrato);
         }
 
         $guardo = $this->codegen_model->add(
@@ -4100,14 +3916,61 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 			if ($this->uri->segment(3)==''){
 				redirect(base_url().'index.php/error_404');
 			}
-			if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) {
-				$idcontrato = $this->uri->segment(3);
-				$this->data['result'] = $this->liquidaciones_model->getrecibos($idcontrato);
-				$liquidacion = $this->data['result'];
+			if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar'))
+            {
+                $this->data['successmessage'] = $this->session->flashdata('successmessage');
+                $this->data['errormessage']   = $this->session->flashdata('errormessage');
+                $this->data['infomessage']    = $this->session->flashdata('infomessage');
+                $this->data['idPagoFactura']  = $this->session->flashdata('idPagoFactura');
 
-				$this->data['facturas_retencion'] = $this->liquidaciones_model->obtenerFacturasRetencion('factura.fact_liquidacionid', $liquidacion->liqu_id);
+				$idcontrato = $this->uri->segment(3);
+
+                $liquidacion = $this->codegen_model->get(
+                    'est_liquidaciones',
+                    'liqu_id, liqu_valorsiniva AS valor_total, liqu_numero AS numero, liqu_tipocontrato AS tipo_contrato, liqu_vigencia AS vigencia',
+                    'liqu_contratoid = '.$idcontrato,
+                    1,NULL,true
+                );
+
+                $cuota_activa = $this->liquidaciones_model->cuotaLiquidacionActiva('id, valor', $liquidacion->liqu_id);
+
+                $this->data['facturas'] = [];
+                $this->data['cuota'] = $cuota_activa;
+                $this->data['id_contrato'] = $idcontrato;
+                $this->data['liquidacion'] = $liquidacion;
+
+                if($cuota_activa) {
+                    $this->data['facturas'] = $this->liquidaciones_model->obtenerFacturasRetencion('factura.id_cuota_liquidacion', $cuota_activa->id);
+                }
+
+                $cuotas_pagadas = $this->codegen_model->get(
+                    'cuotas_liquidacion',
+                    'SUM(valor) AS total',
+                    'id_liquidacion = "' . $liquidacion->liqu_id .'" AND estado = '. Equivalencias::cuotaPaga(),
+                    1, null, true
+                );  
+                $this->data['saldo_contrato'] = $liquidacion->valor_total - ($cuotas_pagadas->total ? $cuotas_pagadas->total : 0);
+
 				$this->template->set('title', 'Contrato liquidado');
-				$this->load->view('liquidaciones/liquidaciones_ver_facturas_retencion', $this->data); 
+
+                $this->data['style_sheets'] = [
+                    'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen',
+                    'css/plugins/bootstrap/fileinput.css' => 'screen',
+                    'css/plugins/bootstrap/bootstrap-switch.css' => 'screen'
+                ];
+                $this->data['javascripts'] = [
+                    'js/jquery.dataTables.min.js',
+                    'js/plugins/dataTables/dataTables.bootstrap.js',
+                    'js/jquery.dataTables.defaults.js',
+                    'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
+                    'js/accounting.min.js',
+                    'js/plugins/bootstrap/fileinput.min.js',
+                    'js/plugins/bootstrap/bootstrap-switch.min.js',
+                    'js/autoNumeric.js',
+                    'js/applicationEvents.js'
+                ];
+
+                $this->template->load($this->config->item('admin_template'),'liquidaciones/liquidaciones_ver_facturas_retencion', $this->data);
 			} else {
 				redirect(base_url().'index.php/error_404');
 			}
@@ -4168,5 +4031,224 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
             redirect(base_url().'index.php/users/login');
         }
 	}
+
+    private function obtenerInfoFacturas($idcontrato, $valor = null)
+    {
+        $respuesta = [];
+
+        $respuesta['result'] = $this->liquidaciones_model->get($idcontrato);
+        $contrato = $respuesta['result'];
+
+        $estampillas = $this->liquidaciones_model->getestampillas($contrato->cntr_tipocontratoid);  
+        $respuesta['estampillas'] = [];
+
+        /*
+        * Valida si el régimen del contratista es otros para calcular el valor
+        * restando el valor del IVA suministrado en la creación del contrato
+        */
+        if($contrato->regi_id == 6 || $contrato->regi_id == 8)
+        {
+            $valorsiniva = (float)$contrato->cntr_valor - (float)$contrato->cntr_iva_otros;
+        }else
+            {
+                //valida el valor del porcentaje según el regimen
+                //del contratista para realizar un calcúlo acertado
+                if($contrato->regi_iva > 0)
+                {
+                    $valorsiniva = (float)$contrato->cntr_valor/(((float)$contrato->regi_iva/100)+1);
+    
+                    //Formatea el resultado del calculo de valor sin iva
+                    //para que redondee por decimales y unidades de mil
+                    //ej valorsiniva=204519396.55172 ->decimales -> 204519397 ->centenas ->204519400
+                    $sinIvaRedondeoDecimales = round($valorsiniva);
+                    $sinIvaRedondeoCentenas = round($sinIvaRedondeoDecimales, -2);  
+                    unset($valorsiniva);
+                    $valorsiniva = $sinIvaRedondeoCentenas;
+                }else
+                    {
+                        $valorsiniva = (float)$contrato->cntr_valor;
+                    }
+            }
+        $respuesta['valor_verdadero'] = $valorsiniva;
+        
+        if($valor != null) {
+            $valorsiniva = (float)$valor;
+        }
+
+        //arreglo que guarda los distintos valores
+        //de liquidacion de las estampillas
+        $totalestampilla= array();
+
+        $valortotal=0;
+        $parametros=$this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo','para_id = 1',1,NULL,true);
+
+        foreach ($estampillas as $key => $value) 
+        {
+            /*
+            * Se valida si la estampilla a almacenar es pro electrificacion
+            * y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
+            * no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
+            */
+            $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($value->estm_id, $contrato->cntr_fecha_firma, $contrato->cntr_tipocontratoid);
+            if($bandRegistrarFactura)
+            {
+                /*
+                * Para la estampilla procultura y que sean contratos de obra civil,
+                * suministros y bienes y servicios que superen los 25 salarios se
+                * les aplica el porcentaje de la estampilla
+                */
+                if($value->estm_id == 2 && in_array($contrato->cntr_tipocontratoid, array(2,4,43)) )
+                {
+                    if( $contrato->cntr_valor >= ($parametros->para_salariominimo * 25) )
+                    {
+                        $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
+                        $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
+                        array_push($respuesta['estampillas'], $value);
+                    }
+                }else
+                    {
+                        $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
+                        $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
+                        array_push($respuesta['estampillas'], $value);
+                    }
+
+                /*
+                * Valida si el valor establecido para la estampilla es igual a cero
+                * para establecer el valor minimo 1000
+                */
+                if(isset($totalestampilla[$value->estm_id]))
+                {
+                    if($totalestampilla[$value->estm_id] <= 0)
+                    {
+                        $totalestampilla[$value->estm_id] = 1000;
+                    }
+
+                    /*
+                    * Calcula el total a pagar
+                    */
+                    $valortotal += (double)$totalestampilla[$value->estm_id];
+                }
+            }
+        }
+
+        $respuesta['est_totalestampilla']   = $totalestampilla;
+        $respuesta['cnrt_valorsiniva']      = $valorsiniva;
+        $respuesta['est_valortotal']        = $valortotal;
+
+        return $respuesta;
+    }
+
+    public function registrarCuotaLiquidacion()
+    {
+        if ($this->ion_auth->logged_in())
+        {
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar'))
+            {
+                $this->form_validation->set_rules('id_contrato', 'Identificador del contrato', 'trim|xss_clean|numeric|integer|greater_than[0]'); 
+                $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');
+
+                if ($this->form_validation->run() == false) {
+					$this->session->set_flashdata('errorModal', true);
+					$this->session->set_flashdata('errormessage', (validation_errors() ? validation_errors(): false));
+					$this->session->set_flashdata('accion', 'retencion');
+                    redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$this->input->post('id_contrato'));
+				}
+
+                # Se da formato al valor para que guarde los valores decimales
+                $valor = str_replace(',', '.', str_replace('.','',$this->input->post('valor')));
+
+                $liquidacion = $this->codegen_model->get(
+                    'est_liquidaciones',
+                    'liqu_id, liqu_valorsiniva AS valor_total',
+                    'liqu_contratoid = '.$this->input->post('id_contrato'),
+                    1,NULL,true
+                );
+
+                $datos = $this->obtenerInfoFacturas( $this->input->post('id_contrato'), $valor );
+
+                $cuotas_pagadas = $this->codegen_model->get(
+                    'cuotas_liquidacion',
+                    'SUM(valor) AS total',
+                    'id_liquidacion = "' . $liquidacion->liqu_id .'" AND estado = '. Equivalencias::cuotaPaga(),
+                    1, null, true
+                );  
+                $saldo_contrato = $liquidacion->valor_total - ($cuotas_pagadas->total ? $cuotas_pagadas->total : 0);
+
+                if($valor > $saldo_contrato){
+                    $this->session->set_flashdata('errorModal', true);
+                    $this->session->set_flashdata('errormessage', '<strong>Error!</strong> El pago de la cuota no puede ser mayor que el saldo.');
+					$this->session->set_flashdata('accion', 'retencion');
+                    redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$this->input->post('id_contrato'));
+                }
+
+                $guardo = $this->codegen_model->add(
+					'cuotas_liquidacion',
+					array(
+						'id_liquidacion'	=> $liquidacion->liqu_id,
+						'valor'				=> $valor,
+						'estado'		    => Equivalencias::cuotaPendiente(),
+						'fecha_creacion'	=> date('Y-m-d H:i:s')
+					)
+				);
+
+                if ($guardo->bandRegistroExitoso)
+                {
+                    foreach($datos['estampillas'] AS $factura)
+					{
+						//Valida si la factura viene en valor cero
+						//no guarda factura
+						$valor = $datos['est_totalestampilla'][$factura->estm_id];
+
+						if($valor > 0)
+						{
+							$data = array(
+								'fact_nombre'			=> $factura->estm_nombre,
+								'fact_porcentaje'		=> $factura->esti_porcentaje,
+								'fact_valor'			=> $datos['est_totalestampilla'][$factura->estm_id],
+								'fact_banco'			=> $factura->banc_nombre,
+								'fact_cuenta'			=> $factura->estm_cuenta,
+								'fact_liquidacionid'	=> $liquidacion->liqu_id,
+								'fact_estampillaid'		=> $factura->estm_id,
+								'fact_rutaimagen'		=> $factura->estm_rutaimagen,
+                                'id_cuota_liquidacion'  => $guardo->idInsercion,
+							);
+
+							/*
+							* Se valida si la estampilla a almacenar es pro electrificacion
+							* y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
+							* no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
+							*/
+							$bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla(
+                                $data['fact_estampillaid'],
+                                $datos['result']->cntr_fecha_firma,
+                                $datos['result']->cntr_tipocontratoid
+                            );
+							if($bandRegistrarFactura)
+							{
+								$respuestaProceso = $this->codegen_model->add('est_facturas',$data);
+
+								/**
+								* Solicita la Asignación del codigo para el codigo de barras
+								*/
+								$this->asignarCodigoParaBarras($liquidacion->liqu_id, $factura->estm_id);
+							}
+							
+						}
+					}
+
+					$this->session->set_flashdata('successmessage', 'Se registro el valor de la cuota');
+				}
+				else{
+					$this->session->set_flashdata('errormessage', '<strong>Error!</strong> Ocurrió un error al registrar el pago.');
+				}
+
+                redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$this->input->post('id_contrato'));
+            } else {
+                redirect(base_url().'index.php/error_404');
+            }
+        } else {
+            redirect(base_url().'index.php/users/login');
+        }
+    }
 
 }

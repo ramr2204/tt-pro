@@ -276,4 +276,10 @@ class Codegen_model extends CI_Model
         return FALSE;
     }
 
+    function getAll($sql)
+    {
+        $query = $this->db->query($sql);
+        return $query->result();
+    }
+
 }

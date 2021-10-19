@@ -2,33 +2,26 @@
 
 Class Equivalencias extends CI_Controller
 {
-	private static $tiposEstampillas = array(
-        1 => 'normal',
-        2 => 'retención'
-    );
-
-    private static $tipoRetencion = 2;
 
     # Codigo (salt) usado para generar hashes
     private static $generadorHash = '729se32sm3owg=.we__hl';
 
     private static $clasificacionCOntratos = array(
-        1 => 'Normal',
-        2 => 'Adición',
-        3 => 'Ajuste',
+        1 => 'Contratos',
+        2 => 'Modificaciones',
+        3 => 'Adiciones',
+        4 => 'Otros',
     );
     
     private static $contratoNormal = 1;
-    private static $contratoAdicion = 2;
-    private static $contratoAjuste = 3;
+    private static $contratoModificacion = 2;
+    private static $contratoAdicion = 3;
+    private static $contratoOtros = 4;
 
-    public static function tiposEstampillas(){
-        return self::$tiposEstampillas;
-    }
+    private static $cuotaPendiente = 2;
+    private static $cuotaPaga = 1;
 
-    public static function tipoRetencion(){
-        return self::$tipoRetencion;
-    }
+    private static $contratoModificado = 4;
 
     public static function generadorHash(){
         return self::$generadorHash;
@@ -42,11 +35,27 @@ Class Equivalencias extends CI_Controller
         return self::$contratoNormal;
     }
 
+    public static function contratoModificacion(){
+        return self::$contratoModificacion;
+    }
+
     public static function contratoAdicion(){
         return self::$contratoAdicion;
     }
 
-    public static function contratoAjuste(){
-        return self::$contratoAjuste;
+    public static function contratoOtros(){
+        return self::$contratoOtros;
+    }
+
+    public static function cuotaPendiente(){
+        return self::$cuotaPendiente;
+    }
+
+    public static function cuotaPaga(){
+        return self::$cuotaPaga;
+    }
+
+    public static function contratoModificado(){
+        return self::$contratoModificado;
     }
 }

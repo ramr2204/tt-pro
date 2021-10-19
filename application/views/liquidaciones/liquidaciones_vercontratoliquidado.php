@@ -36,13 +36,7 @@
                          <tr>
                               <td colspan="1"><strong>Nombre del contratista</strong></td>
                               <td colspan="3"><?php echo $result->liqu_nombrecontratista; ?></td>
-                              <td colspan="1">
-                                   <?=
-                                        (count($facturas) > 0) ?
-                                             anchor(base_url().'generarpdf/generar_liquidacion/'.$result->liqu_contratoid,'<i class="fa fa-file-pdf-o fa-2x"></i> PDF','class="btn btn-large  btn-default" target="_blank"') :
-                                             '';
-                                   ?>
-                              </td>
+                              <td colspan="1"></td>
                          </tr>
 
                          <tr>
@@ -90,6 +84,7 @@
                                    </tr>
                                    <?php
                                         $total = 0;
+                                        /*
                                         foreach($facturas as $row2)
                                         {
                                              ?>
@@ -176,21 +171,12 @@
                                                   $x++;
                                                   $total += $row2->fact_valor;
                                         }
+                                        */
                                    ?>
                                    <tr>
                                         <td colspan="3" class="text-right"><strong>Total</strong></td>
                                         <td colspan="1" class="text-right"><?php echo '$'.number_format($total, 2, ',', '.'); ?></td>
                                         <td>
-                                        <?php if ($comprobantes) {  ?>
-                                                  <div class="bg-success">Comprobantes: <?php echo $ncomprobantescargados.'/'.$numerocomprobantes; ?> <i class="fa fa-check"></i> </div> 
-                                        <?php  } else { ?>
-                                                  <div class="bg-danger">Comprobantes: <?php echo $ncomprobantescargados.'/'.$numerocomprobantes; ?> <i class="fa fa-times"></i> </div>
-                                        <?php  }  ?>
-                                        <?php if ($todopago) {  ?>
-                                                  <div class="bg-success">Pagado: <?php echo '$'.number_format($totalpagado, 2, ',', '.'); ?> <i class="fa fa-check"></i> </div> 
-                                        <?php  } else { ?>
-                                                  <div class="bg-danger">Pagado: <?php echo '$'.number_format($totalpagado, 2, ',', '.'); ?> <i class="fa fa-times"></i> </div>
-                                        <?php  }  ?>
 
                                         </td>
                                    </tr>
@@ -203,13 +189,16 @@
                     <tfoot>
                          <tr>
                               <th colspan="5">
-                                   <div class="col-xs-12 col-sm-8 text-right">        
-                                        <label>REGISTRAR OBJETO CONTRATO</label>     
+                                   <div class="col-xs-12 text-center">
+                                        <label>REGISTRAR OBJETO CONTRATO</label>
                                    </div>
-                                   <div class="col-xs-12 col-sm-4 text-right">
+                                   <div class="col-xs-12 col-sm-4 col-sm-offset-4 text-center form-group">
                                         <input id="comprobante_objeto" type="file" class="file" name="comprobante_objeto" multiple=false >
                                    </div>
-                                   <input type="hidden" name="liquida_id" value="<?php echo $result->liqu_id; ?>">     
+                                   <div class="col-xs-12 text-center">
+                                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                                   </div>
+                                   <input type="hidden" name="liquida_id" value="<?php echo $result->liqu_id; ?>">
                               </th>
                          </tr>
                          <script type="text/javascript">
@@ -229,34 +218,9 @@
                                    ?>
                               });
                          </script>
-                         <tr>
-                              <th colspan="5">
-                                   <div class="pull-right">
-                                   <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Cancelar</button>
-                                   <button type="submit" class="btn btn-primary">Guardar cambios</button>
-                                   </div>
-                              </th>
-                         </tr>
                     </tfoot>
                </table>
                <?php echo form_close();?>
-
-               <?php
-                    # Si han pagado todas las facturas, subir los comprobantes respectivos y la copia del contrato
-                    if ($todopago && $comprobantes && $result->liqu_soporteobjeto)
-                    {
-                         ?>
-                         <?= form_open("liquidaciones/legalizar",'role="form"') ?>
-                              <div class="pull-right">
-                                   <input type="hidden" name="numeroarchivos" value="<?= $x ?>">
-                                   <input type="hidden" name="contratoid" value="<?= $result->liqu_contratoid ?>">
-                                   <input type="hidden" name="liquidacionid" value="<?= $result->liqu_id ?>">
-                                   <button type="submit" class="btn btn-success">Legalizar</button>
-                              </div>
-                         <?= form_close() ?>
-                         <?php
-                    }
-               ?>
           </div>
      </div>
 </div>

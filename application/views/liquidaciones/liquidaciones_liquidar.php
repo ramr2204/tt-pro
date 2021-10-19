@@ -57,27 +57,28 @@ $(document).ready(function() {
             {
                $("td:eq(4)", nRow).html('<div class="small">NO REGISTRA...</div>');     
             }
+
+            $("td:eq(7)", nRow).html('');
             
             var number= accounting.formatMoney(aData[6], "$", 2, ".", ","); // €4.999,99
             $("td:eq(5)", nRow).html('<div class="">' + number + '</div>');
             if (aData[7]=='Legalizado') {
-                $("td:eq(7)", nRow).html('<a href="#" class="btn btn-success btn-xs terminar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-tags"></i></a>');
+                $("td:eq(7)", nRow).append('<a href="#" class="btn btn-success btn-xs terminar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-tags"></i></a>');
             }
             if (aData[7]=='Liquidado') {
-                $("td:eq(7)", nRow).html('<a href="#" class="btn btn-primary btn-xs pagar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-money"></i></a>');
+                $("td:eq(7)", nRow).append('<a href="#" class="btn btn-primary btn-xs pagar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-money"></i></a>');
             }
             if (aData[7]==null) { 
                $("td:eq(6)", nRow).html('<div>Sin Liquidar</div>'); 
-               $("td:eq(7)", nRow).html('<a href="#" class="btn btn-danger btn-xs liquidar" title="Liquidar" id="'+aData[0]+'"><i class="fa fa-file-excel-o"></i></a>');
+               $("td:eq(7)", nRow).append('<a href="#" class="btn btn-danger btn-xs liquidar" title="Liquidar" id="'+aData[0]+'"><i class="fa fa-file-excel-o"></i></a>');
             }
             if (aData[8]==0) {
                 // Se comenta ya que el proceso de pago aun no ha sido terminado
                 // $("td:eq(7)", nRow).append('<a href="#" class="btn btn-info btn-xs pagar-contrato" data-toggle="modal" data-target="#modalLiquidacion" title="pse" id="'+aData[0]+'"><i class="fa fa-shopping-cart"></i></a>');
             }
 
-            // Si tiene mas de un numero de pagos es por retencion y se mostrara en todos los estados expecto sin liquidar
-            if(aData[9] > 0 && aData[7] != null) {
-                $("td:eq(7)", nRow).append('<a href="#" class="btn btn-warning btn-xs pagar-estampillas" title="Pagar estampillas por contención" id-contrato="'+aData[0]+'"><i class="fa fa-legal"></i></a>');
+            if(aData[7] != null && aData[7] != 'Modificado') {
+                $("td:eq(7)", nRow).append('<a href="'+ base_url + 'liquidaciones/estampillasRetencion/' + aData[0]+'" target="_blank" class="btn btn-warning btn-xs" title="Pagar estampillas por retencions"><i class="fa fa-legal"></i></a>');
             }
         },
         "fnDrawCallback": function( oSettings ) {
@@ -402,55 +403,5 @@ $(document).ready(function() {
         <?php
     }
 ?>
-
-<!-- Modal de pago de estampillas por retencion -->
-<div class="modal fade" id="pago_estampillas" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-body contenedor_pago_estampillas"></div>
-        </div>
-    </div>
-</div>
-
-<script>
-    $(document).on('click', '.pagar-estampillas', onClickPagarEstampillas);
-
-    function onClickPagarEstampillas(event, ID=null, error_modal=false){
-        if(event){
-            event.preventDefault();
-        }
-        ID = ID ? ID : $(this).attr('id-contrato');
-
-        $('.contenedor_pago_estampillas').load(
-            '<?php echo base_url(); ?>index.php/liquidaciones/estampillasRetencion/'+ID,
-            function(result){
-                $('#pago_estampillas').modal('show');
-                $('.id_contrato_cont').val(ID);
-
-                if(error_modal){
-                    $('#errorModal').html( $('.alert')[0].outerHTML );
-                }
-            }
-        );
-    }
-
-    <?php
-        if ($accion=='retencion')
-        {
-            ?>
-            onClickPagarEstampillas(null, <?= $idcontrato ?>, <?= $errorModal ?>);
-            <?php
-        }
-    ?>
-
-    <?php
-        if(isset($idPagoFactura) && $idPagoFactura)
-        {
-            ?>
-            window.open($('#base').val() + 'generarpdf/certificadoPagoEstampilla?id=<?= urlencode($idPagoFactura) ?>', '_blank');
-            <?php
-        }
-    ?>
-</script>
 
 
