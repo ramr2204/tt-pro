@@ -404,7 +404,7 @@ class Generarpdf extends CI_controller {
   
                 $contrato = $this->codegen_model->getSelect(
                       'con_contratos',
-                      'date_format(fecha_insercion,"%Y-%m-%d") AS fecha_insercion,cntr_contratistaid,cntr_objeto,cantidad_pagos',
+                      'date_format(fecha_insercion,"%Y-%m-%d") AS fecha_insercion,cntr_contratistaid,cntr_objeto',
                       'WHERE cntr_id = "'.$liquidacion->liqu_contratoid.'"'
                 );
                 $contratista = $this->codegen_model->getSelect(

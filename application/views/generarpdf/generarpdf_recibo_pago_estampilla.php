@@ -101,7 +101,7 @@
                 ?>
                 <tr>
                     <td width="25%" class="text-center"><?= $pago->fact_nombre ?></td>
-                    <td width="13%" class="text-center"><?= $pago->cuota ?> / <?= $contrato->cantidad_pagos ?></td>
+                    <td width="13%" class="text-center"><?= $pago->cuota ?></td>
                     <td width="12%" class="text-center">$<?= number_format($pago->valor_cuota, 2, ',', '.') ?></td>
                     <td width="50%" class="text-center">
                         <tcpdf method="write2DBarcode" params="<?= $params; ?>" />
