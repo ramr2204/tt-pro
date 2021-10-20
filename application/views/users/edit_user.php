@@ -37,6 +37,21 @@
                                                  <input class="form-control" id="nombres" type="text" name="nombres" value="<?php echo $result->first_name; ?>" required="required" />
                                                  <?php echo form_error('nombres','<span class="text-danger">','</span>'); ?>
                                           </div>
+                                            <div class="form-group">
+                                                <label for="empresa">Empresa</label>
+                                                <select class="form-control" id="empresa" name="empresa">
+                                                    <option value="">Seleccione...</option>
+                                                        <?php
+                                                            foreach($empresas as $empresa)
+                                                            {
+                                                                ?>
+                                                                    <option value="<?= $empresa->id ?>" <?= $result->id_empresa == $empresa->id ? 'selected' : '' ?>><?= $empresa->nombre ?></option>
+                                                                <?php
+                                                            }
+                                                        ?>
+                                                    </select>
+                                                <?php echo form_error('empresa','<span class="text-danger">','</span>'); ?>
+                                            </div>
                                     </fieldset>                             
                                 </div>
 
@@ -136,8 +151,8 @@
 </div>
 <?php echo form_close();?>
 
+<script type="text/javascript">
 
-   <script type="text/javascript">
     //style selects
     var config = {
       '#perfilid'  : {disable_search_threshold: 10},
@@ -147,4 +162,17 @@
         $(selector).chosen(config[selector]);
     }
 
-  </script>
+    $(function () {
+            $('#perfilid').change(changePerfil);
+            $('#perfilid').change();
+    });
+
+    function changePerfil()
+    {
+        if($(this).val() == '<?= $perfil_liquidador ?>') {
+            $('#empresa').closest('.form-group').show();
+        }else{
+            $('#empresa').closest('.form-group').hide();
+        }
+    }
+</script>

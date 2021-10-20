@@ -154,6 +154,7 @@ class Contratos extends MY_Controller {
                             'cntr_municipio_origen'	=> $this->input->post('cntr_municipio_origen'),
                             'clasificacion'			=> $this->input->post('clasificacion_contrato'),
                             'numero_relacionado'	=> $aplica_numero_relacionado ? $this->input->post('contrato_relacionado') : null,
+                            'id_empresa'            => $this->ion_auth->user()->row()->id_empresa
 						);
 
                         /*

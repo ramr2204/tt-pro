@@ -23,6 +23,8 @@ Class Equivalencias extends CI_Controller
 
     private static $contratoModificado = 4;
 
+    private static $perfilLiquidador = 4;
+
     public static function generadorHash(){
         return self::$generadorHash;
     }
@@ -57,5 +59,9 @@ Class Equivalencias extends CI_Controller
 
     public static function contratoModificado(){
         return self::$contratoModificado;
+    }
+
+    public static function perfilLiquidador(){
+        return self::$perfilLiquidador;
     }
 }
