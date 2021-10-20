@@ -36,6 +36,10 @@ class Empresas extends MY_Controller
 		}
 		else
 		{
+			$this->data['successmessage']	= $this->session->flashdata('successmessage');
+			$this->data['errormessage']		= $this->session->flashdata('errormessage');
+			$this->data['infomessage']		= $this->session->flashdata('infomessage');
+
 			//template data
             $this->template->set('title', 'Usuarios');
             $this->data['style_sheets']= array(
@@ -57,13 +61,12 @@ class Empresas extends MY_Controller
         if ($this->ion_auth->is_admin())
         {
             $this->load->library('datatables');
-            $this->datatables->select('id,nit,nombre,email,direccion,telefono,id_municipio,nombre_representante,identificador_representante');
+            $this->datatables->select('id,nit,nombre,email,direccion,telefono,id_municipio,nombre_representante,identificador_representante,estado');
             $this->datatables->from('empresas');
             //$this->datatables->join('adm_perfiles p','p.perf_id = u.perfilid','left');
             $this->datatables->add_column('edit', '<div class="btn-toolbar" role="toolbar">
 	                                           <div class="btn-group">
 	                                            <a href="'.base_url().'empresas/edit/$1" class="btn btn-default btn-xs" title="Editar datos de usuario"><i class="fa fa-pencil-square-o"></i></a>
-	                                            <a href="'.base_url().'users/permisos/$1" class="btn btn-default btn-xs" title="Editar permisos predeterminados"><i class="fa fa-eye"></i></a>
 	                                           </div>
 	                                       </div>', 'id');
          echo $this->datatables->generate();
@@ -88,6 +91,7 @@ class Empresas extends MY_Controller
 
 		    if ($this->ion_auth->is_admin())
 			{
+				$this->data['successmessage'] = $this->session->flashdata('message');
 
             	$this->data['municipios']  = $this->codegen_model->getMunicipios();
 
@@ -104,14 +108,12 @@ class Empresas extends MY_Controller
 			    $this->form_validation->set_rules('nombre_representante', 'Nombre Representante', 'required'); 
 			    $this->form_validation->set_rules('identificador_representante', 'Identificador Representante', 'required|numeric'); 
               
-			    //fin validacionn
-			 		/*var_dump('aaa');exit();*/
+			    //fin validacion
 
 			  	if ($this->form_validation->run() == false)
 			 	{
 			 		$errormessage = (validation_errors() ? validation_errors(): false);
               		$this->data['errormessage'] = $errormessage;
-					$this->session->set_flashdata('errormessage', $errormessage);
 			 	} 
 			 	else 
 			 	{
@@ -129,13 +131,11 @@ class Empresas extends MY_Controller
 			 		);
 
 	                $respuestaProceso = $this->codegen_model->add('empresas',$dataEmpresa);
-					$this->session->set_flashdata('successmessage', 'La empresa se ha creado con éxito');
-					/*var_dump($this->session);exit();*/
+
+					$this->session->set_flashdata('message', 'La empresa se ha creado con éxito');
+					redirect(base_url().'index.php/empresas/create');
 			  	}
 
-				$this->load->model('codegen_model','',TRUE); 
-				/*$this->data['perfiles']  = $this->codegen_model->getSelect('adm_perfiles','perf_id,perf_nombre');*/
-		      	$this->data['successmessage']=$this->session->flashdata('successmessage');
 				$this->template->load($this->config->item('admin_template'),'empresas/create', $this->data);
 			}
 			else 
@@ -166,14 +166,13 @@ class Empresas extends MY_Controller
           	{  
               	$idempresa = ($this->uri->segment(3)) ? $this->uri->segment(3) : $this->input->post('id') ;
 
-          		//var_dump($idempresa);exit();
               	if ($idempresa=='')
               	{
-                  	$this->session->set_flashdata('infomessage', 'Debe elegir un tipo de régimen para editar');
+                  	$this->session->set_flashdata('infomessage', 'Debe elegir una empresa para editar');
                   	redirect(base_url().'index.php/empresas');
               	}
 
-              	$this->form_validation->set_rules('nit', 'Nit' ,'required|is_unique[empresas.nit]');
+              	$this->form_validation->set_rules('nit', 'Nit' ,'required|is_unique[empresas.nit.id.'. $idempresa .']');
 			    $this->form_validation->set_rules('nombre', 'Nombre', 'required');
 			    $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
 			    $this->form_validation->set_rules('direccion', 'Direccion', 'required');
@@ -185,10 +184,9 @@ class Empresas extends MY_Controller
               	if ($this->form_validation->run() == false) 
               	{
                   	$this->data['errormessage'] = (validation_errors() ? validation_errors() : false);  
-                  	//var_dump($this->data['errormessage']);exit();
-	            } 
-	            else 
-	            {                                        
+	            }
+	            else
+	            {
 					$data = array(
                         'nit'                  => $this->input->post('nit'),
 						'nombre'               => $this->input->post('nombre'),
@@ -201,17 +199,8 @@ class Empresas extends MY_Controller
 						'fecha_creacion'       => date('Y-m-d H:i:s')
                     );
 
-                    //var_dump($data);exit();
-	                           
 	                if ($this->codegen_model->edit('empresas',$data,'id',$idempresa) == TRUE) 
 	                {
-                        /*
-                        * Actualiza el nombre del regimen en las posibles liquidaciones de los contratos
-                        */
-                        $where = 'id = '.$idempresa;                              
-
-                        $this->codegen_model->editWhere('empresas',$datos,$where);
-
                         $this->session->set_flashdata('successmessage', 'La empresa se ha editado con éxito');
                         redirect(base_url().'index.php/empresas/edit/'.$idempresa);
 	                } 
@@ -224,7 +213,7 @@ class Empresas extends MY_Controller
               	$this->data['successmessage']=$this->session->flashdata('successmessage');
               	$this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
             	$this->data['result'] = $this->codegen_model->get('empresas','id,nit,nombre,email,direccion,telefono,id_municipio,nombre_representante,identificador_representante','id = '.$idempresa,1,NULL,true);
-              	$this->template->set('title', 'Editar régimen');
+              	$this->template->set('title', 'Editar empresa');
               	$this->template->load($this->config->item('admin_template'),'empresas/edit', $this->data);
           	}
           	else 
@@ -244,24 +233,24 @@ class Empresas extends MY_Controller
 	    if ($this->ion_auth->logged_in()) 
 	    {
 	        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('regimenes/delete')) 
-	        { 
-	            if ($this->input->post('id')==''){
-	                $this->session->set_flashdata('infomessage', 'Debe elegir un tipo de régimen para eliminar');
-	                redirect(base_url().'index.php/empresas');
-	            }
-	            if (!$this->codegen_model->depend('con_contratistas','cont_regimenid',$this->input->post('id'))) 
-	            {
-	                $this->codegen_model->delete('empresas','regi_id',$this->input->post('id'));
-	                $this->session->set_flashdata('successmessage', 'La empresa se ha eliminado con éxito');
-	                redirect(base_url().'index.php/empresas');  
+	        {
+				$id = $this->uri->segment(3);
+				$estado = $this->uri->segment(4);
 
-	            } 
-	            else 
-	            {
-	                $this->session->set_flashdata('errormessage', 'El régimen se encuentra en uso, no es posible eliminarlo.');
-	                redirect(base_url().'index.php/empresas/edit/'.$this->input->post('id'));
+	            if (!$id || !in_array($estado, [0,1])){
+	                $this->session->set_flashdata('infomessage', 'La informacion suministrada es invalida');
+	            } else {
+					if ($this->codegen_model->edit('empresas',['estado' => $estado], 'id',$id) == true) 
+					{
+						$this->session->set_flashdata('successmessage', 'La empresa se ha '. ($estado ? 'activado' : 'desactivado') .' con éxito');
+					} 
+					else
+					{
+						$this->session->set_flashdata('errormessage', 'No se pudo cambiar de estado la empresa');
+					}
+				}
 
-	            }                 
+				redirect(base_url().'index.php/empresas');
 	        } 
 	        else 
 	        {

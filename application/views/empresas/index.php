@@ -12,22 +12,24 @@
         "aoColumns": [ 
                         { "sClass": "center","sWidth": "5%" }, /*id 0*/
                         { "sClass": "center","sWidth": "5%" }, /*id 0*/
-                        { "sClass": "item" }, 
-                        { "sClass": "item" },  
-                        { "sClass": "item" },  
-                        { "sClass": "item" },  
-                        { "sClass": "item" },  
-                        { "sClass": "item"}, 
-                        { "sClass": "item"}, 
+                        { "sClass": "item" },
+                        { "sClass": "item" },
+                        { "sClass": "item" },
+                        { "sClass": "item" },
+                        { "sClass": "item" },
+                        { "sClass": "item"},
+                        { "sClass": "item"},
+                        { "sClass": "item"},
                         { "sClass": "center","bSortable": false,"bSearchable": false,"sWidth": "5%" },
         ],
         "fnRowCallback":function( nRow, aData, iDataIndex ) {
-            if ( aData[3] ==1 )
+            console.log(aData);
+            if ( aData[9] ==1 )
             {
-               /*$('td:eq(3)', nRow).html( '<a href="<?php echo base_url(); ?>users/deactivate/'+aData[0]+'" class="btn btn-default btn-xs" title="Desactivar"><i class="fa fa-unlock" style="color:green"></i> </a>' );  */
+               $('td:eq(9)', nRow).html( '<a href="<?php echo base_url(); ?>empresas/delete/'+aData[0]+'/0" class="btn btn-default btn-xs" title="Desactivar"><i class="fa fa-unlock" style="color:green"></i> </a>' );
             }else
             {
-            /*  $('td:eq(3)', nRow).html( '<a href="<?php echo base_url(); ?>users/activate/'+aData[0]+'" class="btn btn-default btn-xs"" title="Activar"><i class="fa fa-lock" style="color:red"></i></a>' );  */
+                $('td:eq(9)', nRow).html( '<a href="<?php echo base_url(); ?>empresas/delete/'+aData[0]+'/1" class="btn btn-default btn-xs"" title="Activar"><i class="fa fa-lock" style="color:red"></i></a>' );
             }
         },                          
 
@@ -55,6 +57,7 @@
                         <th>Municipio</th>
                         <th>Representante</th>
                         <th>Id. Representante</th>
+                        <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
