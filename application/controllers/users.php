@@ -20,6 +20,8 @@ class Users extends MY_Controller {
 
 		$this->lang->load('auth');
 		$this->load->helper('language');
+
+		$this->load->helper('Equivalencias');
 	}
 
 	//redirect if needed, otherwise display the user list
@@ -439,7 +441,15 @@ class Users extends MY_Controller {
 		      $this->form_validation->set_rules('nombres', $this->lang->line('create_user_validation_nombres_label'), 'required|min_length[4]|max_length[40]');
 		      $this->form_validation->set_rules('password', $this->lang->line('create_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|max_length[' . $this->config->item('max_password_length', 'ion_auth') . ']|matches[password_confirm]');
 		      $this->form_validation->set_rules('password_confirm', $this->lang->line('create_user_validation_password_confirm_label'), 'required');
-              $this->form_validation->set_rules('perfilid', 'Perfil',  'required|numeric|greater_than[0]'); 
+              $this->form_validation->set_rules('perfilid', 'Perfil',  'required|numeric|greater_than[0]');
+
+			  $id_empresa = null;
+			  
+			  if($this->input->post('perfilid') == Equivalencias::perfilLiquidador()) {
+				  $this->form_validation->set_rules('empresa', 'Empresa',  'required|numeric|greater_than[0]|is_exists[empresas.id]');
+				  $id_empresa = $this->input->post('empresa');
+			  }
+
 			  if ($this->form_validation->run() == false)
 				 {
 				  $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage'));
@@ -449,11 +459,14 @@ class Users extends MY_Controller {
 				  $username = $this->input->post('id'); //este id será el identificador de la tabla usuarios, no se usa nombre de usuario
 			      $email    = strtolower($this->input->post('email'));
 			      $password = $this->input->post('password');
-                  $additional_data = array('perfilid' => $this->input->post('perfilid'),                  	
-                      'first_name'=> $this->input->post('nombres'),
-                      'last_name'=> $this->input->post('apellidos'),
-                      'phone'=> $this->input->post('telefono'),
-                      'id'=> $this->input->post('id'));                  
+                  $additional_data = array(
+					  'perfilid'	=> $this->input->post('perfilid'),
+                      'first_name'	=> $this->input->post('nombres'),
+                      'last_name'	=> $this->input->post('apellidos'),
+                      'phone'		=> $this->input->post('telefono'),
+                      'id'			=> $this->input->post('id'),
+					  'id_empresa'	=> $id_empresa
+				  );
 
 				  if ($this->ion_auth->register($username, $password, $email, $additional_data))
 					 {
@@ -479,6 +492,10 @@ class Users extends MY_Controller {
 				  }
 				 $this->load->model('codegen_model','',TRUE); 
 				 $this->data['perfiles']  = $this->codegen_model->getSelect('adm_perfiles','perf_id,perf_nombre');
+
+				 $this->data['empresas'] = $this->codegen_model->getSelect('empresas','id, nombre', 'WHERE estado = 1', '', 'ORDER BY nombre');
+				 $this->data['perfil_liquidador'] = Equivalencias::perfilLiquidador();
+
 				 $this->template->load($this->config->item('admin_template'),'users/create_user', $this->data);
 			 }else 
 			 {
@@ -503,7 +520,7 @@ class Users extends MY_Controller {
 			  $this->data['title'] = "Editar usuarios";
 		      $this->data['message'] =$this->session->flashdata('message');
 		      $user = $this->ion_auth->user($id)->row();
-		      $this->data['result']=$user; 
+		      $this->data['result']=$user;
 		      
               //validate form input
               if ($user->email != $this->input->post('email')) 
@@ -529,13 +546,21 @@ class Users extends MY_Controller {
 				  $datosActualizar['password'] = $this->input->post('password');
 			  }
 
+			  $id_empresa = null;
+			  
+			  if($this->input->post('perfilid') == Equivalencias::perfilLiquidador()) {
+				  $this->form_validation->set_rules('empresa', 'Empresa',  'required|numeric|greater_than[0]|is_exists[empresas.id]');
+				  $id_empresa = $this->input->post('empresa');
+			  }
+
 			  if ($this->form_validation->run() === TRUE)
 			  {				  
-				    $datosActualizar['email']  = $this->input->post('email');
-                    $datosActualizar['perfilid']  = $this->input->post('perfilid');
-                    $datosActualizar['phone'] = $this->input->post('telefono');
-                    $datosActualizar['last_name'] = $this->input->post('apellidos');
-                    $datosActualizar['first_name'] = $this->input->post('nombres');
+				    $datosActualizar['email'] 		= $this->input->post('email');
+                    $datosActualizar['perfilid'] 	= $this->input->post('perfilid');
+                    $datosActualizar['phone'] 		= $this->input->post('telefono');
+                    $datosActualizar['last_name'] 	= $this->input->post('apellidos');
+                    $datosActualizar['first_name'] 	= $this->input->post('nombres');
+                    $datosActualizar['id_empresa'] 	= $id_empresa;
 
 				    $this->ion_auth->update($user->id, $datosActualizar);
 
@@ -570,6 +595,10 @@ class Users extends MY_Controller {
 		      $this->data['csrf'] = $this->_get_csrf_nonce();
 		      $this->load->model('codegen_model','',TRUE); 
 			  $this->data['perfiles']  = $this->codegen_model->getSelect('adm_perfiles','perf_id,perf_nombre');
+
+			  $this->data['empresas'] = $this->codegen_model->getSelect('empresas','id, nombre', 'WHERE estado = 1', '', 'ORDER BY nombre');
+			  $this->data['perfil_liquidador'] = Equivalencias::perfilLiquidador();
+
 			  $this->template->load($this->config->item('admin_template'),'users/edit_user', $this->data);
              
 

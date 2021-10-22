@@ -29,7 +29,22 @@
                                                  <input class="form-control" id="nombres" type="text" name="nombres" value="<?php echo set_value('nombres'); ?>" required="required" />
                                                  <?php echo form_error('nombres','<span class="text-danger">','</span>'); ?>
                                           </div>
-                                    </fieldset>                             
+                                          <div class="form-group">
+                                                 <label for="empresa">Empresa</label>
+                                                 <select class="form-control" id="empresa" name="empresa">
+                                                    <option value="">Seleccione...</option>
+                                                        <?php
+                                                            foreach($empresas as $empresa)
+                                                            {
+                                                                ?>
+                                                                    <option value="<?= $empresa->id ?>"><?= $empresa->nombre ?></option>
+                                                                <?php
+                                                            }
+                                                        ?>
+                                                    </select>
+                                                 <?php echo form_error('empresa','<span class="text-danger">','</span>'); ?>
+                                          </div>
+                                    </fieldset>
                                 </div>
 
                               <div class="col-md-5 col-md-offset-1">                           
@@ -96,4 +111,18 @@
             </div>
       </div>
 
+    <script type="text/javascript">
+        $(function () {
+                $('#perfilid').change(changePerfil);
+                $('#perfilid').change();
+        });
 
+        function changePerfil()
+        {
+            if($(this).val() == '<?= $perfil_liquidador ?>') {
+                $('#empresa').closest('.form-group').show();
+            }else{
+                $('#empresa').closest('.form-group').hide();
+            }
+        }
+    </script>

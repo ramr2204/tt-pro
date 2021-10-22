@@ -950,10 +950,21 @@ class CI_Form_validation {
 	 */
 	public function is_unique($str, $field)
 	{
-		list($table, $field)=explode('.', $field);
+		$parametros = explode('.', $field);
+		list($table, $field) = $parametros;
 		$query = $this->CI->db->limit(1)->get_where($table, array($field => $str));
-		
-		return $query->num_rows() === 0;
+
+		if(count($parametros) == 4)
+		{
+			list(, , $field_exeption, $value_exeption) = $parametros;
+			if ($query->row() && $query->row()->{$field_exeption} != $value_exeption) {
+				return false;
+			} else {
+				return true;
+			}
+		} else {
+			return $query->num_rows() === 0;
+		}
     }
 
 	/**

@@ -72,9 +72,9 @@
 
           <div class="row">
   
-  <div class="col-sm-12 logo"><a class="" href="/"><img src="/images/logo_presentacion.png" alt="bitbahia.com" class="img-responsive"></a></div>
+            <div class="col-sm-12 logo"><a class="" href="/"><img src="/images/logo_presentacion.png" alt="bitbahia.com" class="img-responsive"></a></div>
   
-</div>
+          </div>
           
           </div>
         </div>

@@ -394,7 +394,7 @@ class Generarpdf extends CI_controller {
                 $pagos = $this->codegen_model->getSelect(
                     'pagos_estampillas AS pago',
                     'factura.fact_liquidacionid AS id_liquidacion, pago.valor AS valor_cuota, factura.fact_valor AS valor_total,
-                        pago.numero AS cuota, factura.fact_nombre, pago.id',
+                        pago.numero AS cuota, factura.fact_nombre, pago.id, factura.fact_porcentaje AS porcentaje',
                     'WHERE pago.id IN (' . $ids_pago . ')',
                     'INNER JOIN est_facturas factura ON factura.fact_id = pago.factura_id'
                 );
@@ -404,7 +404,7 @@ class Generarpdf extends CI_controller {
   
                 $contrato = $this->codegen_model->getSelect(
                       'con_contratos',
-                      'date_format(fecha_insercion,"%Y-%m-%d") AS fecha_insercion,cntr_contratistaid,cntr_objeto,cantidad_pagos',
+                      'date_format(fecha_insercion,"%Y-%m-%d") AS fecha_insercion,cntr_contratistaid,cntr_objeto',
                       'WHERE cntr_id = "'.$liquidacion->liqu_contratoid.'"'
                 );
                 $contratista = $this->codegen_model->getSelect(

@@ -9,121 +9,147 @@
 *   @version          2014-05-20
 *
 */
+
+$total = 0;
+$saldo_total = 0;
+$estampillas_pagadas = 0;
+
 ?>
 
 <div class="row"> 
     <div class="col-sm-12">    
         <div id="errorModal"></div>
         <div class="table-responsive">
-            <table class="table table-striped table-bordered " id="tablaq">
-                <thead>
-                    <tr>
-                        <th colspan="1" class="text-center small" width="20%">
-                            <img src="<?php echo base_url() ?>images/gobernacion.jpg" height="60" width="70" >
-                        </th>
-                        <th colspan="4" class="text-center small" width="60%">Gobernación de Boyacá <br> Secretaría de Hacienda <br> Dirección de Recaudo y Fiscalización</th>
-                        <th colspan="1" class="text-center small" width="20%">
-                            <img src="<?php echo base_url() ?>images/logo.png" height="50" width="80" >
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                        if(count($facturas_retencion) > 0)
-                        {
-                            ?>
-                            <tr>
-                                    <td colspan="6"></td>
-                            </tr>
-                            <tr>
-                                    <td colspan="6" class="text-center"><strong>Facturas por Retención</strong></td>
-                            </tr>
-                            <tr>
-                                    <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
-                                    <td colspan="1" class="text-center"><strong>Valor total</strong></td>
-                                    <td colspan="1" class="text-center"><strong>Número de cuota</strong></td>
-                                    <td colspan="1" class="text-center"><strong>Valor de cuota</strong></td>
-                                    <td colspan="1" class="text-center"><strong>Saldo a pagar</strong></td>
-                                    <td colspan="1" class="text-center"><strong>Procesos</strong></td>
-                            </tr>
-                            <?php
-                                    $total = 0;
-                                    $saldo_total = 0;
-                                    $estampillas_pagadas = 0;
 
-                                    foreach($facturas_retencion as $factura)
+            <?= form_open_multipart('liquidaciones/registrarCuotaLiquidacion','role="form"') ?>
+                <input type="hidden" name="id_contrato" value="<?= $id_contrato ?>">
+
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th colspan="1" class="text-center small" width="20%">
+                                <img src="<?php echo base_url() ?>images/gobernacion.jpg" height="60" width="70" >
+                            </th>
+                            <th colspan="2" class="text-center small" width="60%">Gobernación de Boyacá <br> Secretaría de Hacienda <br> Dirección de Recaudo y Fiscalización</th>
+                            <th colspan="1" class="text-center small" width="20%">
+                                <img src="<?php echo base_url() ?>images/logo.png" height="50" width="80" >
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <strong>Valor cuota</strong>
+                            </td>
+                            <td colspan="2">
+                                <input name="valor"
+                                    type="text"
+                                    class="form-control numerico_ret"
+                                    <?= $cuota ? ('disabled value="'. $cuota->valor .'"') : '' ?>
+                                >
+                            </td>
+                            <td>
+                                <?
+                                    if(!$cuota)
                                     {
-                                        $saldo = floor($factura->valor_total - $factura->valor_pagado);
                                         ?>
-                                        <tr>
-                                            <td colspan="1">
-                                                <?= $factura->fact_nombre; ?>
-                                                <?php
-                                                        if ($factura->fact_rutaimagen)
-                                                        {
-                                                            ?>
-                                                            <img src="<?= base_url().$factura->fact_rutaimagen; ?>" height="60" width="60" >
-                                                            <?php
-                                                        }
-                                                ?>
-                                            </td>
-                                            <td colspan="1" class="text-center"><?= '$'.number_format($factura->valor_total, 2, ',', '.') ?></td>
-                                            <td colspan="1" class="text-center"><?= $factura->numero_cuota ?> / <?= $factura->cantidad_pagos ?></td>
-                                            <td colspan="1" class="text-center"><?= '$'.number_format($factura->valor_cuota, 2, ',', '.') ?></td>
-                                            <td colspan="1" class="text-center"><?= '$'.number_format($saldo, 2, ',', '.') ?></td>
-                                            <td colspan="1" class="text-center">
-                                                <?php
-                                                    if($saldo != 0)
-                                                    {
-                                                        ?>
-                                                        <a href="#"
-                                                            class="btn btn-info pagar-estampilla"
-                                                            title="Registrar pago cuota"
-                                                            valor="<?= number_format($factura->valor_cuota, 2, ',', '') ?>"
-                                                            fact-nombre="<?= $factura->fact_nombre ?>"
-                                                            id-factura="<?= $factura->fact_id ?>"
-                                                        >
-                                                            <i class="fa fa-shopping-cart"></i>
-                                                        </a>
-                                                        <a href="#"
-                                                            class="btn btn-primary descuento-estampilla"
-                                                            title="Registrar descuento"
-                                                            fact-nombre="<?= $factura->fact_nombre ?>"
-                                                            id-factura="<?= $factura->fact_id ?>"
-                                                        >
-                                                            <i class="fa fa-minus-circle"></i>
-                                                        </a>
-                                                        <?php
-                                                    }
-                                                ?>
-                                            </td>
-                                        </tr>
-                                        <?php
-                                            $total += $factura->valor_total;
-                                            $saldo_total += $saldo;
-
-                                            if($saldo == 0)
-                                            {
-                                                $estampillas_pagadas++;
-                                            }
+                                        <button class="btn btn-primary" type="submit">Confirmar</button>
+                                        <?
                                     }
-                            ?>
-                            <tr>
+                                ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>Saldo contrato</strong>
+                            </td>
+                            <td colspan="2">
+                                <?= '$'.number_format($saldo_contrato, 2, ',', '.') ?>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td colspan="1"><strong>Número de contrato</strong></td>
+                            <td colspan="1"><?php echo $liquidacion->numero; ?></td>
+                            <td colspan="1"><strong>Vigencia</strong></td>
+                            <td colspan="2"><?php echo $liquidacion->vigencia; ?></td>
+                        </tr>
+                        <tr>
+                            <td colspan="1"><strong>Tipo de contrato</strong></td>
+                            <td colspan="1"><?php echo $liquidacion->tipo_contrato; ?></td>
+                            <td colspan="1"><strong>Valor</strong></td>
+                            <td colspan="2"><?= '$'.number_format($liquidacion->valor_total, 2, ',', '.') ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <?php
+                    if(count($facturas) > 0)
+                    {
+                        ?>
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <td colspan="6" class="text-center"><strong>Facturas por Retención</strong></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
+                                    <td colspan="1" class="text-center"><strong>Porcentaje</strong></td>
+                                    <td colspan="1" class="text-center"><strong>Valor total</strong></td>
+                                    <td colspan="1" class="text-center"><strong>Saldo a pagar</strong></td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                        $id_factura_muestra = 0;
+
+                                        foreach($facturas as $factura)
+                                        {
+                                            $saldo = floor($factura->valor_total - $factura->valor_pagado);
+                                            ?>
+                                            <tr>
+                                                <td colspan="1">
+                                                    <?= $factura->fact_nombre; ?>
+                                                    <?php
+                                                            if ($factura->fact_rutaimagen)
+                                                            {
+                                                                ?>
+                                                                <img src="<?= base_url().$factura->fact_rutaimagen; ?>" height="60" width="60" >
+                                                                <?php
+                                                            }
+                                                    ?>
+                                                </td>
+                                                <td colspan="1" class="text-center"><?= number_format($factura->porcentaje, 2, ',', '.') ?>%</td>
+                                                <td colspan="1" class="text-center"><?= '$'.number_format($factura->valor_total, 2, ',', '.') ?></td>
+                                                <td colspan="1" class="text-center"><?= '$'.number_format($saldo, 2, ',', '.') ?></td>
+                                            </tr>
+                                            <?php
+                                                $total += $factura->valor_total;
+                                                $saldo_total += $saldo;
+
+                                                if($saldo == 0)
+                                                {
+                                                    $estampillas_pagadas++;
+                                                }
+                                                $id_factura_muestra = $factura->fact_id;
+                                        }
+                                ?>
+                                <tr>
                                     <td colspan="1" class="text-right"><strong>Total</strong></td>
-                                    <td colspan="1" class="text-center"><?= '$'.number_format($total, 2, ',', '.') ?></td>
-                                    <td colspan="2"></td>
-                                    <td colspan="1" class="text-center"><?= '$'.number_format($saldo_total, 2, ',', '.') ?></td>
                                     <td colspan="1"></td>
-                            </tr>
-                            <?php
-                        }
-                    ?>
-                </tbody>
-            </table>
+                                    <td colspan="1" class="text-center"><?= '$'.number_format($total, 2, ',', '.') ?></td>
+                                    <td colspan="1" class="text-center"><?= '$'.number_format($saldo_total, 2, ',', '.') ?></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <?php
+                    }
+                ?>
+            <?= form_close() ?>
         </div>
     </div>
     <?
-        if($estampillas_pagadas != count($facturas_retencion))
+        if($estampillas_pagadas != count($facturas))
         {
             ?>
             <div class="col-sm-12 text-center">
@@ -132,12 +158,12 @@
             <?
         }
     ?>
-    <div class="col-sm-12" style="display:none" id="form_pago_estampilla">
+    <div class="col-xs-12 col-sm-6 col-sm-offset-3" style="display:none" id="form_pago_estampilla">
         <div class="row">
             <hr>
             <?= form_open_multipart('liquidaciones/pagarEstampilla','role="form"') ?>
-                <input type="hidden" name="id_factura" id="id_factura_cont">
-                <input type="hidden" name="id_contrato" class="id_contrato_cont">
+                <input type="hidden" name="id_factura" id="id_factura_cont" value="<?= $id_factura_muestra ?>">
+                <input type="hidden" name="id_contrato" value="<?= $id_contrato ?>">
                 <input type="hidden" name="todos" class="todos_cont" value="0">
 
                 <h4 class="text-center"><b>Pago de Estampillas por Retención</b></h4>
@@ -148,7 +174,7 @@
                 </div>
                 <div class="form-group col-md-6">
                     <label>Valor</label>
-                    <input type="text" name="valor" class="form-control" id="valor_cont">
+                    <input type="text" name="valor" class="form-control numerico_ret" id="valor_cont" value="1">
                 </div>
                 <div class="form-group col-sm-12">
                 <label for="fecha_cont">Fecha</label>
@@ -178,12 +204,13 @@
             <?= form_close() ?>
         </div>
     </div>
+
     <div class="col-sm-12" style="display:none" id="form_descuento_estampilla">
         <div class="row">
             <hr>
             <?= form_open_multipart('liquidaciones/descuentoEstampilla','role="form"') ?>
                 <input type="hidden" name="id_factura" id="id_factura_desc">
-                <input type="hidden" name="id_contrato" class="id_contrato_cont">
+                <input type="hidden" name="id_contrato" value="<?= $id_contrato ?>">
 
                 <h4 class="text-center"><b>Descuento de Estampillas por Retención</b></h4>
 
@@ -193,7 +220,7 @@
                 </div>
                 <div class="form-group col-md-6">
                     <label for="valor_desc">Valor</label>
-                    <input type="text" name="valor" class="form-control" id="valor_desc">
+                    <input type="text" name="valor" class="form-control numerico_ret" id="valor_desc">
                 </div>
                 <div class="form-group col-sm-12">
                     <label for="observaciones_desc">Observaciones</label>
@@ -235,8 +262,10 @@
     });
 
     $(document).on('click', '#pagar_todo', function() {
-        // Simula como se hubiera clickeado la primera estampilla a pagar
-        $('.pagar-estampilla')[0].click();
+        $('#form_descuento_estampilla').hide();
+        $('#valor_cont').closest('.form-group').show();
+
+        $('#form_pago_estampilla').slideDown();
 
         $('.todos_cont').val(1);
         $('#nombre_estampilla').val('Todas una cuota');
@@ -251,6 +280,14 @@
         showRemove: false,
     });
 
-    $('#valor_cont').autoNumeric('init',{aSep: '.' , aDec: ',' });
-    $('#valor_desc').autoNumeric('init',{aSep: '.' , aDec: ',' });
+    $('.numerico_ret').autoNumeric('init',{aSep: '.' , aDec: ',' });
+
+    <?php
+        if(isset($idPagoFactura) && $idPagoFactura)
+        {
+            ?>
+            window.open($('#base').val() + 'generarpdf/certificadoPagoEstampilla?id=<?= urlencode($idPagoFactura) ?>', '_blank');
+            <?php
+        }
+    ?>
 </script>

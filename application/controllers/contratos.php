@@ -96,16 +96,27 @@ class Contratos extends MY_Controller {
                 $this->form_validation->set_rules('contrato_relacionado', 'Número de contrato relacionado','required|trim|xss_clean|is_exists[con_contratos.cntr_numero]');
               }
 
-			  $es_retencion = $this->esContratoRetencion($this->input->post('tipocontratoid'));
-
-			  if($es_retencion){
-				$this->form_validation->set_rules('cantidad_pagos', 'Número de pagos','required|trim|xss_clean|numeric|greater_than[0]');
-			  }
-
               if ($this->form_validation->run() == false) {
 
                   $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
               } else {
+
+                    if($this->input->post('clasificacion_contrato') == Equivalencias::contratoModificacion())
+                    {
+                        $contrato_relacionado = $this->codegen_model->get(
+                            'con_contratos',
+                            'cntr_id',
+                            'cntr_numero = '. $this->input->post('contrato_relacionado') .' AND cntr_vigencia = "'. $vigencia[0] .'"',
+                            1,NULL,true
+                        );
+    
+                        $this->codegen_model->edit(
+                            'con_contratos',
+                            ['cntr_estadolocalid' => Equivalencias::contratoModificado()],
+                            'cntr_id',$contrato_relacionado->cntr_id
+                        );
+                    }
+
                     
                     /*
                     * Valida que el contratista exista en la base de datos
@@ -141,9 +152,9 @@ class Contratos extends MY_Controller {
                             'fecha_insercion'		=> date('Y-m-d H:i:s'),
                             'cntr_usuariocrea'		=> $usuario->id,
                             'cntr_municipio_origen'	=> $this->input->post('cntr_municipio_origen'),
-							'cantidad_pagos'		=> $es_retencion ? $this->input->post('cantidad_pagos') : 0,
                             'clasificacion'			=> $this->input->post('clasificacion_contrato'),
                             'numero_relacionado'	=> $aplica_numero_relacionado ? $this->input->post('contrato_relacionado') : null,
+                            'id_empresa'            => $this->ion_auth->user()->row()->id_empresa
 						);
 
                         /*
@@ -215,45 +226,6 @@ class Contratos extends MY_Controller {
 
   }
 
-	function verificarTipoRetencion()
-	{
-		$respuesta = array(
-			'exito' => false
-		);
-
-		if ($this->ion_auth->logged_in())
-		{
-			if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/add'))
-			{
-				$tipo_contrato = $this->uri->segment(3);
-
-				$respuesta['exito'] = true;
-				$respuesta['es_retencion'] = $this->esContratoRetencion($tipo_contrato);
-			}
-		}
-
-		echo json_encode( $respuesta );
-	}
-
-	function esContratoRetencion($tipo)
-	{
-		if(!$tipo){
-			return false;
-		}
-
-		$verificacion = $this->codegen_model->get(
-			'est_estampillas_tiposcontratos AS tipo',
-			'tipo.esti_id',
-			'esti_tipocontratoid = ' . $tipo . ' AND estampilla.tipo = '. Equivalencias::tipoRetencion(),
-			1, null, true, 'array',
-			'est_estampillas estampilla',
-			'estampilla.estm_id = tipo.esti_estampillaid'
-		);
-
-		return !empty($verificacion);
-	}
-
-
 	function edit()
 	{
       if ($this->ion_auth->logged_in()) {
@@ -285,12 +257,6 @@ class Contratos extends MY_Controller {
               if($aplica_numero_relacionado){
                 $this->form_validation->set_rules('contrato_relacionado', 'Número de contrato relacionado','required|trim|xss_clean|is_exists[con_contratos.cntr_numero]');
               }
-
-			  $es_retencion = $this->esContratoRetencion($this->input->post('tipocontratoid'));
-
-			  if($es_retencion){
-				$this->form_validation->set_rules('cantidad_pagos', 'Número de pagos','required|trim|xss_clean|numeric|greater_than[0]');
-			  }
 
               if ($this->form_validation->run() == false) {
                   
@@ -330,7 +296,6 @@ class Contratos extends MY_Controller {
                             'cntr_valor' => $valor,
                             'cntr_vigencia' => $vigencia[0],
                             'cntr_municipio_origen' => $this->input->post('cntr_municipio_origen'),
-							'cantidad_pagos'		=> $es_retencion ? $this->input->post('cantidad_pagos') : 0,
                             'clasificacion'			=> $this->input->post('clasificacion_contrato'),
                             'numero_relacionado'	=> $aplica_numero_relacionado ? $this->input->post('contrato_relacionado') : null,
 						);
@@ -388,7 +353,7 @@ class Contratos extends MY_Controller {
                     'con_contratos',
                     'cont_regimenid,cntr_id,cntr_contratistaid,cntr_contratanteid,cntr_municipio_origen,
                         cntr_tipocontratoid,cntr_fecha_firma,cntr_numero,cntr_objeto,cntr_valor,
-                        cntr_iva_otros,cantidad_pagos,clasificacion,numero_relacionado',
+                        cntr_iva_otros,clasificacion,numero_relacionado',
                     'cntr_id = '.$idcontrato,
                     1,NULL,true,array(),
                     'con_contratistas',

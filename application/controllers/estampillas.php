@@ -70,7 +70,6 @@ class Estampillas extends MY_Controller {
 				$this->form_validation->set_rules('cuenta', 'Cuenta', 'required|trim|xss_clean|max_length[100]');
 				$this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[256]');
 				$this->form_validation->set_rules('bancoid', 'Banco',  'required|numeric|greater_than[0]');
-				$this->form_validation->set_rules('tipo', 'Tipo Estampilla', 'required|numeric|greater_than[0]');
 
 				$path = "uploads/imagenesestampillas";
 				if(!is_dir($path)) { //create the folder if it's not already exists
@@ -99,7 +98,6 @@ class Estampillas extends MY_Controller {
 							'estm_descripcion'	=> $this->input->post('descripcion'),
 							'estm_bancoid'		=> $this->input->post('bancoid'),
 							'estm_codigoB'		=> $this->input->post('codigoB'),
-							'tipo'				=> $this->input->post('tipo'),
 							'estm_rutaimagen'	=> $ruta
 						);
 						
@@ -125,7 +123,6 @@ class Estampillas extends MY_Controller {
 				);
 				$this->template->set('title', 'Nuevo estampilla');
 				$this->data['bancos'] = $this->codegen_model->getSelect('par_bancos','banc_id,banc_nombre');
-				$this->data['tiposEstampillas'] = Equivalencias::tiposEstampillas();
 				$this->template->load($this->config->item('admin_template'),'estampillas/estampillas_add', $this->data);
 			} else {
 				redirect(base_url().'index.php/error_404');
@@ -164,7 +161,6 @@ class Estampillas extends MY_Controller {
               $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]');   
               $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[256]');
               $this->form_validation->set_rules('bancoid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
-              $this->form_validation->set_rules('tipo', 'Tipo Estampilla', 'required|numeric|greater_than[0]');
               /**
               * Valida si el numero codigo para barras es el mismo al registrado
               * o no para validarlo como unique
@@ -207,7 +203,6 @@ class Estampillas extends MY_Controller {
                         'estm_descripcion'  => $this->input->post('descripcion'),
                         'estm_bancoid'      => $this->input->post('bancoid'),
                         'estm_codigoB'      => $this->input->post('codigoB'),
-                        'tipo'              => $this->input->post('tipo'),
                         'estm_rutaimagen'   => $ruta
                        );
                   } else {
@@ -217,7 +212,6 @@ class Estampillas extends MY_Controller {
                         'estm_cuenta'				=> $this->input->post('cuenta'),
                         'estm_descripcion'	=> $this->input->post('descripcion'),
                         'estm_codigoB'			=> $this->input->post('codigoB'),
-												'tipo'							=> $this->input->post('tipo'),
                         'estm_bancoid'			=> $this->input->post('bancoid')
                        );
                   }
@@ -257,7 +251,6 @@ class Estampillas extends MY_Controller {
 						1,NULL,true
 					);
                   $this->data['bancos']  = $this->codegen_model->getSelect('par_bancos','banc_id,banc_nombre');
-                  $this->data['tiposEstampillas']  = Equivalencias::tiposEstampillas();
                   $this->template->set('title', 'Editar estampilla');
                   $this->template->load($this->config->item('admin_template'),'estampillas/estampillas_edit', $this->data);
           }else {

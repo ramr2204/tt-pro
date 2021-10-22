@@ -208,22 +208,6 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-6 column" style="display:none">
-                                        <div class="form-group">
-                                            <label for="cantidad_pagos">Número de pagos</label>
-                                            <input
-                                                disabled
-                                                class="form-control"
-                                                id="cantidad_pagos"
-                                                type="number"
-                                                name="cantidad_pagos"
-                                                value="<?= $result->cantidad_pagos; ?>"
-                                                required="required"
-                                                min="0" />
-                                            <?php echo form_error('cantidad_pagos','<span class="text-danger">','</span>'); ?>
-                                        </div>
-                                    </div>
-
                                      <div class="col-md-12 column">
 
                                           <div class="form-group">
@@ -313,33 +297,9 @@
         $('#valor').autoNumeric('init',{aSep: '.' , aDec: ',' }); 
         $('#valor_iva_otros').autoNumeric('init',{aSep: '.' , aDec: ',' });
 
-        $('#tipocontratoid').change(consultarContratoRetencion);
-        $('#tipocontratoid').change();
-
         $('#clasificacion_contrato').change(handlerClasificacionContrato);
         $('#clasificacion_contrato').change();
     });
-
-    function consultarContratoRetencion()
-    {
-        if($(this).val())
-        {
-            $('#cantidad_pagos').attr('disabled', true)
-            $('#cantidad_pagos').closest('.column').hide();
-
-            $.ajax({
-                type: 'GET',
-                dataType: 'json',
-                url: base_url + 'index.php/contratos/verificarTipoRetencion/'+$(this).val(),
-                success: function (data) {
-                    if(data.exito && data.es_retencion){
-                        $('#cantidad_pagos').attr('disabled', false)
-                        $('#cantidad_pagos').closest('.column').show();
-                    }
-                }
-            });
-        }
-    }
 
     function handlerClasificacionContrato()
     {

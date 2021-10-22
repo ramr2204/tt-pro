@@ -127,41 +127,49 @@
 
 
 
-       <?php  foreach($nav_procesos as $key_proceso => $value_proceso) : ?>
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <span class="glyphicon glyphicon-folder-close"></span> <?php echo $value_proceso['proc_nombre']; ?><b class="caret"></b> </a>
-            <ul class="dropdown-menu">
-            
-             <?php foreach($nav_aplicaciones as $key_aplicacion => $value_aplicacion) : ?>
-                 <?php if ($value_aplicacion['apli_procesoid']==$key_proceso) : ?> 
-                    <li class="menu-item dropdown dropdown-submenu">
-                      <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <?php echo $value_aplicacion['apli_nombre']; ?></a>
-                      <ul class="dropdown-menu">
-                       <?php foreach($nav_modulos as $key_modulo => $value_modulo) : ?>
-                           <?php if ($value_modulo['modu_aplicacionid']==$key_aplicacion) : ?> 
-                             <li class="menu-item dropdown dropdown-submenu">
-                               <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <?php echo $value_modulo['modu_nombre']; ?></a>
-                               <ul class="dropdown-menu">
-                                   <?php foreach($nav_menus as $key_menu => $value_menu) : ?>
-                                       <?php if ($value_menu['menu_moduloid']==$key_modulo) : ?>
-                                            <li class="menu-item menu-link">
-                                             <a href="<?php echo base_url().$value_menu['menu_ruta']; ?>"><?php echo $value_menu['menu_nombre']; ?></a>
-                                             </li>
-                                       <?php endif; ?> 
-                                   <?php endforeach; ?> 
-                               </ul>
-                             </li>  
-                           <?php endif; ?>
-                       <?php endforeach; ?> 
+       <?php
+        foreach($nav_procesos as $key_proceso => $value_proceso) :
+          ?>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <span class="glyphicon glyphicon-folder-close"></span> <?php echo $value_proceso['proc_nombre']; ?><b class="caret"></b> </a>
+              <ul class="dropdown-menu">
+              
+                <?php
+                  foreach($nav_aplicaciones as $key_aplicacion => $value_aplicacion) :
+                    if ($value_aplicacion['apli_procesoid']==$key_proceso) :
+                      ?>
+                        <li class="menu-item dropdown dropdown-submenu">
+                          <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <?php echo $value_aplicacion['apli_nombre']; ?></a>
+                          <ul class="dropdown-menu">
+                            <?php
+                              foreach($nav_modulos as $key_modulo => $value_modulo) :
+                                if ($value_modulo['modu_aplicacionid']==$key_aplicacion) :
+                                  ?> 
+                                    <li class="menu-item dropdown dropdown-submenu">
+                                      <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <?php echo $value_modulo['modu_nombre']; ?></a>
+                                      <ul class="dropdown-menu">
+                                          <?php
+                                            foreach($nav_menus as $key_menu => $value_menu) :
+                                              ?>
+                                              <?php if ($value_menu['menu_moduloid']==$key_modulo) : ?>
+                                                    <li class="menu-item menu-link">
+                                                    <a href="<?php echo base_url().$value_menu['menu_ruta']; ?>"><?php echo $value_menu['menu_nombre']; ?></a>
+                                                    </li>
+                                              <?php endif; ?> 
+                                          <?php endforeach; ?> 
+                                      </ul>
+                                    </li>
+                                <?php endif; ?>
+                            <?php endforeach; ?> 
 
-                      </ul>
+                          </ul>
 
-                    </li>
-                 <?php endif; ?>
-             <?php endforeach; ?>  
-            
-            </ul>
-          </li>
+                        </li>
+                  <?php endif; ?>
+              <?php endforeach; ?>  
+              
+              </ul>
+            </li>
 
        <?php endforeach; ?> 
       

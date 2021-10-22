@@ -54,21 +54,6 @@
                                         <input id="file" type="file" class="file" name="imagen" multiple=false>
                                     </div>
                                     <div class="form-group">
-                                      <label for="tipo">Tipo Estampilla</label>
-                                      <select class="form-control" id="tipo" name="tipo" required="required" >
-                                        <option value="0">Seleccione...</option>
-                                        <?php
-                                          foreach($tiposEstampillas as $id => $nombre)
-                                          {
-                                            ?>
-                                            <option value="<?= $id ?>"><?= ucfirst($nombre) ?></option>
-                                            <?php
-                                          }
-                                        ?>
-                                      </select>
-                                      <?php echo form_error('tipo','<span class="text-danger">','</span>'); ?>
-                                    </div>
-                                    <div class="form-group">
                                            <label for="descripcion">Descripción</label>
                                            <textarea class="form-control" id="descripcion" type="descripcion" name="descripcion" maxlength="500"><?php echo set_value('descripcion'); ?></textarea>
                                            <?php echo form_error('descripcion','<span class="text-danger">','</span>'); ?>
