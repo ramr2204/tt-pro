@@ -78,7 +78,7 @@ $estampillas_pagadas = 0;
                             <td colspan="1"><strong>Tipo de contrato</strong></td>
                             <td colspan="1"><?php echo $liquidacion->tipo_contrato; ?></td>
                             <td colspan="1"><strong>Valor</strong></td>
-                            <td colspan="2"><?php echo $liquidacion->valor_total; ?></td>
+                            <td colspan="2"><?= '$'.number_format($liquidacion->valor_total, 2, ',', '.') ?></td>
                         </tr>
                     </tbody>
                 </table>
@@ -94,14 +94,14 @@ $estampillas_pagadas = 0;
                                 </tr>
                                 <tr>
                                     <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
+                                    <td colspan="1" class="text-center"><strong>Porcentaje</strong></td>
                                     <td colspan="1" class="text-center"><strong>Valor total</strong></td>
-                                    <td colspan="1" class="text-center"><strong>Número de cuota</strong></td>
                                     <td colspan="1" class="text-center"><strong>Saldo a pagar</strong></td>
-                                    <td colspan="1" class="text-center"><strong>Procesos</strong></td>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
+                                        $id_factura_muestra = 0;
 
                                         foreach($facturas as $factura)
                                         {
@@ -119,35 +119,9 @@ $estampillas_pagadas = 0;
                                                             }
                                                     ?>
                                                 </td>
+                                                <td colspan="1" class="text-center"><?= number_format($factura->porcentaje, 2, ',', '.') ?>%</td>
                                                 <td colspan="1" class="text-center"><?= '$'.number_format($factura->valor_total, 2, ',', '.') ?></td>
-                                                <td colspan="1" class="text-center"><?= $factura->numero_cuota ?></td>
                                                 <td colspan="1" class="text-center"><?= '$'.number_format($saldo, 2, ',', '.') ?></td>
-                                                <td colspan="1" class="text-center">
-                                                    <?php
-                                                        if($saldo != 0)
-                                                        {
-                                                            ?>
-                                                            <!-- <a href="#"
-                                                                class="btn btn-info pagar-estampilla"
-                                                                title="Registrar pago cuota"
-                                                                valor="<?= number_format($saldo, 2, ',', '') ?>"
-                                                                fact-nombre="<?= $factura->fact_nombre ?>"
-                                                                id-factura="<?= $factura->fact_id ?>"
-                                                            >
-                                                                <i class="fa fa-shopping-cart"></i>
-                                                            </a> -->
-                                                            <!-- <a href="#"
-                                                                class="btn btn-primary descuento-estampilla"
-                                                                title="Registrar descuento"
-                                                                fact-nombre="<?= $factura->fact_nombre ?>"
-                                                                id-factura="<?= $factura->fact_id ?>"
-                                                            >
-                                                                <i class="fa fa-minus-circle"></i>
-                                                            </a> -->
-                                                            <?php
-                                                        }
-                                                    ?>
-                                                </td>
                                             </tr>
                                             <?php
                                                 $total += $factura->valor_total;
@@ -157,14 +131,14 @@ $estampillas_pagadas = 0;
                                                 {
                                                     $estampillas_pagadas++;
                                                 }
+                                                $id_factura_muestra = $factura->fact_id;
                                         }
                                 ?>
                                 <tr>
-                                        <td colspan="1" class="text-right"><strong>Total</strong></td>
-                                        <td colspan="1" class="text-center"><?= '$'.number_format($total, 2, ',', '.') ?></td>
-                                        <td colspan="1"></td>
-                                        <td colspan="1" class="text-center"><?= '$'.number_format($saldo_total, 2, ',', '.') ?></td>
-                                        <td colspan="1"></td>
+                                    <td colspan="1" class="text-right"><strong>Total</strong></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1" class="text-center"><?= '$'.number_format($total, 2, ',', '.') ?></td>
+                                    <td colspan="1" class="text-center"><?= '$'.number_format($saldo_total, 2, ',', '.') ?></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -188,7 +162,7 @@ $estampillas_pagadas = 0;
         <div class="row">
             <hr>
             <?= form_open_multipart('liquidaciones/pagarEstampilla','role="form"') ?>
-                <input type="hidden" name="id_factura" id="id_factura_cont">
+                <input type="hidden" name="id_factura" id="id_factura_cont" value="<?= $id_factura_muestra ?>">
                 <input type="hidden" name="id_contrato" value="<?= $id_contrato ?>">
                 <input type="hidden" name="todos" class="todos_cont" value="0">
 
@@ -200,7 +174,7 @@ $estampillas_pagadas = 0;
                 </div>
                 <div class="form-group col-md-6">
                     <label>Valor</label>
-                    <input type="text" name="valor" class="form-control numerico_ret" id="valor_cont">
+                    <input type="text" name="valor" class="form-control numerico_ret" id="valor_cont" value="1">
                 </div>
                 <div class="form-group col-sm-12">
                 <label for="fecha_cont">Fecha</label>
@@ -288,8 +262,10 @@ $estampillas_pagadas = 0;
     });
 
     $(document).on('click', '#pagar_todo', function() {
-        // Simula como se hubiera clickeado la primera estampilla a pagar
-        $('.pagar-estampilla')[0].click();
+        $('#form_descuento_estampilla').hide();
+        $('#valor_cont').closest('.form-group').show();
+
+        $('#form_pago_estampilla').slideDown();
 
         $('.todos_cont').val(1);
         $('#nombre_estampilla').val('Todas una cuota');
