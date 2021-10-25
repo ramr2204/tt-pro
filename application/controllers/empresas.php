@@ -1,11 +1,7 @@
 <?php if( ! defined('BASEPATH') ) exit('No direct script access allowed');
 /**
-*   VNombre:            cuantias
-*   Ruta:              /application/controllers/cuantias.php
-*   Descripcion:       controlador de cuantias
-*   Fecha Creacion:    20/may/2014
-*   @author            Iván Viña <ivandariovinam@gmail.com>
-*   @version           2014-05-20
+*   @author            Monica Guitierrez
+*   @version           2021-10-13
 *
 */
 
@@ -19,8 +15,13 @@ class Empresas extends MY_Controller
         //$this->load->helper('MYPDF');
         $this->load->helper(array('form','url','codegen_helper'));
         $this->load->model('codegen_model','',TRUE);
-    }   
+    }
 
+	/**
+	 * Muestra el listado de empresas
+	 * 
+	 * @return null
+	 */
     function index()
     {
     	if (!$this->ion_auth->logged_in())
@@ -28,7 +29,7 @@ class Empresas extends MY_Controller
 			//redirect them to the login page
 			redirect('users/login', 'refresh');
 		}
-		elseif (!$this->ion_auth->is_admin()) //remove this elseif if you want to enable this for non-admins
+		elseif (!$this->ion_auth->is_admin() || $this->ion_auth->in_menu('empresas/index')) //remove this elseif if you want to enable this for non-admins
 		{
 			//redirect them to the home page because they must be an administrator to view this
 			redirect('error_404', 'refresh');
@@ -56,28 +57,37 @@ class Empresas extends MY_Controller
 		}
     }
 
+	/**
+	 * Retorna datos para el procesamiento del dataTable
+	 * 
+	 * @return null
+	 */
     function dataTable()
     {
-        if ($this->ion_auth->is_admin())
+        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('empresas/index'))
         {
             $this->load->library('datatables');
             $this->datatables->select('id,nit,nombre,email,direccion,telefono,id_municipio,nombre_representante,identificador_representante,estado');
             $this->datatables->from('empresas');
-            //$this->datatables->join('adm_perfiles p','p.perf_id = u.perfilid','left');
             $this->datatables->add_column('edit', '<div class="btn-toolbar" role="toolbar">
-	                                           <div class="btn-group">
-	                                            <a href="'.base_url().'empresas/edit/$1" class="btn btn-default btn-xs" title="Editar datos de usuario"><i class="fa fa-pencil-square-o"></i></a>
-	                                           </div>
-	                                       </div>', 'id');
-         echo $this->datatables->generate();
+					<div class="btn-group">
+						<a href="'.base_url().'empresas/edit/$1" class="btn btn-default btn-xs" title="Editar datos de usuario"><i class="fa fa-pencil-square-o"></i></a>
+					</div>
+				</div>', 'id');
+         	echo $this->datatables->generate();
         }
         else
         {
-          redirect(base_url().'index.php/users/login');
+          	redirect(base_url().'index.php/users/login');
         }           
     	
     }
 
+	/**
+	 * Renderiza la vista de crear y tambien guarda una empresa
+	 * 
+	 * @return null
+	 */
     function create()
     {
     	if ($this->ion_auth->logged_in())
@@ -89,7 +99,7 @@ class Empresas extends MY_Controller
             	'js/chosen.jquery.min.js'
             );    
 
-		    if ($this->ion_auth->is_admin())
+		    if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('empresas/index'))
 			{
 				$this->data['successmessage'] = $this->session->flashdata('message');
 
@@ -149,8 +159,13 @@ class Empresas extends MY_Controller
 		}
     }
 
+	/**
+	 * Renderiza la vista de editar y tambien actualiza una empresa
+	 * 
+	 * @return null
+	 */
 	function edit()
-	{    
+	{
       	if ($this->ion_auth->logged_in()) 
       	{
       		$this->data['style_sheets']= array(
@@ -163,7 +178,7 @@ class Empresas extends MY_Controller
             $this->data['municipios']  = $this->codegen_model->getMunicipios();
 
           	if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('empresas/edit')) 
-          	{  
+          	{
               	$idempresa = ($this->uri->segment(3)) ? $this->uri->segment(3) : $this->input->post('id') ;
 
               	if ($idempresa=='')
@@ -206,7 +221,7 @@ class Empresas extends MY_Controller
 	                } 
 	                else 
 	                {
-	                	$this->data['errormessage'] = 'No se pudo registrar el aplilo';
+	                	$this->data['errormessage'] = 'No se pudo editar la empresa';
 	                } 
 	            } 
 
@@ -228,6 +243,11 @@ class Empresas extends MY_Controller
         
   	}
 
+	/**
+	 * Cambia de estado las empresas
+	 * 
+	 * @return null
+	 */
   	function delete()
 	{
 	    if ($this->ion_auth->logged_in()) 
