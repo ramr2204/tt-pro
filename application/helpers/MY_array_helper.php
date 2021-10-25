@@ -122,6 +122,52 @@ if ( ! function_exists('array_to_object'))
  }
 }
 
+if ( ! function_exists('array_lists'))
+{
+    /**
+     * Funcion de apoyo agregada por Mike para crear un arreglo
+     * a partir de una coleccion de objetos resultados de get_results
+     *
+     * @param array $arr
+     * @param string $val
+     * @param string $llave
+     * @return array
+    */
+    function array_lists($arr = array(), $val = '', $llave = '')
+    {
+        $vectorResultado = array();
+
+        if ($val != '' || $llave != '') {
+            foreach ($arr as $objeto) {
+                /*
+                * Si solo llega el valor
+                * cree el arreglo con solo el valor
+                * sin indices
+                */
+                if ($llave == '' && $val != '') {
+                    $vectorResultado[] = $objeto->$val;
+                } elseif ($llave != '' && $val != '') {
+                    /*
+                    * Si llega la llave y valor
+                    * construya un vector con indice y valor
+                    */
+                    $vectorResultado[$objeto->$llave] = $objeto->$val;
+                } elseif ($llave != '' && $val == '') {
+                    /*
+                    * Si llega llave pero no valor,
+                    * devuelva el mismo arreglo, con las llaves seleccionadas
+                    */
+                    $vectorResultado[$objeto->$llave] = $objeto;
+                }
+            }
+            return $vectorResultado;
+        } else {
+            echo 'Debe Suministrar por lo menos el nombre del campo para extraer los valores del arreglo';
+            exit();
+        }
+    }
+}
+
 
 
 // ------------------------------------------------------------------------
