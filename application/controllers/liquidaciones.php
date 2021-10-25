@@ -3360,7 +3360,7 @@ function asignarCodigoParaBarras($idLiquidacion,$idEstampilla)
     $campos = 'f.fact_id, f.fact_estampillaid, f.fact_valor, e.estm_codigoB'; 
     $donde = 'WHERE fact_liquidacionid = '.$idLiquidacion.' AND fact_estampillaid = '.$idEstampilla;
     $join = 'INNER JOIN est_estampillas e ON e.estm_id = f.fact_estampillaid';
-    $factura = $this->codegen_model->getSelect($tabla, $campos, $donde, $join);
+    $factura = $this->codegen_model->getSelect($tabla, $campos, $donde, $join, 'ORDER BY f.fact_id DESC');
 
     /*
     * Se eliminan los decimales del valor de la factura
@@ -3691,35 +3691,35 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
     | en las liquidaciones según ordenanza 026 de 20017
     | [SE REACTIVA EL COBRO DE LA ESTAMPILLA A PARTIR DEL 9 DE ENERO DE 2018]
     */
-    if($idTipoEstampilla == 7)
-    {
-        if(strtotime('2017-05-21') < strtotime($fecha_validar) && strtotime('2018-01-01') > strtotime($fecha_validar))
-        {
-            $bandRegistrarFactura = false;
-        }
-    }
+    // if($idTipoEstampilla == 7)
+    // {
+    //     if(strtotime('2017-05-21') < strtotime($fecha_validar) && strtotime('2018-01-01') > strtotime($fecha_validar))
+    //     {
+    //         $bandRegistrarFactura = false;
+    //     }
+    // }
 
-    /*
-    | PRO CULTURA
-    | Se valida si la estampilla a almacenar es pro cultura, el tipo de contrato es OBRA
-    | y la fecha del contrato es anterior al 2018, no se incluya la estampilla
-    | en las liquidaciones según ordenanza DFRI-163-5709 de 2018
-    */
-    $idsContratoObra = array(4);
-    if($idTipoEstampilla == 9 && in_array($contrato_validar, $idsContratoObra))
-    {
-        if(strtotime('2018-01-01') > strtotime($fecha_validar))
-        {
-            $bandRegistrarFactura = false;
-        }
-    }
+    // /*
+    // | PRO CULTURA
+    // | Se valida si la estampilla a almacenar es pro cultura, el tipo de contrato es OBRA
+    // | y la fecha del contrato es anterior al 2018, no se incluya la estampilla
+    // | en las liquidaciones según ordenanza DFRI-163-5709 de 2018
+    // */
+    // $idsContratoObra = array(4);
+    // if($idTipoEstampilla == 9 && in_array($contrato_validar, $idsContratoObra))
+    // {
+    //     if(strtotime('2018-01-01') > strtotime($fecha_validar))
+    //     {
+    //         $bandRegistrarFactura = false;
+    //     }
+    // }
 
     return $bandRegistrarFactura;
 }
 
 	function pagarEstampilla()
 	{
-		if ($this->ion_auth->logged_in())
+        if ($this->ion_auth->logged_in())
 		{
 			if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) 
 			{

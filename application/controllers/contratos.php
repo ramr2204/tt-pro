@@ -212,7 +212,7 @@ class Contratos extends MY_Controller {
                 $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
                 $this->data['contratantes'] = $this->codegen_model->getSelect('con_contratantes', 'id,nombre,nit');
                 $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 6');
-                $this->data['clasificacion_contrato']  = Equivalencias::clasificacionCOntratos();
+                $this->data['clasificacion_contrato']  = Equivalencias::clasificacionContratos();
                 $this->data['contrato_normal']  = Equivalencias::contratoNormal();
                 $this->template->load($this->config->item('admin_template'),'contratos/contratos_add', $this->data);
              
@@ -249,7 +249,7 @@ class Contratos extends MY_Controller {
               $this->form_validation->set_rules('fecha', 'Fecha',  'required|trim|xss_clean');  
               $this->form_validation->set_rules('objeto', 'objeto',  'required|trim|xss_clean');  
               $this->form_validation->set_rules('numero', 'Número','required|trim|xss_clean|numeric|greater_than[0]');
-              $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');  
+              $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean'); 
 			  $this->form_validation->set_rules('clasificacion_contrato', 'Clasificación del contrato','required|trim|xss_clean|numeric|greater_than[0]');
 
 			  $aplica_numero_relacionado = $this->input->post('clasificacion_contrato') != Equivalencias::contratoNormal();
@@ -363,7 +363,7 @@ class Contratos extends MY_Controller {
                 $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
                 $this->data['contratantes'] = $this->codegen_model->getSelect('con_contratantes', 'id,nombre,nit');
                 $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 6');
-				$this->data['clasificacion_contrato']  = Equivalencias::clasificacionCOntratos();
+				$this->data['clasificacion_contrato']  = Equivalencias::clasificacionContratos();
                 $this->data['contrato_normal']  = Equivalencias::contratoNormal();
                 $this->template->set('title', 'Editar contrato');
                 $this->template->load($this->config->item('admin_template'),'contratos/contratos_edit', $this->data);
