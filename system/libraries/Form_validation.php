@@ -101,7 +101,13 @@ class CI_Form_validation {
 		}
 
 		// No fields? Nothing to do...
-		if ( ! is_string($field) OR  ! is_string($rules) OR $field == '')
+		if ( ! is_string($field) OR $field == '')
+		{
+			return $this;
+		}
+
+		# Si las reglas no son ni texto ni arreglo no siga
+		if ( ! is_string($rules) AND ! is_array($rules))
 		{
 			return $this;
 		}
@@ -338,7 +344,11 @@ class CI_Form_validation {
 				}
 			}
 
-			$this->_execute($row, explode('|', $row['rules']), $this->_field_data[$field]['postdata']);
+			$this->_execute(
+				$row,
+				(is_array($row['rules']) ? $row['rules'] : explode('|', $row['rules'])),
+				$this->_field_data[$field]['postdata']
+			);
 		}
 
 		// Did we end up with any errors?
@@ -1299,6 +1309,21 @@ class CI_Form_validation {
 	public function valid_base64($str)
 	{
 		return (bool) ! preg_match('/[^a-zA-Z0-9\/\+=]/', $str);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Validate if the value field exists in list of elements separeted for ,
+	 *
+	 * @access	public
+	 * @param	string
+	 * @param	string
+	 * @return	bool
+	 */
+	public function in_list($str, $val)
+	{
+		return in_array($str, explode(',', $val));
 	}
 
 	// --------------------------------------------------------------------

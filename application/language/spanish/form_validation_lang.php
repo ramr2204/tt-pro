@@ -25,6 +25,7 @@ $lang['greater_than']		= "El campo %s debe cotener un numero mayor a %s.";
 $lang['is_unique']			= "Ya existe un campo con este valor. Elija otro."; //no esta en los demas idiomas
 $lang['is_exists']			= "No se encuentra otro registro para el campo %s."; //no esta en los demas idiomas
 $lang['blank']				= "No puede dejar el campo en blanco";
+$lang['in_list']			= 'El campo %s no es un valor permitido.';
 
 /* End of file form_validation_lang.php */
 /* Location: ./system/language/english/form_validation_lang.php */
