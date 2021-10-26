@@ -16,6 +16,7 @@ class Declaraciones extends MY_Controller
         
         $this->load->helper(['form','url','codegen_helper', 'array']);
         $this->load->helper('Equivalencias');
+        $this->load->helper('HelperGeneral');
     }
 
     /**
@@ -30,11 +31,10 @@ class Declaraciones extends MY_Controller
 			//redirect them to the login page
 			redirect('users/login', 'refresh');
 		}
-		elseif (!$this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index')) //remove this elseif if you want to enable this for non-admins
+		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index'))) //remove this elseif if you want to enable this for non-admins
 		{
 			//redirect them to the home page because they must be an administrator to view this
 			redirect('error_404', 'refresh');
-			
 		}
 		else
 		{
@@ -50,11 +50,20 @@ class Declaraciones extends MY_Controller
             $this->data['javascripts'] = [
                 'js/jquery.dataTables.min.js',
                 'js/plugins/dataTables/dataTables.bootstrap.js',
-                'js/jquery.dataTables.defaults.js'
+                'js/jquery.dataTables.defaults.js',
+                'js/sweetalert.min.js',
             ];
 
             $this->data['meses'] = $this->obtenerMeses();
             $this->data['tipos_declaraciones'] = Equivalencias::tipoDeclaraciones();
+
+            $this->data['firma'] = $this->codegen_model->get(
+                'usuarios_firma',
+                'id, change_password',
+                'id_usuario = '. $this->session->userdata('user_id').'
+                    AND estado = '. Equivalencias::estadoActivo(),
+                1,NULL,true
+            );
 
 			$this->template->load($this->config->item('admin_template'),'declaraciones/index', $this->data);
 		}
@@ -93,6 +102,13 @@ class Declaraciones extends MY_Controller
             $this->datatables->from('declaraciones AS d');
             $this->datatables->join('empresas empresa','empresa.id = d.id_empresa','inner');
             $this->datatables->join('est_estampillas estampilla','estampilla.estm_id = d.id_estampilla','inner');
+
+            $helper = new HelperGeneral;
+            $verificacion = $helper->verificarRestriccionEmpresa();
+
+            if($verificacion !== true) {
+                $this->datatables->where('d.id_empresa = "'. $verificacion .'"');
+            }
 
             echo $this->datatables->generate();
         }
@@ -146,7 +162,7 @@ class Declaraciones extends MY_Controller
                     'js/chosen.jquery.min.js',
                     'js/plugins/bootstrap/moment.js',
                     'js/plugins/bootstrap/bootstrap-datetimepicker.js',
-                    'js/autoNumeric.js'
+                    'js/autoNumeric.js',
                 );
 
                 $this->data['empresas'] = $this->codegen_model->getSelect('empresas','id, nombre', 'WHERE estado = 1', '', '', 'ORDER BY nombre');
@@ -215,7 +231,7 @@ class Declaraciones extends MY_Controller
                 INNER JOIN con_contratos contrato ON contrato.cntr_id = liquidacion.liqu_contratoid',
             'GROUP BY contrato.clasificacion'
         );
-        $pagos = array_lists($pagos, '', 'clasificacion');
+        $pagos = HelperGeneral::lists($pagos, '', 'clasificacion');
 
         if(count($pagos) > 0)
         {
@@ -476,26 +492,5 @@ class Declaraciones extends MY_Controller
 
         //Close and output PDF document
         $pdf->Output('recibos_estampilla.pdf', 'I');
-    }
-
-    /**
-     * Verifica si el usuario esta asociado a una empresa o tiene control total
-     * 
-     * @return bool|int
-     */
-    private function verificarRestriccionEmpresa()
-    {
-        if($this->ion_auth->is_admin()) {
-            return true;
-        }
-
-        $usuario = $this->codegen_model->get(
-            'users',
-            'id_empresa',
-            'id = '. $this->session->userdata('user_id'),
-            1,NULL,true
-        );
-
-        return $usuario->id_empresa;
     }
 }

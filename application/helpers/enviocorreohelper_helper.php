@@ -5,13 +5,11 @@ Class EnvioCorreoHelper extends CI_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('codegen_model', '', true);
+        $this->load->library('email');
     }
 
 	public function enviar($data)
     {
-        $this->load->library('email');
-
         $config['protocol']     = $this->config->item('protocol');
         $config['smtp_host']    = $this->config->item('smtp_host');
         $config['smtp_port']    = $this->config->item('smtp_port');
@@ -28,9 +26,9 @@ Class EnvioCorreoHelper extends CI_Controller
         $this->email->from($this->config->item('smtp_user'), $data['sender_name']);
         $this->email->to($data['to']); 
         $this->email->subject($data['subject']);
+        $this->email->set_alt_message($data['alt']);
 
-        $mesg = $this->load->view('templates/mail','',true);
-        $this->email->message($mesg);
+        $this->email->message($data['body']);
 
         if($this->email->send())
         {
@@ -38,10 +36,8 @@ Class EnvioCorreoHelper extends CI_Controller
         }
         else
         {
-            echo $this->email->print_debugger();exit();
+            return false;
+            // echo $this->email->print_debugger();exit();
         }
-
-   }   
-
-
+   }
 }

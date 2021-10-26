@@ -10,7 +10,25 @@ Class EquivalenciasFirmas extends CI_Controller
         3 => 'Revisor Fiscal',
     ];
 
+    private static $tiposGrupos = [
+        'R' => [1],
+        'A' => [2, 3],
+    ];
+
+    private static $tiposGruposNombres = [
+        'R' => 'Representante Legal',
+        'A' => 'Revisor Fiscal / Contador',
+    ];
+
     private static $usuarioRepresentante = 1;
+
+    private static $estadosDeclaracion = [
+        1 => 'Iniciado',
+        2 => 'Firmado',
+    ];
+
+    private static $declaracionIniciada = 1;
+    private static $declaracionFirmada = 2;
 
     public static function tiposUsuarios(){
         return self::$tiposUsuarios;
@@ -18,6 +36,26 @@ Class EquivalenciasFirmas extends CI_Controller
 
     public static function usuarioRepresentante(){
         return self::$usuarioRepresentante;
+    }
+
+    public static function tiposGrupos(){
+        return self::$tiposGrupos;
+    }
+
+    public static function tiposGruposNombres(){
+        return self::$tiposGruposNombres;
+    }
+
+    public static function estadosDeclaracion(){
+        return self::$estadosDeclaracion;
+    }
+
+    public static function declaracionIniciada(){
+        return self::$declaracionIniciada;
+    }
+
+    public static function declaracionFirmada(){
+        return self::$declaracionFirmada;
     }
 
 }

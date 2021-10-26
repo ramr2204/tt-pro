@@ -224,6 +224,7 @@ class usuariosFirma extends MY_Controller
             }
         }
 
+        header('Content-type: application/json; charset=utf-8');
         echo json_encode($respuesta);
     }
 
@@ -250,19 +251,20 @@ class usuariosFirma extends MY_Controller
                     'id', $this->input->post('id')
                 );
 
-                if($estado == 1)
+                if ($edito)
                 {
-                    $usuario = $this->codegen_model->get(
-                        'usuarios_firma AS firma',
-                        'users.id_empresa',
-                        'firma.id = '.$this->input->post('id'),
-                        1,NULL,true, '',
-                        'users', 'users.id = firma.id_usuario'
-                    );
-                    $this->inactivarFirmantesAnteriores($usuario->id_empresa, $this->input->post('id'));
-                }
+                    if($estado == 1)
+                    {
+                        $usuario = $this->codegen_model->get(
+                            'usuarios_firma AS firma',
+                            'users.id_empresa',
+                            'firma.id = '.$this->input->post('id'),
+                            1,NULL,true, '',
+                            'users', 'users.id = firma.id_usuario'
+                        );
+                        $this->inactivarFirmantesAnteriores($usuario->id_empresa, $this->input->post('id'));
+                    }
 
-                if ($edito) {
                     $response['id'] = $this->input->post('id');
                     $response['estado'] = $estado;
                 }
@@ -328,5 +330,69 @@ class usuariosFirma extends MY_Controller
                 )
                 AND id != "'. $exepcion .'"'
         );
+    }
+
+    public function asignarClave()
+    {
+        $respuesta = [
+            'state' => false,
+            'message' => ''
+        ];
+
+        if ($this->ion_auth->logged_in())
+        {
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index'))
+            {
+                $this->form_validation->set_rules('clave', 'Clave',[
+                    'required',
+                    'trim',
+                    'xss_clean',
+                    'min_length[8]',
+                    'length_number[2]',
+                    'length_lower[1]',
+                    'length_upper[1]',
+                ]);
+                $this->form_validation->set_rules('confirm', 'Confirmar clave', 'required|trim|xss_clean|matches[clave]');
+
+                if ($this->form_validation->run() == false) {
+                    $respuesta['message'] = (validation_errors() ? validation_errors() : false);
+                } else {
+
+                    $pass = $this->getHashUserPassword($this->input->post('clave'));
+
+                    //Actualizamos el Hash del Password del usuario
+                    $edito = $this->codegen_model->edit(
+                        'usuarios_firma',
+                        [
+                            'password' => $pass,
+                            'update_at' => date('Y-m-d H:i:s'),
+                            'change_password' => 0
+                        ],
+                        'id', $this->input->post('codigo')
+                    );
+
+                    if($edito){
+                        $respuesta['state'] = true;
+                        $respuesta['message'] = 'Se actualizo correctamente la contraseña de la firma<br>
+                        Inicie Sesión y podrá utilizar su firma electrónica';
+                    }else{
+                        $respuesta['message'] = 'No se pudo actualizar la contraseña de la firma';
+                    }
+                }
+            }
+        }
+
+        header('Content-type: application/json; charset=utf-8');
+        echo json_encode($respuesta);
+    }
+
+    /**
+    * Función que genera el hash de la segunda clave del usuario (Clave para firmar)
+    */
+    public function getHashUserPassword($key)
+    {
+        $hash = sha1($key);
+
+        return $hash;
     }
 }

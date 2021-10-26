@@ -26,7 +26,7 @@
                             if(count($consulta) == 0)
                             {
                                 ?>
-                                <?= form_open('declaraciones/create'); ?>
+                                <?= form_open('declaraciones/create') ?>
 
                                     <div class="col-md-6 column form-group">
                                         <label for="empresa">Empresa</label>
@@ -86,7 +86,7 @@
                                             class="btn btn-primary" type="submit"
                                         >Consultar</button>
                                     </div>
-                                <?= form_close();?>
+                                <?= form_close() ?>
                                 <?
                             }
                         ?>
