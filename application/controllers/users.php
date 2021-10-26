@@ -27,7 +27,6 @@ class Users extends MY_Controller {
 	//redirect if needed, otherwise display the user list
 	function index()
 	{
-
 		if (!$this->ion_auth->logged_in())
 		{
 			//redirect them to the login page
@@ -112,6 +111,11 @@ class Users extends MY_Controller {
 				//if the login is successful
 				//redirect them back to the home page				
 				$this->session->set_flashdata('successmessage', $this->ion_auth->messages());
+
+				if($this->ion_auth->user()->row()->perfilid == Equivalencias::perfilFirmante()) {
+					redirect(base_url().'declaraciones/index', 'refresh');
+					exit();
+				}
 				redirect(base_url().'liquidaciones/liquidar', 'refresh');
 			}
 			else
@@ -445,7 +449,7 @@ class Users extends MY_Controller {
 
 			  $id_empresa = null;
 			  
-			  if($this->input->post('perfilid') == Equivalencias::perfilLiquidador()) {
+			  if(in_array($this->input->post('perfilid'), Equivalencias::perfilesEmpresa())) {
 				  $this->form_validation->set_rules('empresa', 'Empresa',  'required|numeric|greater_than[0]|is_exists[empresas.id]');
 				  $id_empresa = $this->input->post('empresa');
 			  }
@@ -493,8 +497,14 @@ class Users extends MY_Controller {
 				 $this->load->model('codegen_model','',TRUE); 
 				 $this->data['perfiles']  = $this->codegen_model->getSelect('adm_perfiles','perf_id,perf_nombre');
 
-				 $this->data['empresas'] = $this->codegen_model->getSelect('empresas','id, nombre', 'WHERE estado = 1', '', 'ORDER BY nombre');
-				 $this->data['perfil_liquidador'] = Equivalencias::perfilLiquidador();
+				 $this->data['empresas'] = $this->codegen_model->getSelect(
+					 'empresas',
+					 'id, nombre',
+					 'WHERE estado = '.Equivalencias::estadoActivo(),
+					 '',
+					 'ORDER BY nombre'
+				 );
+				 $this->data['perfiles_empresa'] = Equivalencias::perfilesEmpresa();
 
 				 $this->template->load($this->config->item('admin_template'),'users/create_user', $this->data);
 			 }else 
@@ -547,8 +557,8 @@ class Users extends MY_Controller {
 			  }
 
 			  $id_empresa = null;
-			  
-			  if($this->input->post('perfilid') == Equivalencias::perfilLiquidador()) {
+
+			  if(in_array($this->input->post('perfilid'), Equivalencias::perfilesEmpresa())) {
 				  $this->form_validation->set_rules('empresa', 'Empresa',  'required|numeric|greater_than[0]|is_exists[empresas.id]');
 				  $id_empresa = $this->input->post('empresa');
 			  }
@@ -597,7 +607,7 @@ class Users extends MY_Controller {
 			  $this->data['perfiles']  = $this->codegen_model->getSelect('adm_perfiles','perf_id,perf_nombre');
 
 			  $this->data['empresas'] = $this->codegen_model->getSelect('empresas','id, nombre', 'WHERE estado = 1', '', 'ORDER BY nombre');
-			  $this->data['perfil_liquidador'] = Equivalencias::perfilLiquidador();
+			  $this->data['perfiles_empresa'] = Equivalencias::perfilesEmpresa();
 
 			  $this->template->load($this->config->item('admin_template'),'users/edit_user', $this->data);
              

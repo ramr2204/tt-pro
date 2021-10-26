@@ -1,0 +1,582 @@
+<?php if( ! defined('BASEPATH') ) exit('No direct script access allowed'); 
+
+/**
+*   Nombre:            generarpdf_relacionEntregaEstampillas.php
+*   Ruta:              /application/views/generarpdf/generarpdf_relacionEntregaEstampillas.php
+*   Descripcion:       contiene la estructura del pdf del listado de impresiones del día
+*   Fecha Creacion:    22/ene/2015
+*   @author           Mike Ortiz <michael.ortiz@turrisystem.com>
+*   @version          2015-01-13
+*
+*/
+?>
+
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <style type="text/css">
+            body{
+                font-size: 11px;
+            }
+            .text-center{
+                text-align: center !important;
+            }
+
+            .text-left{
+                text-align: left;
+            }
+
+            .text-right{
+                text-align: right;
+            }
+
+            .m20{
+                margin: 20px;
+            }
+
+            table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+
+            .borde, .borde td, .borde th {
+                border: 1px solid #000;
+            }
+
+            .borde-externo{
+                border: 1px solid #000;
+            }
+
+            .borde-especifico{
+                border: 1px solid #000;
+            }
+
+            .v-center{
+                vertical-align: middle;
+            }
+
+            .v-bot{
+                vertical-align: bottom;
+            }
+
+            .v-top{
+                vertical-align: top;
+            }
+
+            .bold{
+                font-weight: bold;
+            }
+
+            .subtitulo{
+                font-weight: bold;
+            }
+
+            @page {
+                margin: 10mm;
+                /* margin: 10mm; */
+                /* margin-header: 0mm;
+                margin-footer: 0mm; */
+            }
+
+            .mb-10{
+                margin-bottom: 10px
+            }
+
+            .pb-10{
+                padding-bottom: 10px
+            }
+
+            .bg-verde{
+                background-color: #c6efce;
+                color: #006100;
+            }
+
+            .bg-amarillo{
+                background-color: #ffff00;
+            }
+
+            .bg-gris{
+                background-color: #acb9ca;
+            }
+        </style>
+    </head>
+    <body>
+
+        <table class="borde-externo">
+            <tr>
+                <td style="padding:7px 12px">
+
+                    <table cellpadding="2" class="borde mb-10">
+                        <thead>
+                            <tr>
+                                <td class="text-center" rowspan="2">
+                                    <img src="<?php echo $this->config->item('application_root'); ?>/images/escudo_largo.png" style="height: 9mm ;margin: 10px;">
+                                </td>
+                                <td class="text-center bold" rowspan="2">
+                                    FORMATO
+                                </td>
+                                <td class="bold"> VERSIÓN: 2</td>
+                            </tr>
+                            <tr>
+                                <td class="bold"> CÓDIGO: FF-P06-F02</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="text-center bold" style="height:30px">
+                                    DECLARACIÓN ESTAMPILLA PRO CULTURA
+                                </td>
+                                <td class="bold">
+                                    FECHA: 26/Jul/2016
+                                </td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td width="40%" rowspan="6" class="text-center bold">
+                                    GOBERNACIÓN DE BOYACÁ<br>
+                                    NIT. 891.800.498-1<br>
+                                    CALLE 20 N° 9 - 90 TUNJA
+                                </td>
+                                <td width="60%" colspan="2" class="text-center">
+                                    PARA USO OFICIAL EXCLUSIVAMENTE
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>No. DE RADICACIÓN:</td>
+                                <td>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>No. DECLARACIÓN:</td>
+                                <td>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>FECHA</td>
+                                <td style="padding:0">
+                                    <table>
+                                        <tr>
+                                            <td class="text-center">AÑO</td>
+                                            <td class="text-center">MES</td>
+                                            <td class="text-center">DÍA</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-center">2021</td>
+                                            <td class="text-center">01</td>
+                                            <td class="text-center">02</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>NOMBRE FUNCIONARIO:</td>
+                                <td>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>FIRMA:</td>
+                                <td>
+
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 class="subtitulo">SECCIÓN A. TIPO DE DECLARACIÓN</h4>
+
+                    <table class="borde-externo mb-10">
+                        <tbody>
+                            <tr>
+                                <td width="15%"> A.1. INICIAL</td>
+                                <td width="4%" >
+                                    <table class="borde" style="height:10px; width:10px; background-color:#000">
+                                        <tr>
+                                            <td style="height:10px; width:10px"></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td colspan="3"></td>
+                            </tr>
+                            <tr>
+                                <td rowspan="3" class="v-top"> A.2. CORRECCIÓN</td>
+                                <td rowspan="3" class="v-top">
+                                    <table class="borde" style="height:10px; width:10px">
+                                        <tr>
+                                            <td style="height:10px; width:10px"></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td rowspan="3" width="36%">
+                                    <table class="borde">
+                                        <tr>
+                                            <td width="55%"> No. DECLARACIÓN:</td>
+                                            <td width="45%"></td>
+                                        </tr>
+                                        <tr>
+                                            <td> No. DE RADICACIÓN:</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td> FECHA:</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td> PERIODO GRAVABLE:</td>
+                                            <td></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td width="20%" class="text-right"> VALOR RECAUDADO</td>
+                                <td width="25%" class="borde-especifico"></td>
+                            </tr>
+                            <tr>
+                                <td class="text-right"> VALOR SANCIONES</td>
+                                <td class="borde-especifico"></td>
+                            </tr>
+                            <tr>
+                                <td class="text-right"> VALOR INTERESES</td>
+                                <td class="borde-especifico"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 class="subtitulo">SECCIÓN B. PERÍODO GRAVABLE</h4>
+
+                    <table class="borde-externo mb-10">
+                        <tr>
+                            <td style="padding:20px 0">AÑO</td>
+                            <td>
+                                <table class="borde">
+                                    <tr>
+                                        <td class="text-center"> 2021</td>
+                                        <td class="text-center"> ENE</td>
+                                        <td class="text-center"> FEB</td>
+                                        <td class="text-center"> MAR</td>
+                                        <td class="text-center"> ABR</td>
+                                        <td class="text-center"> MAY</td>
+                                        <td class="text-center"> X</td>
+                                        <td class="text-center"> JUL</td>
+                                        <td class="text-center"> AGO</td>
+                                        <td class="text-center"> SEP</td>
+                                        <td class="text-center"> OCT</td>
+                                        <td class="text-center"> NOV</td>
+                                        <td class="text-center"> DIC</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <h4 class="subtitulo">SECCIÓN C. INFORMACIÓN GENERAL</h4>
+
+                    <table class="borde mb-10" cellpadding="2">
+                        <tr>
+                            <td width="75%" colspan="2"> C.1. RAZÓN SOCIAL: </td>
+                            <td width="25%" > C.2. NIT </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center" colspan="2"> EMPRESA DE ENERGIA DE BOYACÁ S.A. E.S.P.</td>
+                            <td class="text-center"> 891.800.219-1</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3"> C.3. CORREO ELECTRÓNICO:</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3"> cescamilla@ebsa.com.co</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"> C.4. APELLIDOS Y NOMBRES DEL REPRESENTANTE LEGAL:</td>
+                            <td> C.5. N° DE IDENTIFICACIÓN</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center" colspan="2"> ROOSEVELT MESA MARTINEZ</td>
+                            <td class="text-center"> 7.214.951</td>
+                        </tr>
+                        <tr>
+                            <td> C.6. DIRECCIÓN: </td>
+                            <td> C.7. MUNICIPIO</td>
+                            <td> C.8. TELÉFONO</td>
+                        </tr>
+                        <tr>
+                            <td> Cr 10 15 87</td>
+                            <td class="text-center"> Tunja</td>
+                            <td class="text-center"> 7405000</td>
+                        </tr>
+                    </table>
+
+                    <table>
+                        <tr>
+                            <td width="50%">
+                                <h4 class="subtitulo">SECCIÓN D. LIQUIDACIÓN</h4>
+                            </td>
+                            <td width="50%" class="bold text-right">
+                                APROXIME AL MULTIPLO DE MIL MAS CERCANO
+                            </td>
+                        </tr>
+                    </table>
+
+                    <table class="borde mb-10" cellpadding="2">
+                        <thead>
+                            <tr>
+                                <td class="text-center" rowspan="2" width="3%"> R</td>
+                                <td class="text-center" rowspan="2" width="25%"> D.1. CLASE</td>
+                                <td class="text-center" colspan="3"> D.2. VALOR</td>
+                                <td class="text-center" rowspan="2"> D.3. TARIFA</td>
+                                <td class="text-center" rowspan="2" width="20%"> D.4. VALOR RECAUDO ESTAMPILLA PRO CULTURA</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center" width="20%"> VALOR BASE</td>
+                                <td class="text-center"> VIGENCIA ACTUAL</td>
+                                <td class="text-center"> VIGENCIA ANTERIOR</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-center"> 1</td>
+                                <td> CONTRATOS</td>
+                                <td class="text-center"> 6.732.056.727 </td>
+                                <td class="text-center"></td>
+                                <td class="text-center"></td>
+                                <td class="text-center"> 1,50%</td>
+                                <td class="text-right"> 100.980.900</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center"> 2</td>
+                                <td> MODIFICACIONES</td>
+                                <td class="text-center"> 6.732.056.727 </td>
+                                <td class="text-center"></td>
+                                <td class="text-center"></td>
+                                <td class="text-center"> 1,50%</td>
+                                <td class="text-right"> 100.980.900</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center"> 3</td>
+                                <td> ADICIONES</td>
+                                <td class="text-center"> 6.732.056.727 </td>
+                                <td class="text-center"></td>
+                                <td class="text-center"></td>
+                                <td class="text-center"> 1,50%</td>
+                                <td class="text-right"> 100.980.900</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center"> 4</td>
+                                <td> OTROS</td>
+                                <td class="text-center"> 6.732.056.727 </td>
+                                <td class="text-center"></td>
+                                <td class="text-center"></td>
+                                <td class="text-center"> 1,50%</td>
+                                <td class="text-right"> 100.980.900</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center"> 5</td>
+                                <td> TOTAL A FAVOR DEL DEPARTAMETO</td>
+                                <td class="text-center"> 6.732.056.727 </td>
+                                <td class="text-center"></td>
+                                <td class="text-center"></td>
+                                <td class="text-center"> 1,50%</td>
+                                <td class="text-right"> 100.980.900</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4 class="subtitulo">SECCIÓN E. PAGOS</h4>
+
+                    <table class="borde mb-10" cellpadding="2">
+                        <tbody>
+                            <tr>
+                                <td width="3%" class="text-center"> 6</td>
+                                <td> TOTAL A FAVOR DEL DEPARTAMETO</td>
+                                <td width="20%" class="text-right"> 124.315.100 </td>
+                            </tr>
+                            <tr>
+                                <td class="text-center"> -</td>
+                                <td> SALDO A FAVOR PERÍODO ANTERIOR</td>
+                                <td class="text-right"> 124.315.100 </td>
+                            </tr>
+                            <tr>
+                                <td class="text-center"> +</td>
+                                <td> VALOR SANCIONES</td>
+                                <td class="text-right"> 124.315.100 </td>
+                            </tr>
+                            <tr>
+                                <td class="text-center"> +</td>
+                                <td> INTERESES DE MORA</td>
+                                <td class="text-right"> 124.315.100 </td>
+                            </tr>
+                            <tr>
+                                <td class="text-center"></td>
+                                <td> TOTAL A CARGO POR RECAUDO ESTAMPILLA, SANCIONES E INTERESES</td>
+                                <td class="text-right"> 124.315.100 </td>
+                            </tr>
+                            <tr>
+                                <td class="text-center"></td>
+                                <td> SALDO A FAVOR</td>
+                                <td class="text-right"> 124.315.100 </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table>
+                        <tr>
+                            <td width="50%">
+                                <h4 class="subtitulo">SECCIÓN F. FIRMAS</h4>
+                            </td>
+                            <td width="50%">
+                                <h4 class="subtitulo">SECCIÓN G. RELACIÓN DE ESTAMPILLA FIJADA</h4>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <table class="mb-10" cellpadding="2" border="1">
+                        <tr>
+                            <td width="50%">
+                                <h4 class="subtitulo">
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="2" class="bold"> F.1. REPRESENTANTE LEGAL</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2"> Declaro que la información aquí consignada es correcta y ajustada a las disposiciones legales.</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bold v-bot"> FIRMA</td>
+                                                <td>
+                                                    CESAR HERNANDO RODRIGUEZ FAGUA
+                                                    <br>
+                                                    ______________________________________
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bold"> NOMBRE</td>
+                                                <td class="bold"> CESAR HERNANDO RODRIGUEZ FAGUA</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bold"> C.C.</td>
+                                                <td class="bold"> 79.458.051</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" class="bold" style="padding-top:20px"> F.2. CONTADOR Y/O REVISOR FISCAL</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bold v-bot"> FIRMA</td>
+                                                <td>
+                                                    CESAR HERNANDO RODRIGUEZ FAGUA
+                                                    <br>
+                                                    ______________________________________
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bold"> NOMBRE</td>
+                                                <td class="bold"> CESAR HERNANDO RODRIGUEZ FAGUA</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="bold"> C.C.</td>
+                                                <td class="bold"> 79.458.051</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </h4>
+                            </td>
+                            <td width="50%" class="v-top">
+                                <table style="height:100%">
+                                    <tr>
+                                        <td style="height:30px" class="text-center bold">
+                                            CANTIDAD ANULADAS
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <table border="1" cellpadding="3">
+                                                <tr>
+                                                    <td class="text-center"> N° Inicial</td>
+                                                    <td class="text-center"> Al N°.</td>
+                                                    <td class="text-center"> N° Inicial</td>
+                                                    <td class="text-center"> Al N°.</td>
+                                                    <td class="text-center"> Total Fijadas</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-center">33845</td>
+                                                    <td class="text-center">33845</td>
+                                                    <td class="text-center"></td>
+                                                    <td class="text-center"></td>
+                                                    <td class="text-center"></td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 50px 0" class="text-center">ESPACIO RESERVADO PARA EL BANCO</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+
+                </td>
+            </tr>
+        </table>
+
+        <pagebreak>
+        
+        <!-- <img src="<?php echo $this->config->item('application_root'); ?>/images/escudo_largo.png" style="height: 9mm ;margin: 10px;"> -->
+        <table class="mb-10">
+            <tr>
+                <td width="30%">
+                    <img src="http://aplicativosenlinea.net:8081/estampillas-pro-boyaca/uploads/imagenesestampillas/ELECTRIFICADORA_October_06_2021.png" style="width:150px">
+                </td>
+                <td class="bold">
+                    EMPRESA DE ENERGIA DE BOYACÁ S.A. E.S.P<br>
+                    NIT: 891.800.219-1<br>
+                    DECLARACION DE ESTAMPILLA PROCULTURA
+                </td>
+            </tr>
+        </table>
+
+        <table>
+            <tr>
+                <td width="20%" class="v-bot bold">PERIODO:</td>
+                <td width="9%" class="v-bot bold">JUNIO</td>
+                <td width="9%"></td>
+                <td width="13%" class="text-center bg-verde bold"> Contrato - Factura IVA Incluido</td>
+                <td width="13%" class="text-center bg-verde bold"> Base liquidación estampilla SIN IVA</td>
+                <td width="13%" class="text-center bg-verde bold"> Estampilla</td>
+                <td width="23%" colspan="3"></td>
+            </tr>
+        </table>
+
+        <table class="borde">
+            <thead>
+                <tr>
+                    <td width="20%" class="bg-amarillo bold">Proveedor</td>
+                    <td width="9%" class="bg-amarillo bold">Nº doc.</td>
+                    <td width="9%" class="bg-amarillo bold">Fe.contab.</td>
+                    <td width="13%" class="text-right bg-amarillo bold">Importe en MD</td>
+                    <td width="13%" class="text-right bg-amarillo bold">Impte.base Qst en MI</td>
+                    <td width="13%" class="text-right bg-amarillo bold">Importe qst en MI</td>
+                    <td width="8%" class="bg-gris bold">Contrato</td>
+                    <td width="7%" class="bg-gris bold">Pago</td>
+                    <td width="8%" class="bg-gris bold">Estampilla</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>hhjhh</td>
+                    <td>gjhgh</td>
+                    <td>yyuiy</td>
+                    <td class="text-right">hghhg</td>
+                    <td class="text-right">lkkjljk</td>
+                    <td class="text-right">iououi</td>
+                    <td>jhkjhhk</td>
+                    <td>yuuiy</td>
+                    <td>hjhjjk</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </body>
+</html>
+<?
+// die();

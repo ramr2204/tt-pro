@@ -153,23 +153,16 @@
 
 <script type="text/javascript">
 
-    //style selects
-    var config = {
-      '#perfilid'  : {disable_search_threshold: 10},
-      '#estadoid'  : {disable_search_threshold: 10}
-    }
-    for (var selector in config) {
-        $(selector).chosen(config[selector]);
-    }
+    perfiles_empresa = JSON.parse('<?= json_encode($perfiles_empresa) ?>');
 
     $(function () {
-            $('#perfilid').change(changePerfil);
-            $('#perfilid').change();
+        $('#perfilid').change(changePerfil);
+        $('#perfilid').change();
     });
 
     function changePerfil()
     {
-        if($(this).val() == '<?= $perfil_liquidador ?>') {
+        if( perfiles_empresa.includes(Number($(this).val())) ) {
             $('#empresa').closest('.form-group').show();
         }else{
             $('#empresa').closest('.form-group').hide();
