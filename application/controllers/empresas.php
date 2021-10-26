@@ -29,7 +29,7 @@ class Empresas extends MY_Controller
 			//redirect them to the login page
 			redirect('users/login', 'refresh');
 		}
-		elseif (!$this->ion_auth->is_admin() || $this->ion_auth->in_menu('empresas/index')) //remove this elseif if you want to enable this for non-admins
+		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('empresas/index'))) //remove this elseif if you want to enable this for non-admins
 		{
 			//redirect them to the home page because they must be an administrator to view this
 			redirect('error_404', 'refresh');

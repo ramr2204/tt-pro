@@ -683,6 +683,13 @@ class Contratos extends MY_Controller {
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
               $this->datatables->join('con_contratantes ctte', 'ctte.id = c.cntr_contratanteid', 'left');
 
+              $helper = new HelperGeneral;
+              $verificacion = $helper->verificarRestriccionEmpresa();
+
+              if($verificacion !== true) {
+                  $this->datatables->where('c.id_empresa = "'. $verificacion .'"');
+              }
+
               echo $this->datatables->generate();
 
           } else {

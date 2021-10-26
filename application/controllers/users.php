@@ -27,7 +27,6 @@ class Users extends MY_Controller {
 	//redirect if needed, otherwise display the user list
 	function index()
 	{
-
 		if (!$this->ion_auth->logged_in())
 		{
 			//redirect them to the login page
@@ -112,6 +111,11 @@ class Users extends MY_Controller {
 				//if the login is successful
 				//redirect them back to the home page				
 				$this->session->set_flashdata('successmessage', $this->ion_auth->messages());
+
+				if($this->ion_auth->user()->row()->perfilid == Equivalencias::perfilFirmante()) {
+					redirect(base_url().'declaraciones/index', 'refresh');
+					exit();
+				}
 				redirect(base_url().'liquidaciones/liquidar', 'refresh');
 			}
 			else

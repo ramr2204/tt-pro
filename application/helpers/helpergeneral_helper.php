@@ -11,7 +11,16 @@ Class HelperGeneral extends CI_Controller
         $this->load->model('codegen_model', '', true);
     }
 
-	public function lists($arr = array(), $val = '', $llave = '')
+    /**
+     * Funcion de apoyo agregada por Mike para crear un arreglo
+     * a partir de una coleccion de objetos resultados de get_results
+     *
+     * @param array $arr
+     * @param string $val
+     * @param string $llave
+     * @return array
+    */
+	public static function lists($arr = array(), $val = '', $llave = '')
     {
         $vectorResultado = array();
     
@@ -24,17 +33,21 @@ Class HelperGeneral extends CI_Controller
                 * cree el arreglo con solo el valor
                 * sin indices
                 */
-                if($llave == '' && $val != '')
-                {
+                if($llave == '' && $val != '') {
                     $vectorResultado[] = $objeto->$val;
-                }elseif($llave != '' && $val != '')
-                    {
-                        /*
-                        * Si llega la llave y valor
-                        * construya un vector con indice y valor
-                        */
-                        $vectorResultado[$objeto->$llave] = $objeto->$val;
-                    }
+                } elseif($llave != '' && $val != '') {
+                    /*
+                    * Si llega la llave y valor
+                    * construya un vector con indice y valor
+                    */
+                    $vectorResultado[$objeto->$llave] = $objeto->$val;
+                } elseif ($llave != '' && $val == '') {
+                    /*
+                    * Si llega llave pero no valor,
+                    * devuelva el mismo arreglo, con las llaves seleccionadas
+                    */
+                    $vectorResultado[$objeto->$llave] = $objeto;
+                }
             }
             return $vectorResultado;
         }else
@@ -55,7 +68,7 @@ Class HelperGeneral extends CI_Controller
         $cantPapelesDisponibles = 0;
         if(count($rangosPapelUsuario) > 0)
         {
-            $idsRangosPapelUsuario = $this->lists($rangosPapelUsuario,'pape_id');
+            $idsRangosPapelUsuario = HelperGeneral::lists($rangosPapelUsuario,'pape_id');
             $where = ' WHERE impr_codigopapel != 0 AND impr_papelid IN (' . implode(',',$idsRangosPapelUsuario) .') ';
             $group = ' GROUP BY impr_papelid ';
 
@@ -65,7 +78,7 @@ Class HelperGeneral extends CI_Controller
             $vectorCantidadesImpresas = array();
             if(count($cantidadesImpresas) > 0)
             {
-                $vectorCantidadesImpresas = $this->lists($cantidadesImpresas, 'contador', 'impr_papelid');
+                $vectorCantidadesImpresas = HelperGeneral::lists($cantidadesImpresas, 'contador', 'impr_papelid');
             }
 
             foreach($rangosPapelUsuario as $objRangoPapel)
@@ -208,5 +221,20 @@ Class HelperGeneral extends CI_Controller
 
         return $informacionAlerta;
     }
-    
+
+    /**
+     * Verifica si el usuario esta asociado a una empresa o tiene control total
+     * 
+     * @return bool|int
+    */
+    public function verificarRestriccionEmpresa()
+    {
+        if($this->ion_auth->is_admin()) {
+            return true;
+        }
+
+        $usuario = $this->ion_auth->user()->row();
+
+        return $usuario->id_empresa;
+    }
 }

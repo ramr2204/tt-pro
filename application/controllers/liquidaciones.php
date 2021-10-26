@@ -1313,10 +1313,10 @@ function verliquidartramite()
 
   function liquidaciones_datatable ()
   { 
-      if ($this->ion_auth->logged_in()) {
-          
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') ) { 
-              
+      if ($this->ion_auth->logged_in())
+      {
+          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') )
+          {
               $this->load->library('datatables');
               $this->datatables->select(
                   'c.cntr_id,c.cntr_numero,co.cont_nit,
@@ -1326,6 +1326,13 @@ function verliquidartramite()
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
               $this->datatables->join('con_estadoslocales el', 'el.eslo_id = c.cntr_estadolocalid', 'left');
               $this->datatables->add_column('edit', '-');
+
+              $helper = new HelperGeneral;
+              $verificacion = $helper->verificarRestriccionEmpresa();
+
+              if($verificacion !== true) {
+                  $this->datatables->where('c.id_empresa = "'. $verificacion .'"');
+              }
               echo $this->datatables->generate();
 
           } else {
