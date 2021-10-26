@@ -26,6 +26,9 @@ $lang['is_unique']			= "Ya existe un campo con este valor. Elija otro."; //no es
 $lang['is_exists']			= "No se encuentra otro registro para el campo %s."; //no esta en los demas idiomas
 $lang['blank']				= "No puede dejar el campo en blanco";
 $lang['in_list']			= 'El campo %s no es un valor permitido.';
+$lang['length_number']		= 'El campo %s debe tener al menos %s números.';
+$lang['length_lower']       = 'El campo %s debe tener al menos %s minúsculas';
+$lang['length_upper']       = 'El campo %s debe tener al menos %s mayúsculas';
 
 /* End of file form_validation_lang.php */
 /* Location: ./system/language/english/form_validation_lang.php */
