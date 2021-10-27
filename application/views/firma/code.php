@@ -10,6 +10,7 @@
             body{
                 background-color: #F7F7F7;
                 font-family: "Source Sans Pro", "Arial", sans-serif;
+                color: #0b1409 !important;
             }
             .contenedor{
                 margin: 0 auto;
@@ -17,7 +18,7 @@
                 width: 80%;
             }
             #header{
-                background-color: #339933;
+                background-color: #ffff;
                 height: auto;
                 margin: 0 auto;
                 width: 100% !important;
@@ -28,7 +29,7 @@
             }
             #content{
                 background-color: #F7F7F7;
-                border-bottom: 2px solid black;
+                /*border-bottom: 2px solid black;*/
                 height: auto;
                 margin: 0 auto;
                 padding: 3px;
@@ -38,6 +39,7 @@
                 font-size: 14px;
                 padding-left: 10px;
                 padding-top: 6px;
+                text-align: center;
             }
             .message-bottom{
                 text-align: center;
@@ -58,22 +60,22 @@
                 width: 20%;
             }
             #footer{
-                background-color: #339933;
+                background-color: #00632d;
                 color: white;
                 font-style: italic;
                 font-size: 10px;
                 height: auto;
                 margin: 0 auto;
                 margin-top: 0;
-                text-align: center; 
                 width: 100% !important;
+                /*text-align: right !important;*/
             }
             table, td, th {  
                 border: 1px solid black;
-                text-align: left;
+                text-align: center;
             }
             table:first-child{
-                background: #94D937;
+                background: #00632d;
             }
             table {
                 border-collapse: collapse;
@@ -81,7 +83,7 @@
                 width: 100%;
             }
             th, td {
-                padding: 2px;
+                border: 0; border-bottom:1px solid #000
             }
             .prop{
                 background: #13A615;
@@ -115,7 +117,7 @@
     <body>
         <div class="contenedor">
             <div id="header">
-                <img id="banner" src="cid:banner" alt="Banner Cordoba">
+                <img id="banner" src="../images/bannerlogo.png" style="height: auto;width: 578px;    display: block;margin: auto;" alt="Banner Cordoba">
             </div>
             <div id="content">
                 <p class="message-code">A continuación el código de verificación generado en TTI Córdoba para que pueda realizar la respectiva firma de la declaración.</p>
@@ -125,8 +127,17 @@
                 <p class="message-bottom">El código de firma tiene vigencia de 60 minutos, pasado este tiempo ya no sera valido y deberá solicitar un código nuevo.</p>
             </div>
             <div id="footer">
-                <p>Este correo fue generando automáticamente, por favor no responder.</p>
-                <div class="copy">Todos los derechos reservados Thomas Greg & Sons de Colombia ® <?php echo date('Y') ?></div>
+                <table>
+                    <tr>
+                        <td>
+                            <img src="../images/desarrolladoturri.png" width="150px" height="40px">
+                        </td>
+                        <td>
+                            <p style="font-size: 13px">Este correo fue generando automáticamente, por favor no responder.</p>
+                            <div class="copy">Todos los derechos reservados Turrisystem ® <?php echo date('Y') ?></div>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
     </body>
