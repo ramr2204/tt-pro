@@ -5,6 +5,11 @@
 *
 */
 
+require_once APPPATH.'/libraries/barcodegen/class/BCGFontFile.php';
+require_once APPPATH.'/libraries/barcodegen/class/BCGColor.php';
+require_once APPPATH.'/libraries/barcodegen/class/BCGDrawing.php';
+require_once APPPATH.'/libraries/barcodegen/class/BCGgs1128.barcode.php';
+
 class Firma extends MY_Controller
 {
     function __construct() 
@@ -18,6 +23,11 @@ class Firma extends MY_Controller
         $this->load->helper('HelperGeneral');
     }
 
+    /**
+     * Muestra el cambio de clave o el formulario para firmar
+     * 
+     * @return null
+     */
     public function renderSignDeclaracion()
     {
         if ($this->ion_auth->logged_in())
@@ -39,8 +49,6 @@ class Firma extends MY_Controller
                     ]);
 
                     $vista = 'sign';
-
-                    // echo '$datos<pre>';var_dump( $datos );echo '</pre>';die();
                 }
                 $this->load->view('firma/'.$vista, $datos); 
             } else {
@@ -51,9 +59,12 @@ class Firma extends MY_Controller
         }
     }
 
-    /*
-    * Metodo para obtener información de un firma de usuario
-    */
+    /**
+     * Metodo para obtener información de un firma de usuario
+     * 
+     * @param int $id
+     * @return array
+     */
     private function getInfoSign($id)
     {
         $info = [];
@@ -83,9 +94,12 @@ class Firma extends MY_Controller
         return $info;
     }
 
-    /*
-    * Metodo que recupera la informacion de la empresa segun el tipo y el nit
-    */
+    /**
+     * Metodo que recupera la informacion de la empresa
+     * 
+     * @param int $id_empresa
+     * @return object|array
+     */
     private function getInfoEmpresa($id_empresa)
     {
         $empresa = $this->codegen_model->get(
@@ -98,9 +112,12 @@ class Firma extends MY_Controller
         return $empresa ? $empresa : [];
     }
 
-    /*
-    * Metodo que verifica segun el numero de documento si el usuario puede firmar la declaracion
-    */
+    /**
+     * Metodo que verifica segun el numero de documento si el usuario puede firmar la declaracion
+     * 
+     * @param array $param
+     * @return object
+     */
     private function getAvaibleSign($param)
     {
         $response = (object)[
@@ -112,16 +129,12 @@ class Firma extends MY_Controller
         # Obtenemos el elemento
         $elemento = $this->getElemento($param['ref']);
 
-        // echo '$elemento<pre>';var_dump( $elemento );echo '</pre>';die();
-
         $tipos_grupos = EquivalenciasFirmas::tiposGrupos();
 
         # Todos los tipos de usuarios seran necesarios
         $permisos = array_reduce($tipos_grupos, function($acumulador, $grupo){
             return array_merge($acumulador, $grupo);
         }, []);
-
-        // echo '$permisos<pre>';var_dump( $permisos );echo '</pre>';die();
 
         # Verificamos si tiene permisos para firmar
         if (in_array($param['tp'], $permisos))
@@ -163,6 +176,12 @@ class Firma extends MY_Controller
         return $response;
     }
 
+    /**
+     * Obtene la declaracion y todas las firmas de la misma
+     * 
+     * @param int $referencia
+     * @return array
+     */
     private function getElemento($referencia)
     {
         $response = [];
@@ -189,7 +208,7 @@ class Firma extends MY_Controller
                 'INNER JOIN usuarios_firma u_firma ON u_firma.id = firma.id_usuario_firma
                     INNER JOIN users u ON u.id = u_firma.id_usuario',
                 '',
-                'ORDER BY fecha_firma DESC'
+                'ORDER BY tipo_usuario ASC'
             );
 
             $tipos_grupos = EquivalenciasFirmas::tiposGrupos();
@@ -201,17 +220,19 @@ class Firma extends MY_Controller
             # Recorremos las firmas y obtenemos información de los firmantes
             if (count($result_all) >  0)
             {
-                foreach ($result_all as $item) {
-                    $info = [ 'empresa' => $this->getInfoEmpresa($item->id_empresa) ];
+                foreach ($result_all as $item)
+                {
+                    $item = (array)$item;
+                    $info = [ 'empresa' => $this->getInfoEmpresa($item['id_empresa']) ];
 
                     foreach($tipos_grupos AS $indice => $grupo) {
-                        if(in_array($item->tipo_usuario, $grupo)) {
+                        if(in_array($item['tipo_usuario'], $grupo)) {
                             $firmas[$indice] = true;
+                            $item['grupo'] = $indice;
                         }
                     }
 
-                    $item = (array)$item;
-                    $item['label'] = $this->getLabelType($info['type']);
+                    $item['label'] = $this->getLabelType($item['tipo_usuario']);
                     $content = array_merge($item, $info);
                     $response['info'][$item['id']] = $content;
                     $response['info'][$item['id']]['code'] = $this->genereteCodeBarSign($item['created_at'], $item['id_usuario']);
@@ -223,6 +244,12 @@ class Firma extends MY_Controller
         return $response;
     }
 
+    /**
+     * Retorna el nombre de un tipo de usuario de firma electronica
+     * 
+     * @param int $type
+     * @return string
+     */
     private function getLabelType($type)
     {
         $tipos_usuarios = EquivalenciasFirmas::tiposUsuarios();
@@ -232,6 +259,13 @@ class Firma extends MY_Controller
         return $label ? $label : 'N/A';
     }
 
+    /**
+     * Genera el string usado para el codigo de barras
+     * 
+     * @param string $datetime
+     * @param int $cod
+     * @return string
+     */
     private function genereteCodeBarSign($datetime, $cod)
     {
         $code = '';
@@ -251,6 +285,11 @@ class Firma extends MY_Controller
         return $code;
     }
 
+    /**
+     * Procesa el envio del codigo de verificacion por email
+     * 
+     * @return null
+     */
     public function sendMail()
     {
         $result = [
@@ -270,7 +309,6 @@ class Firma extends MY_Controller
                 $nombre_receptor = $this->input->post('destino');
 
                 $code = $this->getCodeMail($id);
-                // echo '$code<pre>';var_dump( $code );echo '</pre>';die();
 
                 $datos_vista = [
                     'code' => $code ,
@@ -278,18 +316,6 @@ class Firma extends MY_Controller
                     'alt' => 'Correo sin formato'
                 ];
                 $view = $this->load->view('firma/code', $datos_vista,true);
-
-                // $mail->setTo(array( 'to' => array($email_destino,$nombre_receptor) ) );
-                // $mail->setSubject("Código Verificación Firma");
-                // $mail->setImage(
-                //     array(
-                //         array(
-                //             'banner' => 'images/index_r1_c1.png'
-                //         )
-                //     )
-                // );
-                // $mail->setBody($view);
-                // $mail->setAlt("El codigo de verificacion es: ".$code['code']);
 
                 $envio = $mail->enviar([
                     'to'          => $email_destino,
@@ -312,6 +338,12 @@ class Firma extends MY_Controller
         echo json_encode($result);
     }
 
+    /**
+     * Genera el codigo que se enviara por email
+     * 
+     * @param int $id
+     * @return array
+     */
     private function getCodeMail($id)
     {
         $code = [];
@@ -358,12 +390,22 @@ class Firma extends MY_Controller
         return $code;
     }
 
+    /**
+     * Genera un numero aleatorio
+     * 
+     * @return int
+     */
     private function getRamdonCode()
     {
         return rand(100000, 999999);
     }
 
-    private function signProcess()
+    /**
+     * Procesa la firma de un usuario
+     * 
+     * @param null
+     */
+    public function signProcess()
     {
         $response = (object)[
             'state' => false,
@@ -386,42 +428,47 @@ class Firma extends MY_Controller
 
                     if ($band['state'])
                     {
+                        $accept = $this->input->post('accept');
+
                         # Verificamos que se aceptaron los terminos
                         if (isset($accept))
                         {
                             # Verificamos si la referencia ya esta creada
                             $elemento = $this->setElemento($this->input->post('referencia'));
+
                             if (isset($elemento['id']))
                             {
                                 # Relacionamos el elemento a la firma
                                 $firma = $this->setFirmaElemento($elemento['id'], $info['id'], $info['key_hash']);
+
                                 if ($firma->state)
                                 {
                                     $response->state = true;
 
                                     # Verificamos si ya tiene todas las firmas activas necesarias
-                                    if (!$this->getFullSignDeclaracion($elemento['id'], 'declaracion')) {
+                                    if (!$this->getFullSignDeclaracion($elemento['id']))
+                                    {
                                         # Generamos y firmamos el archivo
                                         $url = $this->generadorPlantilla($elemento['id']);
                                         if (!empty($url)) {
                                             $response->state = true;
                                             $response->url = $url;
-                                            $response->message = "Se firmo y se genero correctamente el PDF";
+                                            $response->message = 'Se firmo y se genero correctamente el PDF';
                                         }
                                     }
                                 }
                                 $response->message = $firma->message;
                             } else {
-                                $response->message = "Se presento un problema , intente mas tarde.";
+                                $response->message = 'Se presento un problema , intente mas tarde.';
                             }
                         } else {
-                            $response->message = "Debe aceptar los t&eacute;rminos y condiciones";
+                            $response->message = 'Debe aceptar los t&eacute;rminos y condiciones';
                         }
                     } else {
                         $response->message = $band['message'];
                     }
                 } else {
-                    $response->message = "Clave Incorrecta";
+                    $response->message = 'Clave Incorrecta';
                 }
             }
         }
@@ -430,9 +477,12 @@ class Firma extends MY_Controller
         echo json_encode($response);
     }
 
-    /*
-    * Metodo para obtener información de un firma de usuario
-    */
+    /**
+     * Metodo para obtener información de un firma de usuario
+     * 
+     * @param int $id
+     * @return array
+     */
     private function getInfoSignUser($id)
     {
         $info = [];
@@ -449,7 +499,13 @@ class Firma extends MY_Controller
         return $info;
     }
 
-    /* Funciones de verificación */
+    /**
+     * Funciones de verificación
+     * 
+     * @param string $key
+     * @param string $hash
+     * @return bool
+     */
     private function verifyPassword($key, $hash)
     {
         if (sha1($key) == $hash) {
@@ -459,6 +515,13 @@ class Firma extends MY_Controller
         }
     }
 
+    /**
+     * Funciones de verificación del codigo enviado por correo
+     * 
+     * @param int $codigo
+     * @param int $id
+     * @return array
+     */
     private function verifyCodeMail($codigo, $id)
     {
         $response = ['state' => false, 'message' => 'Se presento un error'];
@@ -468,7 +531,7 @@ class Firma extends MY_Controller
             'codigo_firma',
             '*',
             'codigo = "'. $codigo . '"
-                AND usuario_firma_id = "'. $id .'"',
+                AND id_usuario_firma = "'. $id .'"',
             1,NULL,true
         );
 
@@ -488,9 +551,12 @@ class Firma extends MY_Controller
         return $response;
     }
 
-    /*
-    * Verifica que un elemento exista si no lo crea
-    */
+    /**
+     * Verifica que un elemento exista si no lo crea
+     * 
+     * @param int $referencia
+     * @return array
+     */
     private function setElemento($referencia)
     {
         $info = [];
@@ -510,14 +576,19 @@ class Firma extends MY_Controller
         return $info;
     }
 
-    /*
-    * Metodo que relaciona una firma a un elemento especifico
-    */
+    /**
+     * Metodo que relaciona una firma a un elemento especifico
+     * 
+     * @param int $elemento
+     * @param int $usuario
+     * @param string $hash
+     * @return object
+     */
     private function setFirmaElemento($elemento, $usuario, $hash)
     {
         $response = (object)[
             'state' => false,
-            'message' => 'No se ha podido firmar'
+            'message' => 'No se ha podido firmar',
         ];
 
         # Verificamos que no exista una firma previa del usuario en el elemento especifico
@@ -525,11 +596,11 @@ class Firma extends MY_Controller
             'elemento_firma',
             '*',
             'id_usuario_firma = "'. $usuario . '"
-                AND elemento_id = "'. $elemento .'"
+                AND id_declaracion = "'. $elemento .'"
                 AND estado = '. Equivalencias::estadoActivo(),
             1,NULL,true
         );
-
+        
         $info = $this->getInfoSign($usuario);
 
         $permisos = array_reduce(EquivalenciasFirmas::tiposGrupos(), function($acumulador, $grupo){
@@ -541,15 +612,15 @@ class Firma extends MY_Controller
             if (!isset($result->id))
             {
                 $guardo = $this->codegen_model->add('elemento_firma', [
-                    'elemento_id'       => $elemento,
-                    'usuario_firma_id'  => $usuario,
+                    'id_declaracion'    => $elemento,
+                    'id_usuario_firma'  => $usuario,
                     'key_hash'          => $hash,
                     'fecha'             => date('Y-m-d H:i:s'),
                 ]);
 
                 if ($guardo->bandRegistroExitoso)
                 {
-                    $message = $this->getMessageFirma($guardo->idInsercion, $info['firma'], $info['usuario']);
+                    $message = $this->getMessageFirma($elemento, $info['firma'], $info['usuario']);
                     $response->state = true;
                     $response->message = $message;
                 } else {
@@ -565,14 +636,19 @@ class Firma extends MY_Controller
         return $response;
     }
 
-    /*
-    * Metodo que retornar los mensajes amigables al procesar una firma
-    */
-    private function getMessageFirma($id_elemento_firma, $firma, $usuario)
+    /**
+     * Metodo que retornar los mensajes amigables al procesar una firma
+     * 
+     * @param int $id_declaracion
+     * @param array $firma
+     * @param array $usuario
+     * @return string
+     */
+    private function getMessageFirma($id_declaracion, $firma, $usuario)
     {
         $message = 'Se ha generado la firma correctamente';
 
-        $full = $this->getFullSignDeclaracion($id_elemento_firma);
+        $full = $this->getFullSignDeclaracion($id_declaracion);
         if (!$full) {
             $message = '<p>Las firmas de la declaraci&oacute;n se han completado y el archivo se ha generado.</p> La pagina se actualizar&aacute; en pocos segundos...';
         } else {
@@ -583,9 +659,12 @@ class Firma extends MY_Controller
         return $message;
     }
 
-    /*
-    * Metodo que permite verificar si el elemento contiene todas las firmas requeridas para generar el archivo
-    */
+    /**
+     * Metodo que permite verificar si el elemento contiene todas las firmas requeridas para generar el archivo
+     * 
+     * @param int $elemento
+     * @return bool
+     */
     private function getFullSignDeclaracion($elemento)
     {
         $band = true;
@@ -593,7 +672,7 @@ class Firma extends MY_Controller
         $result = $this->codegen_model->get(
             'elemento_firma',
             'COUNT(*) AS total',
-            'elemento_id = "'. $elemento .'"
+            'id_declaracion = "'. $elemento .'"
                 AND estado = '. Equivalencias::estadoActivo(),
             1,NULL,true
         );
@@ -607,6 +686,12 @@ class Firma extends MY_Controller
         return $band;
     }
 
+    /**
+     * Identifica los usuarios que hacen falta para completar el firmado
+     * 
+     * @param int $tipo_usuario
+     * @return string
+     */
     private function getFaltantes($tipo_usuario)
     {
         $text = '';
@@ -620,5 +705,245 @@ class Firma extends MY_Controller
         }
 
         return $text;
+    }
+
+    /**
+     * Metodo de generacion de archivos
+     * 
+     * @param int $elemento
+     * @return string
+     */
+    private function generadorPlantilla($elemento)
+    {
+        # Agregamos información de firma
+        $signData = [];
+
+        /*Generamos el registro*/
+        $fileN = $this->addFileSign(['elemento' => $elemento, 'ruta' => 'ruta']);
+        $signData['FILE_ID'] = $this->getHashString($fileN['id']);
+
+        // $qr_filename = $this->generateQR($signData['FILE_ID']);
+
+        # Obtenemos firmas del elemento
+        $info = $this->getElemento($elemento);
+        $firmas = [];
+
+        foreach ($info['info'] as $key => $item)
+        {
+            $signData['SIGN_' . $item['id'] . '_' . $elemento] = $item['key_hash'];
+
+            $nombre = $item['first_name'] . ' ' . $item['last_name'];
+
+            $firmas[] = [
+                'nombre' => $nombre,
+                'documento' => $item['id_usuario'],
+                'hash' => $item['key_hash'],
+                'code' => $item['code']
+            ];
+
+            $this->generateCodeBarSign($item['code'], '942', 'PNG');
+        }
+
+        # Generamos el archivo
+        $this->load->library('../controllers/declaraciones');
+        $url = $this->declaraciones->generarPdf($elemento, $signData, $info);
+
+        # Actualizamos el registro del archivo
+        $fileU = $this->addFileSign(['elemento' => $elemento, 'ruta' => $url]);
+
+        $this->clearTempImg();
+
+        if (isset($fileU['id']))
+        {
+            # Actualizamos el estado de la declaracion a firmada
+            $this->codegen_model->edit(
+                'declaraciones',
+                [ 'estado' => EquivalenciasFirmas::declaracionFirmada() ],
+                'id', $elemento
+            );
+
+            return $url;
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * Se recibe un vector como unico parametro el cual debe contener los siguientes campos
+     *
+     * elemento      =>   ID Elemento
+     * ruta          =>   Ruta del archivo
+     * checksum      =>   Hash para validacion de cambios Checksum
+     * 
+     * @param array $info
+     * @return array
+    */
+
+    private function addFileSign($info)
+    {
+        $response = [];
+
+        # Convertimos el vector es variables individuales
+        foreach ($info as $key => $value) {
+            $$key = $value;
+        }
+        $bandInsert = false;
+        $bandUpdate = false;
+        $hash = 'hash';
+        $checksum = 'checksum';
+
+        # Verificamos si ya existe el elemento en algun archivo
+        $result = $this->codegen_model->get(
+            'archivo_firma',
+            '*',
+            'id_declaracion = "'. $elemento .'"
+                AND estado = '. Equivalencias::estadoActivo(),
+            1,NULL,true
+        );
+
+        if (isset($result->id)) {
+            $bandUpdate = true;
+        } else {
+            $bandInsert = true;
+        }
+
+        if ($bandInsert)
+        {
+            $guardo = $this->codegen_model->add('archivo_firma', [
+                'id_declaracion'    => $elemento,
+                'fecha'             => date('Y-m-d H:i:s'),
+                'ruta_file'         => $ruta,
+                'checksum'          => 'checksum',
+                'hash_file'         => 'hash',
+            ]);
+
+            $response['id'] = $guardo->idInsercion;
+            $response['elemento_id'] = $elemento;
+            $response['ruta_file'] = $ruta;
+        }
+
+        if ($bandUpdate)
+        {
+            # Generamos el Hash del Id del archivo
+            $id = $result->id;
+            $hash = $this->getHashString($id);
+
+            # Generamos el checksum de la fila
+            $checksum = $this->getHashFile($ruta);
+
+            # Actualizamos el registro
+            $this->codegen_model->edit(
+                'archivo_firma',
+                [
+                    'checksum' => $checksum,
+                    'hash_file' => $hash,
+                    'ruta_file' => $ruta,
+                ],
+                'id', $id
+            );
+
+            $response['id'] = $id;
+            $response['elemento_id'] = $elemento;
+            $response['ruta_file'] = $ruta;
+            $response['hash_file'] = $hash;
+            $response['checksum'] = $checksum;
+        }
+        return $response;
+    }
+
+    /**
+     * Genera un Hash de un string
+     * 
+     * @param string $data
+     * @return string
+     */
+    public function getHashString($data)
+    {
+        return hash("sha256", $data);
+    }
+
+    /**
+     * Funcion que genera un hash de un archivo
+     * 
+     * @param string $url
+     * @return string|null
+     */
+    private function getHashFile($url)
+    {
+        //Verificamos si el archivo existe
+        if (file_exists($url)) {
+            return hash_file("sha256", $url);
+        }
+        return null;
+    }
+
+    /**
+     * Genera las imagenes de los codigos de barras
+     * 
+     * @param string $hash
+     * @param string $ind
+     * @param string $type
+     * @param any $setStart
+     * @return null
+     */
+    private function generateCodeBarSign($hash, $ind = '', $type, $setStart = null)
+    {
+        $colorFront = new BCGColor(0, 0, 0);
+        $colorBack = new BCGColor(255, 255, 255);
+        //Tipo Imagen
+        switch ($type) {
+            case 'PNG':
+                $format = BCGDrawing::IMG_FORMAT_PNG;
+                $ext = '.png';
+                break;
+            case 'JPEG':
+                $format = BCGDrawing::IMG_FORMAT_JPEG;
+                $ext = '.jpeg';
+                break;
+        }
+
+        # Barcode Part
+        $code = new BCGgs1128();
+        if (!is_null($setStart)) {
+            $code->setStart('C');
+        }
+        $code->setScale(2);
+        $code->setThickness(30);
+        $code->setForegroundColor($colorFront);
+        $code->setBackgroundColor($colorBack);
+
+        $code->setStrictMode(true);
+        if (empty($ind)) {
+            $code->parse($hash);
+        } else {
+            $code->parse($ind . $hash);
+        }
+
+        $dir = 'uploads/temporal';
+        if (!file_exists($dir)) {
+            mkdir($dir, 0755);
+        }
+
+        // Drawing Part
+        $drawing = new BCGDrawing($dir . '/' . $hash . $ext, $colorBack);
+        $drawing->setBarcode($code);
+        $drawing->setDPI(72);
+        $drawing->draw();
+        //header('Content-Type: image/png');
+        $drawing->finish($format);
+    }
+
+    /**
+     * Limpia la carpeta temporal
+     * 
+     * @return null
+     */
+    public function clearTempImg()
+    {
+        $files = glob('uploads/temporal/*'); //obtenemos todos los nombres de los ficheros
+        foreach ($files as $file) {
+            if (is_file($file))
+                unlink($file); //elimino el fichero
+        }
     }
 }

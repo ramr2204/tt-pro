@@ -114,7 +114,7 @@ class Empresas extends MY_Controller
 			    $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
 			    $this->form_validation->set_rules('direccion', 'Direccion', 'required');
 			    $this->form_validation->set_rules('telefono', 'Telefono', 'required|numeric');
-			    $this->form_validation->set_rules('id_municipio', 'Municipio', 'required'); 
+			    $this->form_validation->set_rules('id_municipio', 'Municipio', 'required|is_exists[par_municipios.muni_id]'); 
 			    $this->form_validation->set_rules('nombre_representante', 'Nombre Representante', 'required'); 
 			    $this->form_validation->set_rules('identificador_representante', 'Identificador Representante', 'required|numeric'); 
               

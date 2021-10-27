@@ -86,6 +86,10 @@ if (!defined('PHP_VERSION_ID')) {
     define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
 }
 
+/**
+ * @class mPDF
+ * PHP class for generating PDF documents without requiring external extensions.
+ */
 class mPDF
 {
 
@@ -798,6 +802,8 @@ var $ispre;
 
 var $outerblocktags;
 var $innerblocktags;
+
+var $custom_xmp = '';
 
 
 // **********************************
@@ -9830,6 +9836,7 @@ function _putmetadata() {
 	$m .= '    <xmpMM:DocumentID>uuid:'.$uuid.'</xmpMM:DocumentID>'."\n";
 	$m .= '   </rdf:Description>'."\n";
 	$m .= '  </rdf:RDF>'."\n";
+	$m .= $this->custom_xmp;
 	$m .= ' </x:xmpmeta>'."\n";
 	$m .= str_repeat(str_repeat(' ',100)."\n",20);	// 2-4kB whitespace padding required
 	$m .= '<?xpacket end="w"?>';	// "r" read only

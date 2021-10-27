@@ -9,7 +9,7 @@
 
     <table class="table table-striped table-bordered">
         <tr>
-            <td colspan="2" class="text-center">FIRMANTE</td>
+            <th colspan="2" class="text-center">FIRMANTE</th>
         </tr>
         <tr>
             <th>Empresa</th>

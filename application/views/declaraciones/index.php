@@ -118,6 +118,14 @@
                 // Inicializada
                 if(aData[6] == 1) {
                     $('td:eq(6)', nRow).html(boton_firmar.replaceAll(':id', aData[0]))
+                } else if(aData[6] == 2) {
+                    $('td:eq(6)', nRow).html(`<a class="btn btn-danger"
+                        href="${base_url}uploads/declaraciones/comprobante_declaracion_${aData[0]}.pdf"
+                        title="Ver declaración"
+                        target="_blank"
+                    >
+                        <i class="fa fa-file-pdf-o"></i>
+                    </a>`)
                 }
             }, 
 
@@ -133,6 +141,7 @@
         var ref = $(this).data('ref');
 
         var parametros = { st: st, user: user, ref: ref };
+
         $.ajax({
             url: base_url + 'index.php/firma/renderSignDeclaracion',
             type: 'POST',
@@ -250,10 +259,10 @@
                     $('#responseMSG').html(crearAleta(response.message, color));
 
                     if (response.hasOwnProperty('url') && response.url != null) {
-                        window.open(response.url, "_blank");
+                        window.open(base_url + response.url, '_blank');
                     }
                     if (band) {
-                        setTimeout(updatePage, 10000);
+                        setTimeout(updatePage, 15000);
                     }
                 } else {
                     alert('Se Presento un error al procesar la firma');
