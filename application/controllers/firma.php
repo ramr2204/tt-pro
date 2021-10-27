@@ -18,6 +18,16 @@ class Firma extends MY_Controller
         $this->load->helper('HelperGeneral');
     }
 
+    /*public function index(){
+
+        $this->template->load($this->config->item('admin_template'),'firma/code');
+    }*/
+
+ /*   public function index()
+    {
+        $this->template->load($this->config->item('admin_template'),'firma/code', $this->data);
+    }*/
+
     public function renderSignDeclaracion()
     {
         if ($this->ion_auth->logged_in())
