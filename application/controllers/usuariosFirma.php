@@ -166,7 +166,8 @@ class usuariosFirma extends MY_Controller
 
             if($guardo->bandRegistroExitoso)
             {
-                $key_hash = $this->getHashString($guardo->idInsercion . "," . trim($this->input->post('usuario')));
+                $this->load->library('../controllers/firma');
+                $key_hash = $this->firma->getHashString($guardo->idInsercion . "," . trim($this->input->post('usuario')));
 
                 $edito = $this->codegen_model->edit(
                     'usuarios_firma',
@@ -191,14 +192,6 @@ class usuariosFirma extends MY_Controller
                 $this->data['errormessage'] = 'No se pudo registrar el usuario';
             }
         }
-    }
-
-    /*
-    * Genera un Hash de un string
-    */
-    private function getHashString($data)
-    {
-        return hash("sha256", $data);
     }
 
     public function buscarUsuariosEmpresa()

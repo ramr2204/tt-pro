@@ -109,3 +109,18 @@ CREATE TABLE `codigo_firma` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE `archivo_firma` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_declaracion` int(11) NOT NULL,
+  `fecha` datetime DEFAULT NULL,
+  `ruta_file` varchar(240) NOT NULL,
+  `checksum` varchar(240) NOT NULL,
+  `hash_file` varchar(240) NOT NULL,
+  `estado` int(11) DEFAULT 1,
+  `certificado` int(11) DEFAULT 0,
+  `fecha_certificacion` datetime DEFAULT NULL,
+  `id_usuario_certifico` int(11) DEFAULT NULL,
+  `tipo_archivo` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+

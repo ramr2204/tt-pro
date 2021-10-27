@@ -149,7 +149,7 @@
                             <tr>
                                 <td>No. DECLARACIÓN:</td>
                                 <td>
-
+                                    <?= str_pad($declaracion->id, 10, '0', STR_PAD_LEFT) ?>
                                 </td>
                             </tr>
                             <tr>
@@ -162,9 +162,9 @@
                                             <td class="text-center">DÍA</td>
                                         </tr>
                                         <tr>
-                                            <td class="text-center">2021</td>
-                                            <td class="text-center">01</td>
-                                            <td class="text-center">02</td>
+                                            <td class="text-center"><?= date('Y', strtotime($declaracion->fecha)) ?></td>
+                                            <td class="text-center"><?= date('m', strtotime($declaracion->fecha)) ?></td>
+                                            <td class="text-center"><?= date('d', strtotime($declaracion->fecha)) ?></td>
                                         </tr>
                                     </table>
                                 </td>
@@ -191,7 +191,9 @@
                             <tr>
                                 <td width="15%"> A.1. INICIAL</td>
                                 <td width="4%" >
-                                    <table class="borde" style="height:10px; width:10px; background-color:#000">
+                                    <table class="borde"
+                                        style="height:10px; width:10px;
+                                            <?= $tipo_correccion != $declaracion->tipo_declaracion ? 'background-color:#000': '' ?>">
                                         <tr>
                                             <td style="height:10px; width:10px"></td>
                                         </tr>
@@ -202,7 +204,9 @@
                             <tr>
                                 <td rowspan="3" class="v-top"> A.2. CORRECCIÓN</td>
                                 <td rowspan="3" class="v-top">
-                                    <table class="borde" style="height:10px; width:10px">
+                                    <table class="borde"
+                                        style="height:10px; width:10px;
+                                            <?= $tipo_correccion == $declaracion->tipo_declaracion ? 'background-color:#000': '' ?>">
                                         <tr>
                                             <td style="height:10px; width:10px"></td>
                                         </tr>
@@ -212,32 +216,32 @@
                                     <table class="borde">
                                         <tr>
                                             <td width="55%"> No. DECLARACIÓN:</td>
-                                            <td width="45%"></td>
+                                            <td width="45%"> <?= $declaracion->declaracion_correccion ?></td>
                                         </tr>
                                         <tr>
                                             <td> No. DE RADICACIÓN:</td>
-                                            <td></td>
+                                            <td> <?= $declaracion->radicacion_correccion ?></td>
                                         </tr>
                                         <tr>
                                             <td> FECHA:</td>
-                                            <td></td>
+                                            <td> <?= $declaracion->fecha_correccion ?></td>
                                         </tr>
                                         <tr>
                                             <td> PERIODO GRAVABLE:</td>
-                                            <td></td>
+                                            <td> <?= $declaracion->periodo_correccion ? strtoupper(strftime('%B %Y', strtotime($declaracion->periodo_correccion))) : '' ?></td>
                                         </tr>
                                     </table>
                                 </td>
                                 <td width="20%" class="text-right"> VALOR RECAUDADO</td>
-                                <td width="25%" class="borde-especifico"></td>
+                                <td width="25%" class="borde-especifico"> <?= $declaracion->recaudado ?></td>
                             </tr>
                             <tr>
                                 <td class="text-right"> VALOR SANCIONES</td>
-                                <td class="borde-especifico"></td>
+                                <td class="borde-especifico"> <?= $declaracion->sanciones ?></td>
                             </tr>
                             <tr>
                                 <td class="text-right"> VALOR INTERESES</td>
-                                <td class="borde-especifico"></td>
+                                <td class="borde-especifico"> <?= $declaracion->intereses ?></td>
                             </tr>
                         </tbody>
                     </table>
@@ -250,19 +254,14 @@
                             <td>
                                 <table class="borde">
                                     <tr>
-                                        <td class="text-center"> 2021</td>
-                                        <td class="text-center"> ENE</td>
-                                        <td class="text-center"> FEB</td>
-                                        <td class="text-center"> MAR</td>
-                                        <td class="text-center"> ABR</td>
-                                        <td class="text-center"> MAY</td>
-                                        <td class="text-center"> X</td>
-                                        <td class="text-center"> JUL</td>
-                                        <td class="text-center"> AGO</td>
-                                        <td class="text-center"> SEP</td>
-                                        <td class="text-center"> OCT</td>
-                                        <td class="text-center"> NOV</td>
-                                        <td class="text-center"> DIC</td>
+                                        <td class="text-center"> <?= date('Y', strtotime($declaracion->periodo)) ?></td>
+                                        <?
+                                            $mes_periodo = (int)date('m', strtotime($declaracion->periodo));
+                                            foreach($meses AS $numero => $nombre)
+                                            {
+                                                echo '<td class="text-center"> '.($numero == $mes_periodo ? 'X' : strtoupper($nombre)).'</td>';
+                                            }
+                                        ?>
                                     </tr>
                                 </table>
                             </td>
@@ -277,22 +276,22 @@
                             <td width="25%" > C.2. NIT </td>
                         </tr>
                         <tr>
-                            <td class="text-center" colspan="2"> EMPRESA DE ENERGIA DE BOYACÁ S.A. E.S.P.</td>
-                            <td class="text-center"> 891.800.219-1</td>
+                            <td class="text-center" colspan="2"> <?= strtoupper($empresa->nombre) ?></td>
+                            <td class="text-center"> <?= $empresa->nit ?></td>
                         </tr>
                         <tr>
                             <td colspan="3"> C.3. CORREO ELECTRÓNICO:</td>
                         </tr>
                         <tr>
-                            <td colspan="3"> cescamilla@ebsa.com.co</td>
+                            <td colspan="3"> <?= $empresa->email ?></td>
                         </tr>
                         <tr>
                             <td colspan="2"> C.4. APELLIDOS Y NOMBRES DEL REPRESENTANTE LEGAL:</td>
                             <td> C.5. N° DE IDENTIFICACIÓN</td>
                         </tr>
                         <tr>
-                            <td class="text-center" colspan="2"> ROOSEVELT MESA MARTINEZ</td>
-                            <td class="text-center"> 7.214.951</td>
+                            <td class="text-center" colspan="2"> <?= strtoupper($empresa->nombre_representante) ?></td>
+                            <td class="text-center"> <?= number_format($empresa->identificador_representante, 0, '', '.') ?></td>
                         </tr>
                         <tr>
                             <td> C.6. DIRECCIÓN: </td>
@@ -300,9 +299,9 @@
                             <td> C.8. TELÉFONO</td>
                         </tr>
                         <tr>
-                            <td> Cr 10 15 87</td>
-                            <td class="text-center"> Tunja</td>
-                            <td class="text-center"> 7405000</td>
+                            <td> <?= $empresa->direccion ?></td>
+                            <td class="text-center"> <?= $empresa->municipio ?></td>
+                            <td class="text-center"> <?= $empresa->telefono ?></td>
                         </tr>
                     </table>
 
@@ -324,7 +323,7 @@
                                 <td class="text-center" rowspan="2" width="25%"> D.1. CLASE</td>
                                 <td class="text-center" colspan="3"> D.2. VALOR</td>
                                 <td class="text-center" rowspan="2"> D.3. TARIFA</td>
-                                <td class="text-center" rowspan="2" width="20%"> D.4. VALOR RECAUDO ESTAMPILLA PRO CULTURA</td>
+                                <td class="text-center" rowspan="2" width="20%"> D.4. VALOR RECAUDO ESTAMPILLA <?= strtoupper($declaracion->estampilla) ?></td>
                             </tr>
                             <tr>
                                 <td class="text-center" width="20%"> VALOR BASE</td>
@@ -333,50 +332,30 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td class="text-center"> 1</td>
-                                <td> CONTRATOS</td>
-                                <td class="text-center"> 6.732.056.727 </td>
-                                <td class="text-center"></td>
-                                <td class="text-center"></td>
-                                <td class="text-center"> 1,50%</td>
-                                <td class="text-right"> 100.980.900</td>
-                            </tr>
-                            <tr>
-                                <td class="text-center"> 2</td>
-                                <td> MODIFICACIONES</td>
-                                <td class="text-center"> 6.732.056.727 </td>
-                                <td class="text-center"></td>
-                                <td class="text-center"></td>
-                                <td class="text-center"> 1,50%</td>
-                                <td class="text-right"> 100.980.900</td>
-                            </tr>
-                            <tr>
-                                <td class="text-center"> 3</td>
-                                <td> ADICIONES</td>
-                                <td class="text-center"> 6.732.056.727 </td>
-                                <td class="text-center"></td>
-                                <td class="text-center"></td>
-                                <td class="text-center"> 1,50%</td>
-                                <td class="text-right"> 100.980.900</td>
-                            </tr>
-                            <tr>
-                                <td class="text-center"> 4</td>
-                                <td> OTROS</td>
-                                <td class="text-center"> 6.732.056.727 </td>
-                                <td class="text-center"></td>
-                                <td class="text-center"></td>
-                                <td class="text-center"> 1,50%</td>
-                                <td class="text-right"> 100.980.900</td>
-                            </tr>
+                            <?
+                                foreach($detalles AS $detalle)
+                                {
+                                    ?>
+                                    <tr>
+                                        <td class="text-center"> <?= $detalle->renglon ?></td>
+                                        <td> <?= strtoupper($clasificaciones[$detalle->renglon]) ?></td>
+                                        <td class="text-center"> <?= number_format($detalle->base, 2, ',', '.') ?></td>
+                                        <td class="text-center"> <?= $detalle->vigencia_actual ?></td>
+                                        <td class="text-center"> <?= $detalle->vigencia_anterior ?></td>
+                                        <td class="text-center"> <?= number_format($detalle->porcentaje, 2, ',', '.')  ?>%</td>
+                                        <td class="text-right"> <?= number_format($detalle->valor_estampilla, 2, ',', '.') ?></td>
+                                    </tr>
+                                    <?
+                                }
+                            ?>
                             <tr>
                                 <td class="text-center"> 5</td>
                                 <td> TOTAL A FAVOR DEL DEPARTAMETO</td>
-                                <td class="text-center"> 6.732.056.727 </td>
+                                <td class="text-center"> <?= number_format($declaracion->total_base, 2, ',', '.') ?></td>
                                 <td class="text-center"></td>
                                 <td class="text-center"></td>
-                                <td class="text-center"> 1,50%</td>
-                                <td class="text-right"> 100.980.900</td>
+                                <td class="text-center"></td>
+                                <td class="text-right"> <?= number_format($declaracion->total_estampillas, 2, ',', '.') ?></td>
                             </tr>
                         </tbody>
                     </table>
@@ -388,32 +367,32 @@
                             <tr>
                                 <td width="3%" class="text-center"> 6</td>
                                 <td> TOTAL A FAVOR DEL DEPARTAMETO</td>
-                                <td width="20%" class="text-right"> 124.315.100 </td>
+                                <td width="20%" class="text-right"> <?= number_format($declaracion->total_estampillas, 2, ',', '.') ?></td>
                             </tr>
                             <tr>
                                 <td class="text-center"> -</td>
                                 <td> SALDO A FAVOR PERÍODO ANTERIOR</td>
-                                <td class="text-right"> 124.315.100 </td>
+                                <td class="text-right"> <?= number_format($declaracion->saldo_periodo_anterior, 2, ',', '.') ?></td>
                             </tr>
                             <tr>
                                 <td class="text-center"> +</td>
                                 <td> VALOR SANCIONES</td>
-                                <td class="text-right"> 124.315.100 </td>
+                                <td class="text-right"> <?= number_format($declaracion->sanciones_pago, 2, ',', '.') ?></td>
                             </tr>
                             <tr>
                                 <td class="text-center"> +</td>
                                 <td> INTERESES DE MORA</td>
-                                <td class="text-right"> 124.315.100 </td>
+                                <td class="text-right"> <?= number_format($declaracion->intereses_mora, 2, ',', '.') ?></td>
                             </tr>
                             <tr>
                                 <td class="text-center"></td>
                                 <td> TOTAL A CARGO POR RECAUDO ESTAMPILLA, SANCIONES E INTERESES</td>
-                                <td class="text-right"> 124.315.100 </td>
+                                <td class="text-right"> <?= number_format($declaracion->total_cargo, 2, ',', '.') ?></td>
                             </tr>
                             <tr>
                                 <td class="text-center"></td>
                                 <td> SALDO A FAVOR</td>
-                                <td class="text-right"> 124.315.100 </td>
+                                <td class="text-right"> <?= number_format($declaracion->saldo_favor, 2, ',', '.') ?></td>
                             </tr>
                         </tbody>
                     </table>
@@ -435,47 +414,49 @@
                                 <h4 class="subtitulo">
                                     <table>
                                         <tbody>
-                                            <tr>
-                                                <td colspan="2" class="bold"> F.1. REPRESENTANTE LEGAL</td>
-                                            </tr>
-                                            <tr>
-                                                <td colspan="2"> Declaro que la información aquí consignada es correcta y ajustada a las disposiciones legales.</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bold v-bot"> FIRMA</td>
-                                                <td>
-                                                    CESAR HERNANDO RODRIGUEZ FAGUA
-                                                    <br>
-                                                    ______________________________________
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bold"> NOMBRE</td>
-                                                <td class="bold"> CESAR HERNANDO RODRIGUEZ FAGUA</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bold"> C.C.</td>
-                                                <td class="bold"> 79.458.051</td>
-                                            </tr>
-                                            <tr>
-                                                <td colspan="2" class="bold" style="padding-top:20px"> F.2. CONTADOR Y/O REVISOR FISCAL</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bold v-bot"> FIRMA</td>
-                                                <td>
-                                                    CESAR HERNANDO RODRIGUEZ FAGUA
-                                                    <br>
-                                                    ______________________________________
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bold"> NOMBRE</td>
-                                                <td class="bold"> CESAR HERNANDO RODRIGUEZ FAGUA</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="bold"> C.C.</td>
-                                                <td class="bold"> 79.458.051</td>
-                                            </tr>
+                                            <?
+                                                $indice = 0;
+                                                foreach($firmas AS $firma)
+                                                {
+                                                    ?>
+                                                    <tr>
+                                                        <!-- Si no es la primera aplique el espaciado -->
+                                                        <td colspan="2"
+                                                            class="bold"
+                                                            <?= $indice != 0 ? 'style="padding-top:20px"' : '' ?>
+                                                        > F.<?= $indice+1 ?>. <?= strtoupper($firma['label']) ?></td>
+                                                    </tr>
+                                                    <?
+                                                        # Si es la primera
+                                                        if($indice == 0)
+                                                        {
+                                                            ?>
+                                                            <tr>
+                                                                <td colspan="2"> Declaro que la información aquí consignada es correcta y ajustada a las disposiciones legales.</td>
+                                                            </tr>
+                                                            <?
+                                                        }
+                                                    ?>
+                                                    <tr>
+                                                        <td class="bold v-bot"> FIRMA</td>
+                                                        <td>
+                                                            <img src="<?= $this->config->item('application_root') .'/uploads/temporal/'.$firma['code'].'.png' ?>" width="240" height="40" align="absmiddle">
+                                                            <br>
+                                                            ______________________________________
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="bold"> NOMBRE</td>
+                                                        <td class="bold"> <?= strtoupper($firma['first_name'] .' '. $firma['last_name']) ?></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="bold"> C.C.</td>
+                                                        <td class="bold"> <?= number_format($firma['id_usuario'], 0, '', '.') ?></td>
+                                                    </tr>
+                                                    <?
+                                                    $indice++;
+                                                }
+                                            ?>
                                         </tbody>
                                     </table>
                                 </h4>
@@ -498,8 +479,8 @@
                                                     <td class="text-center"> Total Fijadas</td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="text-center">33845</td>
-                                                    <td class="text-center">33845</td>
+                                                    <td class="text-center">&nbsp;</td>
+                                                    <td class="text-center"></td>
                                                     <td class="text-center"></td>
                                                     <td class="text-center"></td>
                                                     <td class="text-center"></td>
@@ -525,12 +506,12 @@
         <table class="mb-10">
             <tr>
                 <td width="30%">
-                    <img src="http://aplicativosenlinea.net:8081/estampillas-pro-boyaca/uploads/imagenesestampillas/ELECTRIFICADORA_October_06_2021.png" style="width:150px">
+                    <img src="<?= $this->config->item('application_root') .'/'. $declaracion->imagen_estampilla ?>" style="width:150px">
                 </td>
                 <td class="bold">
-                    EMPRESA DE ENERGIA DE BOYACÁ S.A. E.S.P<br>
-                    NIT: 891.800.219-1<br>
-                    DECLARACION DE ESTAMPILLA PROCULTURA
+                    <?= strtoupper($empresa->nombre) ?><br>
+                    NIT: <?= $empresa->nit ?><br>
+                    DECLARACION DE ESTAMPILLA <?= strtoupper($declaracion->estampilla) ?>
                 </td>
             </tr>
         </table>
@@ -538,7 +519,7 @@
         <table>
             <tr>
                 <td width="20%" class="v-bot bold">PERIODO:</td>
-                <td width="9%" class="v-bot bold">JUNIO</td>
+                <td width="9%" class="v-bot bold"><?= strtoupper(strftime('%B', strtotime($declaracion->periodo))) ?></td>
                 <td width="9%"></td>
                 <td width="13%" class="text-center bg-verde bold"> Contrato - Factura IVA Incluido</td>
                 <td width="13%" class="text-center bg-verde bold"> Base liquidación estampilla SIN IVA</td>

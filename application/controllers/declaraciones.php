@@ -17,6 +17,8 @@ class Declaraciones extends MY_Controller
         $this->load->helper(['form','url','codegen_helper', 'array']);
         $this->load->helper('Equivalencias');
         $this->load->helper('HelperGeneral');
+
+        setlocale(LC_TIME, 'es_CO');
     }
 
     /**
@@ -77,7 +79,6 @@ class Declaraciones extends MY_Controller
      */
     private function obtenerMeses($mes_corto = false)
     {
-        setlocale(LC_TIME, 'es');
         $meses = [];
 
         for($mes = 1; $mes <= 12; $mes++){
@@ -365,11 +366,11 @@ class Declaraciones extends MY_Controller
                 }
             }
 
-            # Se agregan "-00" al final de los campos periodo para que guarde como fecha
+            # Se agregan "-01" al final de los campos periodo para que guarde como fecha
             $insercion = [
                 'id_empresa'                => $this->input->post('empresa'),
                 'id_estampilla'             => $this->input->post('tipo_estampilla'),
-                'periodo'                   => $this->input->post('periodo') . '-00',
+                'periodo'                   => $this->input->post('periodo') . '-01',
                 'tipo_declaracion'          => $this->input->post('tipo_declaracion'),
                 'recaudado'                 => $this->input->post('recaudado'),
                 'sanciones'                 => $this->input->post('sanciones'),
@@ -389,7 +390,7 @@ class Declaraciones extends MY_Controller
                 $insercion['declaracion_correccion']    = $this->input->post('declaracion_correccion');
                 $insercion['radicacion_correccion']     = $this->input->post('radicacion_correccion');
                 $insercion['fecha_correccion']          = $this->input->post('fecha_correccion');
-                $insercion['periodo_correccion']        = $this->input->post('periodo_correccion') . '-00';
+                $insercion['periodo_correccion']        = $this->input->post('periodo_correccion') . '-01';
             }
 
             $guardo = $this->codegen_model->add('declaraciones', $insercion);
@@ -421,76 +422,70 @@ class Declaraciones extends MY_Controller
         }
     }
 
-    private function generarPdf()
+    /**
+     * Genera el pdf de la declaracion firmada
+     * 
+     * @param int $id_declaracion
+     * @param array $datos_firma
+     * @param array $info
+     * @return string
+     */
+    public function generarPdf($id_declaracion, $datos_firma, $info)
     {
-        // $this->load->library('encrypt');
-        // $hash = $_GET['id'];
-        // $ids_pago = $this->encrypt->decode($hash, Equivalencias::generadorHash());
-
-        // echo '$algo<pre>';var_dump( $hash, $ids_pago );echo '</pre>';
-
         $this->load->library('CustomPdf');
-
         $pdf = new CustomPdf();
+
+        $this->data['declaracion'] = $this->codegen_model->get(
+            'declaraciones AS d',
+            'd.id_empresa, e.estm_nombre AS estampilla, d.periodo,
+                d.tipo_declaracion, d.declaracion_correccion, d.radicacion_correccion,
+                d.fecha_correccion, d.periodo_correccion, d.recaudado,
+                d.sanciones, d.intereses, d.total_base,
+                d.total_estampillas, d.saldo_periodo_anterior, d.sanciones_pago,
+                d.intereses_mora, d.total_cargo, d.saldo_favor,
+                d.id, d.fecha_creacion AS fecha, e.estm_rutaimagen AS imagen_estampilla',
+            'd.id = "'. $id_declaracion .'"',
+            1,NULL,true, '',
+            'est_estampillas e', 'e.estm_id = d.id_estampilla'
+        );
+
+        $this->data['empresa'] = $this->codegen_model->get(
+            'empresas AS e',
+            'e.nit, e.nombre, e.email,
+                e.direccion, e.telefono, e.nombre_representante,
+                e.identificador_representante, m.muni_nombre AS municipio',
+            'e.id = "'. $this->data['declaracion']->id_empresa .'"',
+            1,NULL,true, '',
+            'par_municipios m', 'm.muni_id = e.id_municipio'
+        );
+
+        $this->data['detalles'] = $this->codegen_model->getSelect(
+            'detalles_declaracion',
+            'renglon, base, vigencia_actual,
+                vigencia_anterior, porcentaje, valor_estampilla',
+            'WHERE id_declaracion = "'. $id_declaracion .'"',
+            '',
+            '',
+            'ORDER BY renglon'
+        );
+
+        $this->data['firmas'] = $info['info'] ? $info['info'] : [];
+
+        $this->data['tipo_correccion'] = Equivalencias::declaracionCorreccion();
+        $this->data['meses'] = $this->obtenerMeses(true);
+        $this->data['clasificaciones'] = Equivalencias::clasificacionContratos();
 
         $html = $this->load->view('generarpdf/declaracion_estampilla', $this->data, TRUE);
 
         # Se agrega la paginacion
         $pdf->setFooter('{PAGENO}');
         $pdf->WriteHTML($html);
-        ob_end_clean();
 
-        $pdf->Output( 'Prueba', 'I');
-        die();
+        $pdf->setPathServer('uploads/declaraciones');
+        $pdf->setFileName('comprobante_declaracion_'. $id_declaracion .'.pdf');
 
-        $this->load->library('Pdf');
+        $pdf->addXMP($datos_firma);
 
-        // create new PDF document
-        $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-  
-        // set document information
-        $pdf->SetCreator(PDF_CREATOR);
-        $pdf->SetAuthor('turrisystem');
-        $pdf->SetTitle('Declaración de estampilla');
-        $pdf->SetSubject('Gobernación del Putumayo');
-        $pdf->SetKeywords('estampillas,gobernación');
-        $pdf->SetPrintHeader(false);
-        $pdf->SetPrintFooter(false);
-        // set default monospaced font
-        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-
-        // set margins
-        $pdf->SetMargins(PDF_MARGIN_LEFT, 2, PDF_MARGIN_RIGHT);
-        $pdf->SetHeaderMargin(0);
-        $pdf->SetFooterMargin(0);
-
-        // set auto page breaks
-        $pdf->SetAutoPageBreak(TRUE, 2);
-
-        // set image scale factor
-        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-
-        // set some language-dependent strings (optional)
-        if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-            require_once(dirname(__FILE__).'/lang/eng.php');
-            $pdf->setLanguageArray($l);
-        }
-
-        // ---------------------------------------------------------
-
-        // set font
-        $pdf->SetFont('times', 'BI', 8);
-
-        $pdf->AddPage();
-
-        $this->data = array();
-
-        $html = $this->load->view('generarpdf/declaracion_estampilla', $this->data, TRUE);
-        $pdf->writeHTML($html, true, false, true, false, '');
-
-        // ---------------------------------------------------------
-
-        //Close and output PDF document
-        $pdf->Output('recibos_estampilla.pdf', 'I');
+        return $pdf->generar();
     }
 }
