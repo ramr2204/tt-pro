@@ -180,9 +180,10 @@ class Firma extends MY_Controller
      * Obtene la declaracion y todas las firmas de la misma
      * 
      * @param int $referencia
+     * @param bool $validacion_estado
      * @return array
      */
-    private function getElemento($referencia)
+    private function getElemento($referencia, $validacion_estado=true)
     {
         $response = [];
 
@@ -202,9 +203,10 @@ class Firma extends MY_Controller
                 'elemento_firma AS firma',
                 'firma.id AS id, firma.fecha AS fecha_firma, u_firma.id_usuario ,
                     u_firma.key_hash AS key_hash, u_firma.created_at AS created_at, u_firma.tipo AS tipo_usuario,
-                    u.id_empresa, u.first_name, u.last_name',
-                'WHERE firma.estado = 1
-                    AND firma.id_declaracion = "'. $referencia .'"',
+                    u.id_empresa, u.first_name, u.last_name,
+                    firma.estado',
+                'WHERE firma.id_declaracion = "'. $referencia .'"'
+                    . ($validacion_estado ? ' AND firma.estado = 1' : ''),
                 'INNER JOIN usuarios_firma u_firma ON u_firma.id = firma.id_usuario_firma
                     INNER JOIN users u ON u.id = u_firma.id_usuario',
                 '',
@@ -945,5 +947,90 @@ class Firma extends MY_Controller
             if (is_file($file))
                 unlink($file); //elimino el fichero
         }
+    }
+
+    public function obtenerFirmas()
+    {
+        if ($this->ion_auth->logged_in())
+        {
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index'))
+            {
+                $info = $this->getElemento($this->input->post('codigo'), false);
+                $info['id_declaracion'] = $this->input->post('codigo');
+
+                $this->load->view('firma/firmas', $info); 
+            }
+        }
+    }
+
+    public function liberarFirma()
+    {
+        $message = '';
+
+        if ($this->ion_auth->logged_in())
+        {
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index'))
+            {
+                $result = $this->codegen_model->get(
+                    'elemento_firma',
+                    '*',
+                    'id = '.$this->input->post('codigo'),
+                    1,NULL,true
+                );
+
+                if (isset($result->id_declaracion))
+                {
+                    $elemento = $result->id_declaracion;
+
+                    # Actualizamos el estado
+                    $update = $this->codegen_model->edit(
+                        'elemento_firma',
+                        [ 'estado' => 0 ],
+                        'id', $this->input->post('codigo'),
+                        true
+                    );
+
+                    if ($update > 0)
+                    {
+                        $message .= 'La firma fue liberado correctamente<br>';
+
+                        # Verificamos si existe un archivo
+                        $result_file = $this->codegen_model->get(
+                            'archivo_firma',
+                            'id',
+                            'id_declaracion = "'. $elemento .'"
+                                AND estado = 1',
+                            1,NULL,true
+                        );
+
+                        if (isset($result_file->id))
+                        {
+                            # Inactivamos el archivo
+                            $update = $this->codegen_model->edit(
+                                'archivo_firma',
+                                [ 'estado' => 0 ],
+                                'id', $result_file->id,
+                                true
+                            );
+
+                            # Se retorna la declaracion a inicializada
+                            $this->codegen_model->edit(
+                                'declaraciones',
+                                [ 'estado' => EquivalenciasFirmas::declaracionIniciada() ],
+                                'id', $elemento
+                            );
+
+                            if ($update > 0) {
+                                $message .= 'El archivo fue invalidado.<br>';
+                            }
+                        }
+                    } else {
+                        $message .= 'Se presento un problema, no se pudo liberar la firma.<br>';
+                    }
+                }
+            }
+        }
+
+        echo $message;
     }
 }

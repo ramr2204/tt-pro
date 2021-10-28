@@ -42,19 +42,13 @@
                 <tr>
                     <td class="text-center"  style="height: 4mm; width: 57.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
-                        border-left: 0.5px solid black;                        
+                        border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;">Número Estampilla</td>
 
-                    <td class="text-center" colspan="2" style="height: 4mm; width: 45.5mm; border-top: 0.5px solid black;
+                    <td class="text-center" colspan="4" style="height: 4mm; width: 62.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><?php echo $estampilla->impr_estampillaid; ?></td>
-
-                    <td class="text-center" colspan="2" style="height: 4mm; width: 17mm; border-top: 0.5px solid black;
-                        border-right: 0.5px solid black;
-                        border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;
-                        color:red;"><?php echo $contingencia.str_pad($estampilla->impr_codigopapel, 4, '0', STR_PAD_LEFT); ?></td>
+                        border-bottom: 0.5px solid black;"><?= str_pad($estampilla->fact_id, 4, '0', STR_PAD_LEFT) ?></td>
                 </tr>
 
                 <tr>

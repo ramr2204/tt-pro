@@ -117,10 +117,10 @@
     <body>
         <div class="contenedor">
             <div id="header">
-                <img id="banner" src="../images/bannerlogo.png" style="height: auto;width: 578px;    display: block;margin: auto;" alt="Banner Cordoba">
+                <img id="banner" src="<?= site_url('images/bannerlogo.png') ?>" style="height: auto;width: 578px;    display: block;margin: auto;" alt="Banner Cordoba">
             </div>
             <div id="content">
-                <p class="message-code">A continuación el código de verificación generado en TTI Córdoba para que pueda realizar la respectiva firma de la declaración.</p>
+                <p class="message-code">A continuación el código de verificación generado en Estampillas Pro Boyaca para que pueda realizar la respectiva firma de la declaración.</p>
                 <div id="codeSign">
                     <?php echo $code['code']; ?>
                 </div>
@@ -130,7 +130,7 @@
                 <table>
                     <tr>
                         <td>
-                            <img src="../images/desarrolladoturri.png" width="150px" height="40px">
+                            <img src="<?= site_url('images/desarrolladoturri.png') ?>" width="150px" height="40px">
                         </td>
                         <td>
                             <p style="font-size: 13px">Este correo fue generando automáticamente, por favor no responder.</p>

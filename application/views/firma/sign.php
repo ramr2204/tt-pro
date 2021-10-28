@@ -30,7 +30,7 @@
     </table>
 
     <div class="panel panel-success">
-        <div class="panel-heading text-center"><b>FIRMAS EN DECLARACIÓN</b></div>
+        <div class="panel-heading text-center"><b>FIRMAS DE LA DECLARACIÓN</b></div>
 
         <table class="table">
             <thead>

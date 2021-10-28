@@ -435,7 +435,7 @@ class Declaraciones extends MY_Controller
         $this->load->library('CustomPdf');
         $pdf = new CustomPdf();
 
-        $this->data['declaracion'] = $this->codegen_model->get(
+        $declaracion = $this->codegen_model->get(
             'declaraciones AS d',
             'd.id_empresa, e.estm_nombre AS estampilla, d.periodo,
                 d.tipo_declaracion, d.declaracion_correccion, d.radicacion_correccion,
@@ -443,7 +443,8 @@ class Declaraciones extends MY_Controller
                 d.sanciones, d.intereses, d.total_base,
                 d.total_estampillas, d.saldo_periodo_anterior, d.sanciones_pago,
                 d.intereses_mora, d.total_cargo, d.saldo_favor,
-                d.id, d.fecha_creacion AS fecha, e.estm_rutaimagen AS imagen_estampilla',
+                d.id, d.fecha_creacion AS fecha, e.estm_rutaimagen AS imagen_estampilla,
+                d.id_estampilla',
             'd.id = "'. $id_declaracion .'"',
             1,NULL,true, '',
             'est_estampillas e', 'e.estm_id = d.id_estampilla'
@@ -454,7 +455,7 @@ class Declaraciones extends MY_Controller
             'e.nit, e.nombre, e.email,
                 e.direccion, e.telefono, e.nombre_representante,
                 e.identificador_representante, m.muni_nombre AS municipio',
-            'e.id = "'. $this->data['declaracion']->id_empresa .'"',
+            'e.id = "'. $declaracion->id_empresa .'"',
             1,NULL,true, '',
             'par_municipios m', 'm.muni_id = e.id_municipio'
         );
@@ -469,6 +470,30 @@ class Declaraciones extends MY_Controller
             'ORDER BY renglon'
         );
 
+        $this->data['pagos'] = $this->codegen_model->getSelect(
+            'estampillas_pro_boyaca.pagos_estampillas AS pagos',
+            'contratista.cont_nombre AS nombre_contratista,
+                contratista.cont_nit AS nit_contratista,
+                pagos.fecha,
+                contrato.cntr_numero AS contrato,
+                pagos.id AS pago,
+                factura.fact_id AS factura,
+                liquidacion.liqu_valorsiniva AS valor_contrato,
+                cuota.valor as base_pago,
+                pagos.valor as pagado',
+            'WHERE factura.fact_estampillaid = '. $declaracion->id_estampilla .'
+                AND DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. date('Y-m', strtotime($declaracion->periodo)) .'"
+                AND DATE_FORMAT(pagos.fecha, "%Y-%m-%d") < "'. date('Y-m-d', strtotime($declaracion->fecha)) .'"
+                AND liquidacion.id_empresa = '. $declaracion->id_empresa,
+            'INNER JOIN est_facturas factura ON factura.fact_id = pagos.factura_id
+                INNER JOIN est_liquidaciones liquidacion ON liquidacion.liqu_id = factura.fact_liquidacionid
+                INNER JOIN cuotas_liquidacion cuota ON cuota.id = factura.id_cuota_liquidacion
+                INNER JOIN con_contratos contrato ON contrato.cntr_id = liquidacion.liqu_contratoid
+                LEFT JOIN con_contratistas contratista ON contratista.cont_id = contrato.cntr_contratistaid',
+            '', 'ORDER BY pagos.fecha DESC'
+        );
+
+        $this->data['declaracion'] = $declaracion;
         $this->data['firmas'] = $info['info'] ? $info['info'] : [];
 
         $this->data['tipo_correccion'] = Equivalencias::declaracionCorreccion();

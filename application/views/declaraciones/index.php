@@ -54,6 +54,14 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalSign" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body" id="contentSign"></div>
+        </div>
+    </div>
+</div>
+
 <script type="text/javascript" language="javascript" charset="utf-8">
 
     meses = JSON.parse('<?= json_encode($meses) ?>');
@@ -66,6 +74,8 @@
         $(document).on('click', '.btn-sign', renderSign)
         $(document).on('submit', '#formulario_firmar', submitFirmar);
         $(document).on('click', '#sendCode', enviarCodigoVerificacion);
+        $(document).on('click', '.sign-modal', openModalSign);
+        $(document).on('click', '.free-sign', liberarFirma);
     });
 
     function updatePage() {
@@ -125,7 +135,14 @@
                         target="_blank"
                     >
                         <i class="fa fa-file-pdf-o"></i>
-                    </a>`)
+                    </a>
+                    <button
+                        class="btn btn-primary sign-modal"
+                        data-cod="${aData[0]}"
+                        title="Visualizar Firmas"
+                    >
+                        <i class="fa fa-eye"></i>
+                    </button>`)
                 }
             }, 
 
@@ -298,6 +315,56 @@
                     $('#responseMSG').html(crearAleta('Se presento un error', 'danger'));
                     console.log(response.message);
                 }
+            },
+        });
+    }
+
+    function openModalSign() {
+        var elemento = this;
+        var codigo = $(elemento).data('cod');
+
+        $('#contentSign').html('');
+
+        //Contenido Ajax
+        $.ajax({
+            url: base_url + 'index.php/firma/obtenerFirmas',
+            type: 'POST',
+            data: { codigo: codigo },
+            success: function (response) {
+                $('#contentSign').html(response);
+                $('#modalSign').modal('show');
+            },
+        });
+    }
+
+    function liberarFirma() {
+        var elemento = this;
+        var opt = confirm(
+            '¿Realmente desea liberar la firma ?, recuerde que una vez liberada no se podrá restaurar.'
+        );
+        if (opt != true) {
+            alert('Operación cancelada por el usuario');
+            return false;
+        }
+        var codigo = $(elemento).data('codigo');
+        var declaracion = $(elemento).data('declaracion');
+
+        $.ajax({
+            url: base_url + 'index.php/firma/liberarFirma',
+            type: 'POST',
+            data: { codigo: codigo },
+            success: function (response) {
+                $('#contentSign').html(`
+                    <div class="text-center">
+                        <h4>${response}</h4>
+                        <button type="button"
+                            class="btn btn-primary sign-modal"
+                            data-cod="${declaracion}"
+                        >
+                            <i class="glyphicon glyphicon-th-list"></i> Regresar a firmas
+                        </button>
+                    </div>
+                `);
             },
         });
     }

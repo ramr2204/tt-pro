@@ -275,7 +275,7 @@ $estampillas_pagadas = 0;
     $("#soporte_cont").fileinput({
         showCaption: false,
         browseClass: "btn btn-default",
-        browseLabel: "Cargar soporte",
+        browseLabel: "Cargar soporte de pago",
         showUpload: false,
         showRemove: false,
     });

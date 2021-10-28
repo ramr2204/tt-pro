@@ -62,18 +62,22 @@ class Codegen_model extends CI_Model
         return $respuestaProceso;
     }
     
-    function edit($table,$data,$fieldID,$ID)
+    function edit($table, $data, $fieldID, $ID, $retornar_registros=false)
     {
         $this->addlog($table,'UPDATE',$ID,$data);
         $this->db->where($fieldID,$ID);
         $this->db->update($table, $data);
+
+        if($retornar_registros){
+            return $this->db->affected_rows();
+        }
 
         if ($this->db->affected_rows() >= 0)
         {
             return TRUE;
         }
     
-        return FALSE;       
+        return FALSE;
     }
 
 
