@@ -72,7 +72,7 @@
 
           <div class="row">
   
-            <div class="col-sm-12 logo"><a class="" href="/"><img src="/images/logo_presentacion.png" alt="bitbahia.com" class="img-responsive"></a></div>
+            <div class="col-sm-12 logo"><a class="" href="/"><img src="<?php echo base_url(); ?>/images/logogober.png" style="max-width: 120px" alt="bitbahia.com" class="img-responsive logoImagen"></a></div>
   
           </div>
           

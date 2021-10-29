@@ -89,7 +89,7 @@
       <div class="row">
         <div class="col-md-3 contLogo">
           <div align="center"> 
-            <img src="<?php echo base_url(); ?>/images/logo_presentacion.png" alt="bitbahia.com" class="img-responsive logoLogin">
+            <img src="<?php echo base_url(); ?>/images/logogober.png" alt="bitbahia.com" class="img-responsive logoLogin" style="max-width: 170px;">
           </div>
         </div>
         <div class="col-md-9" >
@@ -116,7 +116,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-           <div class="logo"><a class="navbar-brand" href="<?php echo base_url(); ?>"><img src="<?php echo base_url(); ?>/images/logo_presentacion.png" alt="bitbahia.com" class="img-responsive logoImagen"></a></div>
+           <div class="logo"><a class="navbar-brand" href="<?php echo base_url(); ?>"><img src="<?php echo base_url(); ?>/images/logogober.png" alt="bitbahia.com" class="img-responsive logoImagen"></a></div>
 
         </div>
 
@@ -319,8 +319,8 @@
         <div class="container">
           <center>
             <br/>
-            <p style="font-size: 20px;">
-                Thomas Greg & Sons de Colombia S.A. © <?php echo date('Y'); ?>
+            <p style="font-size: 16px;">
+                Todos los derechos reservados Turrisystem © <?php echo date('Y'); ?>
             </p>
 
           </center>

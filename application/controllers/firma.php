@@ -277,7 +277,7 @@ class Firma extends MY_Controller
         $code = $date->format('YmdHis');
 
         # Establecemos la longitud del codigo, se rellena para que quede dos digitos
-        $long = str_pad(strlen($cod), 2, '0', STR_PAD_LEFT);;
+        $long = str_pad(strlen($cod), 2, '0', STR_PAD_LEFT);
 
         $code = $long . $cod . $code;
 
