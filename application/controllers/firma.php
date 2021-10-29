@@ -36,7 +36,7 @@ class Firma extends MY_Controller
             {
                 $datos = $this->input->post();
 
-                # Si es igual a uno requiere asignaci&oacute;n de segunda clave
+                # Si es igual a uno requiere asignación de segunda clave
                 if( $this->input->post('st') == '1' ){
                     $vista = 'password';
                 }else{
@@ -60,7 +60,7 @@ class Firma extends MY_Controller
     }
 
     /**
-     * Metodo para obtener informaci&oacute;n de un firma de usuario
+     * Metodo para obtener información de un firma de usuario
      * 
      * @param int $id
      * @return array
@@ -122,7 +122,7 @@ class Firma extends MY_Controller
     {
         $response = (object)[
             'state' => false,
-            'message' => 'Usted ya ha firmado esta declaraci&oacute;n y se est&oacute; a la espera que sea firmada por los dem&oacute;s responsables para ser aprobada',
+            'message' => 'Usted ya ha firmado esta declaración y se está a la espera que sea firmada por los demás responsables para ser aprobada',
             'firmas' => []
         ];
 
@@ -144,7 +144,7 @@ class Firma extends MY_Controller
             {
                 if ($elemento['elemento']->estado != EquivalenciasFirmas::declaracionIniciada())
                 {
-                    $response->message = 'Ya declaraci&oacute;n ya ha sido firmada por todos.';
+                    $response->message = 'Ya declaración ya ha sido firmada por todos.';
                     return $response;
                 }
                 # Verificamos si ya existe una firma del mismo tipo del usuario que va firmar
@@ -159,7 +159,7 @@ class Firma extends MY_Controller
                             if (!$elemento['firmas'][$indicador_grupo]) {
                                 $response->state = true;
                             } else {
-                                $response->message = 'Esta declaraci&oacute;n ya ha sido firmada por el ' . $nombres_grupos[$indicador_grupo];
+                                $response->message = 'Esta declaración ya ha sido firmada por el ' . $nombres_grupos[$indicador_grupo];
                             }
                         }
                     }
@@ -219,7 +219,7 @@ class Firma extends MY_Controller
                 return false;
             }, $tipos_grupos);
 
-            # Recorremos las firmas y obtenemos informaci&oacute;n de los firmantes
+            # Recorremos las firmas y obtenemos información de los firmantes
             if (count($result_all) >  0)
             {
                 foreach ($result_all as $item)
@@ -313,21 +313,21 @@ class Firma extends MY_Controller
 
             $datos_vista = [
                 'code' => $code ,
-                'subject' => 'C&oacute;digo Verificaci&oacute;n Firma',
+                'subject' => 'Código Verificación Firma',
                 'alt' => 'Correo sin formato'
             ];
             $view = $this->load->view('firma/code', $datos_vista,true);
 
             $envio = $mail->enviar([
                 'to'          => $email_destino,
-                'sender_name' => 'Estampillas Pro Boyac&oacute;',
-                'subject'     => 'C&oacute;digo Verificaci&oacute;n Firma',
+                'sender_name' => 'Estampillas Pro Boyacá',
+                'subject'     => 'Código Verificación Firma',
                 'body'        => $view,
                 'alt'         => 'El codigo de verificacion es: '.$code['code']
             ]);
 
             if($envio === true) {
-                $result['message'] = 'El correo electr&oacute;nico se envi&oacute; correctamente, por favor verificar el c&oacute;digo enviado.';
+                $result['message'] = 'El correo electrónico se envió correctamente, por favor verificar el código enviado.';
                 $result['status'] = 1;
             } else {
                 $result['message'] = 'Se presento un problema al enviar el correo.';
@@ -335,7 +335,7 @@ class Firma extends MY_Controller
         }
 
         header('Content-type: application/json; charset=utf-8');
-        echo json_encode($result);
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -415,7 +415,7 @@ class Firma extends MY_Controller
 
         if ( $this->ion_auth->logged_in() && ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/firmar')) )
         {
-            # Obtenemos informaci&oacute;n de la firma
+            # Obtenemos información de la firma
             $info = $this->getInfoSignUser($this->input->post('firma_id'));
 
             # Verificamos la clave
@@ -471,11 +471,11 @@ class Firma extends MY_Controller
         }
 
         header('Content-type: application/json; charset=utf-8');
-        echo json_encode($response);
+        echo json_encode($response, JSON_UNESCAPED_UNICODE);
     }
 
     /**
-     * Metodo para obtener informaci&oacute;n de un firma de usuario
+     * Metodo para obtener información de un firma de usuario
      * 
      * @param int $id
      * @return array
@@ -497,7 +497,7 @@ class Firma extends MY_Controller
     }
 
     /**
-     * Funciones de verificaci&oacute;n
+     * Funciones de verificación
      * 
      * @param string $key
      * @param string $hash
@@ -513,7 +513,7 @@ class Firma extends MY_Controller
     }
 
     /**
-     * Funciones de verificaci&oacute;n del codigo enviado por correo
+     * Funciones de verificación del codigo enviado por correo
      * 
      * @param int $codigo
      * @param int $id
@@ -712,7 +712,7 @@ class Firma extends MY_Controller
      */
     private function generadorPlantilla($elemento)
     {
-        # Agregamos informaci&oacute;n de firma
+        # Agregamos información de firma
         $signData = [];
 
         /*Generamos el registro*/
@@ -1083,13 +1083,13 @@ class Firma extends MY_Controller
     {
         $data = [];
 
-        # Quitamos el primer digito de verificaci&oacute;n
+        # Quitamos el primer digito de verificación
         $findme   = '942';
         $pos = strpos($value, $findme);
 
         if ($pos !== false)
         {
-            # Eliminamos caracters anteriores al codigo de identificaci&oacute;n
+            # Eliminamos caracters anteriores al codigo de identificación
             $value = substr($value, $pos + strlen($findme));
 
             # Obtenemos longitud del codigo y le quitamos los ceros de la izquierda
@@ -1101,7 +1101,7 @@ class Firma extends MY_Controller
             $data['codigo'] = $codigo;
             $value = substr($value, $long);
 
-            # Obtenemos la fecha de creaci&oacute;n longitud default de 14
+            # Obtenemos la fecha de creación longitud default de 14
             $fecha = substr($value, 0, 14);
             if ($this->validateStringDate($fecha))
             {
