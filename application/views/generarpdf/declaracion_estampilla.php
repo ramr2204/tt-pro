@@ -501,8 +501,7 @@
         </table>
 
         <pagebreak>
-        
-        <!-- <img src="<?php echo $this->config->item('application_root'); ?>/images/escudo_largo.png" style="height: 9mm ;margin: 10px;"> -->
+
         <table class="mb-10">
             <tr>
                 <td width="30%">
@@ -543,17 +542,24 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>hhjhh</td>
-                    <td>gjhgh</td>
-                    <td>yyuiy</td>
-                    <td class="text-right">hghhg</td>
-                    <td class="text-right">lkkjljk</td>
-                    <td class="text-right">iououi</td>
-                    <td>jhkjhhk</td>
-                    <td>yuuiy</td>
-                    <td>hjhjjk</td>
-                </tr>
+                <?
+                    foreach($pagos AS $pago)
+                    {
+                        ?>
+                        <tr>
+                            <td><?= $pago->nombre_contratista ?></td>
+                            <td><?= $pago->nit_contratista ?></td>
+                            <td><?= $pago->fecha ?></td>
+                            <td class="text-right"><?= number_format($pago->valor_contrato, 2, ',', '.') ?></td>
+                            <td class="text-right"><?= number_format($pago->base_pago, 2, ',', '.') ?></td>
+                            <td class="text-right"><?= number_format($pago->pagado, 2, ',', '.') ?></td>
+                            <td><?= $pago->contrato ?></td>
+                            <td><?= $pago->pago ?></td>
+                            <td><?= $pago->factura ?></td>
+                        </tr>
+                        <?
+                    }
+                ?>
             </tbody>
         </table>
 

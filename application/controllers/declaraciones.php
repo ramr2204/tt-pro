@@ -26,7 +26,7 @@ class Declaraciones extends MY_Controller
      * 
      * @return null
      */
-    function index()
+    public function index()
     {
     	if (!$this->ion_auth->logged_in())
 		{
@@ -93,13 +93,13 @@ class Declaraciones extends MY_Controller
      * 
      * @return null
      */
-    function dataTable()
+    public function dataTable()
     {
         if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index'))
         {
             $this->load->library('datatables');
             $this->datatables->select('d.id, empresa.nombre AS empresa, estampilla.estm_nombre AS estampilla,
-                d.periodo, d.tipo_declaracion, d.fecha_creacion, d.estado');
+                d.periodo, d.tipo_declaracion, d.fecha_creacion, d.estado, d.soporte');
             $this->datatables->from('declaraciones AS d');
             $this->datatables->join('empresas empresa','empresa.id = d.id_empresa','inner');
             $this->datatables->join('est_estampillas estampilla','estampilla.estm_id = d.id_estampilla','inner');
@@ -128,7 +128,7 @@ class Declaraciones extends MY_Controller
     {
         if ($this->ion_auth->logged_in())
         {
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index'))
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/add'))
             {
                 $_POST = array_merge($_POST, ($this->session->flashdata('campos') ? $this->session->flashdata('campos') : []) );
 
@@ -155,16 +155,18 @@ class Declaraciones extends MY_Controller
 
                 $this->template->set('title', 'Administrar declaraciones');
 
-                $this->data['style_sheets'] = array(
+                $this->data['style_sheets'] = [
                     'css/chosen.css' => 'screen',
-                    'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen'
-                );
-                $this->data['javascripts'] = array(
+                    'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen',
+                    'css/plugins/bootstrap/fileinput.css' => 'screen',
+                ];
+                $this->data['javascripts'] = [
                     'js/chosen.jquery.min.js',
                     'js/plugins/bootstrap/moment.js',
                     'js/plugins/bootstrap/bootstrap-datetimepicker.js',
+                    'js/plugins/bootstrap/fileinput.min.js',
                     'js/autoNumeric.js',
-                );
+                ];
 
                 $this->data['empresas'] = $this->codegen_model->getSelect('empresas','id, nombre', 'WHERE estado = 1', '', '', 'ORDER BY nombre');
                 $this->data['estampillas'] = $this->codegen_model->getSelect('est_estampillas', 'estm_id AS id, estm_nombre AS nombre');
@@ -354,6 +356,48 @@ class Declaraciones extends MY_Controller
             $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);
             return false;
         } else {
+
+            # Cargue del anexo
+            $ruta_soporte = '';
+
+            if (!isset($_FILES['upload_field_name']) && !is_uploaded_file($_FILES['soporte']['tmp_name'])) 
+            {
+                // $this->session->set_flashdata('errorModal', true);
+                // $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe cargar el soporte del pago.');
+            }
+            else
+            {
+                $path = 'uploads/anexosDeclaraciones';
+                if(!is_dir($path)) { //crea la carpeta para los objetos si no existe
+                    mkdir($path,0777,TRUE);
+                }
+                $config['upload_path'] = $path;
+                $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
+                $config['remove_spaces']=TRUE;
+                $config['max_size']    = '99999';
+                $config['overwrite']    = TRUE;
+                $this->load->library('upload');
+
+                // var_dump( $_FILES['soporte']['name'], $_FILES['soporte'], date('F_d_Y') );
+                $config['file_name'] = 'anexo_'.time();
+                $this->upload->initialize($config);
+
+                //Valida si se carga correctamente el soporte
+                if ($this->upload->do_upload("soporte"))
+                {
+                    /*
+                    * Establece la informacion para actualizar la liquidacion
+                    * en este caso la ruta de la copia del objeto del contrato
+                    */
+                    $file_datos= $this->upload->data();
+                    $ruta_soporte = $path.'/'.$file_datos['orig_name'];
+                }
+                else {
+                    $this->data['errormessage'] = '<strong>Error!</strong> '.$this->upload->display_errors();
+                    return false;
+                }
+            }
+
             if($this->input->post('tipo_declaracion') != Equivalencias::declaracionCorreccion()) {
                 $validacion = $this->codegen_model->countwhere('declaraciones',
                     'id_empresa = "'. $this->input->post('empresa') .'"
@@ -383,6 +427,7 @@ class Declaraciones extends MY_Controller
                 'total_cargo'               => $this->input->post('total_cargo'),
                 'saldo_favor'               => $this->input->post('saldo_favor'),
                 'fecha_creacion'            => date('Y-m-d H:i:s'),
+                'soporte'                   => $ruta_soporte,
             ];
 
             if($es_correccion)
@@ -435,7 +480,7 @@ class Declaraciones extends MY_Controller
         $this->load->library('CustomPdf');
         $pdf = new CustomPdf();
 
-        $this->data['declaracion'] = $this->codegen_model->get(
+        $declaracion = $this->codegen_model->get(
             'declaraciones AS d',
             'd.id_empresa, e.estm_nombre AS estampilla, d.periodo,
                 d.tipo_declaracion, d.declaracion_correccion, d.radicacion_correccion,
@@ -443,7 +488,8 @@ class Declaraciones extends MY_Controller
                 d.sanciones, d.intereses, d.total_base,
                 d.total_estampillas, d.saldo_periodo_anterior, d.sanciones_pago,
                 d.intereses_mora, d.total_cargo, d.saldo_favor,
-                d.id, d.fecha_creacion AS fecha, e.estm_rutaimagen AS imagen_estampilla',
+                d.id, d.fecha_creacion AS fecha, e.estm_rutaimagen AS imagen_estampilla,
+                d.id_estampilla',
             'd.id = "'. $id_declaracion .'"',
             1,NULL,true, '',
             'est_estampillas e', 'e.estm_id = d.id_estampilla'
@@ -454,7 +500,7 @@ class Declaraciones extends MY_Controller
             'e.nit, e.nombre, e.email,
                 e.direccion, e.telefono, e.nombre_representante,
                 e.identificador_representante, m.muni_nombre AS municipio',
-            'e.id = "'. $this->data['declaracion']->id_empresa .'"',
+            'e.id = "'. $declaracion->id_empresa .'"',
             1,NULL,true, '',
             'par_municipios m', 'm.muni_id = e.id_municipio'
         );
@@ -469,6 +515,30 @@ class Declaraciones extends MY_Controller
             'ORDER BY renglon'
         );
 
+        $this->data['pagos'] = $this->codegen_model->getSelect(
+            'estampillas_pro_boyaca.pagos_estampillas AS pagos',
+            'contratista.cont_nombre AS nombre_contratista,
+                contratista.cont_nit AS nit_contratista,
+                pagos.fecha,
+                contrato.cntr_numero AS contrato,
+                pagos.id AS pago,
+                factura.fact_id AS factura,
+                liquidacion.liqu_valorsiniva AS valor_contrato,
+                cuota.valor as base_pago,
+                pagos.valor as pagado',
+            'WHERE factura.fact_estampillaid = '. $declaracion->id_estampilla .'
+                AND DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. date('Y-m', strtotime($declaracion->periodo)) .'"
+                AND DATE_FORMAT(pagos.fecha, "%Y-%m-%d") < "'. date('Y-m-d', strtotime($declaracion->fecha)) .'"
+                AND liquidacion.id_empresa = '. $declaracion->id_empresa,
+            'INNER JOIN est_facturas factura ON factura.fact_id = pagos.factura_id
+                INNER JOIN est_liquidaciones liquidacion ON liquidacion.liqu_id = factura.fact_liquidacionid
+                INNER JOIN cuotas_liquidacion cuota ON cuota.id = factura.id_cuota_liquidacion
+                INNER JOIN con_contratos contrato ON contrato.cntr_id = liquidacion.liqu_contratoid
+                LEFT JOIN con_contratistas contratista ON contratista.cont_id = contrato.cntr_contratistaid',
+            '', 'ORDER BY pagos.fecha DESC'
+        );
+
+        $this->data['declaracion'] = $declaracion;
         $this->data['firmas'] = $info['info'] ? $info['info'] : [];
 
         $this->data['tipo_correccion'] = Equivalencias::declaracionCorreccion();

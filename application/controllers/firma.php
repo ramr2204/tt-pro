@@ -32,7 +32,7 @@ class Firma extends MY_Controller
     {
         if ($this->ion_auth->logged_in())
         {
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index'))
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/firmar'))
             {
                 $datos = $this->input->post();
 
@@ -72,7 +72,7 @@ class Firma extends MY_Controller
         # Consultamos el registro de la firma
         $result_sign = $this->codegen_model->get(
             'usuarios_firma',
-            'id, id_usuario, estado, tipo',
+            'id, id_usuario, estado, tipo, created_at',
             'id = '.$id,
             1,NULL,true
         );
@@ -180,9 +180,10 @@ class Firma extends MY_Controller
      * Obtene la declaracion y todas las firmas de la misma
      * 
      * @param int $referencia
+     * @param bool $validacion_estado
      * @return array
      */
-    private function getElemento($referencia)
+    private function getElemento($referencia, $validacion_estado=true)
     {
         $response = [];
 
@@ -202,9 +203,10 @@ class Firma extends MY_Controller
                 'elemento_firma AS firma',
                 'firma.id AS id, firma.fecha AS fecha_firma, u_firma.id_usuario ,
                     u_firma.key_hash AS key_hash, u_firma.created_at AS created_at, u_firma.tipo AS tipo_usuario,
-                    u.id_empresa, u.first_name, u.last_name',
-                'WHERE firma.estado = 1
-                    AND firma.id_declaracion = "'. $referencia .'"',
+                    u.id_empresa, u.first_name, u.last_name,
+                    firma.estado',
+                'WHERE firma.id_declaracion = "'. $referencia .'"'
+                    . ($validacion_estado ? ' AND firma.estado = 1' : ''),
                 'INNER JOIN usuarios_firma u_firma ON u_firma.id = firma.id_usuario_firma
                     INNER JOIN users u ON u.id = u_firma.id_usuario',
                 '',
@@ -274,8 +276,9 @@ class Firma extends MY_Controller
         $date = new DateTime($datetime);
         $code = $date->format('YmdHis');
 
-        # Establecemos la longitud del codigo
-        $long = strlen($cod);
+        # Establecemos la longitud del codigo, se rellena para que quede dos digitos
+        $long = str_pad(strlen($cod), 2, '0', STR_PAD_LEFT);;
+
         $code = $long . $cod . $code;
 
         # Generamos dos numeros aleatorios al final
@@ -297,40 +300,37 @@ class Firma extends MY_Controller
             'message' => '',
         ];
 
-        if ($this->ion_auth->logged_in())
+        if ( $this->ion_auth->logged_in() && ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/firmar')) )
         {
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index'))
-            {
-                $this->load->helper('EnvioCorreoHelper');
-                $mail = new EnvioCorreoHelper();
+            $this->load->helper('EnvioCorreoHelper');
+            $mail = new EnvioCorreoHelper();
 
-                $id = $this->input->post('id');
-                $email_destino = $this->input->post('mail');
-                $nombre_receptor = $this->input->post('destino');
+            $id = $this->input->post('id');
+            $email_destino = $this->input->post('mail');
+            $nombre_receptor = $this->input->post('destino');
 
-                $code = $this->getCodeMail($id);
+            $code = $this->getCodeMail($id);
 
-                $datos_vista = [
-                    'code' => $code ,
-                    'subject' => 'Código Verificación Firma',
-                    'alt' => 'Correo sin formato'
-                ];
-                $view = $this->load->view('firma/code', $datos_vista,true);
+            $datos_vista = [
+                'code' => $code ,
+                'subject' => 'Código Verificación Firma',
+                'alt' => 'Correo sin formato'
+            ];
+            $view = $this->load->view('firma/code', $datos_vista,true);
 
-                $envio = $mail->enviar([
-                    'to'          => $email_destino,
-                    'sender_name' => 'Estampillas Pro Boyacá',
-                    'subject'     => 'Código Verificación Firma',
-                    'body'        => $view,
-                    'alt'         => 'El codigo de verificacion es: '.$code['code']
-                ]);
+            $envio = $mail->enviar([
+                'to'          => $email_destino,
+                'sender_name' => 'Estampillas Pro Boyacá',
+                'subject'     => 'Código Verificación Firma',
+                'body'        => $view,
+                'alt'         => 'El codigo de verificacion es: '.$code['code']
+            ]);
 
-                if($envio === true) {
-                    $result['message'] = 'El correo electrónico se envió correctamente, por favor verificar el código enviado.';
-                    $result['status'] = 1;
-                } else {
-                    $result['message'] = 'Se presento un problema al enviar el correo.';
-                }
+            if($envio === true) {
+                $result['message'] = 'El correo electrónico se envió correctamente, por favor verificar el código enviado.';
+                $result['status'] = 1;
+            } else {
+                $result['message'] = 'Se presento un problema al enviar el correo.';
             }
         }
 
@@ -413,63 +413,60 @@ class Firma extends MY_Controller
             'url' => null
         ];
 
-        if ($this->ion_auth->logged_in())
+        if ( $this->ion_auth->logged_in() && ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/firmar')) )
         {
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index'))
+            # Obtenemos información de la firma
+            $info = $this->getInfoSignUser($this->input->post('firma_id'));
+
+            # Verificamos la clave
+            if ($this->verifyPassword($this->input->post('clave_firma'), $info['password']))
             {
-                # Obtenemos información de la firma
-                $info = $this->getInfoSignUser($this->input->post('firma_id'));
+                # Verificamos que el codigo este activo y sea correcto
+                $band = $this->verifyCodeMail($this->input->post('codigo_v'), $this->input->post('firma_id'));
 
-                # Verificamos la clave
-                if ($this->verifyPassword($this->input->post('clave_firma'), $info['password']))
+                if ($band['state'])
                 {
-                    # Verificamos que el codigo este activo y sea correcto
-                    $band = $this->verifyCodeMail($this->input->post('codigo_v'), $this->input->post('firma_id'));
+                    $accept = $this->input->post('accept');
 
-                    if ($band['state'])
+                    # Verificamos que se aceptaron los terminos
+                    if (isset($accept))
                     {
-                        $accept = $this->input->post('accept');
+                        # Verificamos si la referencia ya esta creada
+                        $elemento = $this->setElemento($this->input->post('referencia'));
 
-                        # Verificamos que se aceptaron los terminos
-                        if (isset($accept))
+                        if (isset($elemento['id']))
                         {
-                            # Verificamos si la referencia ya esta creada
-                            $elemento = $this->setElemento($this->input->post('referencia'));
+                            # Relacionamos el elemento a la firma
+                            $firma = $this->setFirmaElemento($elemento['id'], $info['id'], $info['key_hash']);
 
-                            if (isset($elemento['id']))
+                            if ($firma->state)
                             {
-                                # Relacionamos el elemento a la firma
-                                $firma = $this->setFirmaElemento($elemento['id'], $info['id'], $info['key_hash']);
+                                $response->state = true;
 
-                                if ($firma->state)
+                                # Verificamos si ya tiene todas las firmas activas necesarias
+                                if (!$this->getFullSignDeclaracion($elemento['id']))
                                 {
-                                    $response->state = true;
-
-                                    # Verificamos si ya tiene todas las firmas activas necesarias
-                                    if (!$this->getFullSignDeclaracion($elemento['id']))
-                                    {
-                                        # Generamos y firmamos el archivo
-                                        $url = $this->generadorPlantilla($elemento['id']);
-                                        if (!empty($url)) {
-                                            $response->state = true;
-                                            $response->url = $url;
-                                            $response->message = 'Se firmo y se genero correctamente el PDF';
-                                        }
+                                    # Generamos y firmamos el archivo
+                                    $url = $this->generadorPlantilla($elemento['id']);
+                                    if (!empty($url)) {
+                                        $response->state = true;
+                                        $response->url = $url;
+                                        $response->message = 'Se firmo y se genero correctamente el PDF';
                                     }
                                 }
-                                $response->message = $firma->message;
-                            } else {
-                                $response->message = 'Se presento un problema , intente mas tarde.';
                             }
+                            $response->message = $firma->message;
                         } else {
-                            $response->message = 'Debe aceptar los t&eacute;rminos y condiciones';
+                            $response->message = 'Se presento un problema , intente mas tarde.';
                         }
                     } else {
-                        $response->message = $band['message'];
+                        $response->message = 'Debe aceptar los t&eacute;rminos y condiciones';
                     }
                 } else {
-                    $response->message = 'Clave Incorrecta';
+                    $response->message = $band['message'];
                 }
+            } else {
+                $response->message = 'Clave Incorrecta';
             }
         }
 
@@ -938,12 +935,225 @@ class Firma extends MY_Controller
      * 
      * @return null
      */
-    public function clearTempImg()
+    private function clearTempImg()
     {
         $files = glob('uploads/temporal/*'); //obtenemos todos los nombres de los ficheros
         foreach ($files as $file) {
             if (is_file($file))
                 unlink($file); //elimino el fichero
         }
+    }
+
+    /**
+     * Renderiza el listado de las firmas
+     * 
+     * @return null
+     */
+    public function obtenerFirmas()
+    {
+        if ( $this->ion_auth->logged_in() && ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/liberarFirmas')) )
+        {
+            $info = $this->getElemento($this->input->post('codigo'), false);
+            $info['id_declaracion'] = $this->input->post('codigo');
+
+            $this->load->view('firma/firmas', $info); 
+        }
+    }
+
+    /**
+     * Procesa la inactivacion de una firma y si es necesario anula el estado firmado
+     * 
+     * @return null
+     */
+    public function liberarFirma()
+    {
+        $message = '';
+
+        if ( $this->ion_auth->logged_in() && ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/liberarFirmas')) )
+        {
+            $result = $this->codegen_model->get(
+                'elemento_firma',
+                '*',
+                'id = '.$this->input->post('codigo'),
+                1,NULL,true
+            );
+
+            if (isset($result->id_declaracion))
+            {
+                $elemento = $result->id_declaracion;
+
+                # Actualizamos el estado
+                $update = $this->codegen_model->edit(
+                    'elemento_firma',
+                    [ 'estado' => 0 ],
+                    'id', $this->input->post('codigo'),
+                    true
+                );
+
+                if ($update > 0)
+                {
+                    $message .= 'La firma fue liberado correctamente<br>';
+
+                    # Verificamos si existe un archivo
+                    $result_file = $this->codegen_model->get(
+                        'archivo_firma',
+                        'id',
+                        'id_declaracion = "'. $elemento .'"
+                            AND estado = 1',
+                        1,NULL,true
+                    );
+
+                    if (isset($result_file->id))
+                    {
+                        # Inactivamos el archivo
+                        $update = $this->codegen_model->edit(
+                            'archivo_firma',
+                            [ 'estado' => 0 ],
+                            'id', $result_file->id,
+                            true
+                        );
+
+                        # Se retorna la declaracion a inicializada
+                        $this->codegen_model->edit(
+                            'declaraciones',
+                            [ 'estado' => EquivalenciasFirmas::declaracionIniciada() ],
+                            'id', $elemento
+                        );
+
+                        if ($update > 0) {
+                            $message .= 'El archivo fue invalidado.<br>';
+                        }
+                    }
+                } else {
+                    $message .= 'Se presento un problema, no se pudo liberar la firma.<br>';
+                }
+            }
+        }
+
+        echo $message;
+    }
+
+    /**
+     * Vista para comprobar el codigo de barras de la firma
+     * 
+     * @return null
+     */
+    public function consultarFirma()
+    {
+        $this->template->load($this->config->item('admin_template'),'firma/comprobarFirma', $this->data);
+    }
+
+    /**
+     * Procesa la consulta del codigo de barras de la firma
+     * 
+     * @return null
+     */
+    public function searchSign()
+    {
+        $info = [];
+        $codigo = $this->input->post('value');
+
+        if (!empty($codigo))
+        {
+            $data = $this->getDataFromCode($codigo);
+            $id = isset($data['codigo']) ? $data['codigo'] : null;
+
+            $result_user = $this->codegen_model->get(
+                'usuarios_firma',
+                '*',
+                'id_usuario = '.$id,
+                1,NULL,true
+            );
+
+            if (isset($result_user->id)) {
+                $info = $this->getInfoSign($result_user->id);
+            }
+        }
+
+        $this->load->view('firma/datosFirmante', ['info' => $info]); 
+    }
+
+    /**
+     * Se obitiene la informacion del codigo de la firma
+     * 
+     * @param string $value
+     * @return array
+     */
+    private function getDataFromCode($value)
+    {
+        $data = [];
+
+        # Quitamos el primer digito de verificación
+        $findme   = '942';
+        $pos = strpos($value, $findme);
+
+        if ($pos !== false)
+        {
+            # Eliminamos caracters anteriores al codigo de identificación
+            $value = substr($value, $pos + strlen($findme));
+
+            # Obtenemos longitud del codigo y le quitamos los ceros de la izquierda
+            $long = ltrim(substr($value, 0, 2), '0');
+
+            # Obtenemos el codigo de la firma
+            $value = substr($value, 2);
+            $codigo = substr($value, 0, $long);
+            $data['codigo'] = $codigo;
+            $value = substr($value, $long);
+
+            # Obtenemos la fecha de creación longitud default de 14
+            $fecha = substr($value, 0, 14);
+            if ($this->validateStringDate($fecha))
+            {
+                $date = new DateTime($fecha);
+
+                if ($date)
+                {
+                    $fecha = $date->format('Y-m-d H:i:s');
+                    $data['fecha'] = $fecha;
+
+                    # Obtenemos el valor aleatorio de control
+                    $value = substr($value, 14);
+                    $data['control'] = $value;
+                }
+            } else {
+                $data = [];
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * Valida la fecha convertida
+     * 
+     * @param string $str_date
+     * @return bool
+     */
+    private function validateStringDate($str_date)
+    {
+        $band = true;
+
+        if (strlen($str_date) == 14)
+        {
+            $formats = [
+                [4, 2000, 2030],
+                [2, 01, 12],
+                [2, 01, 31],
+                [2, 00, 24],
+                [2, 00, 60],
+                [2, 00, 60],
+            ];
+
+            foreach ($formats as $item)
+            {
+                $check = substr($str_date, 0, $item[0]);
+                $str_date = substr($str_date, $item[0]);
+
+                if (intval($check) < $item[1] || intval($check) > $item[2]) {
+                    $band = false;
+                }
+            }
+        }
+        return $band;
     }
 }

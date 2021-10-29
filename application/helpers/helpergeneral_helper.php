@@ -24,7 +24,7 @@ Class HelperGeneral extends CI_Controller
     {
         $vectorResultado = array();
     
-        if($val != '')
+        if($val != '' || $llave != '')
         {
             foreach($arr as $objeto)
             {

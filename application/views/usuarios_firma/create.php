@@ -76,7 +76,7 @@
                             </div>
 
                             <div class="col-md-12 column form-group text-center">
-                                <?= anchor('declaraciones', '<i class="fa fa-times"></i> Cancelar', 'class="btn btn-default"'); ?>
+                                <?= anchor('usuariosFirma', '<i class="fa fa-times"></i> Cancelar', 'class="btn btn-default"'); ?>
                                 <button
                                     class="btn btn-primary" type="submit"
                                 >Guardar</button>
