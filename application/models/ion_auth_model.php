@@ -1806,7 +1806,7 @@ class Ion_auth_model extends CI_Model
 		$validate=FALSE;
 		$this->db->select('usme_id');
         $this->db->from('adm_usuarios_menus um');
-        $this->db->join('adm_menus me',"me.menu_id=um.usme_menuid and me.menu_ruta="."'".$check_menu."' and me.menu_estadoid=1",'inner');
+        $this->db->join('adm_menus me',"me.menu_id=um.usme_menuid and me.menu_ruta="."'".$check_menu."'",'inner');
         $this->db->join('users u','u.id=um.usme_usuarioid and u.id='.$id.' and u.active=1','inner');
         $this->db->join('adm_modulos mo','mo.modu_id=me.menu_moduloid and mo.modu_estadoid=1 and u.active=1','inner');
         $this->db->join('adm_aplicaciones a','a.apli_id=mo.modu_aplicacionid and a.apli_estadoid=1 and u.active=1','inner');

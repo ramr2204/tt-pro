@@ -26,7 +26,7 @@ class Declaraciones extends MY_Controller
      * 
      * @return null
      */
-    function index()
+    public function index()
     {
     	if (!$this->ion_auth->logged_in())
 		{
@@ -93,13 +93,13 @@ class Declaraciones extends MY_Controller
      * 
      * @return null
      */
-    function dataTable()
+    public function dataTable()
     {
         if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index'))
         {
             $this->load->library('datatables');
             $this->datatables->select('d.id, empresa.nombre AS empresa, estampilla.estm_nombre AS estampilla,
-                d.periodo, d.tipo_declaracion, d.fecha_creacion, d.estado');
+                d.periodo, d.tipo_declaracion, d.fecha_creacion, d.estado, d.soporte');
             $this->datatables->from('declaraciones AS d');
             $this->datatables->join('empresas empresa','empresa.id = d.id_empresa','inner');
             $this->datatables->join('est_estampillas estampilla','estampilla.estm_id = d.id_estampilla','inner');
@@ -128,7 +128,7 @@ class Declaraciones extends MY_Controller
     {
         if ($this->ion_auth->logged_in())
         {
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index'))
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/add'))
             {
                 $_POST = array_merge($_POST, ($this->session->flashdata('campos') ? $this->session->flashdata('campos') : []) );
 
@@ -155,16 +155,18 @@ class Declaraciones extends MY_Controller
 
                 $this->template->set('title', 'Administrar declaraciones');
 
-                $this->data['style_sheets'] = array(
+                $this->data['style_sheets'] = [
                     'css/chosen.css' => 'screen',
-                    'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen'
-                );
-                $this->data['javascripts'] = array(
+                    'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen',
+                    'css/plugins/bootstrap/fileinput.css' => 'screen',
+                ];
+                $this->data['javascripts'] = [
                     'js/chosen.jquery.min.js',
                     'js/plugins/bootstrap/moment.js',
                     'js/plugins/bootstrap/bootstrap-datetimepicker.js',
+                    'js/plugins/bootstrap/fileinput.min.js',
                     'js/autoNumeric.js',
-                );
+                ];
 
                 $this->data['empresas'] = $this->codegen_model->getSelect('empresas','id, nombre', 'WHERE estado = 1', '', '', 'ORDER BY nombre');
                 $this->data['estampillas'] = $this->codegen_model->getSelect('est_estampillas', 'estm_id AS id, estm_nombre AS nombre');
@@ -354,6 +356,48 @@ class Declaraciones extends MY_Controller
             $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);
             return false;
         } else {
+
+            # Cargue del anexo
+            $ruta_soporte = '';
+
+            if (!isset($_FILES['upload_field_name']) && !is_uploaded_file($_FILES['soporte']['tmp_name'])) 
+            {
+                // $this->session->set_flashdata('errorModal', true);
+                // $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe cargar el soporte del pago.');
+            }
+            else
+            {
+                $path = 'uploads/anexosDeclaraciones';
+                if(!is_dir($path)) { //crea la carpeta para los objetos si no existe
+                    mkdir($path,0777,TRUE);
+                }
+                $config['upload_path'] = $path;
+                $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
+                $config['remove_spaces']=TRUE;
+                $config['max_size']    = '99999';
+                $config['overwrite']    = TRUE;
+                $this->load->library('upload');
+
+                // var_dump( $_FILES['soporte']['name'], $_FILES['soporte'], date('F_d_Y') );
+                $config['file_name'] = 'anexo_'.time();
+                $this->upload->initialize($config);
+
+                //Valida si se carga correctamente el soporte
+                if ($this->upload->do_upload("soporte"))
+                {
+                    /*
+                    * Establece la informacion para actualizar la liquidacion
+                    * en este caso la ruta de la copia del objeto del contrato
+                    */
+                    $file_datos= $this->upload->data();
+                    $ruta_soporte = $path.'/'.$file_datos['orig_name'];
+                }
+                else {
+                    $this->data['errormessage'] = '<strong>Error!</strong> '.$this->upload->display_errors();
+                    return false;
+                }
+            }
+
             if($this->input->post('tipo_declaracion') != Equivalencias::declaracionCorreccion()) {
                 $validacion = $this->codegen_model->countwhere('declaraciones',
                     'id_empresa = "'. $this->input->post('empresa') .'"
@@ -383,6 +427,7 @@ class Declaraciones extends MY_Controller
                 'total_cargo'               => $this->input->post('total_cargo'),
                 'saldo_favor'               => $this->input->post('saldo_favor'),
                 'fecha_creacion'            => date('Y-m-d H:i:s'),
+                'soporte'                   => $ruta_soporte,
             ];
 
             if($es_correccion)

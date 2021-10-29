@@ -23,9 +23,13 @@
 </style>
 
 <div class="row"> 
-    <div class="col-sm-12">    
+    <div class="col-sm-12">
         <h1><?php echo lang('index_heading');?></h1>
-        <?php echo anchor(base_url().'declaraciones/create','<i class="fa fa-plus"></i> '. lang('index_create_user_link'),'class="btn btn-large  btn-primary"'); ?>
+        <?php
+            if( $this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/add') ) {
+                echo anchor(base_url().'declaraciones/create','<i class="fa fa-plus"></i> '. lang('index_create_user_link'),'class="btn btn-large  btn-primary"');
+            }
+        ?>
         <br><br>
         <div class="table-responsive">
             <table class="table table-striped table-bordered table-hover" id="tablaq">
@@ -67,6 +71,8 @@
     meses = JSON.parse('<?= json_encode($meses) ?>');
     tipos_declaraciones = JSON.parse('<?= json_encode($tipos_declaraciones) ?>');
     firma = JSON.parse('<?= json_encode($firma) ?>');
+    permiso_firmar = <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/firmar')) ?>;
+    permiso_liberar_firmas = <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/liberarFirmas')) ?>;
 
     $(function () {
         construirTablaDeclaraciones()
@@ -89,7 +95,7 @@
     function construirTablaDeclaraciones() {
         var boton_firmar = ''
 
-        if(firma.id) {
+        if(firma.id && permiso_firmar) {
             var cambio_firma = firma.change_password == 1 ? 1 : 0
 
             boton_firmar = `<button type="button"
@@ -115,7 +121,8 @@
                 { 'sClass': 'item', 'bSortable': false,'bSearchable': false },
                 { 'sClass': 'item', 'bSortable': false,'bSearchable': false },
                 { 'sClass': 'item' },
-                { 'sClass': 'center','bSortable': false,'bSearchable': false,'sWidth': '5%' },
+                { 'sClass': 'center','bSortable': false,'bSearchable': false },
+                { 'sClass': 'item','bSortable': false,'bSearchable': false, 'bVisible': false },
             ],
             'fnRowCallback':function( nRow, aData, iDataIndex ) {
 
@@ -125,25 +132,44 @@
 
                 $('td:eq(4)', nRow).html(tipos_declaraciones[aData[4]])
 
+                var acciones = '';
+
                 // Inicializada
                 if(aData[6] == 1) {
-                    $('td:eq(6)', nRow).html(boton_firmar.replaceAll(':id', aData[0]))
+                    acciones += boton_firmar.replaceAll(':id', aData[0])
                 } else if(aData[6] == 2) {
-                    $('td:eq(6)', nRow).html(`<a class="btn btn-danger"
+                    acciones += `<a class="btn btn-danger"
                         href="${base_url}uploads/declaraciones/comprobante_declaracion_${aData[0]}.pdf"
                         title="Ver declaración"
                         target="_blank"
                     >
                         <i class="fa fa-file-pdf-o"></i>
-                    </a>
-                    <button
-                        class="btn btn-primary sign-modal"
-                        data-cod="${aData[0]}"
-                        title="Visualizar Firmas"
-                    >
-                        <i class="fa fa-eye"></i>
-                    </button>`)
+                    </a>`;
+
+                    if(permiso_liberar_firmas) {
+                        acciones += `<button
+                            class="btn btn-primary sign-modal"
+                            data-cod="${aData[0]}"
+                            title="Visualizar Firmas"
+                        >
+                            <i class="fa fa-eye"></i>
+                        </button>`
+                    }
                 }
+
+                if(aData[7] != '') {
+                    acciones += `<a class="btn btn-info"
+                        href="${base_url}${aData[7]}"
+                        title="Ver anexo"
+                        target="_blank"
+                    >
+                        <i class="fa fa-files-o"></i>
+                    </a>`
+                }
+
+                acciones = acciones ? '<div class="btn-group">'+ acciones +'</div>' : ''
+
+                $('td:eq(6)', nRow).html(acciones);
             }, 
 
         } );

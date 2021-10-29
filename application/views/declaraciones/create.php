@@ -95,7 +95,7 @@
                             if(count($consulta) > 0)
                             {
                                 ?>
-                                <?= form_open('declaraciones/create'); ?>
+                                <?= form_open_multipart('declaraciones/create', 'role="form"'); ?>
 
                                     <input type="hidden" name="empresa" value="<?= set_value('empresa') ?>">
                                     <input type="hidden" name="tipo_estampilla" value="<?= set_value('tipo_estampilla') ?>">
@@ -105,8 +105,8 @@
                                         <label for="tipo_declaracion">Tipo de declaración</label>
                                         <select class="form-control chosen-select" id="tipo_declaracion" name="tipo_declaracion">
                                             <option value="0">Seleccione...</option>
-                                            <option value="1">Inicial</option>
-                                            <option value="2">Corrección</option>
+                                            <option value="1" <?= set_select('tipo_declaracion', '1') ?>>Inicial</option>
+                                            <option value="2" <?= set_select('tipo_declaracion', '2') ?>>Corrección</option>
                                         </select>
                                         <?= form_error('tipo_declaracion','<span class="text-danger">','</span>'); ?>
                                     </div>
@@ -238,6 +238,7 @@
                                                                     type="text"
                                                                     class="form-control fechas-anio"
                                                                     autocomplete="off"
+                                                                    value="<?= set_value('detalle_vigencia_actual['. $detalle->clasificacion .']'); ?>"
                                                                 >
                                                             </td>
                                                             <td>
@@ -245,6 +246,7 @@
                                                                     type="text"
                                                                     class="form-control fechas-anio"
                                                                     autocomplete="off"
+                                                                    value="<?= set_value('detalle_vigencia_anterior['. $detalle->clasificacion .']'); ?>"
                                                                 >
                                                             </td>
                                                             <td>
@@ -361,6 +363,16 @@
                                         </div>
                                     </div>
 
+                                    <!-- Anexos -->
+                                    <div>
+                                        <div class="col-xs-12">
+                                            <legend>Anexos</legend>
+                                        </div>
+                                        <div class="col-md-12 column form-group">
+                                            <input id="soporte" type="file" class="file" name="soporte" multiple="false">
+                                        </div>
+                                    </div>
+
                                     <div class="pull-right">
                                         <?= anchor('declaraciones', '<i class="fa fa-times"></i> Cancelar', 'class="btn btn-default"'); ?>
                                         <button name="acc" value="generar"
@@ -403,6 +415,14 @@
             viewMode: 'years',
             minViewMode: 'years',
             autoclose: true
+        });
+
+        $("#soporte").fileinput({
+            showCaption: false,
+            browseClass: 'btn btn-default',
+            browseLabel: 'Cargar soporte de pago',
+            showUpload: false,
+            showRemove: false,
         });
 
         $('.chosen-select').chosen({disable_search_threshold: 10});

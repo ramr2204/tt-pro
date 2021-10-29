@@ -437,7 +437,7 @@ class Users extends MY_Controller {
 		 {
 		  if ($this->ion_auth->is_admin())
 			 {
-			  $this->data['title'] = "Crear usuario";	
+			  $this->data['title'] = "Crear usuario";
 		      $this->form_validation->set_rules('id', $this->lang->line('create_user_validation_id_label'), 'required|xss_clean|numeric|greater_than[0]|is_unique[users.id]');
 		      $this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'required|valid_email|is_unique[users.email]');
 		      $this->form_validation->set_rules('telefono', $this->lang->line('create_user_validation_telefono_label'), 'required|numeric');
