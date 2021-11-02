@@ -110,14 +110,6 @@ $estampillas_pagadas = 0;
                                             <tr>
                                                 <td colspan="1">
                                                     <?= $factura->fact_nombre; ?>
-                                                    <?php
-                                                            if ($factura->fact_rutaimagen)
-                                                            {
-                                                                ?>
-                                                                <img src="<?= base_url().$factura->fact_rutaimagen; ?>" height="60" width="60" >
-                                                                <?php
-                                                            }
-                                                    ?>
                                                 </td>
                                                 <td colspan="1" class="text-center"><?= number_format($factura->porcentaje, 2, ',', '.') ?>%</td>
                                                 <td colspan="1" class="text-center"><?= '$'.number_format($factura->valor_total, 2, ',', '.') ?></td>
@@ -168,10 +160,10 @@ $estampillas_pagadas = 0;
 
                 <h4 class="text-center"><b>Pago de Estampillas por Retención</b></h4>
 
-                <div class="form-group col-md-6">
+                <!-- <div class="form-group col-md-6">
                     <label>Estampilla</label>
                     <input type="text" class="form-control" id="nombre_estampilla" disabled>
-                </div>
+                </div> -->
                 <div class="form-group col-md-6">
                     <label>Valor</label>
                     <input type="text" name="valor" class="form-control numerico_ret" id="valor_cont" value="1">
