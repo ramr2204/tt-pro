@@ -402,7 +402,8 @@ class Declaraciones extends MY_Controller
                 $validacion = $this->codegen_model->countwhere('declaraciones',
                     'id_empresa = "'. $this->input->post('empresa') .'"
                         AND id_estampilla = "'. $this->input->post('tipo_estampilla') .'"
-                        AND DATE_FORMAT(periodo, "%Y-%m") = "'. $this->input->post('periodo') .'"');
+                        AND DATE_FORMAT(periodo, "%Y-%m") = "'. $this->input->post('periodo') .'"
+                        AND tipo_declaracion != "'. Equivalencias::declaracionCorreccion() .'"');
                 
                 if($validacion->contador > 0) {
                     $this->data['errormessage'] = 'Otra declaración con los mismos parametros inciales ya ha sido generada.';
