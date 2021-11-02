@@ -246,7 +246,7 @@ class Estampillas extends MY_Controller {
                   $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
                 	$this->data['result'] = $this->codegen_model->get(
 						'est_estampillas',
-						'estm_id,estm_nombre,estm_cuenta,estm_descripcion,estm_bancoid,estm_rutaimagen,estm_codigoB,tipo',
+						'estm_id,estm_nombre,estm_cuenta,estm_descripcion,estm_bancoid,estm_rutaimagen,estm_codigoB',
 						'estm_id = '.$idestampilla,
 						1,NULL,true
 					);
