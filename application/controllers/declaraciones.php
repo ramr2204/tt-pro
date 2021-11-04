@@ -529,7 +529,6 @@ class Declaraciones extends MY_Controller
                 pagos.valor as pagado',
             'WHERE factura.fact_estampillaid = '. $declaracion->id_estampilla .'
                 AND DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. date('Y-m', strtotime($declaracion->periodo)) .'"
-                AND DATE_FORMAT(pagos.fecha, "%Y-%m-%d") < "'. date('Y-m-d', strtotime($declaracion->fecha)) .'"
                 AND liquidacion.id_empresa = '. $declaracion->id_empresa,
             'INNER JOIN est_facturas factura ON factura.fact_id = pagos.factura_id
                 INNER JOIN est_liquidaciones liquidacion ON liquidacion.liqu_id = factura.fact_liquidacionid
@@ -545,6 +544,10 @@ class Declaraciones extends MY_Controller
         $this->data['tipo_correccion'] = Equivalencias::declaracionCorreccion();
         $this->data['meses'] = $this->obtenerMeses(true);
         $this->data['clasificaciones'] = Equivalencias::clasificacionContratos();
+
+        $this->data['formatear_valor'] = function($numero) {
+            return '$'.number_format($numero, 2, ',', '.');
+        };
 
         $html = $this->load->view('generarpdf/declaracion_estampilla', $this->data, TRUE);
 
