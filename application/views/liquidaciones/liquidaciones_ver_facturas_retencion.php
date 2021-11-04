@@ -50,7 +50,7 @@ $estampillas_pagadas = 0;
                             </td>
                             <td>
                                 <?
-                                    if(!$cuota)
+                                    if(!$cuota && number_format($saldo_contrato, 0, '', '') != 0)
                                     {
                                         ?>
                                         <button class="btn btn-primary" type="submit">Confirmar</button>

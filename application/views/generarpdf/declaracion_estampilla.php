@@ -122,7 +122,7 @@
                             </tr>
                             <tr>
                                 <td colspan="2" class="text-center bold" style="height:30px">
-                                    DECLARACIÓN ESTAMPILLA PRO CULTURA
+                                    DECLARACIÓN <?= mb_strtoupper($declaracion->estampilla, 'UTF-8') ?>
                                 </td>
                                 <td class="bold">
                                     FECHA: 26/Jul/2016
@@ -228,20 +228,20 @@
                                         </tr>
                                         <tr>
                                             <td> PERIODO GRAVABLE:</td>
-                                            <td> <?= $declaracion->periodo_correccion ? strtoupper(strftime('%B %Y', strtotime($declaracion->periodo_correccion))) : '' ?></td>
+                                            <td> <?= $declaracion->periodo_correccion ? mb_strtoupper(strftime('%B %Y', strtotime($declaracion->periodo_correccion)), 'UTF-8') : '' ?></td>
                                         </tr>
                                     </table>
                                 </td>
                                 <td width="20%" class="text-right"> VALOR RECAUDADO</td>
-                                <td width="25%" class="borde-especifico"> <?= $declaracion->recaudado ?></td>
+                                <td width="25%" class="borde-especifico"> <?= $formatear_valor($declaracion->recaudado) ?></td>
                             </tr>
                             <tr>
                                 <td class="text-right"> VALOR SANCIONES</td>
-                                <td class="borde-especifico"> <?= $declaracion->sanciones ?></td>
+                                <td class="borde-especifico"> <?= $formatear_valor($declaracion->sanciones) ?></td>
                             </tr>
                             <tr>
                                 <td class="text-right"> VALOR INTERESES</td>
-                                <td class="borde-especifico"> <?= $declaracion->intereses ?></td>
+                                <td class="borde-especifico"> <?= $formatear_valor($declaracion->intereses) ?></td>
                             </tr>
                         </tbody>
                     </table>
@@ -259,7 +259,7 @@
                                             $mes_periodo = (int)date('m', strtotime($declaracion->periodo));
                                             foreach($meses AS $numero => $nombre)
                                             {
-                                                echo '<td class="text-center"> '.($numero == $mes_periodo ? 'X' : strtoupper($nombre)).'</td>';
+                                                echo '<td class="text-center"> '.($numero == $mes_periodo ? 'X' : mb_strtoupper($nombre, 'UTF-8')).'</td>';
                                             }
                                         ?>
                                     </tr>
@@ -276,7 +276,7 @@
                             <td width="25%" > C.2. NIT </td>
                         </tr>
                         <tr>
-                            <td class="text-center" colspan="2"> <?= strtoupper($empresa->nombre) ?></td>
+                            <td class="text-center" colspan="2"> <?= mb_strtoupper($empresa->nombre, 'UTF-8') ?></td>
                             <td class="text-center"> <?= $empresa->nit ?></td>
                         </tr>
                         <tr>
@@ -290,7 +290,7 @@
                             <td> C.5. N° DE IDENTIFICACIÓN</td>
                         </tr>
                         <tr>
-                            <td class="text-center" colspan="2"> <?= strtoupper($empresa->nombre_representante) ?></td>
+                            <td class="text-center" colspan="2"> <?= mb_strtoupper($empresa->nombre_representante, 'UTF-8') ?></td>
                             <td class="text-center"> <?= number_format($empresa->identificador_representante, 0, '', '.') ?></td>
                         </tr>
                         <tr>
@@ -323,7 +323,7 @@
                                 <td class="text-center" rowspan="2" width="25%"> D.1. CLASE</td>
                                 <td class="text-center" colspan="3"> D.2. VALOR</td>
                                 <td class="text-center" rowspan="2"> D.3. TARIFA</td>
-                                <td class="text-center" rowspan="2" width="20%"> D.4. VALOR RECAUDO ESTAMPILLA <?= strtoupper($declaracion->estampilla) ?></td>
+                                <td class="text-center" rowspan="2" width="20%"> D.4. VALOR RECAUDO ESTAMPILLA <?= mb_strtoupper($declaracion->estampilla, 'UTF-8') ?></td>
                             </tr>
                             <tr>
                                 <td class="text-center" width="20%"> VALOR BASE</td>
@@ -338,12 +338,12 @@
                                     ?>
                                     <tr>
                                         <td class="text-center"> <?= $detalle->renglon ?></td>
-                                        <td> <?= strtoupper($clasificaciones[$detalle->renglon]) ?></td>
-                                        <td class="text-center"> <?= number_format($detalle->base, 2, ',', '.') ?></td>
+                                        <td> <?= mb_strtoupper($clasificaciones[$detalle->renglon], 'UTF-8') ?></td>
+                                        <td class="text-center"> <?= $formatear_valor($detalle->base) ?></td>
                                         <td class="text-center"> <?= $detalle->vigencia_actual ?></td>
                                         <td class="text-center"> <?= $detalle->vigencia_anterior ?></td>
-                                        <td class="text-center"> <?= number_format($detalle->porcentaje, 2, ',', '.')  ?>%</td>
-                                        <td class="text-right"> <?= number_format($detalle->valor_estampilla, 2, ',', '.') ?></td>
+                                        <td class="text-center"> <?= $formatear_valor($detalle->porcentaje)  ?>%</td>
+                                        <td class="text-right"> <?= $formatear_valor($detalle->valor_estampilla) ?></td>
                                     </tr>
                                     <?
                                 }
@@ -351,11 +351,11 @@
                             <tr>
                                 <td class="text-center"> 5</td>
                                 <td> TOTAL A FAVOR DEL DEPARTAMETO</td>
-                                <td class="text-center"> <?= number_format($declaracion->total_base, 2, ',', '.') ?></td>
+                                <td class="text-center"> <?= $formatear_valor($declaracion->total_base) ?></td>
                                 <td class="text-center"></td>
                                 <td class="text-center"></td>
                                 <td class="text-center"></td>
-                                <td class="text-right"> <?= number_format($declaracion->total_estampillas, 2, ',', '.') ?></td>
+                                <td class="text-right"> <?= $formatear_valor($declaracion->total_estampillas) ?></td>
                             </tr>
                         </tbody>
                     </table>
@@ -367,32 +367,32 @@
                             <tr>
                                 <td width="3%" class="text-center"> 6</td>
                                 <td> TOTAL A FAVOR DEL DEPARTAMETO</td>
-                                <td width="20%" class="text-right"> <?= number_format($declaracion->total_estampillas, 2, ',', '.') ?></td>
+                                <td width="20%" class="text-right"> <?= $formatear_valor($declaracion->total_estampillas) ?></td>
                             </tr>
                             <tr>
                                 <td class="text-center"> -</td>
                                 <td> SALDO A FAVOR PERÍODO ANTERIOR</td>
-                                <td class="text-right"> <?= number_format($declaracion->saldo_periodo_anterior, 2, ',', '.') ?></td>
+                                <td class="text-right"> <?= $formatear_valor($declaracion->saldo_periodo_anterior) ?></td>
                             </tr>
                             <tr>
                                 <td class="text-center"> +</td>
                                 <td> VALOR SANCIONES</td>
-                                <td class="text-right"> <?= number_format($declaracion->sanciones_pago, 2, ',', '.') ?></td>
+                                <td class="text-right"> <?= $formatear_valor($declaracion->sanciones_pago) ?></td>
                             </tr>
                             <tr>
                                 <td class="text-center"> +</td>
                                 <td> INTERESES DE MORA</td>
-                                <td class="text-right"> <?= number_format($declaracion->intereses_mora, 2, ',', '.') ?></td>
+                                <td class="text-right"> <?= $formatear_valor($declaracion->intereses_mora) ?></td>
                             </tr>
                             <tr>
                                 <td class="text-center"></td>
                                 <td> TOTAL A CARGO POR RECAUDO ESTAMPILLA, SANCIONES E INTERESES</td>
-                                <td class="text-right"> <?= number_format($declaracion->total_cargo, 2, ',', '.') ?></td>
+                                <td class="text-right"> <?= $formatear_valor($declaracion->total_cargo) ?></td>
                             </tr>
                             <tr>
                                 <td class="text-center"></td>
                                 <td> SALDO A FAVOR</td>
-                                <td class="text-right"> <?= number_format($declaracion->saldo_favor, 2, ',', '.') ?></td>
+                                <td class="text-right"> <?= $formatear_valor($declaracion->saldo_favor) ?></td>
                             </tr>
                         </tbody>
                     </table>
@@ -424,7 +424,7 @@
                                                         <td colspan="2"
                                                             class="bold"
                                                             <?= $indice != 0 ? 'style="padding-top:20px"' : '' ?>
-                                                        > F.<?= $indice+1 ?>. <?= strtoupper($firma['label']) ?></td>
+                                                        > F.<?= $indice+1 ?>. <?= mb_strtoupper($firma['label'], 'UTF-8') ?></td>
                                                     </tr>
                                                     <?
                                                         # Si es la primera
@@ -447,7 +447,7 @@
                                                     </tr>
                                                     <tr>
                                                         <td class="bold"> NOMBRE</td>
-                                                        <td class="bold"> <?= strtoupper($firma['first_name'] .' '. $firma['last_name']) ?></td>
+                                                        <td class="bold"> <?= mb_strtoupper($firma['first_name'] .' '. $firma['last_name'], 'UTF-8') ?></td>
                                                     </tr>
                                                     <tr>
                                                         <td class="bold"> C.C.</td>
@@ -508,9 +508,9 @@
                     <img src="<?= $this->config->item('application_root') .'/'. $declaracion->imagen_estampilla ?>" style="width:150px">
                 </td>
                 <td class="bold">
-                    <?= strtoupper($empresa->nombre) ?><br>
+                    <?= mb_strtoupper($empresa->nombre) ?><br>
                     NIT: <?= $empresa->nit ?><br>
-                    DECLARACION DE ESTAMPILLA <?= strtoupper($declaracion->estampilla) ?>
+                    DECLARACION DE ESTAMPILLA <?= mb_strtoupper($declaracion->estampilla) ?>
                 </td>
             </tr>
         </table>
@@ -518,7 +518,7 @@
         <table>
             <tr>
                 <td width="20%" class="v-bot bold">PERIODO:</td>
-                <td width="9%" class="v-bot bold"><?= strtoupper(strftime('%B', strtotime($declaracion->periodo))) ?></td>
+                <td width="9%" class="v-bot bold"><?= mb_strtoupper(strftime('%B', strtotime($declaracion->periodo)), 'UTF-8') ?></td>
                 <td width="9%"></td>
                 <td width="13%" class="text-center bg-verde bold"> Contrato - Factura IVA Incluido</td>
                 <td width="13%" class="text-center bg-verde bold"> Base liquidación estampilla SIN IVA</td>
@@ -550,9 +550,9 @@
                             <td><?= $pago->nombre_contratista ?></td>
                             <td><?= $pago->nit_contratista ?></td>
                             <td><?= $pago->fecha ?></td>
-                            <td class="text-right"><?= number_format($pago->valor_contrato, 2, ',', '.') ?></td>
-                            <td class="text-right"><?= number_format($pago->base_pago, 2, ',', '.') ?></td>
-                            <td class="text-right"><?= number_format($pago->pagado, 2, ',', '.') ?></td>
+                            <td class="text-right"><?= $formatear_valor($pago->valor_contrato) ?></td>
+                            <td class="text-right"><?= $formatear_valor($pago->base_pago) ?></td>
+                            <td class="text-right"><?= $formatear_valor($pago->pagado) ?></td>
                             <td><?= $pago->contrato ?></td>
                             <td><?= $pago->pago ?></td>
                             <td><?= $pago->factura ?></td>
