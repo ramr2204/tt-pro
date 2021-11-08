@@ -323,7 +323,7 @@
                                 <td class="text-center" rowspan="2" width="25%"> D.1. CLASE</td>
                                 <td class="text-center" colspan="3"> D.2. VALOR</td>
                                 <td class="text-center" rowspan="2"> D.3. TARIFA</td>
-                                <td class="text-center" rowspan="2" width="20%"> D.4. VALOR RECAUDO ESTAMPILLA <?= mb_strtoupper($declaracion->estampilla, 'UTF-8') ?></td>
+                                <td class="text-center" rowspan="2" width="20%"> D.4. VALOR RECAUDO <?= mb_strtoupper($declaracion->estampilla, 'UTF-8') ?></td>
                             </tr>
                             <tr>
                                 <td class="text-center" width="20%"> VALOR BASE</td>
@@ -342,7 +342,7 @@
                                         <td class="text-center"> <?= $formatear_valor($detalle->base) ?></td>
                                         <td class="text-center"> <?= $detalle->vigencia_actual ?></td>
                                         <td class="text-center"> <?= $detalle->vigencia_anterior ?></td>
-                                        <td class="text-center"> <?= $formatear_valor($detalle->porcentaje)  ?>%</td>
+                                        <td class="text-center"> <?= number_format($detalle->porcentaje, 2, ',', '.')  ?>%</td>
                                         <td class="text-right"> <?= $formatear_valor($detalle->valor_estampilla) ?></td>
                                     </tr>
                                     <?
@@ -510,7 +510,7 @@
                 <td class="bold">
                     <?= mb_strtoupper($empresa->nombre) ?><br>
                     NIT: <?= $empresa->nit ?><br>
-                    DECLARACION DE ESTAMPILLA <?= mb_strtoupper($declaracion->estampilla) ?>
+                    DECLARACIÓN <?= mb_strtoupper($declaracion->estampilla) ?>
                 </td>
             </tr>
         </table>
