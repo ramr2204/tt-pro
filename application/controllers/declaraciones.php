@@ -82,7 +82,7 @@ class Declaraciones extends MY_Controller
         $meses = [];
 
         for($mes = 1; $mes <= 12; $mes++){
-            $meses[$mes] = $mes_corto ? substr(strftime('%b', mktime(0, 0, 0, $mes)), 0, -1) : strftime('%B', mktime(0, 0, 0, $mes));
+            $meses[$mes] = $mes_corto ? strftime('%b', mktime(0, 0, 0, $mes)) : strftime('%B', mktime(0, 0, 0, $mes));
         }
 
         return $meses;
@@ -429,6 +429,7 @@ class Declaraciones extends MY_Controller
                 'saldo_favor'               => $this->input->post('saldo_favor'),
                 'fecha_creacion'            => date('Y-m-d H:i:s'),
                 'soporte'                   => $ruta_soporte,
+                'creado_por'                => $this->session->userdata('user_id'),
             ];
 
             if($es_correccion)
@@ -490,7 +491,7 @@ class Declaraciones extends MY_Controller
                 d.total_estampillas, d.saldo_periodo_anterior, d.sanciones_pago,
                 d.intereses_mora, d.total_cargo, d.saldo_favor,
                 d.id, d.fecha_creacion AS fecha, e.estm_rutaimagen AS imagen_estampilla,
-                d.id_estampilla',
+                d.id_estampilla, d.creado_por',
             'd.id = "'. $id_declaracion .'"',
             1,NULL,true, '',
             'est_estampillas e', 'e.estm_id = d.id_estampilla'
@@ -536,6 +537,13 @@ class Declaraciones extends MY_Controller
                 INNER JOIN con_contratos contrato ON contrato.cntr_id = liquidacion.liqu_contratoid
                 LEFT JOIN con_contratistas contratista ON contratista.cont_id = contrato.cntr_contratistaid',
             '', 'ORDER BY pagos.fecha DESC'
+        );
+
+        $this->data['funcionario'] = $this->codegen_model->get(
+            'users',
+            'first_name, last_name',
+            'id = "'. $declaracion->creado_por .'"',
+            1,NULL,true
         );
 
         $this->data['declaracion'] = $declaracion;

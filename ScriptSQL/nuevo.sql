@@ -37,8 +37,6 @@ ALTER TABLE estampillas_pro_boyaca.con_contratos ADD id_empresa INT(11) NOT NULL
 
 ALTER TABLE estampillas_pro_boyaca.est_liquidaciones ADD id_empresa INT(11) NOT NULL;
 
-/*  */
-
 CREATE TABLE `declaraciones` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_empresa` int(11) NOT NULL,
@@ -124,3 +122,7 @@ CREATE TABLE `archivo_firma` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+/*  */
+
+ALTER TABLE estampillas_pro_boyaca.declaraciones ADD creado_por INT(11) NOT NULL;
+ALTER TABLE estampillas_pro_boyaca.declaraciones CHANGE creado_por creado_por INT(11) NOT NULL AFTER estado;
