@@ -169,7 +169,7 @@ class Firma extends MY_Controller
             } else {
                 $response->state = true;
             }
-            $response->firmas = isset($elemento['info']) ? $elemento['info'] : array();
+            $response->firmas = isset($elemento['info']) ? $elemento['info'] : [];
         } else {
             $response->message = 'No tiene permisos para firmar esta declaraci&oacute;n';
         }

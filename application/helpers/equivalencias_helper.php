@@ -5,12 +5,12 @@ class Equivalencias extends CI_Controller
     # Codigo (salt) usado para generar hashes
     private static $generadorHash = '729se32sm3owg=.we__hl';
 
-    private static $clasificacionContratos = array(
+    private static $clasificacionContratos = [
         1 => 'Contratos',
         2 => 'Modificaciones',
         3 => 'Adiciones',
         4 => 'Otros',
-    );
+    ];
     
     private static $contratoNormal = 1;
     private static $contratoModificacion = 2;
@@ -27,10 +27,10 @@ class Equivalencias extends CI_Controller
         9, # Firmante
     ];
 
-    private static $tipoDeclaraciones = array(
+    private static $tipoDeclaraciones = [
         1 => 'Inicial',
-        2 => 'Correccion',
-    );
+        2 => 'Corrección',
+    ];
 
     private static $declaracionCorreccion = 2;
 
