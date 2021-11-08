@@ -172,7 +172,7 @@
                             <tr>
                                 <td>NOMBRE FUNCIONARIO:</td>
                                 <td>
-
+                                    <?= mb_strtoupper(($funcionario->first_name . ' ' . $funcionario->last_name), 'UTF-8') ?>
                                 </td>
                             </tr>
                             <tr>
