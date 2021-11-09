@@ -1059,15 +1059,18 @@ class Firma extends MY_Controller
             $data = $this->getDataFromCode($codigo);
             $id = isset($data['codigo']) ? $data['codigo'] : null;
 
-            $result_user = $this->codegen_model->get(
-                'usuarios_firma',
-                '*',
-                'id_usuario = '.$id,
-                1,NULL,true
-            );
-
-            if (isset($result_user->id)) {
-                $info = $this->getInfoSign($result_user->id);
+            if($id)
+            {
+                $result_user = $this->codegen_model->get(
+                    'usuarios_firma',
+                    '*',
+                    'id_usuario = '.$id,
+                    1,NULL,true
+                );
+    
+                if (isset($result_user->id)) {
+                    $info = $this->getInfoSign($result_user->id);
+                }
             }
         }
 
