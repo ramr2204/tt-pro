@@ -1040,6 +1040,7 @@ class Firma extends MY_Controller
      */
     public function consultarFirma()
     {
+        $this->template->set('title', 'Comprobar firma');
         $this->template->load($this->config->item('admin_template'),'firma/comprobarFirma', $this->data);
     }
 

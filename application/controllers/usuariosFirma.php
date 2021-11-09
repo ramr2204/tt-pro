@@ -42,7 +42,7 @@ class usuariosFirma extends MY_Controller
 			$this->data['infomessage']		= $this->session->flashdata('infomessage');
 
 			//template data
-            $this->template->set('title', 'Administrar Usuarios');
+            $this->template->set('title', 'Administrar Usuarios Firma');
             $this->data['style_sheets'] = [
                 'css/chosen.css' => 'screen',
                 'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'

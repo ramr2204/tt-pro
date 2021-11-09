@@ -45,7 +45,7 @@ class Declaraciones extends MY_Controller
 			$this->data['infomessage']		= $this->session->flashdata('infomessage');
 
 			//template data
-            $this->template->set('title', 'Usuarios');
+            $this->template->set('title', 'Administrar declaraciones');
             $this->data['style_sheets'] = [
                 'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
             ];
@@ -153,7 +153,7 @@ class Declaraciones extends MY_Controller
                     }
                 }
 
-                $this->template->set('title', 'Administrar declaraciones');
+                $this->template->set('title', 'Ingreso de declaraciones');
 
                 $this->data['style_sheets'] = [
                     'css/chosen.css' => 'screen',
