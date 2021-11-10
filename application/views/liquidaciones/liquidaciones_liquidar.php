@@ -78,7 +78,7 @@ $(document).ready(function() {
             }
 
             if(aData[7] != null && aData[7] != 'Modificado') {
-                $("td:eq(7)", nRow).append('<a href="'+ base_url + 'liquidaciones/estampillasRetencion/' + aData[0]+'" target="_blank" class="btn btn-warning btn-xs" title="Pagar estampillas por retencions"><i class="fa fa-legal"></i></a>');
+                $("td:eq(7)", nRow).append('<a href="'+ base_url + 'liquidaciones/estampillasRetencion/' + aData[0]+'" target="_blank" class="btn btn-warning btn-xs" title="Pagar estampillas por retencion"><i class="fa fa-legal"></i></a>');
             }
         },
         "fnDrawCallback": function( oSettings ) {
