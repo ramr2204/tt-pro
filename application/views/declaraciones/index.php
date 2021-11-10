@@ -89,7 +89,10 @@
     }
 
     function capitalize(string) {
-        return string[0].toUpperCase() + string.slice(1)
+        if(string) {
+            return string[0].toUpperCase() + string.slice(1)
+        }
+        return '';
     }
 
     function construirTablaDeclaraciones() {
@@ -128,7 +131,7 @@
 
                 var fecha_partida = aData[3].split('-')
 
-                $('td:eq(3)', nRow).html(capitalize(meses[fecha_partida[1]]) + ' ' + fecha_partida[0])
+                $('td:eq(3)', nRow).html(capitalize(meses[Number(fecha_partida[1])]) + ' ' + fecha_partida[0])
 
                 $('td:eq(4)', nRow).html(tipos_declaraciones[aData[4]])
 
@@ -300,6 +303,7 @@
                     }
 
                     $('#responseMSG').html(crearAleta(response.message, color));
+                    $('#myModal').animate({ scrollTop: 0 }, 'slow');
 
                     if (response.hasOwnProperty('url') && response.url != null) {
                         window.open(base_url + response.url, '_blank');
