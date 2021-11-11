@@ -126,3 +126,7 @@ CREATE TABLE `archivo_firma` (
 
 ALTER TABLE estampillas_pro_boyaca.declaraciones ADD creado_por INT(11) NOT NULL;
 ALTER TABLE estampillas_pro_boyaca.declaraciones CHANGE creado_por creado_por INT(11) NOT NULL AFTER estado;
+
+ALTER TABLE estampillas_pro_boyaca.detalles_declaracion MODIFY COLUMN vigencia_actual double(14,2) NOT NULL;
+ALTER TABLE estampillas_pro_boyaca.detalles_declaracion MODIFY COLUMN vigencia_anterior double(14,2) NOT NULL;
+
