@@ -214,21 +214,13 @@ $(document).ready(function() {
     overflow: hidden;
 }
 </style>
-<div class="row"> 
-    <div class="col-xs-12">
-        <?php
-            if($band_saldoestampillas) 
-            {
-                echo '<div class="alert alert-dismissable alert-danger">'. $notif_saldoestampillas.'</div>';
-            }
-        ?>
-    </div>
+<div class="row">
     <div rol="usuario_rotulo" style="display:none;"><?php echo $this->ion_auth->user()->row()->id; ?></div>
     <div class="col-sm-12">
         <h1>Contratos</h1>
         <br><br>
     </div>
-</div> 
+</div>
 
 <div class="row"> 
     <div class="col-sm-1"></div>
