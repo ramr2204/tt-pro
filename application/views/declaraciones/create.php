@@ -235,16 +235,16 @@
                                                             </td>
                                                             <td>
                                                                 <input name="detalle_vigencia_actual[<?= $detalle->clasificacion ?>]"
-                                                                    type="text"
-                                                                    class="form-control fechas-anio"
+                                                                    type="number"
+                                                                    class="form-control"
                                                                     autocomplete="off"
                                                                     value="<?= set_value('detalle_vigencia_actual['. $detalle->clasificacion .']'); ?>"
                                                                 >
                                                             </td>
                                                             <td>
                                                                 <input name="detalle_vigencia_anterior[<?= $detalle->clasificacion ?>]"
-                                                                    type="text"
-                                                                    class="form-control fechas-anio"
+                                                                    type="number"
+                                                                    class="form-control"
                                                                     autocomplete="off"
                                                                     value="<?= set_value('detalle_vigencia_anterior['. $detalle->clasificacion .']'); ?>"
                                                                 >

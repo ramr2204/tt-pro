@@ -331,22 +331,8 @@ class Declaraciones extends MY_Controller
 
         foreach(Equivalencias::clasificacionContratos() AS $id => $nombre)
         {
-            $this->form_validation->set_rules('detalle_vigencia_actual['. $id .']', 'Vigencia actual '. $id,
-                [
-                    'required',
-                    'trim',
-                    'xss_clean',
-                    'regex_match[/^(19|20)\d\d$/]'
-                ]
-            );
-            $this->form_validation->set_rules('detalle_vigencia_anterior['. $id .']', 'Vigencia anterior '. $id,
-                [
-                    'required',
-                    'trim',
-                    'xss_clean',
-                    'regex_match[/^(19|20)\d\d$/]'
-                ]
-            );
+            $this->form_validation->set_rules('detalle_vigencia_actual['. $id .']', 'Vigencia actual '. $id, 'required|trim|xss_clean|numeric');
+            $this->form_validation->set_rules('detalle_vigencia_anterior['. $id .']', 'Vigencia anterior '. $id, 'required|trim|xss_clean|numeric');
             $this->form_validation->set_rules('detalle_porcentaje['. $id .']', 'Tarifa '. $id, 'required|trim|xss_clean|numeric');
             $this->form_validation->set_rules('detalle_base['. $id .']', 'Valor base '. $id, 'required|trim|xss_clean|numeric');
             $this->form_validation->set_rules('detalle_pagado['. $id .']', 'Valor recaudo estampilla '. $id, 'required|trim|xss_clean|numeric');
