@@ -27,15 +27,22 @@
                             <div class="col-md-12 column">
                                 <div class="form-group">
                                 <label for="contratistaid">Contratista</label>
-                                <select class="form-control chosen" id="contratistaid" name="contratistaid" required="required" >
-                                <option value="0">Seleccione...</option>
-                                    <?php  foreach($contratistas as $row) { ?>
-                                    <option
-                                        value="<?= $row->cont_id; ?>"
-                                        <?= set_value('contratistaid') == $row->cont_id ? 'selected' : '' ?>
-                                    ><?php echo $row->cont_nit.' - '.$row->cont_nombre; ?></option>
-                                    <?php   } ?>
-                                </select>
+                                <div class="row">
+                                    <div class="col-md-10">
+                                        <select class="form-control chosen" id="contratistaid" name="contratistaid" required="required" >
+                                        <option value="0">Seleccione...</option>
+                                            <?php  foreach($contratistas as $row) { ?>
+                                            <option
+                                                value="<?= $row->cont_id; ?>"
+                                                <?= set_value('contratistaid') == $row->cont_id ? 'selected' : '' ?>
+                                            ><?php echo $row->cont_nit.' - '.$row->cont_nombre; ?></option>
+                                            <?php   } ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-success" id="btn-historial" type="button"><i class="fa fa-align-justify"></i></button>
+                                    </div>
+                                </div>
                                 <?php echo form_error('contratistaid','<span class="text-danger">','</span>'); ?>
                                 </div>
                             </div>
@@ -250,4 +257,18 @@
                 $('#contrato_relacionado').closest('.column').hide();
             }
         }
+
+        $('#btn-historial').click(function(){
+            var contratista = $('#contratistaid').val();
+
+            if(contratista != 0)
+            {
+                window.open(base_url+'liquidaciones/liquidar?person='+contratista);
+            }
+            else
+            {
+                alert("Seleccione por favor un contratista!!");
+            }
+        });
+
   </script>
