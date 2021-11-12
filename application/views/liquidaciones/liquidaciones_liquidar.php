@@ -50,11 +50,12 @@ $(document).ready(function() {
             { "sClass": "center" }, 
             { "sClass": "item" },
             { "sClass": "item" },
-            { "sClass": "item" },  
+            { "sClass": "item" },
+            { "sClass": "money"},
             { "sClass": "money"},
             { "sClass": "item"},
             { "sClass": "center","bSortable": false,"bSearchable": false},
-            { "sClass": "center","bVisible": false}, 
+            { "sClass": "center","bVisible": false},
         ],   
         "fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
             if(aData[5] != null)
@@ -66,16 +67,20 @@ $(document).ready(function() {
                $("td:eq(4)", nRow).html('<div class="small">NO REGISTRA...</div>');     
             }
 
-            $("td:eq(7)", nRow).html('');
+            $("td:eq(8)", nRow).html('');
             
             var number= accounting.formatMoney(aData[6], "$", 2, ".", ","); // €4.999,99
             $("td:eq(5)", nRow).html('<div class="">' + number + '</div>');
-            if (aData[7]=='Legalizado') {
-                $("td:eq(7)", nRow).append('<a href="#" class="btn btn-success btn-xs terminar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-tags"></i></a>');
+
+            var number = accounting.formatMoney(aData[7], "$", 2, ".", ",");
+            $("td:eq(6)", nRow).html('<div class="">' + number + '</div>');
+
+            if (aData[8]=='Legalizado') {
+                $("td:eq(8)", nRow).append('<a href="#" class="btn btn-success btn-xs terminar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-tags"></i></a>');
             }
 
-            if (aData[7]=='Activo' && !aData[8]) {
-                $("td:eq(7)", nRow).append(`<a href="#"
+            if (aData[8]=='Activo' && !aData[9]) {
+                $("td:eq(8)", nRow).append(`<a href="#"
                     class="btn btn-primary btn-xs pagar"
                     title="Cargar copia"
                     id="${aData[0]}"
@@ -84,9 +89,9 @@ $(document).ready(function() {
                 </a>`);
             }
 
-            if(aData[8]) {
-                $("td:eq(7)", nRow).append(`<a class="btn btn-info btn-xs"
-                    href="${base_url}${aData[8]}"
+            if(aData[9]) {
+                $("td:eq(8)", nRow).append(`<a class="btn btn-info btn-xs"
+                    href="${base_url}${aData[9]}"
                     title="Ver copia"
                     target="_blank"
                 >
@@ -94,17 +99,17 @@ $(document).ready(function() {
                 </a>`);
             }
 
-            if (aData[7]==null) {
-               $("td:eq(6)", nRow).html('<div>Sin Liquidar</div>'); 
-               $("td:eq(7)", nRow).append('<a href="#" class="btn btn-danger btn-xs liquidar" title="Liquidar" id="'+aData[0]+'"><i class="fa fa-file-excel-o"></i></a>');
+            if (aData[8]==null) {
+               $("td:eq(7)", nRow).html('<div>Sin Liquidar</div>'); 
+               $("td:eq(8)", nRow).append('<a href="#" class="btn btn-danger btn-xs liquidar" title="Liquidar" id="'+aData[0]+'"><i class="fa fa-file-excel-o"></i></a>');
             }
-            if (aData[8]==0) {
+            if (aData[9]==0) {
                 // Se comenta ya que el proceso de pago aun no ha sido terminado
-                // $("td:eq(7)", nRow).append('<a href="#" class="btn btn-info btn-xs pagar-contrato" data-toggle="modal" data-target="#modalLiquidacion" title="pse" id="'+aData[0]+'"><i class="fa fa-shopping-cart"></i></a>');
+                // $("td:eq(8)", nRow).append('<a href="#" class="btn btn-info btn-xs pagar-contrato" data-toggle="modal" data-target="#modalLiquidacion" title="pse" id="'+aData[0]+'"><i class="fa fa-shopping-cart"></i></a>');
             }
 
-            if(aData[7] != null && aData[7] != 'Modificado') {
-                $("td:eq(7)", nRow).append('<a href="'+ base_url + 'liquidaciones/estampillasRetencion/' + aData[0]+'" target="_blank" class="btn btn-warning btn-xs" title="Pagar estampillas por retencion"><i class="fa fa-legal"></i></a>');
+            if(aData[8] == 'Activo') {
+                $("td:eq(8)", nRow).append('<a href="'+ base_url + 'liquidaciones/estampillasRetencion/' + aData[0]+'" target="_blank" class="btn btn-warning btn-xs" title="Pagar estampillas por retencion"><i class="fa fa-legal"></i></a>');
             }
         },
         "fnDrawCallback": function( oSettings ) {
@@ -267,7 +272,8 @@ $(document).ready(function() {
                         <th>Contratista</th>
                         <th>Fecha</th>
                         <th>Objeto</th>
-                        <th>Valor</th>       
+                        <th>Valor</th>
+                        <th>Saldo</th>
                         <th>Estado</th>
                         <th></th>
                     </tr>
@@ -281,7 +287,8 @@ $(document).ready(function() {
                         <th></th>
                         <th></th>
                         <th></th>
-                        <th></th>       
+                        <th></th>
+                        <th></th>
                         <th></th>
                         <th></th>
                     </tr>

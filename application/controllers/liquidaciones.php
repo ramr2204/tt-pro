@@ -1300,12 +1300,16 @@ function verliquidartramite()
               $this->datatables->select(
                   'c.cntr_id,c.cntr_numero,co.cont_nit,
                   co.cont_nombre,c.cntr_fecha_firma,c.cntr_objeto,
-                  c.cntr_valor,el.eslo_nombre,COALESCE(l.liqu_soporteobjeto, "")', false);
+                  c.cntr_valor,
+                  (COALESCE(l.liqu_valorsiniva, 0) - COALESCE(SUM(cuota.valor), 0)) AS saldo,
+                  el.eslo_nombre,COALESCE(l.liqu_soporteobjeto, "") AS copia_contrato', false);
               $this->datatables->from('con_contratos c');
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
               $this->datatables->join('con_estadoslocales el', 'el.eslo_id = c.cntr_estadolocalid', 'left');
               $this->datatables->join('est_liquidaciones l', 'l.liqu_contratoid = c.cntr_id', 'left');
+              $this->datatables->join('cuotas_liquidacion cuota', 'cuota.id_liquidacion = l.liqu_id', 'left');
               $this->datatables->add_column('edit', '-');
+              $this->datatables->group_by('c.cntr_id');
 
               $helper = new HelperGeneral;
               $verificacion = $helper->verificarRestriccionEmpresa();
@@ -3735,65 +3739,34 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                     1, null, true
                 );
 
-                if($this->input->post('todos') != '1')
-                {
-                    # Se da formato al valor para que guarde los valores decimales
-                    $valor = str_replace(',', '.', str_replace('.','',$this->input->post('valor')));
+                $facturas = $this->liquidaciones_model->obtenerFacturasRetencion('factura.fact_liquidacionid', $factura_muestra->id_liquidacion);
 
-                    $guardo = $this->pagarEstampillaIndividual(
-                        $this->input->post('id_factura'),
-                        $this->input->post('id_contrato'),
-                        $this->input->post('fecha'),
-                        $this->input->post('observaciones'),
-                        $valor
-                    );
-                    $is_pagos[] = $guardo->idInsercion;
-                }
-                else
+                foreach($facturas AS $factura)
                 {
-                    $facturas = $this->liquidaciones_model->obtenerFacturasRetencion('factura.fact_liquidacionid', $factura_muestra->id_liquidacion);
+                    $saldo = floor($factura->valor_total - $factura->valor_pagado);
 
-                    foreach($facturas AS $factura)
+                    # Si el saldo no es cero, es decir no ha sido pagada
+                    if($saldo != 0)
                     {
-                        $saldo = floor($factura->valor_total - $factura->valor_pagado);
+                        $guardo = $this->pagarEstampillaIndividual(
+                            $factura->fact_id,
+                            $this->input->post('id_contrato'),
+                            $this->input->post('fecha'),
+                            $this->input->post('observaciones'),
+                            # El valor de la cuota sera el total restante (saldo)
+                            $saldo,
+                            $factura
+                        );
+                        $is_pagos[] = $guardo->idInsercion;
 
-                        # Si el saldo no es cero, es decir no ha sido pagada
-                        if($saldo != 0)
-                        {
-                            $guardo = $this->pagarEstampillaIndividual(
-                                $factura->fact_id,
-                                $this->input->post('id_contrato'),
-                                $this->input->post('fecha'),
-                                $this->input->post('observaciones'),
-                                # El valor de la cuota sera el total restante (saldo)
-                                $saldo,
-                                $factura
-                            );
-                            $is_pagos[] = $guardo->idInsercion;
-    
-                            # Si falla algun proceso rompa el for y se valide despues
-                            if (!$guardo->bandRegistroExitoso){
-                                break;
-                            }
+                        # Si falla algun proceso rompa el for y se valide despues
+                        if (!$guardo->bandRegistroExitoso){
+                            break;
                         }
                     }
                 }
 
-                # Se obtenienen las facturas (de nuevo en el caso que se hayan pagado todas para obtener la informacion actucalizada)
-                $facturas = $this->liquidaciones_model->obtenerFacturasRetencion('factura.fact_liquidacionid', $factura_muestra->id_liquidacion);
-                $todo_pago = true;
-
-                # Se recorre para saber si todas las estampillas han sido pagadas para terminar la cuota del contrato
-                foreach($facturas AS $factura)
-                {
-                    # Si el saldo no es cero, es decir no ha sido pagada
-                    if(floor($factura->valor_total - $factura->valor_pagado) != 0) {
-                        $todo_pago = false;
-                        break;
-                    }
-                }
-
-                if($todo_pago)
+				if ($guardo->bandRegistroExitoso)
                 {
                     $this->codegen_model->edit(
                         'cuotas_liquidacion',
@@ -3802,10 +3775,33 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                         ],
                         'id', $factura_muestra->id_cuota_liquidacion
                     );
-                }
 
-				if ($guardo->bandRegistroExitoso)
-                {
+                    $liquidacion = $this->codegen_model->get(
+                        'est_liquidaciones',
+                        'liqu_valorsiniva AS valor_total',
+                        'liqu_id = '.$factura_muestra->id_liquidacion,
+                        1,NULL,true
+                    );
+
+                    $cuotas_pagadas = $this->codegen_model->get(
+                        'cuotas_liquidacion',
+                        'SUM(valor) AS total',
+                        'id_liquidacion = "' .$factura_muestra->id_liquidacion .'"
+                            AND estado = '. Equivalencias::cuotaPaga(),
+                        1, null, true
+                    );
+
+                    $saldo = $liquidacion->valor_total - ($cuotas_pagadas->total ? $cuotas_pagadas->total : 0);
+
+                    # Si el saldo es 0, es decir se pago todo pase a estado liquidado
+                    if(number_format($saldo, 0, '', '') == 0) {
+                        $this->codegen_model->edit(
+                            'con_contratos',
+                            [ 'cntr_estadolocalid' => 5 ],# Liquidado
+                            'cntr_id', $this->input->post('id_contrato')
+                        );
+                    }
+
                     $this->load->library('encrypt');
    
 					$this->session->set_flashdata('successmessage', 'Se pagó con éxito la factura');
@@ -3936,7 +3932,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                     'SUM(valor) AS total',
                     'id_liquidacion = "' . $liquidacion->liqu_id .'" AND estado = '. Equivalencias::cuotaPaga(),
                     1, null, true
-                );  
+                );
                 $this->data['saldo_contrato'] = $liquidacion->valor_total - ($cuotas_pagadas->total ? $cuotas_pagadas->total : 0);
 
 				$this->template->set('title', 'Contrato liquidado');
