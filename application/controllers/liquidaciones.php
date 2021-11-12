@@ -1327,6 +1327,11 @@ function verliquidartramite()
               $this->datatables->join('con_estadoslocales el', 'el.eslo_id = c.cntr_estadolocalid', 'left');
               $this->datatables->add_column('edit', '-');
 
+              if(isset($_GET['persona']) && $_GET['persona'] != 0)
+              {
+                $this->datatables->where('co.cont_id = '. $_GET['persona']);
+              }
+
               $helper = new HelperGeneral;
               $verificacion = $helper->verificarRestriccionEmpresa();
 
