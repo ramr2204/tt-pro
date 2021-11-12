@@ -130,3 +130,9 @@ ALTER TABLE estampillas_pro_boyaca.declaraciones CHANGE creado_por creado_por IN
 ALTER TABLE estampillas_pro_boyaca.detalles_declaracion MODIFY COLUMN vigencia_actual double(14,2) NOT NULL;
 ALTER TABLE estampillas_pro_boyaca.detalles_declaracion MODIFY COLUMN vigencia_anterior double(14,2) NOT NULL;
 
+UPDATE estampillas_pro_boyaca.con_estadoslocales
+	SET eslo_nombre='Activo'
+	WHERE eslo_id=1;
+
+INSERT INTO estampillas_pro_boyaca.con_estadoslocales (eslo_id,eslo_nombre)
+	VALUES (5,'Liquidado');

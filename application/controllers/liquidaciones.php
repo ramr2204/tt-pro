@@ -355,12 +355,18 @@ class Liquidaciones extends MY_Controller {
                 /*
                 * Valida que la liquidacion tenga registrada la ruta del soporte
                 */
-                $vSoporteObjeto = $parametros=$this->codegen_model->get('est_liquidaciones','liqu_soporteobjeto','liqu_id = '.$this->input->post('liquida_id'),1,NULL,true);
+                $vSoporteObjeto = $this->codegen_model->get(
+                    'est_liquidaciones',
+                    'liqu_soporteobjeto, liqu_id AS id',
+                    'liqu_contratoid = '.$id,
+                    1,NULL,true
+                );
+
                 if($vSoporteObjeto->liqu_soporteobjeto == '')
                 {
                     /*
                     * Valida si el archivo fue cargado
-                    */        
+                    */
                     if (!isset($_FILES['upload_field_name']) && !is_uploaded_file($_FILES['comprobante_objeto']['tmp_name'])) 
                     {
                         $this->session->set_flashdata('errorModal', '<strong>Error!</strong> Debe cargar la Copia de Objeto del Contrato.');
@@ -389,7 +395,7 @@ class Liquidaciones extends MY_Controller {
                             $config['overwrite']    = TRUE;
                             $this->load->library('upload');
           
-                            $idComprobante = $this->input->post('liquida_id');
+                            $idComprobante = $vSoporteObjeto->id;
                             $config['file_name']='liquidacion_'.$idComprobante.'_'.date("F_d_Y");
                             $this->upload->initialize($config);
 
@@ -402,7 +408,7 @@ class Liquidaciones extends MY_Controller {
                                 */
                                 $file_datos= $this->upload->data();
                                 $data = array(
-                                    'liqu_soporteobjeto' => $path.'/'.$file_datos['orig_name']                          
+                                    'liqu_soporteobjeto' => $path.'/'.$file_datos['orig_name']
                                   );
           
                                 if ($this->codegen_model->edit('est_liquidaciones',$data,'liqu_id',$idComprobante) == FALSE)
@@ -444,168 +450,172 @@ class Liquidaciones extends MY_Controller {
               
               $numeroarchivos=$this->input->post('numeroarchivos');
               
-              if ($id >0 && $numeroarchivos > 0 ) {
-                  $path = 'uploads/'.$carpeta.'/'.$id;
-                  if(!is_dir($path)) { //create the folder if it's not already exists
-                      mkdir($path,0777,TRUE);      
-                  }
-                  $config['upload_path'] = $path;
-                  $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
-                  $config['remove_spaces']=TRUE;
-                  $config['max_size']    = '2048';
-                  $config['overwrite']    = TRUE;
-                  $this->load->library('upload');
-
-
-                  $success=0;
-                  $referenciaCargados='';
-                  for ($i=0; $i < $numeroarchivos; $i++) {
-                 
-                    if(isset($_POST['fecha_pago_'.$i]) && $_POST['fecha_pago_'.$i] == '')
-                    {
-                        $this->session->set_flashdata('errorModal', '<strong>Error!</strong> Debe Ingresar una Fecha para el Pago.');
-                        $this->session->set_flashdata('accion', 'liquidado');                        
-                        $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe Ingresar una Fecha para el Pago.');
-                        
-                        //Valida para redirecionar a la vista respectiva
-                        //tramite o contrato
-                        if ($this->input->post('contratoid'))
+              if($this->input->post('contratoid')) {
+                $this->session->set_flashdata('successmessage', 'Se Cargó con éxito la copia del contrato');
+              } else {
+                  if ($id >0 && $numeroarchivos > 0 ) {
+                      $path = 'uploads/'.$carpeta.'/'.$id;
+                      if(!is_dir($path)) { //create the folder if it's not already exists
+                          mkdir($path,0777,TRUE);
+                      }
+                      $config['upload_path'] = $path;
+                      $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
+                      $config['remove_spaces']=TRUE;
+                      $config['max_size']    = '2048';
+                      $config['overwrite']    = TRUE;
+                      $this->load->library('upload');
+    
+    
+                      $success=0;
+                      $referenciaCargados='';
+                      for ($i=0; $i < $numeroarchivos; $i++) {
+                     
+                        if(isset($_POST['fecha_pago_'.$i]) && $_POST['fecha_pago_'.$i] == '')
                         {
-                            redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
-                        }elseif ($this->input->post('tramiteid'))
+                            $this->session->set_flashdata('errorModal', '<strong>Error!</strong> Debe Ingresar una Fecha para el Pago.');
+                            $this->session->set_flashdata('accion', 'liquidado');                        
+                            $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe Ingresar una Fecha para el Pago.');
+                            
+                            //Valida para redirecionar a la vista respectiva
+                            //tramite o contrato
+                            if ($this->input->post('contratoid'))
                             {
-                                redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
-                            }
-                        
-
-                    }elseif(isset($_POST['fecha_pago_'.$i]) && $_POST['fecha_pago_'.$i] != '')
-                        {
-                            if(strtotime($_POST['fecha_pago_'.$i]) > strtotime(date('Y-m-d')))
-                            {
-                                $this->session->set_flashdata('errorModal', '<strong>Error!</strong> la Fecha de Pago no Puede ser Mayor al Dia actual.');
-                                $this->session->set_flashdata('accion', 'liquidado');
-                                $this->session->set_flashdata('errormessage', '<strong>Error!</strong> la Fecha de Pago no Puede ser Mayor al Dia actual.');
-                                
-                                //Valida para redirecionar a la vista respectiva
-                                //tramite o contrato
-                                if ($this->input->post('contratoid'))
+                                redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
+                            }elseif ($this->input->post('tramiteid'))
                                 {
-                                    redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
-                                }elseif ($this->input->post('tramiteid'))
-                                    {
-                                        redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
-                                    }
-                            }
-                        }
-
-                    //Si se envia el pago en el checkbox
-                    //permitira entrar a la consulta 
-                    //para crear la factura, de lo contrario
-                    //creará una bandera
-                    if(isset($_POST['pago'.$i]))
-                    {
-                        $pago = $this->input->post('pago'.$i);  
-                    }else
-                        {
-                            $pago = 'flag'  ;
-                        }
-                   
-                    
-                    $idfactura=$this->input->post('facturaid'.$i);
-                    $config['file_name']=$idfactura.'_'.date("F_d_Y");
-                    $this->upload->initialize($config);
-
-                    if ($pago != 'flag') 
-                    {
-                        /*
-                        * Valida si ya se creó un pago para la factura
-                        */
-                        $where = 'WHERE pago_facturaid = '.$idfactura;
-                        $vPago = $this->codegen_model->getSelect('est_pagos',"pago_id, pago_valor, pago_valorconciliacion, pago_fechaconciliacion, pago_bancoconciliacion", $where);
-                        
-                        /*
-                        * Se extrae el objeto del usuario autenticado
-                        */
-                        $usuario = $this->ion_auth->user()->row();
-                        if(count($vPago) > 0)
-                        {
-                            /*
-                            * Valida si el pago tiene conciliacion registrada
-                            */
-                            if($vPago[0]->pago_valorconciliacion != null)
+                                    redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
+                                }
+                            
+    
+                        }elseif(isset($_POST['fecha_pago_'.$i]) && $_POST['fecha_pago_'.$i] != '')
                             {
-                                /*
-                                * Se solicita el calculo de valores para conciliacion con el objeto
-                                * de pago existente asignandole el valor que llega del formulario
-                                */
-                                $vPago[0]->pago_valor = $pago;
-                                $datos = Pagos::calcularDatosConciliacion($vPago[0]->pago_fechaconciliacion, $vPago[0]->pago_bancoconciliacion, $vPago[0]->pago_valorconciliacion, $vPago, '', true);
-
-                                /*
-                                * Se Agregan los datos del pago manual
-                                */                                
-                                $datos['pago_facturaid'] = $idfactura;
-                                $datos['pago_fecha'] = $_POST['fecha_pago_'.$i];
-                                $datos['pago_valor'] = $pago;
-                                $datos['pago_liquidadorpago'] = $usuario->id;
-                                $datos['pago_metodo'] = 'manual';                                         
-
-                                /*
-                                * Se Actualiza el registro del pago
-                                */
-                                $this->codegen_model->edit('est_pagos',$datos,'pago_id',$vPago[0]->pago_id);                                        
+                                if(strtotime($_POST['fecha_pago_'.$i]) > strtotime(date('Y-m-d')))
+                                {
+                                    $this->session->set_flashdata('errorModal', '<strong>Error!</strong> la Fecha de Pago no Puede ser Mayor al Dia actual.');
+                                    $this->session->set_flashdata('accion', 'liquidado');
+                                    $this->session->set_flashdata('errormessage', '<strong>Error!</strong> la Fecha de Pago no Puede ser Mayor al Dia actual.');
+                                    
+                                    //Valida para redirecionar a la vista respectiva
+                                    //tramite o contrato
+                                    if ($this->input->post('contratoid'))
+                                    {
+                                        redirect(base_url().'index.php/liquidaciones/liquidar/'.$id);
+                                    }elseif ($this->input->post('tramiteid'))
+                                        {
+                                            redirect(base_url().'index.php/liquidaciones/liquidartramites/'.$id);
+                                        }
+                                }
                             }
+    
+                        //Si se envia el pago en el checkbox
+                        //permitira entrar a la consulta 
+                        //para crear la factura, de lo contrario
+                        //creará una bandera
+                        if(isset($_POST['pago'.$i]))
+                        {
+                            $pago = $this->input->post('pago'.$i);  
                         }else
                             {
-                                /*
-                                * Si no hay un pago creado se crea el registro
-                                */
-                                $datos = array(
-                                         'pago_facturaid' => $idfactura,
-                                         'pago_fecha' => $_POST['fecha_pago_'.$i],
-                                         'pago_valor' => $pago,
-                                         'pago_liquidadorpago' => $usuario->id,
-                                         'pago_metodo' => 'manual',
-                                       );
-
-                                $respuestaProceso = $this->codegen_model->add('est_pagos',$datos);
+                                $pago = 'flag'  ;
                             }
-                      }
-                      
-
-                      $this->form_validation->set_rules('facturaid'.$i, 'factura id '.$i, 'trim|xss_clean|numeric|integer|greater_than[0]'); 
-                      if ($this->form_validation->run() == false) {
-                          $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
-                      } else {
-
-                          if ($this->upload->do_upload("comprobante".$i)) {
-                              $file_data = $this->upload->data();
-                              $data = array(
-                                 'fact_rutacomprobante' => $path.'/'.$file_data['orig_name'],
-                                 'fact_fechacomprobante' => date("Y-m-d H:i:s"),
-                                 'fact_usercomprobante' => $usuario->id
-                               );
-                              if ($this->codegen_model->edit('est_facturas',$data,'fact_id',$idfactura) == TRUE) {
-                                  $success++;
-                                  $referenciaCargados.=' Comprobante: '.$this->input->post('facturaNombre'.$i).': archivo -> '.$file_data['client_name'].' ||';
-                                    
-                              } else {
-                                   $this->data['errormessage'] .= '<br>No se pudo registrar el comprobante'.$i;
-                              }  
+                       
+                        
+                        $idfactura=$this->input->post('facturaid'.$i);
+                        $config['file_name']=$idfactura.'_'.date("F_d_Y");
+                        $this->upload->initialize($config);
+    
+                        if ($pago != 'flag') 
+                        {
+                            /*
+                            * Valida si ya se creó un pago para la factura
+                            */
+                            $where = 'WHERE pago_facturaid = '.$idfactura;
+                            $vPago = $this->codegen_model->getSelect('est_pagos',"pago_id, pago_valor, pago_valorconciliacion, pago_fechaconciliacion, pago_bancoconciliacion", $where);
+                            
+                            /*
+                            * Se extrae el objeto del usuario autenticado
+                            */
+                            $usuario = $this->ion_auth->user()->row();
+                            if(count($vPago) > 0)
+                            {
+                                /*
+                                * Valida si el pago tiene conciliacion registrada
+                                */
+                                if($vPago[0]->pago_valorconciliacion != null)
+                                {
+                                    /*
+                                    * Se solicita el calculo de valores para conciliacion con el objeto
+                                    * de pago existente asignandole el valor que llega del formulario
+                                    */
+                                    $vPago[0]->pago_valor = $pago;
+                                    $datos = Pagos::calcularDatosConciliacion($vPago[0]->pago_fechaconciliacion, $vPago[0]->pago_bancoconciliacion, $vPago[0]->pago_valorconciliacion, $vPago, '', true);
+    
+                                    /*
+                                    * Se Agregan los datos del pago manual
+                                    */                                
+                                    $datos['pago_facturaid'] = $idfactura;
+                                    $datos['pago_fecha'] = $_POST['fecha_pago_'.$i];
+                                    $datos['pago_valor'] = $pago;
+                                    $datos['pago_liquidadorpago'] = $usuario->id;
+                                    $datos['pago_metodo'] = 'manual';                                         
+    
+                                    /*
+                                    * Se Actualiza el registro del pago
+                                    */
+                                    $this->codegen_model->edit('est_pagos',$datos,'pago_id',$vPago[0]->pago_id);                                        
+                                }
+                            }else
+                                {
+                                    /*
+                                    * Si no hay un pago creado se crea el registro
+                                    */
+                                    $datos = array(
+                                             'pago_facturaid' => $idfactura,
+                                             'pago_fecha' => $_POST['fecha_pago_'.$i],
+                                             'pago_valor' => $pago,
+                                             'pago_liquidadorpago' => $usuario->id,
+                                             'pago_metodo' => 'manual',
+                                           );
+    
+                                    $respuestaProceso = $this->codegen_model->add('est_pagos',$datos);
+                                }
+                          }
+                          
+    
+                          $this->form_validation->set_rules('facturaid'.$i, 'factura id '.$i, 'trim|xss_clean|numeric|integer|greater_than[0]'); 
+                          if ($this->form_validation->run() == false) {
+                              $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
                           } else {
-                            $this->data['errormessage'] .=$this->upload->display_errors(); 
-                          }  
+    
+                              if ($this->upload->do_upload("comprobante".$i)) {
+                                  $file_data = $this->upload->data();
+                                  $data = array(
+                                     'fact_rutacomprobante' => $path.'/'.$file_data['orig_name'],
+                                     'fact_fechacomprobante' => date("Y-m-d H:i:s"),
+                                     'fact_usercomprobante' => $usuario->id
+                                   );
+                                  if ($this->codegen_model->edit('est_facturas',$data,'fact_id',$idfactura) == TRUE) {
+                                      $success++;
+                                      $referenciaCargados.=' Comprobante: '.$this->input->post('facturaNombre'.$i).': archivo -> '.$file_data['client_name'].' ||';
+                                        
+                                  } else {
+                                       $this->data['errormessage'] .= '<br>No se pudo registrar el comprobante'.$i;
+                                  }  
+                              } else {
+                                $this->data['errormessage'] .=$this->upload->display_errors(); 
+                              }  
+                          }
+    
                       }
-
+                  } else {
+                      $this->data['errormessage'] = 'Datos incorrectos'.$this->input->post('contratoid').' ---- '.$numeroarchivos;
                   }
-              } else {
-                  $this->data['errormessage'] = 'Datos incorrectos'.$this->input->post('contratoid').' ---- '.$numeroarchivos;
-              }
-              if ($success > 0) {
-                $this->session->set_flashdata('successmessage', 'Se Cargó con éxito'.$referenciaCargados); 
-
-              } else {
-                $this->session->set_flashdata('errormessage', '<strong>Error!</strong> '.$this->data['errormessage'] );
+                  if ($success > 0) {
+                    $this->session->set_flashdata('successmessage', 'Se Cargó con éxito'.$referenciaCargados); 
+    
+                  } else {
+                    $this->session->set_flashdata('errormessage', '<strong>Error!</strong> '.$this->data['errormessage'] );
+                  }
               }
               $this->session->set_flashdata('accion', 'liquidado');
 
@@ -1290,10 +1300,11 @@ function verliquidartramite()
               $this->datatables->select(
                   'c.cntr_id,c.cntr_numero,co.cont_nit,
                   co.cont_nombre,c.cntr_fecha_firma,c.cntr_objeto,
-                  c.cntr_valor,el.eslo_nombre,c.pagado');
+                  c.cntr_valor,el.eslo_nombre,COALESCE(l.liqu_soporteobjeto, "")', false);
               $this->datatables->from('con_contratos c');
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
               $this->datatables->join('con_estadoslocales el', 'el.eslo_id = c.cntr_estadolocalid', 'left');
+              $this->datatables->join('est_liquidaciones l', 'l.liqu_contratoid = c.cntr_id', 'left');
               $this->datatables->add_column('edit', '-');
 
               $helper = new HelperGeneral;
