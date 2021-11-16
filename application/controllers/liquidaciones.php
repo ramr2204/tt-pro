@@ -243,7 +243,7 @@ class Liquidaciones extends MY_Controller {
 					'liqu_numero'               => $this->input->post('numero'),
 					'liqu_vigencia'             => $this->input->post('vigencia'),
 					'liqu_valorconiva'          => $this->input->post('valorconiva'),
-					'liqu_valorsiniva'          => $this->input->post('valorsiniva'),
+					'liqu_valorsiniva'          => $this->input->post('valorconiva'),//$this->input->post('valorsiniva'),
 					'liqu_tipocontrato'         => $this->input->post('tipocontrato'),
 					'liqu_regimenid'            => $this->input->post('idregimen'),
 					'liqu_regimen'              => $this->input->post('regimen'),
@@ -1304,6 +1304,11 @@ function verliquidartramite()
               $this->datatables->join('cuotas_liquidacion cuota', 'cuota.id_liquidacion = l.liqu_id', 'left');
               $this->datatables->add_column('edit', '-');
               $this->datatables->group_by('c.cntr_id');
+
+              if(isset($_GET['persona']) && $_GET['persona'] != 0)
+              {
+                $this->datatables->where('co.cont_id = '. $_GET['persona']);
+              }
 
               $helper = new HelperGeneral;
               $verificacion = $helper->verificarRestriccionEmpresa();

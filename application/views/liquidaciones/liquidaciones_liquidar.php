@@ -38,10 +38,12 @@ $(document).ready(function() {
         showRemove: false,
     });
 
+    var persona = "<?php echo isset($_GET['person']) ? $_GET['person'] : 0 ?>";
+
     var oTable = $('#tablaq').dataTable( {
         "bProcessing": true,
         "bServerSide": true,
-        "sAjaxSource": "<?php echo base_url(); ?>index.php/liquidaciones/liquidaciones_dataTable",
+        "sAjaxSource": "<?php echo base_url(); ?>index.php/liquidaciones/liquidaciones_dataTable?persona="+persona,
         "sServerMethod": "POST",
         "iDisplayLength": 5,
         "aoColumns": [ 
