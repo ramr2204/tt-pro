@@ -277,7 +277,7 @@ class Liquidaciones extends MY_Controller {
 					'liqu_numero'               => $this->input->post('numero'),
 					'liqu_vigencia'             => $this->input->post('vigencia'),
 					'liqu_valorconiva'          => $this->input->post('valorconiva'),
-					'liqu_valorsiniva'          => $this->input->post('valorsiniva'),
+					'liqu_valorsiniva'          => $this->input->post('valorconiva'),//$this->input->post('valorsiniva'),
 					'liqu_tipocontrato'         => $this->input->post('tipocontrato'),
 					'liqu_regimenid'            => $this->input->post('idregimen'),
 					'liqu_regimen'              => $this->input->post('regimen'),

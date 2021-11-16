@@ -67,13 +67,9 @@
      </td>
 </tr>
 <tr>
-     <td colspan="1"><strong>Valor del contrato</strong></td>
-     <td colspan="1"><?php echo '$'.number_format($result->cntr_valor, 2, ',', '.'); ?>
+     <td colspan="1"><strong>Valor contrato antes de iva</strong></td>
+     <td colspan="3"><?php echo '$'.number_format($result->cntr_valor, 2, ',', '.'); ?>
      <input type="hidden" name="valorconiva" value="<?php echo $result->cntr_valor; ?>">
-     </td>
-     <td colspan="1"><strong>Valor sin IVA</strong></td>
-     <td colspan="1"><?php echo '$'.number_format($cnrt_valorsiniva, 2, ',', '.'); ?>
-     <input type="hidden" name="valorsiniva" value="<?php echo $cnrt_valorsiniva; ?>">
      </td>
 </tr>
 <tr>
