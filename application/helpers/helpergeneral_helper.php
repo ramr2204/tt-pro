@@ -266,7 +266,7 @@ Class HelperGeneral extends CI_Controller
                 if(!isset($declaracion->id))
                 {
                     $empresa = $this->codegen_model->get(
-                        'empresas',
+                        'con_contratantes',
                         'nit',
                         'id = '.$usuario->id_empresa,
                         1,NULL,true

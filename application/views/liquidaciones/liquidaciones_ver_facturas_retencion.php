@@ -124,7 +124,7 @@ $total = 0;
                         </table>
 
                         <div class="col-sm-12 text-center">
-                            <button class="btn btn-info" id="pagar_todo">Pagar Todo</button>
+                            <button class="btn btn-info" type="button" id="pagar_todo">Pagar Todo</button>
                         </div>
                         <?php
                     }

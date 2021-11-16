@@ -178,3 +178,13 @@ VALUES(9, 8, 15, '2021-01-01 00:00:00');
 INSERT INTO estampillas_pro_boyaca.vencimiento_declaraciones
 (id, ultimo_digito, dia, modificado)
 VALUES(10, 9, 15, '2021-01-01 00:00:00');
+
+DROP TABLE empresas;
+
+ALTER TABLE estampillas_pro_boyaca.con_contratantes ADD email varchar(100) NOT NULL AFTER nit;
+ALTER TABLE estampillas_pro_boyaca.con_contratantes ADD direccion varchar(200) NOT NULL AFTER email;
+ALTER TABLE estampillas_pro_boyaca.con_contratantes ADD telefono varchar(100) NOT NULL AFTER direccion;
+
+ALTER TABLE estampillas_pro_boyaca.con_contratos DROP COLUMN id_empresa;
+ALTER TABLE estampillas_pro_boyaca.est_liquidaciones DROP COLUMN id_empresa;
+

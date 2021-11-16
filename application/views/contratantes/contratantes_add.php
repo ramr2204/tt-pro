@@ -43,6 +43,22 @@
                                     </div>
 
                                     <div class="form-group">
+                                        <label for="id">Email</label>
+                                        <input class="form-control" name="email" value="<?php echo set_value('email'); ?>" required="required" />
+                                        <?php echo form_error('email','<span class="text-danger">','</span>'); ?>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="id">Direccion</label>
+                                        <input class="form-control" name="direccion" value="<?php echo set_value('direccion'); ?>" required="required" />
+                                        <?php echo form_error('direccion','<span class="text-danger">','</span>'); ?>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="id">Telefono</label>
+                                        <input class="form-control" name="telefono" value="<?php echo set_value('telefono'); ?>" required="required" />
+                                            <?php echo form_error('telefono','<span class="text-danger">','</span>'); ?>
+                                    </div>
+
+                                    <div class="form-group">
                                            <label for="municipioid">Municipio</label>
                                            <select class="form-control" id="municipioid" name="municipioid" required="required" >
                                              <option value="0">Seleccione...</option>

@@ -235,11 +235,6 @@ class Liquidaciones extends MY_Controller {
 				$codigo = 00000;
 				$idcontrato=$this->input->post('idcontrato');
 
-				/*
-				* Extrae el objeto del contrato
-				*/
-				$contrato = $this->liquidaciones_model->get($idcontrato);
-
 				$data = array(
 					'liqu_contratoid'           => $this->input->post('idcontrato'),
 					'liqu_nombrecontratista'    => $this->input->post('nombrecontratista'),
@@ -261,8 +256,7 @@ class Liquidaciones extends MY_Controller {
 					'liqu_codigo'               => $codigo,
 					'liqu_fecha'                => date('Y-m-d'),
 					'liqu_usuarioliquida'       => $usuario->id,
-					'liqu_tiempoliquida'        => date('Y-m-d H:i:s'),
-                    'id_empresa'                => $contrato->id_empresa
+					'liqu_tiempoliquida'        => date('Y-m-d H:i:s')
 				);
 
 				$respuestaProceso = $this->codegen_model->add('est_liquidaciones',$data);
@@ -1315,7 +1309,7 @@ function verliquidartramite()
               $verificacion = $helper->verificarRestriccionEmpresa();
 
               if($verificacion !== true) {
-                  $this->datatables->where('c.id_empresa = "'. $verificacion .'"');
+                  $this->datatables->where('c.cntr_contratanteid = "'. $verificacion .'"');
               }
               echo $this->datatables->generate();
 

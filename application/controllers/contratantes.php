@@ -66,6 +66,9 @@ class Contratantes extends MY_Controller {
                 $this->data['successmessage']=$this->session->flashdata('message');  
                 $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
                 $this->form_validation->set_rules('nit', 'NIT', 'required|numeric|trim|xss_clean|max_length[100]|is_unique[con_contratantes.nit]');
+                $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
+			    $this->form_validation->set_rules('direccion', 'Direccion', 'required');
+			    $this->form_validation->set_rules('telefono', 'Telefono', 'required|numeric');
                 $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
                 $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
                 $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|greater_than[0]');
@@ -75,14 +78,17 @@ class Contratantes extends MY_Controller {
                     $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
                 }else
                 {
-                    $data = array(
-                    'nombre' => $this->input->post('nombre'),
-                    'tipocontratistaid' => $this->input->post('tipocontratistaid'),
-                    'nit' => $this->input->post('nit'),
-                    'municipioid' => $this->input->post('municipioid'),
-                    'regimenid' => $this->input->post('regimenid'),
-                    'fecha' => date('Y-m-d')    
-                    );
+                    $data = [
+                        'nombre'            => $this->input->post('nombre'),
+                        'tipocontratistaid' => $this->input->post('tipocontratistaid'),
+                        'nit'               => $this->input->post('nit'),
+                        'municipioid'       => $this->input->post('municipioid'),
+                        'regimenid'         => $this->input->post('regimenid'),
+                        'fecha'             => date('Y-m-d'),
+                        'email'             => $this->input->post('email'),
+						'direccion'         => $this->input->post('direccion'),
+						'telefono'          => $this->input->post('telefono'),
+                    ];
 
                     $respuestaProceso = $this->codegen_model->add('con_contratantes',$data);
                     if($respuestaProceso->bandRegistroExitoso)
@@ -96,13 +102,13 @@ class Contratantes extends MY_Controller {
                 }
 
                 $this->template->set('title', 'Nuevo Contratante');
-                $this->data['style_sheets']= array(
-                'css/chosen.css' => 'screen'
-                );
+                $this->data['style_sheets']= [
+                    'css/chosen.css' => 'screen'
+                ];
 
-                $this->data['javascripts']= array(
-                'js/chosen.jquery.min.js'
-                );
+                $this->data['javascripts']= [
+                    'js/chosen.jquery.min.js'
+                ];
 
                 $this->data['municipios']  = $this->codegen_model->getMunicipios();
                 $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
@@ -150,20 +156,26 @@ class Contratantes extends MY_Controller {
                 $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]');
                 $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
                 $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
-                $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|greater_than[0]');   
+                $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|greater_than[0]');
+                $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
+			    $this->form_validation->set_rules('direccion', 'Direccion', 'required');
+			    $this->form_validation->set_rules('telefono', 'Telefono', 'required|numeric');
 
                 if ($this->form_validation->run() == false) 
                 {
-                    $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);                            
+                    $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);
                 }else
                 {
-                    $data = array(
-                    'nombre' => $this->input->post('nombre'),
-                    'nit' => $this->input->post('nit'),
-                    'municipioid' => $this->input->post('municipioid'),
-                    'regimenid' => $this->input->post('regimenid'),
-                    'tipocontratistaid' => $this->input->post('tipocontratistaid')
-                    );
+                    $data = [
+                        'nombre'            => $this->input->post('nombre'),
+                        'nit'               => $this->input->post('nit'),
+                        'municipioid'       => $this->input->post('municipioid'),
+                        'regimenid'         => $this->input->post('regimenid'),
+                        'tipocontratistaid' => $this->input->post('tipocontratistaid'),
+                        'email'             => $this->input->post('email'),
+						'direccion'         => $this->input->post('direccion'),
+						'telefono'          => $this->input->post('telefono'),
+                    ];
 
                     if ($this->codegen_model->edit('con_contratantes',$data,'id',$idContratante) == TRUE) 
                     {
@@ -175,17 +187,22 @@ class Contratantes extends MY_Controller {
                     }
                 }
 
-                $this->data['style_sheets']= array(
-                'css/chosen.css' => 'screen'
-                );
+                $this->data['style_sheets'] = [
+                    'css/chosen.css' => 'screen'
+                ];
 
-                $this->data['javascripts']= array(
-                'js/chosen.jquery.min.js'
-                );
+                $this->data['javascripts'] = [
+                    'js/chosen.jquery.min.js'
+                ];
 
                 $this->data['successmessage']=$this->session->flashdata('successmessage');
                 $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
-                $this->data['result'] = $this->codegen_model->get('con_contratantes','id,nombre,nit,municipioid,regimenid,tipocontratistaid','id = '.$idContratante,1,NULL,true);
+                $this->data['result'] = $this->codegen_model->get(
+                    'con_contratantes',
+                    'id,nombre,nit,municipioid,regimenid,tipocontratistaid,,email,direccion,telefono',
+                    'id = '.$idContratante,
+                    1,NULL,true
+                );
                 $this->data['municipios']  = $this->codegen_model->getMunicipios();
                 $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
                 $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');

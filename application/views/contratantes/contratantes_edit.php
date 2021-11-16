@@ -54,6 +54,22 @@
                                            <input class="form-control" id="nombre" type="text" name="nombre" value="<?php echo $result->nombre; ?>" required="required" />
                                            <?php echo form_error('nombre','<span class="text-danger">','</span>'); ?>
                                     </div>
+
+                                    <div class="form-group">
+                                        <label for="id">Email</label>
+                                        <input class="form-control" name="email" value="<?php echo $result->email; ?>" required="required" />
+                                        <?php echo form_error('email','<span class="text-danger">','</span>'); ?>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="id">Direccion</label>
+                                        <input class="form-control" name="direccion" value="<?php echo $result->direccion; ?>" required="required" />
+                                        <?php echo form_error('direccion','<span class="text-danger">','</span>'); ?>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="id">Telefono</label>
+                                        <input class="form-control" name="telefono" value="<?php echo $result->telefono; ?>" required="required" />
+                                             <?php echo form_error('telefono','<span class="text-danger">','</span>'); ?>
+                                    </div>
                                       
                                     <div class="form-group">
                                            <label for="municipioid">Municipio</label>
