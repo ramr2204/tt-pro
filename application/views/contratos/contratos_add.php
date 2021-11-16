@@ -109,7 +109,7 @@
 
                             <div class="col-md-6 column">
                                 <div class="form-group">
-                                    <label for="valor">Valor</label>
+                                    <label for="valor">Valor antes de IVA</label>
                                     <div class="input-group">
                                     <div class="input-group-addon">$</div>
                                         <input class="form-control" id="valor" type="text" name="valor" value="<?php echo set_value('valor'); ?>" required="required" maxlength="100" />

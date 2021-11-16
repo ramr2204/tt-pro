@@ -56,10 +56,8 @@
                               <td colspan="2"><?php echo $result->liqu_vigencia; ?></td>
                          </tr>
                          <tr>
-                              <td colspan="1"><strong>Valor del contrato</strong></td>
-                              <td colspan="1"><?php echo '$'.number_format($result->liqu_valorconiva, 2, ',', '.'); ?></td>
-                              <td colspan="1"><strong>Valor sin IVA</strong></td>
-                              <td colspan="2"><?php echo '$'.number_format($result->liqu_valorsiniva, 2, ',', '.'); ?></td>
+                              <td colspan="1"><strong>Valor contrato antes de iva</strong></td>
+                              <td colspan="4"><?php echo '$'.number_format($result->liqu_valorconiva, 2, ',', '.'); ?></td>
                          </tr>
                          <tr>
                               <td colspan="1"><strong>Tipo de contrato</strong></td>
