@@ -24,7 +24,7 @@
 
 <div class="row"> 
     <div class="col-sm-12">
-        <h1><?php echo lang('index_heading');?></h1>
+        <h1>Declaraciones</h1>
         <?php
             if( $this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/add') ) {
                 echo anchor(base_url().'declaraciones/create','<i class="fa fa-plus"></i> '. lang('index_create_user_link'),'class="btn btn-large  btn-primary"');
