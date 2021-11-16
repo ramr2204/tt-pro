@@ -136,3 +136,45 @@ UPDATE estampillas_pro_boyaca.con_estadoslocales
 
 INSERT INTO estampillas_pro_boyaca.con_estadoslocales (eslo_id,eslo_nombre)
 	VALUES (5,'Liquidado');
+
+CREATE TABLE estampillas_pro_boyaca.vencimiento_declaraciones (
+	id TINYINT auto_increment NOT NULL,
+	ultimo_digito TINYINT NOT NULL,
+	dia TINYINT NOT NULL,
+	modificado DATETIME NOT NULL,
+	CONSTRAINT vencimiento_declaraciones_pk PRIMARY KEY (id)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8
+COLLATE=utf8_general_ci;
+
+INSERT INTO estampillas_pro_boyaca.vencimiento_declaraciones
+(id, ultimo_digito, dia, modificado)
+VALUES(1, 0, 15, '2021-01-01 00:00:00');
+INSERT INTO estampillas_pro_boyaca.vencimiento_declaraciones
+(id, ultimo_digito, dia, modificado)
+VALUES(2, 1, 15, '2021-01-01 00:00:00');
+INSERT INTO estampillas_pro_boyaca.vencimiento_declaraciones
+(id, ultimo_digito, dia, modificado)
+VALUES(3, 2, 15, '2021-01-01 00:00:00');
+INSERT INTO estampillas_pro_boyaca.vencimiento_declaraciones
+(id, ultimo_digito, dia, modificado)
+VALUES(4, 3, 15, '2021-01-01 00:00:00');
+INSERT INTO estampillas_pro_boyaca.vencimiento_declaraciones
+(id, ultimo_digito, dia, modificado)
+VALUES(5, 4, 15, '2021-01-01 00:00:00');
+INSERT INTO estampillas_pro_boyaca.vencimiento_declaraciones
+(id, ultimo_digito, dia, modificado)
+VALUES(6, 5, 15, '2021-01-01 00:00:00');
+INSERT INTO estampillas_pro_boyaca.vencimiento_declaraciones
+(id, ultimo_digito, dia, modificado)
+VALUES(7, 6, 15, '2021-01-01 00:00:00');
+INSERT INTO estampillas_pro_boyaca.vencimiento_declaraciones
+(id, ultimo_digito, dia, modificado)
+VALUES(8, 7, 15, '2021-01-01 00:00:00');
+INSERT INTO estampillas_pro_boyaca.vencimiento_declaraciones
+(id, ultimo_digito, dia, modificado)
+VALUES(9, 8, 15, '2021-01-01 00:00:00');
+INSERT INTO estampillas_pro_boyaca.vencimiento_declaraciones
+(id, ultimo_digito, dia, modificado)
+VALUES(10, 9, 15, '2021-01-01 00:00:00');
