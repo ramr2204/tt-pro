@@ -237,4 +237,61 @@ Class HelperGeneral extends CI_Controller
 
         return $usuario->id_empresa;
     }
+
+    /**
+     * Verifica el mensaje a mostrar para las empresas
+     * (posible proximo vencimiento para reportar declaraciones)
+     * 
+     * @return string
+    */
+    public function verificarVencimientoEmpresa()
+    {
+        $mensaje = '';
+
+        if( $this->ion_auth->logged_in() && $this->ion_auth->in_menu('declaraciones/add') )
+        {
+            $usuario = $this->ion_auth->user()->row();
+
+            if($usuario->id_empresa)
+            {
+                # Se verifica si ya se presento la declaracion sobre el mes vencido
+                $declaracion = $this->codegen_model->get(
+                    'declaraciones',
+                    'id',
+                    'DATE_FORMAT(periodo, "%Y-%m") = "'. date('Y-m', strtotime('-1 months')) .'"
+                        AND tipo_declaracion = '. Equivalencias::declaracionInicial(),
+                    1,NULL,true
+                );
+
+                if(!isset($declaracion->id))
+                {
+                    $empresa = $this->codegen_model->get(
+                        'empresas',
+                        'nit',
+                        'id = '.$usuario->id_empresa,
+                        1,NULL,true
+                    );
+    
+                    $vencimiento = $this->codegen_model->get(
+                        'vencimiento_declaraciones',
+                        'dia',
+                        'ultimo_digito = "'. substr($empresa->nit, -1) .'"',
+                        1,NULL,true
+                    );
+
+                    $diferencia_dias = date_diff(
+                        date_create(date('Y-m-d')),
+                        date_create( date('Y-m-') . $vencimiento->dia )
+                    )->format('%R%a');
+
+                    if($diferencia_dias >= 0 && $diferencia_dias <= 3) {
+                        $mensaje = 'Atención, cuenta con '. ((int)$diferencia_dias) .' día(s) para la presentación del informe, del caso contrario se cobrarán sanciones.';
+                    }
+                }
+
+            }
+        }
+
+        return $mensaje;
+    }
 }
