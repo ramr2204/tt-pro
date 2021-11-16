@@ -11,8 +11,6 @@
 */
 
 $total = 0;
-$saldo_total = 0;
-$estampillas_pagadas = 0;
 
 ?>
 
@@ -96,7 +94,6 @@ $estampillas_pagadas = 0;
                                     <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
                                     <td colspan="1" class="text-center"><strong>Porcentaje</strong></td>
                                     <td colspan="1" class="text-center"><strong>Valor total</strong></td>
-                                    <td colspan="1" class="text-center"><strong>Saldo a pagar</strong></td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -105,7 +102,6 @@ $estampillas_pagadas = 0;
 
                                         foreach($facturas as $factura)
                                         {
-                                            $saldo = floor($factura->valor_total - $factura->valor_pagado);
                                             ?>
                                             <tr>
                                                 <td colspan="1">
@@ -113,16 +109,9 @@ $estampillas_pagadas = 0;
                                                 </td>
                                                 <td colspan="1" class="text-center"><?= number_format($factura->porcentaje, 2, ',', '.') ?>%</td>
                                                 <td colspan="1" class="text-center"><?= '$'.number_format($factura->valor_total, 2, ',', '.') ?></td>
-                                                <td colspan="1" class="text-center"><?= '$'.number_format($saldo, 2, ',', '.') ?></td>
                                             </tr>
                                             <?php
                                                 $total += $factura->valor_total;
-                                                $saldo_total += $saldo;
-
-                                                if($saldo == 0)
-                                                {
-                                                    $estampillas_pagadas++;
-                                                }
                                                 $id_factura_muestra = $factura->fact_id;
                                         }
                                 ?>
@@ -130,26 +119,20 @@ $estampillas_pagadas = 0;
                                     <td colspan="1" class="text-right"><strong>Total</strong></td>
                                     <td colspan="1"></td>
                                     <td colspan="1" class="text-center"><?= '$'.number_format($total, 2, ',', '.') ?></td>
-                                    <td colspan="1" class="text-center"><?= '$'.number_format($saldo_total, 2, ',', '.') ?></td>
                                 </tr>
                             </tbody>
                         </table>
+
+                        <div class="col-sm-12 text-center">
+                            <button class="btn btn-info" type="button" id="pagar_todo">Pagar Todo</button>
+                        </div>
                         <?php
                     }
                 ?>
             <?= form_close() ?>
         </div>
     </div>
-    <?
-        if($estampillas_pagadas != count($facturas))
-        {
-            ?>
-            <div class="col-sm-12 text-center">
-                <button class="btn btn-info" id="pagar_todo">Pagar Todo</button>
-            </div>
-            <?
-        }
-    ?>
+
     <div class="col-xs-12 col-sm-6 col-sm-offset-3" style="display:none" id="form_pago_estampilla">
         <div class="row">
             <hr>

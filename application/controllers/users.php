@@ -450,7 +450,7 @@ class Users extends MY_Controller {
 			  $id_empresa = null;
 			  
 			  if(in_array($this->input->post('perfilid'), Equivalencias::perfilesEmpresa())) {
-				  $this->form_validation->set_rules('empresa', 'Empresa',  'required|numeric|greater_than[0]|is_exists[empresas.id]');
+				  $this->form_validation->set_rules('empresa', 'Empresa',  'required|numeric|greater_than[0]|is_exists[con_contratantes.id]');
 				  $id_empresa = $this->input->post('empresa');
 			  }
 
@@ -498,10 +498,9 @@ class Users extends MY_Controller {
 				 $this->data['perfiles']  = $this->codegen_model->getSelect('adm_perfiles','perf_id,perf_nombre');
 
 				 $this->data['empresas'] = $this->codegen_model->getSelect(
-					 'empresas',
+					 'con_contratantes',
 					 'id, nombre',
-					 'WHERE estado = '.Equivalencias::estadoActivo(),
-					 '',
+					 '', '',
 					 'ORDER BY nombre'
 				 );
 				 $this->data['perfiles_empresa'] = Equivalencias::perfilesEmpresa();
@@ -559,7 +558,7 @@ class Users extends MY_Controller {
 			  $id_empresa = null;
 
 			  if(in_array($this->input->post('perfilid'), Equivalencias::perfilesEmpresa())) {
-				  $this->form_validation->set_rules('empresa', 'Empresa',  'required|numeric|greater_than[0]|is_exists[empresas.id]');
+				  $this->form_validation->set_rules('empresa', 'Empresa',  'required|numeric|greater_than[0]|is_exists[con_contratantes.id]');
 				  $id_empresa = $this->input->post('empresa');
 			  }
 
@@ -606,7 +605,12 @@ class Users extends MY_Controller {
 		      $this->load->model('codegen_model','',TRUE); 
 			  $this->data['perfiles']  = $this->codegen_model->getSelect('adm_perfiles','perf_id,perf_nombre');
 
-			  $this->data['empresas'] = $this->codegen_model->getSelect('empresas','id, nombre', 'WHERE estado = 1', '', 'ORDER BY nombre');
+			  $this->data['empresas'] = $this->codegen_model->getSelect(
+				  'con_contratantes',
+				  'id, nombre',
+				  '', '',
+				  'ORDER BY nombre'
+				);
 			  $this->data['perfiles_empresa'] = Equivalencias::perfilesEmpresa();
 
 			  $this->template->load($this->config->item('admin_template'),'users/edit_user', $this->data);

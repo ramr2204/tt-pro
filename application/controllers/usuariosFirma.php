@@ -80,7 +80,7 @@ class usuariosFirma extends MY_Controller
             ', false);
             $this->datatables->from('usuarios_firma AS f');
             $this->datatables->join('users u','u.id = f.id_usuario','inner');
-            $this->datatables->join('empresas e','e.id = u.id_empresa','inner');
+            $this->datatables->join('con_contratantes e','e.id = u.id_empresa','inner');
 
             echo $this->datatables->generate();
         }
@@ -115,10 +115,9 @@ class usuariosFirma extends MY_Controller
                 $this->store();
 
                 $this->data['empresas'] = $this->codegen_model->getSelect(
-                    'empresas',
+                    'con_contratantes',
                     'id, nombre',
-                    'WHERE estado = '.Equivalencias::estadoActivo(),
-                    '',
+                    '', '',
                     'ORDER BY nombre'
                 );
 
@@ -135,7 +134,7 @@ class usuariosFirma extends MY_Controller
 
     private function store()
     {
-        $this->form_validation->set_rules('empresa', 'Empresa','required|trim|xss_clean|is_exists[empresas.id]');
+        $this->form_validation->set_rules('empresa', 'Empresa','required|trim|xss_clean|is_exists[con_contratantes.id]');
         $this->form_validation->set_rules('usuario', 'Usuario',[
             'required',
             'trim',

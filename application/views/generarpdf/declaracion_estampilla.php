@@ -290,8 +290,8 @@
                             <td> C.5. N° DE IDENTIFICACIÓN</td>
                         </tr>
                         <tr>
-                            <td class="text-center" colspan="2"> <?= mb_strtoupper($empresa->nombre_representante, 'UTF-8') ?></td>
-                            <td class="text-center"> <?= number_format($empresa->identificador_representante, 0, '', '.') ?></td>
+                            <td class="text-center" colspan="2"> <?= mb_strtoupper($representante['first_name'] .' '. $representante['last_name'], 'UTF-8') ?></td>
+                            <td class="text-center"> <?= number_format($representante['id_usuario'], 0, '', '.') ?></td>
                         </tr>
                         <tr>
                             <td> C.6. DIRECCIÓN: </td>

@@ -103,7 +103,7 @@ class Firma extends MY_Controller
     private function getInfoEmpresa($id_empresa)
     {
         $empresa = $this->codegen_model->get(
-            'empresas',
+            'con_contratantes',
             'id, nombre, nit, email',
             'id = '.$id_empresa,
             1,NULL,true

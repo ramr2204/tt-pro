@@ -32,6 +32,7 @@ class Equivalencias extends CI_Controller
         2 => 'Corrección',
     ];
 
+    private static $declaracionInicial = 1;
     private static $declaracionCorreccion = 2;
 
     private static $estados = [
@@ -85,6 +86,10 @@ class Equivalencias extends CI_Controller
 
     public static function tipoDeclaraciones(){
         return self::$tipoDeclaraciones;
+    }
+
+    public static function declaracionInicial(){
+        return self::$declaracionInicial;
     }
 
     public static function declaracionCorreccion(){

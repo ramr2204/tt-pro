@@ -2,7 +2,7 @@
 
 <div class="row"> 
     <div class="col-sm-12">    
-        <h1><?php echo lang('index_heading');?></h1>
+        <h1>Usuarios Firma</h1>
         <?php echo anchor(base_url().'usuariosFirma/create','<i class="fa fa-plus"></i> '. lang('index_create_user_link'),'class="btn btn-large  btn-primary"'); ?>
         <br><br>
         <div class="table-responsive">

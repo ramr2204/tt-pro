@@ -219,28 +219,6 @@
     </div>
 <?php } //if login  && is_admin ?>
 
-<?php 
-    /**
-     * Notificacion para rotulos restantes
-     */
-    if ($this->ion_auth->logged_in()) 
-    {
-        $objHelper = new HelperGeneral;
-        $informacionAlertaRotulosUsuario = $objHelper->solicitarInformacionAlertaRotulosMinimosUsuarioAutenticado();
-
-        if($informacionAlertaRotulosUsuario['mostrarAlerta'] && !$this->ion_auth->is_admin())
-        {
-?>
-            <div class="notification">
-                <div class="content">
-                <div class="text">Debe solicitar rotulos para impresi&oacute;n, solo le quedan <?php echo $informacionAlertaRotulosUsuario['cantidadRotulosDisponiblesUsuario']; ?> rotulos.</div>
-                </div>
-            </div>
-            <div class="number"><p class="glyphicon glyphicon-exclamation-sign"></p></div>
-<?php 
-        } //if show alert rotulos
-    } //if login ?>
-
     <?php 
     /**
      * Notificacion para verificacion de anulacion de rotulos
@@ -262,6 +240,23 @@
 <?php 
         } //if show alert rotulos
     } //if login ?>
+
+    <?
+      $objHelper = new HelperGeneral;
+      $mensajeEmpresa = $objHelper->verificarVencimientoEmpresa();
+
+      if($mensajeEmpresa)
+      {
+        ?>
+        <div class="notification">
+          <div class="content">
+            <div class="text"><?= $mensajeEmpresa ?></div>
+          </div>
+        </div>
+        <div class="number"><p class="glyphicon glyphicon-exclamation-sign"></p></div>
+        <?
+      }
+    ?>
 
  <div class="container" id="cont_contenidogeneral">
 

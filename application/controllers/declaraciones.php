@@ -15,7 +15,7 @@ class Declaraciones extends MY_Controller
         $this->load->model('codegen_model','',TRUE);
         
         $this->load->helper(['form','url','codegen_helper', 'array']);
-        $this->load->helper('Equivalencias');
+        $this->load->helper(['Equivalencias', 'EquivalenciasFirmas']);
         $this->load->helper('HelperGeneral');
 
         setlocale(LC_TIME, 'es_CO');
@@ -101,7 +101,7 @@ class Declaraciones extends MY_Controller
             $this->datatables->select('d.id, empresa.nombre AS empresa, estampilla.estm_nombre AS estampilla,
                 d.periodo, d.tipo_declaracion, d.fecha_creacion, d.estado, d.soporte');
             $this->datatables->from('declaraciones AS d');
-            $this->datatables->join('empresas empresa','empresa.id = d.id_empresa','inner');
+            $this->datatables->join('con_contratantes empresa','empresa.id = d.id_empresa','inner');
             $this->datatables->join('est_estampillas estampilla','estampilla.estm_id = d.id_estampilla','inner');
 
             $helper = new HelperGeneral;
@@ -168,7 +168,12 @@ class Declaraciones extends MY_Controller
                     'js/autoNumeric.js',
                 ];
 
-                $this->data['empresas'] = $this->codegen_model->getSelect('empresas','id, nombre', 'WHERE estado = 1', '', '', 'ORDER BY nombre');
+                $this->data['empresas'] = $this->codegen_model->getSelect(
+                    'con_contratantes',
+                    'id, nombre',
+                    '', '', '',
+                    'ORDER BY nombre'
+                );
                 $this->data['estampillas'] = $this->codegen_model->getSelect('est_estampillas', 'estm_id AS id, estm_nombre AS nombre');
 
                 $this->data['clasificaciones_contratos'] = Equivalencias::clasificacionContratos();
@@ -189,7 +194,7 @@ class Declaraciones extends MY_Controller
      */
     private function consultar()
     {
-        $this->form_validation->set_rules('empresa', 'Empresa','required|trim|xss_clean|is_exists[empresas.id]');
+        $this->form_validation->set_rules('empresa', 'Empresa','required|trim|xss_clean|is_exists[con_contratantes.id]');
         $this->form_validation->set_rules('tipo_estampilla', 'Tipo Estampilla','required|trim|xss_clean|is_exists[est_estampillas.estm_id]');
 
         $this->form_validation->set_rules(
@@ -226,11 +231,11 @@ class Declaraciones extends MY_Controller
                 SUM(pagos.valor) as pagado,
                 factura.fact_porcentaje AS porcentaje',
             'WHERE factura.fact_estampillaid = '. $this->input->post('tipo_estampilla') .'
-                and DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. $this->input->post('periodo') .'"
-                and liquidacion.id_empresa = '. $this->input->post('empresa'),
+                AND DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. $this->input->post('periodo') .'"
+                AND contrato.cntr_contratanteid = '. $this->input->post('empresa'),
             'INNER JOIN est_facturas factura ON factura.fact_id = pagos.factura_id
-                INNER JOIN est_liquidaciones liquidacion ON liquidacion.liqu_id = factura.fact_liquidacionid
                 INNER JOIN cuotas_liquidacion cuota ON cuota.id = factura.id_cuota_liquidacion
+                INNER JOIN est_liquidaciones liquidacion ON liquidacion.liqu_id = factura.fact_liquidacionid
                 INNER JOIN con_contratos contrato ON contrato.cntr_id = liquidacion.liqu_contratoid',
             'GROUP BY contrato.clasificacion'
         );
@@ -276,7 +281,7 @@ class Declaraciones extends MY_Controller
     {
         $es_correccion = $this->input->post('tipo_declaracion') == Equivalencias::declaracionCorreccion();
 
-        $this->form_validation->set_rules('empresa', 'Empresa','required|trim|xss_clean|is_exists[empresas.id]');
+        $this->form_validation->set_rules('empresa', 'Empresa','required|trim|xss_clean|is_exists[con_contratantes.id]');
         $this->form_validation->set_rules('tipo_estampilla', 'Tipo Estampilla','required|trim|xss_clean|is_exists[est_estampillas.estm_id]');
 
         $this->form_validation->set_rules('periodo', 'Período gravable',
@@ -331,22 +336,8 @@ class Declaraciones extends MY_Controller
 
         foreach(Equivalencias::clasificacionContratos() AS $id => $nombre)
         {
-            $this->form_validation->set_rules('detalle_vigencia_actual['. $id .']', 'Vigencia actual '. $id,
-                [
-                    'required',
-                    'trim',
-                    'xss_clean',
-                    'regex_match[/^(19|20)\d\d$/]'
-                ]
-            );
-            $this->form_validation->set_rules('detalle_vigencia_anterior['. $id .']', 'Vigencia anterior '. $id,
-                [
-                    'required',
-                    'trim',
-                    'xss_clean',
-                    'regex_match[/^(19|20)\d\d$/]'
-                ]
-            );
+            $this->form_validation->set_rules('detalle_vigencia_actual['. $id .']', 'Vigencia actual '. $id, 'required|trim|xss_clean|numeric');
+            $this->form_validation->set_rules('detalle_vigencia_anterior['. $id .']', 'Vigencia anterior '. $id, 'required|trim|xss_clean|numeric');
             $this->form_validation->set_rules('detalle_porcentaje['. $id .']', 'Tarifa '. $id, 'required|trim|xss_clean|numeric');
             $this->form_validation->set_rules('detalle_base['. $id .']', 'Valor base '. $id, 'required|trim|xss_clean|numeric');
             $this->form_validation->set_rules('detalle_pagado['. $id .']', 'Valor recaudo estampilla '. $id, 'required|trim|xss_clean|numeric');
@@ -498,13 +489,12 @@ class Declaraciones extends MY_Controller
         );
 
         $this->data['empresa'] = $this->codegen_model->get(
-            'empresas AS e',
+            'con_contratantes AS e',
             'e.nit, e.nombre, e.email,
-                e.direccion, e.telefono, e.nombre_representante,
-                e.identificador_representante, m.muni_nombre AS municipio',
+                e.direccion, e.telefono, m.muni_nombre AS municipio',
             'e.id = "'. $declaracion->id_empresa .'"',
             1,NULL,true, '',
-            'par_municipios m', 'm.muni_id = e.id_municipio'
+            'par_municipios m', 'm.muni_id = e.municipioid'
         );
 
         $this->data['detalles'] = $this->codegen_model->getSelect(
@@ -530,7 +520,7 @@ class Declaraciones extends MY_Controller
                 pagos.valor as pagado',
             'WHERE factura.fact_estampillaid = '. $declaracion->id_estampilla .'
                 AND DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. date('Y-m', strtotime($declaracion->periodo)) .'"
-                AND liquidacion.id_empresa = '. $declaracion->id_empresa,
+                AND contrato.cntr_contratanteid = '. $declaracion->id_empresa,
             'INNER JOIN est_facturas factura ON factura.fact_id = pagos.factura_id
                 INNER JOIN est_liquidaciones liquidacion ON liquidacion.liqu_id = factura.fact_liquidacionid
                 INNER JOIN cuotas_liquidacion cuota ON cuota.id = factura.id_cuota_liquidacion
@@ -548,6 +538,11 @@ class Declaraciones extends MY_Controller
 
         $this->data['declaracion'] = $declaracion;
         $this->data['firmas'] = $info['info'] ? $info['info'] : [];
+
+        $representante = array_filter($this->data['firmas'], function($firma) {
+            return $firma['tipo_usuario'] == EquivalenciasFirmas::usuarioRepresentante();
+        });
+        $this->data['representante'] = end($representante);
 
         $this->data['tipo_correccion'] = Equivalencias::declaracionCorreccion();
         $this->data['meses'] = $this->obtenerMeses(true);

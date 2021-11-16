@@ -140,7 +140,7 @@ class Contratos extends MY_Controller {
 
                     if($bandContinuar)
                     {
-                        $data = array(
+                        $data = [
                             'cntr_contratistaid'	=> $this->input->post('contratistaid'),
                             'cntr_contratanteid'	=> $this->input->post('contratanteid'),
                             'cntr_tipocontratoid'	=> $this->input->post('tipocontratoid'),
@@ -153,9 +153,8 @@ class Contratos extends MY_Controller {
                             'cntr_usuariocrea'		=> $usuario->id,
                             'cntr_municipio_origen'	=> $this->input->post('cntr_municipio_origen'),
                             'clasificacion'			=> $this->input->post('clasificacion_contrato'),
-                            'numero_relacionado'	=> $aplica_numero_relacionado ? $this->input->post('contrato_relacionado') : null,
-                            'id_empresa'            => $this->ion_auth->user()->row()->id_empresa
-						);
+                            'numero_relacionado'	=> $aplica_numero_relacionado ? $this->input->post('contrato_relacionado') : null
+						];
 
                         /*
                         * Valida si el tipo de régimen es otros
@@ -687,7 +686,7 @@ class Contratos extends MY_Controller {
               $verificacion = $helper->verificarRestriccionEmpresa();
 
               if($verificacion !== true) {
-                  $this->datatables->where('c.id_empresa = "'. $verificacion .'"');
+                  $this->datatables->where('c.cntr_contratanteid = "'. $verificacion .'"');
               }
 
               echo $this->datatables->generate();

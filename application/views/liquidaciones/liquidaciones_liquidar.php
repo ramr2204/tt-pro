@@ -30,6 +30,14 @@ $(document).ready(function() {
         }
     });
 
+    $("#comprobante_objeto").fileinput({
+        showCaption: false,
+        browseClass: "btn btn-default btn-sm",
+        browseLabel: "Copia del contrato",
+        showUpload: false,
+        showRemove: false,
+    });
+
     var persona = "<?php echo isset($_GET['person']) ? $_GET['person'] : 0 ?>";
 
     var oTable = $('#tablaq').dataTable( {
@@ -44,11 +52,12 @@ $(document).ready(function() {
             { "sClass": "center" }, 
             { "sClass": "item" },
             { "sClass": "item" },
-            { "sClass": "item" },  
+            { "sClass": "item" },
+            { "sClass": "money"},
             { "sClass": "money"},
             { "sClass": "item"},
             { "sClass": "center","bSortable": false,"bSearchable": false},
-            { "sClass": "center","bVisible": false}, 
+            { "sClass": "center","bVisible": false},
         ],   
         "fnRowCallback" : function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
             if(aData[5] != null)
@@ -60,27 +69,49 @@ $(document).ready(function() {
                $("td:eq(4)", nRow).html('<div class="small">NO REGISTRA...</div>');     
             }
 
-            $("td:eq(7)", nRow).html('');
+            $("td:eq(8)", nRow).html('');
             
             var number= accounting.formatMoney(aData[6], "$", 2, ".", ","); // €4.999,99
             $("td:eq(5)", nRow).html('<div class="">' + number + '</div>');
-            if (aData[7]=='Legalizado') {
-                $("td:eq(7)", nRow).append('<a href="#" class="btn btn-success btn-xs terminar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-tags"></i></a>');
-            }
-            if (aData[7]=='Liquidado') {
-                $("td:eq(7)", nRow).append('<a href="#" class="btn btn-primary btn-xs pagar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-money"></i></a>');
-            }
-            if (aData[7]==null) { 
-               $("td:eq(6)", nRow).html('<div>Sin Liquidar</div>'); 
-               $("td:eq(7)", nRow).append('<a href="#" class="btn btn-danger btn-xs liquidar" title="Liquidar" id="'+aData[0]+'"><i class="fa fa-file-excel-o"></i></a>');
-            }
-            if (aData[8]==0) {
-                // Se comenta ya que el proceso de pago aun no ha sido terminado
-                // $("td:eq(7)", nRow).append('<a href="#" class="btn btn-info btn-xs pagar-contrato" data-toggle="modal" data-target="#modalLiquidacion" title="pse" id="'+aData[0]+'"><i class="fa fa-shopping-cart"></i></a>');
+
+            var number = accounting.formatMoney(aData[7], "$", 2, ".", ",");
+            $("td:eq(6)", nRow).html('<div class="">' + number + '</div>');
+
+            if (aData[8]=='Legalizado') {
+                $("td:eq(8)", nRow).append('<a href="#" class="btn btn-success btn-xs terminar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-tags"></i></a>');
             }
 
-            if(aData[7] != null && aData[7] != 'Modificado') {
-                $("td:eq(7)", nRow).append('<a href="'+ base_url + 'liquidaciones/estampillasRetencion/' + aData[0]+'" target="_blank" class="btn btn-warning btn-xs" title="Pagar estampillas por retencion"><i class="fa fa-legal"></i></a>');
+            if (aData[8]=='Activo' && !aData[9]) {
+                $("td:eq(8)", nRow).append(`<a href="#"
+                    class="btn btn-primary btn-xs pagar"
+                    title="Cargar copia"
+                    id="${aData[0]}"
+                >
+                    <i class="fa fa-money"></i>
+                </a>`);
+            }
+
+            if(aData[9]) {
+                $("td:eq(8)", nRow).append(`<a class="btn btn-info btn-xs"
+                    href="${base_url}${aData[9]}"
+                    title="Ver copia"
+                    target="_blank"
+                >
+                    <i class="fa fa-files-o"></i>
+                </a>`);
+            }
+
+            if (aData[8]==null) {
+               $("td:eq(7)", nRow).html('<div>Sin Liquidar</div>'); 
+               $("td:eq(8)", nRow).append('<a href="#" class="btn btn-danger btn-xs liquidar" title="Liquidar" id="'+aData[0]+'"><i class="fa fa-file-excel-o"></i></a>');
+            }
+            if (aData[9]==0) {
+                // Se comenta ya que el proceso de pago aun no ha sido terminado
+                // $("td:eq(8)", nRow).append('<a href="#" class="btn btn-info btn-xs pagar-contrato" data-toggle="modal" data-target="#modalLiquidacion" title="pse" id="'+aData[0]+'"><i class="fa fa-shopping-cart"></i></a>');
+            }
+
+            if(aData[8] == 'Activo') {
+                $("td:eq(8)", nRow).append('<a href="'+ base_url + 'liquidaciones/estampillasRetencion/' + aData[0]+'" target="_blank" class="btn btn-warning btn-xs" title="Pagar estampillas por retencion"><i class="fa fa-legal"></i></a>');
             }
         },
         "fnDrawCallback": function( oSettings ) {
@@ -154,10 +185,9 @@ $(document).ready(function() {
             $(".pagar").on('click', function(event) {
                 event.preventDefault();
                 var ID = $(this).attr("id");
-                $("#idcontrato").val(ID);
-                $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/verrecibos/'+ID,function(result){
-                    $('#myModal2').modal({show:true});
-                });
+
+                $("#contratoid").val(ID);
+                $('#myModal2').modal({show:true});
             });
             $(".terminar").on('click', function(event) {
                 event.preventDefault();
@@ -198,7 +228,7 @@ $(document).ready(function() {
         ]}
     );
         
-    oTable.fnSearchHighlighting();  
+    oTable.fnSearchHighlighting();
 
 });
 </script>
@@ -216,21 +246,13 @@ $(document).ready(function() {
     overflow: hidden;
 }
 </style>
-<div class="row"> 
-    <div class="col-xs-12">
-        <?php
-            if($band_saldoestampillas) 
-            {
-                echo '<div class="alert alert-dismissable alert-danger">'. $notif_saldoestampillas.'</div>';
-            }
-        ?>
-    </div>
+<div class="row">
     <div rol="usuario_rotulo" style="display:none;"><?php echo $this->ion_auth->user()->row()->id; ?></div>
     <div class="col-sm-12">
         <h1>Contratos</h1>
         <br><br>
     </div>
-</div> 
+</div>
 
 <div class="row"> 
     <div class="col-sm-1"></div>
@@ -252,7 +274,8 @@ $(document).ready(function() {
                         <th>Contratista</th>
                         <th>Fecha</th>
                         <th>Objeto</th>
-                        <th>Valor</th>       
+                        <th>Valor</th>
+                        <th>Saldo</th>
                         <th>Estado</th>
                         <th></th>
                     </tr>
@@ -266,7 +289,8 @@ $(document).ready(function() {
                         <th></th>
                         <th></th>
                         <th></th>
-                        <th></th>       
+                        <th></th>
+                        <th></th>
                         <th></th>
                         <th></th>
                     </tr>
@@ -325,9 +349,53 @@ $(document).ready(function() {
     </div>
     <!-- Cierra modal -->
 <div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-body paga"></div>
+            <div class="modal-body paga">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <?php echo form_open_multipart("liquidaciones/cargar_comprobante",'role="form"');?>
+                            <input id="contratoid" type="hidden" name="contratoid"/>
+                            <div id="errorModal"></div>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered " id="tablaq">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="1" class="text-center small" width="20%">
+                                                <img src="<?php echo base_url() ?>images/gobernacion.jpg" height="60" width="70" >
+                                            </th>
+                                            <th colspan="3" class="text-center small" width="60%">Gobernación de Boyacá <br> Secretaría de Hacienda <br> Dirección de Recaudo y Fiscalización</th>
+                                            <th colspan="1" class="text-center small" width="20%">
+                                                <img src="<?php echo base_url() ?>images/logo.png" height="50" width="80" >
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="5"></td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th colspan="5">
+                                                <div class="col-xs-12 text-center">
+                                                        <label>REGISTRAR OBJETO CONTRATO</label>
+                                                </div>
+                                                <div class="col-xs-12 col-sm-4 col-sm-offset-4 text-center form-group">
+                                                        <input id="comprobante_objeto" type="file" class="file" name="comprobante_objeto" multiple=false >
+                                                </div>
+                                                <div class="col-xs-12 text-center">
+                                                        <button type="submit" class="btn btn-primary">Cargar copia</button>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        <?php echo form_close();?>
+                    </div>
+                </div>
+            </div>
             <div class="modal-footer">
                 <div class="text-center">
                 <small> "Boyacá Avanza"<br>
@@ -364,22 +432,20 @@ $(document).ready(function() {
         ?>
         <script type="text/javascript">
             var ID = <?php echo $idcontrato; ?>;
-            
-            $('.paga').load('<?php echo base_url(); ?>index.php/liquidaciones/verrecibos/'+ID,function(result){
-                <?php
-                    if (isset($errorModal)) 
-                    {
-                        if ($errorModal)
-                        {
-                            ?>
-                            $('#errorModal').html( $('.alert')[0].outerHTML );
-                            <?php
-                        }
-                    }
-                ?>
+            $("#contratoid").val(ID);
             $('#myModal2').modal('show');
-            
-        });
+
+            <?php
+                if (isset($errorModal)) 
+                {
+                    if ($errorModal)
+                    {
+                        ?>
+                        $('#errorModal').html( $('.alert')[0].outerHTML );
+                        <?php
+                    }
+                }
+            ?>
 
         </script>
         <?php
