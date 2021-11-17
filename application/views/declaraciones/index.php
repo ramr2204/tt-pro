@@ -156,7 +156,7 @@
                             title="Visualizar Firmas"
                         >
                             <i class="fa fa-eye"></i>
-                        </button>`
+                        </button>`;
                     }
                 }
 
@@ -167,8 +167,15 @@
                         target="_blank"
                     >
                         <i class="fa fa-files-o"></i>
-                    </a>`
+                    </a>`;
                 }
+
+                acciones += `<a class="btn btn-info"
+                    href="${base_url}declaraciones/detalles/${aData[0]}"
+                    title="Ver detalles"
+                >
+                    <i class="fa fa-list"></i>
+                </a>`;
 
                 acciones = acciones ? '<div class="btn-group">'+ acciones +'</div>' : ''
 
