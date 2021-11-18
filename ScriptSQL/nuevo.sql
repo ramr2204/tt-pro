@@ -188,3 +188,17 @@ ALTER TABLE estampillas_pro_boyaca.con_contratantes ADD telefono varchar(100) NO
 ALTER TABLE estampillas_pro_boyaca.con_contratos DROP COLUMN id_empresa;
 ALTER TABLE estampillas_pro_boyaca.est_liquidaciones DROP COLUMN id_empresa;
 
+CREATE TABLE estampillas_pro_boyaca.adiciones_contratos (
+	id INT auto_increment NOT NULL,
+	id_contrato INT UNSIGNED NOT NULL,
+	valor double(14,2) NOT NULL,
+	observaciones TEXT NULL,
+	fecha_creacion DATETIME NOT NULL,
+	CONSTRAINT adiciones_contratos_pk PRIMARY KEY (id)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8
+COLLATE=utf8_general_ci;
+
+ALTER TABLE estampillas_pro_boyaca.cuotas_liquidacion ADD tipo TINYINT DEFAULT 1 NOT NULL;
+ALTER TABLE estampillas_pro_boyaca.cuotas_liquidacion CHANGE tipo tipo TINYINT DEFAULT 1 NOT NULL AFTER valor;

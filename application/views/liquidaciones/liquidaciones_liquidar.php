@@ -113,6 +113,19 @@ $(document).ready(function() {
             if(aData[8] == 'Activo') {
                 $("td:eq(8)", nRow).append('<a href="'+ base_url + 'liquidaciones/estampillasRetencion/' + aData[0]+'" target="_blank" class="btn btn-warning btn-xs" title="Pagar estampillas por retencion"><i class="fa fa-legal"></i></a>');
             }
+
+            var estadosPosiblesAdicion = [null, 'Activo', 'Legalizado', 'Liquidado'];
+
+            if(estadosPosiblesAdicion.includes(aData[8])) {
+                $("td:eq(8)", nRow).append(`<a
+                    href="${base_url}liquidaciones/adiciones/${aData[0]}"
+                    target="_blank"
+                    class="btn btn-success btn-xs"
+                    title="Adiciones"
+                >
+                    <i class="fa fa-plus-circle"></i>
+                </a>`);
+            }
         },
         "fnDrawCallback": function( oSettings ) {
             $(".pagar-contrato").on('click', function(event){

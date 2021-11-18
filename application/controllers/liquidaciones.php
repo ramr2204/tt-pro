@@ -1295,13 +1295,24 @@ function verliquidartramite()
                   'c.cntr_id,c.cntr_numero,co.cont_nit,
                   co.cont_nombre,c.cntr_fecha_firma,c.cntr_objeto,
                   c.cntr_valor,
-                  (COALESCE(l.liqu_valorsiniva, 0) - COALESCE(SUM(cuota.valor), 0)) AS saldo,
+                  ((l.liqu_valorsiniva + adicion.total) - COALESCE(SUM(cuota.valor), 0)) AS saldo,
                   el.eslo_nombre,COALESCE(l.liqu_soporteobjeto, "") AS copia_contrato', false);
               $this->datatables->from('con_contratos c');
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
               $this->datatables->join('con_estadoslocales el', 'el.eslo_id = c.cntr_estadolocalid', 'left');
               $this->datatables->join('est_liquidaciones l', 'l.liqu_contratoid = c.cntr_id', 'left');
-              $this->datatables->join('cuotas_liquidacion cuota', 'cuota.id_liquidacion = l.liqu_id', 'left');
+              $this->datatables->join('cuotas_liquidacion cuota', 'cuota.id_liquidacion = l.liqu_id AND cuota.estado = '. Equivalencias::cuotaPaga(), 'left');
+
+              $this->datatables->join(
+                '(
+                    SELECT COALESCE(SUM(ac.valor), 0) AS total, ac.id_contrato
+                    FROM adiciones_contratos ac
+                    GROUP by ac.id_contrato
+                ) adicion',
+                'adicion.id_contrato = c.cntr_id',
+                'left'
+              );
+
               $this->datatables->add_column('edit', '-');
               $this->datatables->group_by('c.cntr_id');
 
@@ -3738,7 +3749,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                     1, null, true
                 );
 
-                $facturas = $this->liquidaciones_model->obtenerFacturasRetencion('factura.fact_liquidacionid', $factura_muestra->id_liquidacion);
+                $facturas = $this->liquidaciones_model->obtenerFacturasRetencion('factura.id_cuota_liquidacion', $factura_muestra->id_cuota_liquidacion);
 
                 foreach($facturas AS $factura)
                 {
@@ -3775,22 +3786,25 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                         'id', $factura_muestra->id_cuota_liquidacion
                     );
 
-                    $liquidacion = $this->codegen_model->get(
-                        'est_liquidaciones',
-                        'liqu_valorsiniva AS valor_total',
-                        'liqu_id = '.$factura_muestra->id_liquidacion,
-                        1,NULL,true
+                    $liquidacion = $this->codegen_model->getSelect(
+                        'est_liquidaciones AS l',
+                        'liqu_valorsiniva AS valor_total, adicion.total AS total_adicion,
+                            COALESCE(SUM(cuota.valor), 0) AS total_pagado',
+                        'WHERE l.liqu_id = '.$factura_muestra->id_liquidacion,
+                        'LEFT JOIN cuotas_liquidacion cuota ON (
+                            cuota.id_liquidacion = l.liqu_id
+                            AND estado = '. Equivalencias::cuotaPaga() .'
+                        )
+                        LEFT JOIN (
+                            SELECT COALESCE(SUM(ac.valor), 0) AS total, ac.id_contrato
+                            FROM adiciones_contratos ac
+                            GROUP by ac.id_contrato
+                        ) adicion ON adicion.id_contrato = l.liqu_contratoid',
+                        'group by l.liqu_id'
                     );
+                    $liquidacion = $liquidacion[0];
 
-                    $cuotas_pagadas = $this->codegen_model->get(
-                        'cuotas_liquidacion',
-                        'SUM(valor) AS total',
-                        'id_liquidacion = "' .$factura_muestra->id_liquidacion .'"
-                            AND estado = '. Equivalencias::cuotaPaga(),
-                        1, null, true
-                    );
-
-                    $saldo = $liquidacion->valor_total - ($cuotas_pagadas->total ? $cuotas_pagadas->total : 0);
+                    $saldo = ($liquidacion->valor_total + $liquidacion->total_adicion) - $liquidacion->total_pagado;
 
                     # Si el saldo es 0, es decir se pago todo pase a estado liquidado
                     if(number_format($saldo, 0, '', '') == 0) {
@@ -3908,12 +3922,32 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 
 				$idcontrato = $this->uri->segment(3);
 
-                $liquidacion = $this->codegen_model->get(
-                    'est_liquidaciones',
-                    'liqu_id, liqu_valorsiniva AS valor_total, liqu_numero AS numero, liqu_tipocontrato AS tipo_contrato, liqu_vigencia AS vigencia',
-                    'liqu_contratoid = '.$idcontrato,
-                    1,NULL,true
+                $liquidacion = $this->codegen_model->getSelect(
+                    'est_liquidaciones AS l',
+                    'liqu_id, liqu_valorsiniva AS valor_total, liqu_numero AS numero, liqu_tipocontrato AS tipo_contrato,
+                        l.liqu_vigencia AS vigencia, COALESCE(SUM(cuota_normal.valor), 0) AS total_pagado,
+                        COALESCE(cuota_adicion.valor, 0) AS total_pagado_adicion, adicion.total AS total_adicion',
+                    'WHERE l.liqu_contratoid = '.$idcontrato,
+                    'LEFT JOIN cuotas_liquidacion cuota_normal ON (
+                        cuota_normal.id_liquidacion = l.liqu_id
+                        AND estado = '. Equivalencias::cuotaPaga() .'
+                        AND tipo = '. Equivalencias::cuotaNormal() .'
+                    )
+                    LEFT JOIN (
+                        SELECT c.id_liquidacion, SUM(c.valor) AS valor
+                        FROM cuotas_liquidacion AS c
+                        WHERE estado = '. Equivalencias::cuotaPaga() .'
+                            AND tipo = '. Equivalencias::cuotaAdicion() .'
+                        GROUP BY c.id_liquidacion
+                    ) cuota_adicion ON cuota_adicion.id_liquidacion = l.liqu_id
+                    LEFT JOIN (
+                        SELECT coalesce(SUM(ac.valor), 0) AS total, ac.id_contrato
+                        FROM adiciones_contratos ac
+                        GROUP by ac.id_contrato
+                    ) adicion ON adicion.id_contrato = l.liqu_contratoid',
+                    'group by l.liqu_id'
                 );
+                $liquidacion = $liquidacion[0];
 
                 $cuota_activa = $this->liquidaciones_model->cuotaLiquidacionActiva('id, valor', $liquidacion->liqu_id);
 
@@ -3926,26 +3960,16 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                     $this->data['facturas'] = $this->liquidaciones_model->obtenerFacturasRetencion('factura.id_cuota_liquidacion', $cuota_activa->id);
                 }
 
-                $cuotas_pagadas = $this->codegen_model->get(
-                    'cuotas_liquidacion',
-                    'SUM(valor) AS total',
-                    'id_liquidacion = "' . $liquidacion->liqu_id .'" AND estado = '. Equivalencias::cuotaPaga(),
-                    1, null, true
-                );
-                $this->data['saldo_contrato'] = $liquidacion->valor_total - ($cuotas_pagadas->total ? $cuotas_pagadas->total : 0);
+                $this->data['saldo_contrato'] = $liquidacion->valor_total - $liquidacion->total_pagado;
+                $this->data['saldo_adiciones'] = $liquidacion->total_adicion - $liquidacion->total_pagado_adicion;
 
 				$this->template->set('title', 'Contrato liquidado');
 
                 $this->data['style_sheets'] = [
-                    'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen',
                     'css/plugins/bootstrap/fileinput.css' => 'screen',
                     'css/plugins/bootstrap/bootstrap-switch.css' => 'screen'
                 ];
                 $this->data['javascripts'] = [
-                    'js/jquery.dataTables.min.js',
-                    'js/plugins/dataTables/dataTables.bootstrap.js',
-                    'js/jquery.dataTables.defaults.js',
-                    'js/plugins/dataTables/jquery.dataTables.columnFilter.js',
                     'js/accounting.min.js',
                     'js/plugins/bootstrap/fileinput.min.js',
                     'js/plugins/bootstrap/bootstrap-switch.min.js',
@@ -4137,6 +4161,8 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                     redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$this->input->post('id_contrato'));
 				}
 
+                $es_adicion = $this->input->post('es_adicion') == Equivalencias::cuotaAdicion();
+
                 # Se da formato al valor para que guarde los valores decimales
                 $valor = str_replace(',', '.', str_replace('.','',$this->input->post('valor')));
 
@@ -4147,15 +4173,41 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                     1,NULL,true
                 );
 
+                if($es_adicion) {
+                    $liquidacion = $this->codegen_model->getSelect(
+                        'est_liquidaciones AS l',
+                        'l.liqu_id, adicion.total AS valor_total, COALESCE(SUM(c.valor), 0) AS total_pagado',
+                        'WHERE l.liqu_contratoid = '.$this->input->post('id_contrato'),
+                        'LEFT JOIN cuotas_liquidacion c ON (
+                            c.id_liquidacion = l.liqu_id
+                            AND estado = '. Equivalencias::cuotaPaga() .'
+                            AND tipo = '. Equivalencias::cuotaAdicion() .'
+                        )
+                        LEFT JOIN (
+                            SELECT coalesce(SUM(ac.valor), 0) AS total, ac.id_contrato
+                            FROM adiciones_contratos ac
+                            GROUP by ac.id_contrato
+                        ) adicion ON adicion.id_contrato = l.liqu_contratoid',
+                        'GROUP BY l.liqu_id'
+                    );
+                } else {
+                    $liquidacion = $this->codegen_model->getSelect(
+                        'est_liquidaciones AS l',
+                        'l.liqu_id, l.liqu_valorsiniva AS valor_total, COALESCE(SUM(c.valor), 0) AS total_pagado',
+                        'WHERE l.liqu_contratoid = '.$this->input->post('id_contrato'),
+                        'LEFT JOIN cuotas_liquidacion c ON (
+                            c.id_liquidacion = l.liqu_id
+                            AND estado = '. Equivalencias::cuotaPaga() .'
+                            AND tipo = '. Equivalencias::cuotaNormal() .'
+                        )',
+                        'GROUP BY l.liqu_id'
+                    );
+                }
+                $liquidacion = $liquidacion[0];
+
                 $datos = $this->obtenerInfoFacturas( $this->input->post('id_contrato'), $valor );
 
-                $cuotas_pagadas = $this->codegen_model->get(
-                    'cuotas_liquidacion',
-                    'SUM(valor) AS total',
-                    'id_liquidacion = "' . $liquidacion->liqu_id .'" AND estado = '. Equivalencias::cuotaPaga(),
-                    1, null, true
-                );  
-                $saldo_contrato = $liquidacion->valor_total - ($cuotas_pagadas->total ? $cuotas_pagadas->total : 0);
+                $saldo_contrato = $liquidacion->valor_total - $liquidacion->total_pagado;
 
                 if($valor > $saldo_contrato){
                     $this->session->set_flashdata('errorModal', true);
@@ -4170,6 +4222,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 						'id_liquidacion'	=> $liquidacion->liqu_id,
 						'valor'				=> $valor,
 						'estado'		    => Equivalencias::cuotaPendiente(),
+                        'tipo'              => ($es_adicion ? Equivalencias::cuotaAdicion() : Equivalencias::cuotaNormal()),
 						'fecha_creacion'	=> date('Y-m-d H:i:s')
 					)
 				);
@@ -4234,4 +4287,105 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
         }
     }
 
+    /**
+     * Vista que permite listar y registrar adiciones
+     * 
+     * @return null
+     */
+    public function adiciones()
+    {
+        if ($this->ion_auth->logged_in()) {
+            if ($this->uri->segment(3)==''){
+                redirect(base_url().'index.php/error_404');
+            }    
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar'))
+            {
+                $this->data['successmessage'] = $this->session->flashdata('message');
+                $this->data['infomessage'] = $this->session->flashdata('infomessage');
+                $this->data['errormessage']=$this->session->flashdata('errormessage');
+
+                $id_contrato = $this->uri->segment(3);
+                $this->data['id_contrato'] = $id_contrato;
+
+                $this->data['adiciones'] = $this->codegen_model->getSelect(
+                    'adiciones_contratos',
+                    'valor, observaciones, fecha_creacion',
+                    'WHERE id_contrato = "'. $id_contrato .'"',
+                    '', '',
+                    'ORDER BY fecha_creacion DESC'
+                );
+
+                $this->data['style_sheets'] = [ ];
+                $this->data['javascripts'] = [
+                    'js/autoNumeric.js',
+                    'js/applicationEvents.js',
+                ];
+
+                $this->template->set('title', 'Adiciones del contrato');
+
+                $this->template->load($this->config->item('admin_template'),'contratos/adicion', $this->data);
+            } else {
+                redirect(base_url().'index.php/error_404');
+            }
+
+        } else {
+            redirect(base_url().'index.php/users/login');
+        }
+    }
+
+    /**
+     * Permite crear una adicion a un contrato
+     * 
+     * @return null
+     */
+    public function registrarAdicion()
+    {
+        if ($this->ion_auth->logged_in())
+        {
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar'))
+            {
+                $this->form_validation->set_rules('id_contrato', 'Identificador del contrato','required|trim|xss_clean|is_exists[con_contratos.cntr_id]');
+                $this->form_validation->set_rules('valor', 'Valor','required|trim|xss_clean');
+                $this->form_validation->set_rules('observaciones', 'Observaciones','trim|xss_clean');
+
+                if ($this->form_validation->run() == false)
+                {
+                    $this->session->set_flashdata('errormessage', (validation_errors() ? validation_errors(): false));
+                }
+                else
+                {
+                    $valor = str_replace(',', '.', str_replace('.','',$this->input->post('valor')));
+
+                    $data = [
+                        'id_contrato'       => $this->input->post('id_contrato'),
+                        'valor'             => $valor,
+                        'observaciones'     => $this->input->post('observaciones'),
+                        'fecha_creacion'    => date('Y-m-d H:i:s'),
+                    ];
+
+                    $respuestaProceso = $this->codegen_model->add('adiciones_contratos',$data);
+                    if ($respuestaProceso->bandRegistroExitoso) 
+                    {
+                        # Se pasa el estado del contrato a activo por si ya fue pagado y que permita registrar pagos nuevos
+                        $this->codegen_model->edit(
+                            'con_contratos',
+                            [ 'cntr_estadolocalid' => 1 ],# Activo
+                            'cntr_id', $this->input->post('id_contrato')
+                        );
+
+                        $this->session->set_flashdata('message','La adición se registró con éxito');
+                    }else 
+                        {
+                            $this->session->set_flashdata('errormessage', 'No se pudo registrar la adición');
+                        }
+                }
+
+                redirect(base_url().'index.php/liquidaciones/adiciones/'.$this->input->post('id_contrato'));
+            } else {
+                redirect(base_url().'index.php/error_404');
+            }
+        } else {
+            redirect(base_url().'index.php/users/login');
+        }
+    }
 }
