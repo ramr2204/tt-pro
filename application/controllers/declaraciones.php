@@ -19,6 +19,10 @@ class Declaraciones extends MY_Controller
         $this->load->helper('HelperGeneral');
 
         setlocale(LC_TIME, 'es_CO');
+
+        # Se toma como base las clasificaciones de los contratos pero se le agregan "Adiciones" por que se calcula de otra forma
+        $this->tipos_detalles = Equivalencias::clasificacionContratos();
+        $this->tipos_detalles[3] = 'Adiciones';
     }
 
     /**
@@ -176,7 +180,7 @@ class Declaraciones extends MY_Controller
                 );
                 $this->data['estampillas'] = $this->codegen_model->getSelect('est_estampillas', 'estm_id AS id, estm_nombre AS nombre');
 
-                $this->data['clasificaciones_contratos'] = Equivalencias::clasificacionContratos();
+                $this->data['clasificaciones_contratos'] = $this->tipos_detalles;
 
                 $this->template->load($this->config->item('admin_template'),'declaraciones/create', $this->data);
             } else {
@@ -225,7 +229,7 @@ class Declaraciones extends MY_Controller
         $consulta = [];
 
         $pagos = $this->codegen_model->getSelect(
-            'estampillas_pro_boyaca.pagos_estampillas AS pagos',
+            'pagos_estampillas AS pagos',
             'contrato.clasificacion,
                 SUM(cuota.valor) as base,
                 SUM(pagos.valor) as pagado,
@@ -234,7 +238,11 @@ class Declaraciones extends MY_Controller
                 AND DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. $this->input->post('periodo') .'"
                 AND contrato.cntr_contratanteid = '. $this->input->post('empresa'),
             'INNER JOIN est_facturas factura ON factura.fact_id = pagos.factura_id
-                INNER JOIN cuotas_liquidacion cuota ON cuota.id = factura.id_cuota_liquidacion
+                INNER JOIN cuotas_liquidacion cuota ON (
+                    cuota.id = factura.id_cuota_liquidacion
+                    AND cuota.estado = '. Equivalencias::cuotaPaga() .'
+                    AND cuota.tipo = '. Equivalencias::cuotaNormal() .'
+                )
                 INNER JOIN est_liquidaciones liquidacion ON liquidacion.liqu_id = factura.fact_liquidacionid
                 INNER JOIN con_contratos contrato ON contrato.cntr_id = liquidacion.liqu_contratoid',
             'GROUP BY contrato.clasificacion'
@@ -247,9 +255,9 @@ class Declaraciones extends MY_Controller
             {
                 if( isset($pagos[$id]) ) {
                     $pagos[$id]->clase = $nombre;
-                    $consulta[] = $pagos[$id];
+                    $consulta[$id] = $pagos[$id];
                 } else {
-                    $consulta[] = (object)[
+                    $consulta[$id] = (object)[
                         'clasificacion' => $id,
                         'clase'         => $nombre,
                         'base'          => 0,
@@ -258,6 +266,43 @@ class Declaraciones extends MY_Controller
                     ];
                 }
             }
+        }
+
+        $adiciones = $this->codegen_model->getSelect(
+            'pagos_estampillas AS pagos',
+            'SUM(cuota.valor) as base,
+                SUM(pagos.valor) as pagado,
+                factura.fact_porcentaje AS porcentaje',
+            'WHERE factura.fact_estampillaid = '. $this->input->post('tipo_estampilla') .'
+                AND DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. $this->input->post('periodo') .'"
+                AND contrato.cntr_contratanteid = '. $this->input->post('empresa'),
+            'INNER JOIN est_facturas factura ON factura.fact_id = pagos.factura_id
+                INNER JOIN cuotas_liquidacion cuota ON (
+                    cuota.id = factura.id_cuota_liquidacion
+                    AND cuota.estado = '. Equivalencias::cuotaPaga() .'
+                    AND cuota.tipo = '. Equivalencias::cuotaAdicion() .'
+                )
+                INNER JOIN est_liquidaciones liquidacion ON liquidacion.liqu_id = factura.fact_liquidacionid
+                INNER JOIN con_contratos contrato ON contrato.cntr_id = liquidacion.liqu_contratoid'
+        );
+
+        if(count($adiciones) > 0)
+        {
+            $adiciones = $adiciones[0];
+
+            $consulta[3] = (object)[
+                'clasificacion' => 3,
+                'clase'         => 'Adiciones',
+                'base'          => $adiciones->base,
+                'pagado'        => $adiciones->pagado,
+                'porcentaje'    => $adiciones->porcentaje,
+            ];
+        }
+
+        if(count($consulta) > 0)
+        {
+            # Se ordenan los detalles por el indice
+            ksort($consulta);
 
             $estampilla = $this->codegen_model->getSelect(
                 'est_estampillas',
@@ -267,7 +312,8 @@ class Declaraciones extends MY_Controller
 
             $this->data['consulta'] = $consulta;
             $this->data['estampilla'] = $estampilla[0];
-        } else {
+        }
+        else {
             $this->data['errormessage'] = 'No se encontraron datos por los valores buscados.';
         }
     }
@@ -334,7 +380,7 @@ class Declaraciones extends MY_Controller
         $this->form_validation->set_rules('total_cargo', 'Total a cargo por recaudo estampilla, sanciones e intereses','required|trim|xss_clean|numeric');
         $this->form_validation->set_rules('saldo_favor', 'Saldo a favor','required|trim|xss_clean|numeric');
 
-        foreach(Equivalencias::clasificacionContratos() AS $id => $nombre)
+        foreach($this->tipos_detalles AS $id => $nombre)
         {
             $this->form_validation->set_rules('detalle_vigencia_actual['. $id .']', 'Vigencia actual '. $id, 'required|trim|xss_clean|numeric');
             $this->form_validation->set_rules('detalle_vigencia_anterior['. $id .']', 'Vigencia anterior '. $id, 'required|trim|xss_clean|numeric');
@@ -435,7 +481,7 @@ class Declaraciones extends MY_Controller
 
             if($guardo->bandRegistroExitoso)
             {
-                foreach(Equivalencias::clasificacionContratos() AS $id => $nombre)
+                foreach($this->tipos_detalles AS $id => $nombre)
                 {
                     $insercion = [
                         'id_declaracion'    => $guardo->idInsercion,
@@ -526,7 +572,7 @@ class Declaraciones extends MY_Controller
 
         $this->data['tipo_correccion'] = Equivalencias::declaracionCorreccion();
         $this->data['meses'] = $this->obtenerMeses(true);
-        $this->data['clasificaciones'] = Equivalencias::clasificacionContratos();
+        $this->data['clasificaciones'] = $this->tipos_detalles;
 
         $this->data['formatear_valor'] = function($numero) {
             return '$'.number_format($numero, 2, ',', '.');
@@ -618,7 +664,7 @@ class Declaraciones extends MY_Controller
             pagos.id AS pago,
             factura.fact_id AS factura');
 
-        $this->datatables->from('estampillas_pro_boyaca.pagos_estampillas AS pagos');
+        $this->datatables->from('pagos_estampillas AS pagos');
         $this->datatables->join('est_facturas factura','factura.fact_id = pagos.factura_id','inner');
         $this->datatables->join('est_liquidaciones liquidacion', 'liquidacion.liqu_id = factura.fact_liquidacionid', 'inner');
         $this->datatables->join('cuotas_liquidacion cuota', 'cuota.id = factura.id_cuota_liquidacion', 'inner');
@@ -649,7 +695,7 @@ class Declaraciones extends MY_Controller
     private function consultarDetalles($declaracion)
     {
         return $this->codegen_model->getSelect(
-            'estampillas_pro_boyaca.pagos_estampillas AS pagos',
+            'pagos_estampillas AS pagos',
             'contratista.cont_nombre AS nombre_contratista,
                 contratista.cont_nit AS nit_contratista,
                 pagos.fecha,
