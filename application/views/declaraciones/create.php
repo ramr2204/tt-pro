@@ -363,16 +363,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Anexos -->
-                                    <div>
-                                        <div class="col-xs-12">
-                                            <legend>Anexos</legend>
-                                        </div>
-                                        <div class="col-md-12 column form-group">
-                                            <input id="soporte" type="file" class="file" name="soporte" multiple="false">
-                                        </div>
-                                    </div>
-
                                     <div class="pull-right">
                                         <?= anchor('declaraciones', '<i class="fa fa-times"></i> Cancelar', 'class="btn btn-default"'); ?>
                                         <button name="acc" value="generar"

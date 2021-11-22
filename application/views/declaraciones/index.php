@@ -66,6 +66,67 @@
     </div>
 </div>
 
+<!-- Modal cargue soporte -->
+<div class="modal fade" id="modalSoporte" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body paga">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <?php echo form_open_multipart("declaraciones/cargarPago",'role="form"');?>
+                            <input id="declaracion" type="hidden" name="declaracion"/>
+
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered " id="tablaq">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="1" class="text-center small" width="20%">
+                                                <img src="<?php echo base_url() ?>images/gobernacion.jpg" height="60" width="70" >
+                                            </th>
+                                            <th colspan="3" class="text-center small" width="60%">Gobernación de Boyacá <br> Secretaría de Hacienda <br> Dirección de Recaudo y Fiscalización</th>
+                                            <th colspan="1" class="text-center small" width="20%">
+                                                <img src="<?php echo base_url() ?>images/logo.png" height="50" width="80" >
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="5"></td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th colspan="5">
+                                                <div class="col-xs-12 text-center">
+                                                        <label>REGISTRAR SOPORTE DE PAGO DE LA DECLARACION</label>
+                                                </div>
+                                                <div class="col-xs-12 col-sm-4 col-sm-offset-4 text-center form-group">
+                                                        <input id="soporte_pago" type="file" class="file" name="soporte_pago" multiple=false >
+                                                </div>
+                                                <div class="col-xs-12 text-center">
+                                                        <button type="submit" class="btn btn-primary">Cargar</button>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        <?php echo form_close();?>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="text-center">
+                <small> "Boyacá Avanza"<br>
+                  Palacio de la Torre, Calle 20 No. 9 – 90 <br>
+                  Teléfono PBX+(57)608742 0150<br>
+                  contactenos@boyaca.gov.co </small> 
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script type="text/javascript" language="javascript" charset="utf-8">
 
     meses = JSON.parse('<?= json_encode($meses) ?>');
@@ -73,6 +134,8 @@
     firma = JSON.parse('<?= json_encode($firma) ?>');
     permiso_firmar = <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/firmar')) ?>;
     permiso_liberar_firmas = <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/liberarFirmas')) ?>;
+    permiso_cargar_pago = <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/cargarPago')) ?>;
+    permiso_detalles = <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/detalles')) ?>;
 
     $(function () {
         construirTablaDeclaraciones()
@@ -82,6 +145,15 @@
         $(document).on('click', '#sendCode', enviarCodigoVerificacion);
         $(document).on('click', '.sign-modal', openModalSign);
         $(document).on('click', '.free-sign', liberarFirma);
+        $(document).on('click', '.cargar-soporte', cargarSoporte);
+
+        $('#soporte_pago').fileinput({
+            showCaption: false,
+            browseClass: 'btn btn-default btn-sm',
+            browseLabel: 'Archivo',
+            showUpload: false,
+            showRemove: false,
+        });
     });
 
     function updatePage() {
@@ -137,31 +209,17 @@
 
                 var acciones = '';
 
-                // Inicializada
-                if(aData[6] == 1) {
-                    acciones += boton_firmar.replaceAll(':id', aData[0])
-                } else if(aData[6] == 2) {
-                    acciones += `<a class="btn btn-danger"
-                        href="${base_url}uploads/declaraciones/comprobante_declaracion_${aData[0]}.pdf"
-                        title="Ver declaración"
-                        target="_blank"
+                if(permiso_detalles) {
+                    acciones += `<a class="btn btn-info"
+                        href="${base_url}declaraciones/detalles/${aData[0]}"
+                        title="Ver detalles"
                     >
-                        <i class="fa fa-file-pdf-o"></i>
+                        <i class="fa fa-list"></i>
                     </a>`;
-
-                    if(permiso_liberar_firmas) {
-                        acciones += `<button
-                            class="btn btn-primary sign-modal"
-                            data-cod="${aData[0]}"
-                            title="Visualizar Firmas"
-                        >
-                            <i class="fa fa-eye"></i>
-                        </button>`;
-                    }
                 }
 
                 if(aData[7] != '') {
-                    acciones += `<a class="btn btn-info"
+                    acciones += `<a class="btn btn-primary"
                         href="${base_url}${aData[7]}"
                         title="Ver anexo"
                         target="_blank"
@@ -170,12 +228,44 @@
                     </a>`;
                 }
 
-                acciones += `<a class="btn btn-info"
-                    href="${base_url}declaraciones/detalles/${aData[0]}"
-                    title="Ver detalles"
-                >
-                    <i class="fa fa-list"></i>
-                </a>`;
+                switch (aData[6]) {
+                    // Inicializada
+                    case '1':
+                        if(permiso_cargar_pago) {
+                            acciones += `<button type="button"
+                                class="btn btn-primary cargar-soporte"
+                                title="Cargar soporte"
+                                data-ref="${aData[0]}"
+                            >
+                                <i class="fa fa-upload"></i>
+                            </button>`;
+                        }
+                        break;
+                    // Pagada
+                    case '3':
+                        acciones += boton_firmar.replaceAll(':id', aData[0])
+                        break;
+                    // Firmada
+                    case '2':
+                        acciones += `<a class="btn btn-danger"
+                            href="${base_url}uploads/declaraciones/comprobante_declaracion_${aData[0]}.pdf"
+                            title="Ver declaración"
+                            target="_blank"
+                        >
+                            <i class="fa fa-file-pdf-o"></i>
+                        </a>`;
+
+                        if(permiso_liberar_firmas) {
+                            acciones += `<button
+                                class="btn btn-primary sign-modal"
+                                data-cod="${aData[0]}"
+                                title="Visualizar Firmas"
+                            >
+                                <i class="fa fa-eye"></i>
+                            </button>`;
+                        }
+                        break;
+                }
 
                 acciones = acciones ? '<div class="btn-group">'+ acciones +'</div>' : ''
 
@@ -404,5 +494,12 @@
                 `);
             },
         });
+    }
+
+    function cargarSoporte() {
+        var ref = $(this).data('ref');
+
+        $('#declaracion').val(ref);
+        $('#modalSoporte').modal('show');
     }
 </script>

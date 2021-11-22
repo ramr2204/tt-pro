@@ -24,10 +24,12 @@ Class EquivalenciasFirmas extends CI_Controller
 
     private static $estadosDeclaracion = [
         1 => 'Iniciado',
+        3 => 'Pagado',
         2 => 'Firmado',
     ];
 
     private static $declaracionIniciada = 1;
+    private static $declaracionPagada = 3;
     private static $declaracionFirmada = 2;
 
     public static function tiposUsuarios(){
@@ -52,6 +54,10 @@ Class EquivalenciasFirmas extends CI_Controller
 
     public static function declaracionIniciada(){
         return self::$declaracionIniciada;
+    }
+
+    public static function declaracionPagada(){
+        return self::$declaracionPagada;
     }
 
     public static function declaracionFirmada(){

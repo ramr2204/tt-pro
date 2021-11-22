@@ -51,9 +51,11 @@ class Declaraciones extends MY_Controller
 			//template data
             $this->template->set('title', 'Administrar declaraciones');
             $this->data['style_sheets'] = [
+                'css/plugins/bootstrap/fileinput.css' => 'screen',
                 'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
             ];
             $this->data['javascripts'] = [
+                'js/plugins/bootstrap/fileinput.min.js',
                 'js/jquery.dataTables.min.js',
                 'js/plugins/dataTables/dataTables.bootstrap.js',
                 'js/jquery.dataTables.defaults.js',
@@ -393,48 +395,6 @@ class Declaraciones extends MY_Controller
             $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);
             return false;
         } else {
-
-            # Cargue del anexo
-            $ruta_soporte = '';
-
-            if (!isset($_FILES['upload_field_name']) && !is_uploaded_file($_FILES['soporte']['tmp_name'])) 
-            {
-                // $this->session->set_flashdata('errorModal', true);
-                // $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe cargar el soporte del pago.');
-            }
-            else
-            {
-                $path = 'uploads/anexosDeclaraciones';
-                if(!is_dir($path)) { //crea la carpeta para los objetos si no existe
-                    mkdir($path,0777,TRUE);
-                }
-                $config['upload_path'] = $path;
-                $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
-                $config['remove_spaces']=TRUE;
-                $config['max_size']    = '99999';
-                $config['overwrite']    = TRUE;
-                $this->load->library('upload');
-
-                // var_dump( $_FILES['soporte']['name'], $_FILES['soporte'], date('F_d_Y') );
-                $config['file_name'] = 'anexo_'.time();
-                $this->upload->initialize($config);
-
-                //Valida si se carga correctamente el soporte
-                if ($this->upload->do_upload("soporte"))
-                {
-                    /*
-                    * Establece la informacion para actualizar la liquidacion
-                    * en este caso la ruta de la copia del objeto del contrato
-                    */
-                    $file_datos= $this->upload->data();
-                    $ruta_soporte = $path.'/'.$file_datos['orig_name'];
-                }
-                else {
-                    $this->data['errormessage'] = '<strong>Error!</strong> '.$this->upload->display_errors();
-                    return false;
-                }
-            }
-
             if($this->input->post('tipo_declaracion') != Equivalencias::declaracionCorreccion()) {
                 $validacion = $this->codegen_model->countwhere('declaraciones',
                     'id_empresa = "'. $this->input->post('empresa') .'"
@@ -465,7 +425,6 @@ class Declaraciones extends MY_Controller
                 'total_cargo'               => $this->input->post('total_cargo'),
                 'saldo_favor'               => $this->input->post('saldo_favor'),
                 'fecha_creacion'            => date('Y-m-d H:i:s'),
-                'soporte'                   => $ruta_soporte,
                 'creado_por'                => $this->session->userdata('user_id'),
             ];
 
@@ -752,5 +711,79 @@ class Declaraciones extends MY_Controller
         $_SESSION['fecha_informe_excel'] = 'detalles declaraciones';
 
         $this->template->load($this->config->item('excel_template'),'declaraciones/excel', $this->data);
+    }
+
+    /**
+     * Adjunta el soporte de pago
+     * 
+     * @return null
+     */
+    public function cargarPago()
+    {
+        $this->form_validation->set_rules('declaracion', 'Identificador de la declaración','required|trim|xss_clean|is_exists[declaraciones.id]');
+
+        if ($this->form_validation->run() == false) {
+            $this->session->set_flashdata('errormessage', (validation_errors() ? validation_errors() : false));
+        } else {
+
+            # Cargue del anexo
+            $ruta_soporte = '';
+
+            if (!isset($_FILES['upload_field_name']) && !is_uploaded_file($_FILES['soporte_pago']['tmp_name'])) 
+            {
+                $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe cargar el soporte del pago.');
+            }
+            else
+            {
+                $path = 'uploads/anexosDeclaraciones';
+                if(!is_dir($path)) { //crea la carpeta para los objetos si no existe
+                    mkdir($path,0777,TRUE);
+                }
+                $config['upload_path'] = $path;
+                $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
+                $config['remove_spaces']=TRUE;
+                $config['max_size']    = '99999';
+                $config['overwrite']    = TRUE;
+                $this->load->library('upload');
+
+                $config['file_name'] = 'anexo_'.time();
+                $this->upload->initialize($config);
+
+                //Valida si se carga correctamente el soporte
+                if ($this->upload->do_upload('soporte_pago'))
+                {
+                    /*
+                    * Establece la informacion para actualizar la liquidacion
+                    * en este caso la ruta de la copia del objeto del contrato
+                    */
+                    $file_datos= $this->upload->data();
+                    $ruta_soporte = $path.'/'.$file_datos['orig_name'];
+                }
+                else {
+                    $this->session->set_flashdata('errormessage', '<strong>Error!</strong> '.$this->upload->display_errors());
+                }
+            }
+
+            if($ruta_soporte)
+            {
+                $registros_afectados = $this->codegen_model->edit(
+                    'declaraciones',
+                    [
+                        'soporte' => $ruta_soporte,
+                        'estado' => EquivalenciasFirmas::declaracionPagada(),
+                    ],
+                    'id', $this->input->post('declaracion'),
+                    true
+                );
+    
+                if($registros_afectados > 0) {
+                    $this->session->set_flashdata('successmessage', 'El soporte se cargo correctamente.');
+                } else {
+                    $this->session->set_flashdata('errormessage', '<strong>Error!</strong> No se pudo cargar el pago correctamente.');
+                }
+            }
+        }
+
+        redirect(base_url().'index.php/declaraciones/index');
     }
 }
