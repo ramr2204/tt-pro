@@ -14,10 +14,10 @@ class Codegen_model extends CI_Model
         $this->db->from($table);
         $this->db->limit($perpage,$start);
         if($where){
-        $this->db->where($where);
+            $this->db->where($where);
         }
         if($tablaJoin){
-        $this->db->join($tablaJoin, $condicionJoin);
+            $this->db->join($tablaJoin, $condicionJoin);
         }
         $query = $this->db->get();
         

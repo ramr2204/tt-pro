@@ -51,7 +51,12 @@ $total = 0;
                                     if(!$cuota && number_format($saldo_contrato, 0, '', '') != 0)
                                     {
                                         ?>
-                                        <button class="btn btn-primary" type="submit">Confirmar</button>
+                                        <button class="btn btn-primary" type="submit" style="margin-bottom: 5px;">Confirmar</button>
+                                        <br>
+                                        <label style="margin-bottom: 0;">
+                                            <input type="checkbox" name="es_adicion" value="<?= Equivalencias::cuotaAdicion() ?>">
+                                            Adición
+                                        </label>
                                         <?
                                     }
                                 ?>
@@ -61,21 +66,26 @@ $total = 0;
                             <td>
                                 <strong>Saldo contrato</strong>
                             </td>
-                            <td colspan="2">
+                            <td>
                                 <?= '$'.number_format($saldo_contrato, 2, ',', '.') ?>
                             </td>
-                            <td></td>
+                            <td>
+                                <strong>Saldo adiciones</strong>
+                            </td>
+                            <td>
+                                <?= '$'.number_format($saldo_adiciones, 2, ',', '.') ?>
+                            </td>
                         </tr>
                         <tr>
-                            <td colspan="1"><strong>Número de contrato</strong></td>
-                            <td colspan="1"><?php echo $liquidacion->numero; ?></td>
-                            <td colspan="1"><strong>Vigencia</strong></td>
+                            <td><strong>Número de contrato</strong></td>
+                            <td><?php echo $liquidacion->numero; ?></td>
+                            <td><strong>Vigencia</strong></td>
                             <td colspan="2"><?php echo $liquidacion->vigencia; ?></td>
                         </tr>
                         <tr>
-                            <td colspan="1"><strong>Tipo de contrato</strong></td>
-                            <td colspan="1"><?php echo $liquidacion->tipo_contrato; ?></td>
-                            <td colspan="1"><strong>Valor</strong></td>
+                            <td><strong>Tipo de contrato</strong></td>
+                            <td><?php echo $liquidacion->tipo_contrato; ?></td>
+                            <td><strong>Valor</strong></td>
                             <td colspan="2"><?= '$'.number_format($liquidacion->valor_total, 2, ',', '.') ?></td>
                         </tr>
                     </tbody>

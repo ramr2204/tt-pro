@@ -8,13 +8,11 @@ class Equivalencias extends CI_Controller
     private static $clasificacionContratos = [
         1 => 'Contratos',
         2 => 'Modificaciones',
-        3 => 'Adiciones',
         4 => 'Otros',
     ];
     
     private static $contratoNormal = 1;
     private static $contratoModificacion = 2;
-    private static $contratoAdicion = 3;
     private static $contratoOtros = 4;
 
     private static $cuotaPendiente = 2;
@@ -40,6 +38,9 @@ class Equivalencias extends CI_Controller
         1 => 'Activo',
     ];
 
+    private static $cuotaNormal = 1;
+    private static $cuotaAdicion = 2;
+
     private static $estadoActivo = 1;
 
     private static $perfilFirmante = 9;
@@ -58,10 +59,6 @@ class Equivalencias extends CI_Controller
 
     public static function contratoModificacion(){
         return self::$contratoModificacion;
-    }
-
-    public static function contratoAdicion(){
-        return self::$contratoAdicion;
     }
 
     public static function contratoOtros(){
@@ -106,5 +103,13 @@ class Equivalencias extends CI_Controller
 
     public static function perfilFirmante(){
         return self::$perfilFirmante;
+    }
+
+    public static function cuotaNormal(){
+        return self::$cuotaNormal;
+    }
+
+    public static function cuotaAdicion(){
+        return self::$cuotaAdicion;
     }
 }

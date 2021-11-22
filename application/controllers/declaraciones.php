@@ -19,6 +19,10 @@ class Declaraciones extends MY_Controller
         $this->load->helper('HelperGeneral');
 
         setlocale(LC_TIME, 'es_CO');
+
+        # Se toma como base las clasificaciones de los contratos pero se le agregan "Adiciones" por que se calcula de otra forma
+        $this->tipos_detalles = Equivalencias::clasificacionContratos();
+        $this->tipos_detalles[3] = 'Adiciones';
     }
 
     /**
@@ -176,7 +180,7 @@ class Declaraciones extends MY_Controller
                 );
                 $this->data['estampillas'] = $this->codegen_model->getSelect('est_estampillas', 'estm_id AS id, estm_nombre AS nombre');
 
-                $this->data['clasificaciones_contratos'] = Equivalencias::clasificacionContratos();
+                $this->data['clasificaciones_contratos'] = $this->tipos_detalles;
 
                 $this->template->load($this->config->item('admin_template'),'declaraciones/create', $this->data);
             } else {
@@ -225,7 +229,7 @@ class Declaraciones extends MY_Controller
         $consulta = [];
 
         $pagos = $this->codegen_model->getSelect(
-            'estampillas_pro_boyaca.pagos_estampillas AS pagos',
+            'pagos_estampillas AS pagos',
             'contrato.clasificacion,
                 SUM(cuota.valor) as base,
                 SUM(pagos.valor) as pagado,
@@ -234,7 +238,11 @@ class Declaraciones extends MY_Controller
                 AND DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. $this->input->post('periodo') .'"
                 AND contrato.cntr_contratanteid = '. $this->input->post('empresa'),
             'INNER JOIN est_facturas factura ON factura.fact_id = pagos.factura_id
-                INNER JOIN cuotas_liquidacion cuota ON cuota.id = factura.id_cuota_liquidacion
+                INNER JOIN cuotas_liquidacion cuota ON (
+                    cuota.id = factura.id_cuota_liquidacion
+                    AND cuota.estado = '. Equivalencias::cuotaPaga() .'
+                    AND cuota.tipo = '. Equivalencias::cuotaNormal() .'
+                )
                 INNER JOIN est_liquidaciones liquidacion ON liquidacion.liqu_id = factura.fact_liquidacionid
                 INNER JOIN con_contratos contrato ON contrato.cntr_id = liquidacion.liqu_contratoid',
             'GROUP BY contrato.clasificacion'
@@ -247,9 +255,9 @@ class Declaraciones extends MY_Controller
             {
                 if( isset($pagos[$id]) ) {
                     $pagos[$id]->clase = $nombre;
-                    $consulta[] = $pagos[$id];
+                    $consulta[$id] = $pagos[$id];
                 } else {
-                    $consulta[] = (object)[
+                    $consulta[$id] = (object)[
                         'clasificacion' => $id,
                         'clase'         => $nombre,
                         'base'          => 0,
@@ -258,6 +266,43 @@ class Declaraciones extends MY_Controller
                     ];
                 }
             }
+        }
+
+        $adiciones = $this->codegen_model->getSelect(
+            'pagos_estampillas AS pagos',
+            'SUM(cuota.valor) as base,
+                SUM(pagos.valor) as pagado,
+                factura.fact_porcentaje AS porcentaje',
+            'WHERE factura.fact_estampillaid = '. $this->input->post('tipo_estampilla') .'
+                AND DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. $this->input->post('periodo') .'"
+                AND contrato.cntr_contratanteid = '. $this->input->post('empresa'),
+            'INNER JOIN est_facturas factura ON factura.fact_id = pagos.factura_id
+                INNER JOIN cuotas_liquidacion cuota ON (
+                    cuota.id = factura.id_cuota_liquidacion
+                    AND cuota.estado = '. Equivalencias::cuotaPaga() .'
+                    AND cuota.tipo = '. Equivalencias::cuotaAdicion() .'
+                )
+                INNER JOIN est_liquidaciones liquidacion ON liquidacion.liqu_id = factura.fact_liquidacionid
+                INNER JOIN con_contratos contrato ON contrato.cntr_id = liquidacion.liqu_contratoid'
+        );
+
+        if(count($adiciones) > 0)
+        {
+            $adiciones = $adiciones[0];
+
+            $consulta[3] = (object)[
+                'clasificacion' => 3,
+                'clase'         => 'Adiciones',
+                'base'          => $adiciones->base,
+                'pagado'        => $adiciones->pagado,
+                'porcentaje'    => $adiciones->porcentaje,
+            ];
+        }
+
+        if(count($consulta) > 0)
+        {
+            # Se ordenan los detalles por el indice
+            ksort($consulta);
 
             $estampilla = $this->codegen_model->getSelect(
                 'est_estampillas',
@@ -267,7 +312,8 @@ class Declaraciones extends MY_Controller
 
             $this->data['consulta'] = $consulta;
             $this->data['estampilla'] = $estampilla[0];
-        } else {
+        }
+        else {
             $this->data['errormessage'] = 'No se encontraron datos por los valores buscados.';
         }
     }
@@ -334,7 +380,7 @@ class Declaraciones extends MY_Controller
         $this->form_validation->set_rules('total_cargo', 'Total a cargo por recaudo estampilla, sanciones e intereses','required|trim|xss_clean|numeric');
         $this->form_validation->set_rules('saldo_favor', 'Saldo a favor','required|trim|xss_clean|numeric');
 
-        foreach(Equivalencias::clasificacionContratos() AS $id => $nombre)
+        foreach($this->tipos_detalles AS $id => $nombre)
         {
             $this->form_validation->set_rules('detalle_vigencia_actual['. $id .']', 'Vigencia actual '. $id, 'required|trim|xss_clean|numeric');
             $this->form_validation->set_rules('detalle_vigencia_anterior['. $id .']', 'Vigencia anterior '. $id, 'required|trim|xss_clean|numeric');
@@ -435,7 +481,7 @@ class Declaraciones extends MY_Controller
 
             if($guardo->bandRegistroExitoso)
             {
-                foreach(Equivalencias::clasificacionContratos() AS $id => $nombre)
+                foreach($this->tipos_detalles AS $id => $nombre)
                 {
                     $insercion = [
                         'id_declaracion'    => $guardo->idInsercion,
@@ -507,8 +553,149 @@ class Declaraciones extends MY_Controller
             'ORDER BY renglon'
         );
 
-        $this->data['pagos'] = $this->codegen_model->getSelect(
-            'estampillas_pro_boyaca.pagos_estampillas AS pagos',
+        $this->data['pagos'] = $this->consultarDetalles($declaracion);
+
+        $this->data['funcionario'] = $this->codegen_model->get(
+            'users',
+            'first_name, last_name',
+            'id = "'. $declaracion->creado_por .'"',
+            1,NULL,true
+        );
+
+        $this->data['declaracion'] = $declaracion;
+        $this->data['firmas'] = $info['info'] ? $info['info'] : [];
+
+        $representante = array_filter($this->data['firmas'], function($firma) {
+            return $firma['tipo_usuario'] == EquivalenciasFirmas::usuarioRepresentante();
+        });
+        $this->data['representante'] = end($representante);
+
+        $this->data['tipo_correccion'] = Equivalencias::declaracionCorreccion();
+        $this->data['meses'] = $this->obtenerMeses(true);
+        $this->data['clasificaciones'] = $this->tipos_detalles;
+
+        $this->data['formatear_valor'] = function($numero) {
+            return '$'.number_format($numero, 2, ',', '.');
+        };
+
+        $html = $this->load->view('generarpdf/declaracion_estampilla', $this->data, TRUE);
+
+        # Se agrega la paginacion
+        $pdf->setFooter('{PAGENO}');
+        $pdf->WriteHTML($html);
+
+        $pdf->setPathServer('uploads/declaraciones');
+        $pdf->setFileName('comprobante_declaracion_'. $id_declaracion .'.pdf');
+
+        $pdf->addXMP($datos_firma);
+
+        return $pdf->generar();
+    }
+
+    /**
+     * Genera la vista de los detalles de la declaracion
+     * 
+     * @return null
+     */
+    public function detalles()
+    {
+        //redirect them to the login page
+        if (!$this->ion_auth->logged_in()) {
+			redirect('users/login', 'refresh');
+		}
+		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/detalles'))) {
+			redirect('error_404', 'refresh');
+		}
+        elseif ($this->uri->segment(3)==''){
+            redirect(base_url().'index.php/error_404');
+        }
+
+        $this->data['id_declaracion'] = $this->uri->segment(3);
+
+        $this->template->set('title', 'Detalle de declaracion');
+        $this->data['style_sheets'] = [
+            'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
+        ];
+        $this->data['javascripts'] = [
+            'js/jquery.dataTables.min.js',
+            'js/plugins/dataTables/dataTables.bootstrap.js',
+            'js/jquery.dataTables.defaults.js',
+            'js/accounting.min.js',
+        ];
+
+        $this->template->load($this->config->item('admin_template'),'declaraciones/detalles', $this->data);
+    }
+
+    /**
+     * Consulta los datos del datatable de los detalles
+     * 
+     * @return null
+     */
+    public function detallesDatatable()
+    {
+        //redirect them to the login page
+        if (!$this->ion_auth->logged_in()) {
+			redirect('users/login', 'refresh');
+		}
+		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/detalles'))) {
+			redirect('error_404', 'refresh');
+		}
+        elseif (!isset($_GET['id_declaracion'])){
+            redirect(base_url().'index.php/error_404');
+        }
+
+        $this->load->library('datatables');
+
+        $declaracion = $this->codegen_model->get(
+            'declaraciones AS d',
+            'd.id_estampilla, d.periodo, d.id_empresa',
+            'd.id = "'. $_GET['id_declaracion'] .'"',
+            1,NULL,true, '',
+            'est_estampillas e', 'e.estm_id = d.id_estampilla'
+        );
+
+        $this->datatables->select('contratista.cont_nombre AS nombre_contratista,
+            contratista.cont_nit AS nit_contratista,
+            pagos.fecha,
+            liquidacion.liqu_valorsiniva AS valor_contrato,
+            cuota.valor as base_pago,
+            pagos.valor as pagado,
+            contrato.cntr_numero AS contrato,
+            pagos.id AS pago,
+            factura.fact_id AS factura');
+
+        $this->datatables->from('pagos_estampillas AS pagos');
+        $this->datatables->join('est_facturas factura','factura.fact_id = pagos.factura_id','inner');
+        $this->datatables->join('est_liquidaciones liquidacion', 'liquidacion.liqu_id = factura.fact_liquidacionid', 'inner');
+        $this->datatables->join('cuotas_liquidacion cuota', 'cuota.id = factura.id_cuota_liquidacion', 'inner');
+        $this->datatables->join('con_contratos contrato', 'contrato.cntr_id = liquidacion.liqu_contratoid', 'inner');
+        $this->datatables->join('con_contratistas contratista', 'contratista.cont_id = contrato.cntr_contratistaid', 'left');
+
+        $this->datatables->where('factura.fact_estampillaid = '. $declaracion->id_estampilla);
+        $this->datatables->where('DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. date('Y-m', strtotime($declaracion->periodo)) .'"');
+        $this->datatables->where('contrato.cntr_contratanteid = '. $declaracion->id_empresa);
+
+        $helper = new HelperGeneral;
+        $verificacion = $helper->verificarRestriccionEmpresa();
+
+        # Valida si esta requerido la empresa genere una consulta vacia
+        if($verificacion !== true && $verificacion != $declaracion->id_empresa) {
+            $this->datatables->where('0 != 1');
+        }
+
+        echo $this->datatables->generate();
+    }
+
+    /**
+     * Conulta los pagos relacionados a una declaracion
+     * 
+     * @param object $declaracion
+     * @return array
+     */
+    private function consultarDetalles($declaracion)
+    {
+        return $this->codegen_model->getSelect(
+            'pagos_estampillas AS pagos',
             'contratista.cont_nombre AS nombre_contratista,
                 contratista.cont_nit AS nit_contratista,
                 pagos.fecha,
@@ -528,41 +715,42 @@ class Declaraciones extends MY_Controller
                 LEFT JOIN con_contratistas contratista ON contratista.cont_id = contrato.cntr_contratistaid',
             '', 'ORDER BY pagos.fecha DESC'
         );
+    }
 
-        $this->data['funcionario'] = $this->codegen_model->get(
-            'users',
-            'first_name, last_name',
-            'id = "'. $declaracion->creado_por .'"',
-            1,NULL,true
+    /**
+     * Crea el excel de los detalles de las declaraciones
+     * 
+     * @return null
+     */
+    public function detallesExcel()
+    {
+        //redirect them to the login page
+        if (!$this->ion_auth->logged_in()) {
+			redirect('users/login', 'refresh');
+		}
+		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/detalles'))) {
+			redirect('error_404', 'refresh');
+		}
+        elseif ($this->uri->segment(3)=='') {
+            redirect(base_url().'index.php/error_404');
+        }
+
+        $declaracion = $this->codegen_model->get(
+            'declaraciones AS d',
+            'd.id_estampilla, d.periodo, d.id_empresa',
+            'd.id = "'. $this->uri->segment(3) .'"',
+            1,NULL,true, '',
+            'est_estampillas e', 'e.estm_id = d.id_estampilla'
         );
 
-        $this->data['declaracion'] = $declaracion;
-        $this->data['firmas'] = $info['info'] ? $info['info'] : [];
-
-        $representante = array_filter($this->data['firmas'], function($firma) {
-            return $firma['tipo_usuario'] == EquivalenciasFirmas::usuarioRepresentante();
-        });
-        $this->data['representante'] = end($representante);
-
-        $this->data['tipo_correccion'] = Equivalencias::declaracionCorreccion();
-        $this->data['meses'] = $this->obtenerMeses(true);
-        $this->data['clasificaciones'] = Equivalencias::clasificacionContratos();
+        $this->data['detalles'] = $this->consultarDetalles($declaracion);
 
         $this->data['formatear_valor'] = function($numero) {
             return '$'.number_format($numero, 2, ',', '.');
         };
 
-        $html = $this->load->view('generarpdf/declaracion_estampilla', $this->data, TRUE);
+        $_SESSION['fecha_informe_excel'] = 'detalles declaraciones';
 
-        # Se agrega la paginacion
-        $pdf->setFooter('{PAGENO}');
-        $pdf->WriteHTML($html);
-
-        $pdf->setPathServer('uploads/declaraciones');
-        $pdf->setFileName('comprobante_declaracion_'. $id_declaracion .'.pdf');
-
-        $pdf->addXMP($datos_firma);
-
-        return $pdf->generar();
+        $this->template->load($this->config->item('excel_template'),'declaraciones/excel', $this->data);
     }
 }
