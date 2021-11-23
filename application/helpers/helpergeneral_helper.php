@@ -9,6 +9,7 @@ Class HelperGeneral extends CI_Controller
     {
         parent::__construct();
         $this->load->model('codegen_model', '', true);
+        $this->load->helper(['Equivalencias']);
     }
 
     /**

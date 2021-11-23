@@ -15,7 +15,7 @@ class Declaraciones extends MY_Controller
         $this->load->model('codegen_model','',TRUE);
         
         $this->load->helper(['form','url','codegen_helper', 'array']);
-        $this->load->helper(['Equivalencias', 'EquivalenciasFirmas']);
+        $this->load->helper(['Equivalencias', 'EquivalenciasFirmas', 'EquivalenciasNotificaciones']);
         $this->load->helper('HelperGeneral');
 
         setlocale(LC_TIME, 'es_CO');
@@ -51,9 +51,11 @@ class Declaraciones extends MY_Controller
 			//template data
             $this->template->set('title', 'Administrar declaraciones');
             $this->data['style_sheets'] = [
+                'css/plugins/bootstrap/fileinput.css' => 'screen',
                 'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
             ];
             $this->data['javascripts'] = [
+                'js/plugins/bootstrap/fileinput.min.js',
                 'js/jquery.dataTables.min.js',
                 'js/plugins/dataTables/dataTables.bootstrap.js',
                 'js/jquery.dataTables.defaults.js',
@@ -62,6 +64,8 @@ class Declaraciones extends MY_Controller
 
             $this->data['meses'] = $this->obtenerMeses();
             $this->data['tipos_declaraciones'] = Equivalencias::tipoDeclaraciones();
+            $this->data['estados_declaraciones'] = EquivalenciasFirmas::estadosDeclaracion();
+            $this->data['declaracion_inicial'] = Equivalencias::declaracionInicial();
 
             $this->data['firma'] = $this->codegen_model->get(
                 'usuarios_firma',
@@ -172,10 +176,13 @@ class Declaraciones extends MY_Controller
                     'js/autoNumeric.js',
                 ];
 
+                $id_empresa = $this->verificarRestriccionEmpresa();
+
                 $this->data['empresas'] = $this->codegen_model->getSelect(
                     'con_contratantes',
                     'id, nombre',
-                    '', '', '',
+                    ($id_empresa === true ? '' : 'WHERE id = '.$id_empresa),
+                    '', '',
                     'ORDER BY nombre'
                 );
                 $this->data['estampillas'] = $this->codegen_model->getSelect('est_estampillas', 'estm_id AS id, estm_nombre AS nombre');
@@ -227,46 +234,7 @@ class Declaraciones extends MY_Controller
     private function consultarDatos()
     {
         $consulta = [];
-
-        $pagos = $this->codegen_model->getSelect(
-            'pagos_estampillas AS pagos',
-            'contrato.clasificacion,
-                SUM(cuota.valor) as base,
-                SUM(pagos.valor) as pagado,
-                factura.fact_porcentaje AS porcentaje',
-            'WHERE factura.fact_estampillaid = '. $this->input->post('tipo_estampilla') .'
-                AND DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. $this->input->post('periodo') .'"
-                AND contrato.cntr_contratanteid = '. $this->input->post('empresa'),
-            'INNER JOIN est_facturas factura ON factura.fact_id = pagos.factura_id
-                INNER JOIN cuotas_liquidacion cuota ON (
-                    cuota.id = factura.id_cuota_liquidacion
-                    AND cuota.estado = '. Equivalencias::cuotaPaga() .'
-                    AND cuota.tipo = '. Equivalencias::cuotaNormal() .'
-                )
-                INNER JOIN est_liquidaciones liquidacion ON liquidacion.liqu_id = factura.fact_liquidacionid
-                INNER JOIN con_contratos contrato ON contrato.cntr_id = liquidacion.liqu_contratoid',
-            'GROUP BY contrato.clasificacion'
-        );
-        $pagos = HelperGeneral::lists($pagos, '', 'clasificacion');
-
-        if(count($pagos) > 0)
-        {
-            foreach(Equivalencias::clasificacionContratos() AS $id => $nombre)
-            {
-                if( isset($pagos[$id]) ) {
-                    $pagos[$id]->clase = $nombre;
-                    $consulta[$id] = $pagos[$id];
-                } else {
-                    $consulta[$id] = (object)[
-                        'clasificacion' => $id,
-                        'clase'         => $nombre,
-                        'base'          => 0,
-                        'pagado'        => 0,
-                        'porcentaje'    => 0,
-                    ];
-                }
-            }
-        }
+        $consulto = false;
 
         $adiciones = $this->codegen_model->getSelect(
             'pagos_estampillas AS pagos',
@@ -290,16 +258,68 @@ class Declaraciones extends MY_Controller
         {
             $adiciones = $adiciones[0];
 
-            $consulta[3] = (object)[
-                'clasificacion' => 3,
-                'clase'         => 'Adiciones',
-                'base'          => $adiciones->base,
-                'pagado'        => $adiciones->pagado,
-                'porcentaje'    => $adiciones->porcentaje,
-            ];
+            if($adiciones->porcentaje) {
+                $consulto = true;
+                $consulta[3] = (object)[
+                    'clasificacion' => 3,
+                    'clase'         => 'Adiciones',
+                    'base'          => $adiciones->base,
+                    'pagado'        => $adiciones->pagado,
+                    'porcentaje'    => $adiciones->porcentaje,
+                ];
+            } else {
+                $consulta[3] = (object)[
+                    'clasificacion' => 3,
+                    'clase'         => 'Adiciones',
+                    'base'          => 0,
+                    'pagado'        => 0,
+                    'porcentaje'    => 0,
+                ];
+            }
         }
 
-        if(count($consulta) > 0)
+        $pagos = $this->codegen_model->getSelect(
+            'pagos_estampillas AS pagos',
+            'contrato.clasificacion,
+                SUM(cuota.valor) as base,
+                SUM(pagos.valor) as pagado,
+                factura.fact_porcentaje AS porcentaje',
+            'WHERE factura.fact_estampillaid = '. $this->input->post('tipo_estampilla') .'
+                AND DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. $this->input->post('periodo') .'"
+                AND contrato.cntr_contratanteid = '. $this->input->post('empresa'),
+            'INNER JOIN est_facturas factura ON factura.fact_id = pagos.factura_id
+                INNER JOIN cuotas_liquidacion cuota ON (
+                    cuota.id = factura.id_cuota_liquidacion
+                    AND cuota.estado = '. Equivalencias::cuotaPaga() .'
+                    AND cuota.tipo = '. Equivalencias::cuotaNormal() .'
+                )
+                INNER JOIN est_liquidaciones liquidacion ON liquidacion.liqu_id = factura.fact_liquidacionid
+                INNER JOIN con_contratos contrato ON contrato.cntr_id = liquidacion.liqu_contratoid',
+            'GROUP BY contrato.clasificacion'
+        );
+        $pagos = HelperGeneral::lists($pagos, '', 'clasificacion');
+
+        if(count($pagos) > 0 || $consulto)
+        {
+            foreach(Equivalencias::clasificacionContratos() AS $id => $nombre)
+            {
+                if( isset($pagos[$id]) ) {
+                    $consulto = true;
+                    $pagos[$id]->clase = $nombre;
+                    $consulta[$id] = $pagos[$id];
+                } else {
+                    $consulta[$id] = (object)[
+                        'clasificacion' => $id,
+                        'clase'         => $nombre,
+                        'base'          => 0,
+                        'pagado'        => 0,
+                        'porcentaje'    => 0,
+                    ];
+                }
+            }
+        }
+
+        if($consulto)
         {
             # Se ordenan los detalles por el indice
             ksort($consulta);
@@ -394,43 +414,24 @@ class Declaraciones extends MY_Controller
             return false;
         } else {
 
-            # Cargue del anexo
-            $ruta_soporte = '';
-
-            if (!isset($_FILES['upload_field_name']) && !is_uploaded_file($_FILES['soporte']['tmp_name'])) 
+            if($es_correccion)
             {
-                // $this->session->set_flashdata('errorModal', true);
-                // $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe cargar el soporte del pago.');
-            }
-            else
-            {
-                $path = 'uploads/anexosDeclaraciones';
-                if(!is_dir($path)) { //crea la carpeta para los objetos si no existe
-                    mkdir($path,0777,TRUE);
-                }
-                $config['upload_path'] = $path;
-                $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
-                $config['remove_spaces']=TRUE;
-                $config['max_size']    = '99999';
-                $config['overwrite']    = TRUE;
-                $this->load->library('upload');
+                $declaracion_correccion = ltrim($this->input->post('declaracion_correccion'), '0');
 
-                // var_dump( $_FILES['soporte']['name'], $_FILES['soporte'], date('F_d_Y') );
-                $config['file_name'] = 'anexo_'.time();
-                $this->upload->initialize($config);
+                $verificacion = $this->codegen_model->getSelect(
+                    'correcciones_declaraciones',
+                    'estado',
+                    'WHERE id_declaracion = "'. $declaracion_correccion .'"',
+                    '', '',
+                    'ORDER BY id DESC',
+                    'LIMIT 1'
+                );
 
-                //Valida si se carga correctamente el soporte
-                if ($this->upload->do_upload("soporte"))
-                {
-                    /*
-                    * Establece la informacion para actualizar la liquidacion
-                    * en este caso la ruta de la copia del objeto del contrato
-                    */
-                    $file_datos= $this->upload->data();
-                    $ruta_soporte = $path.'/'.$file_datos['orig_name'];
-                }
-                else {
-                    $this->data['errormessage'] = '<strong>Error!</strong> '.$this->upload->display_errors();
+                if(!(
+                    $verificacion &&
+                    $verificacion[0]->estado == EquivalenciasFirmas::correccionAceptada()
+                )) {
+                    $this->data['errormessage'] = 'La declaración a corregir no existe o no está autorizada, en el último caso por favor solicite su correspondiente corrección.';
                     return false;
                 }
             }
@@ -465,7 +466,6 @@ class Declaraciones extends MY_Controller
                 'total_cargo'               => $this->input->post('total_cargo'),
                 'saldo_favor'               => $this->input->post('saldo_favor'),
                 'fecha_creacion'            => date('Y-m-d H:i:s'),
-                'soporte'                   => $ruta_soporte,
                 'creado_por'                => $this->session->userdata('user_id'),
             ];
 
@@ -548,8 +548,7 @@ class Declaraciones extends MY_Controller
             'renglon, base, vigencia_actual,
                 vigencia_anterior, porcentaje, valor_estampilla',
             'WHERE id_declaracion = "'. $id_declaracion .'"',
-            '',
-            '',
+            '', '',
             'ORDER BY renglon'
         );
 
@@ -752,5 +751,466 @@ class Declaraciones extends MY_Controller
         $_SESSION['fecha_informe_excel'] = 'detalles declaraciones';
 
         $this->template->load($this->config->item('excel_template'),'declaraciones/excel', $this->data);
+    }
+
+    /**
+     * Adjunta el soporte de pago
+     * 
+     * @return null
+     */
+    public function cargarPago()
+    {
+        //redirect them to the login page
+        if (!$this->ion_auth->logged_in()) {
+			redirect('users/login', 'refresh');
+		}
+		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/cargarPago'))) {
+			redirect('error_404', 'refresh');
+		}
+
+        $this->form_validation->set_rules('declaracion', 'Identificador de la declaración','required|trim|xss_clean|is_exists[declaraciones.id]');
+
+        if ($this->form_validation->run() == false) {
+            $this->session->set_flashdata('errormessage', (validation_errors() ? validation_errors() : false));
+        }
+        else
+        {
+            # Cargue del anexo
+            $ruta_soporte = '';
+
+            if (!isset($_FILES['upload_field_name']) && !is_uploaded_file($_FILES['soporte_pago']['tmp_name'])) 
+            {
+                $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe cargar el soporte del pago.');
+            }
+            else
+            {
+                $path = 'uploads/anexosDeclaraciones';
+                if(!is_dir($path)) { //crea la carpeta para los objetos si no existe
+                    mkdir($path,0777,TRUE);
+                }
+                $config['upload_path'] = $path;
+                $config['allowed_types'] = 'jpg|jpeg|gif|png|tif|pdf';
+                $config['remove_spaces']=TRUE;
+                $config['max_size']    = '99999';
+                $config['overwrite']    = TRUE;
+                $this->load->library('upload');
+
+                $config['file_name'] = 'anexo_'.time();
+                $this->upload->initialize($config);
+
+                //Valida si se carga correctamente el soporte
+                if ($this->upload->do_upload('soporte_pago'))
+                {
+                    /*
+                    * Establece la informacion para actualizar la liquidacion
+                    * en este caso la ruta de la copia del objeto del contrato
+                    */
+                    $file_datos= $this->upload->data();
+                    $ruta_soporte = $path.'/'.$file_datos['orig_name'];
+                }
+                else {
+                    $this->session->set_flashdata('errormessage', '<strong>Error!</strong> '.$this->upload->display_errors());
+                }
+            }
+
+            if($ruta_soporte)
+            {
+                $registros_afectados = $this->codegen_model->edit(
+                    'declaraciones',
+                    [
+                        'soporte' => $ruta_soporte,
+                        'estado' => EquivalenciasFirmas::declaracionPagada(),
+                    ],
+                    'id', $this->input->post('declaracion'),
+                    true
+                );
+    
+                if($registros_afectados > 0) {
+                    $this->session->set_flashdata('successmessage', 'El soporte se cargo correctamente.');
+                } else {
+                    $this->session->set_flashdata('errormessage', '<strong>Error!</strong> No se pudo cargar el pago correctamente.');
+                }
+            }
+        }
+
+        redirect(base_url().'index.php/declaraciones/index');
+    }
+
+    /**
+     * Crea la solicitud de una correccion de declaracion
+     * 
+     * @return null
+     */
+    public function solicitarCorreccion()
+    {
+        header('Content-type: application/json; charset=utf-8');
+
+        $respuesta = [
+            'exito' => false,
+            'mensaje' => '',
+        ];
+
+        //redirect them to the login page
+        if (!$this->ion_auth->logged_in()) {
+			$respuesta['mensaje'] = 'No se encuentra registrado en el aplicativo';
+            echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
+		}
+		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/solicitarCorreccion'))) {
+			$respuesta['mensaje'] = 'No cuenta con los permisos necesarios para realizar esta acción';
+            echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
+		}
+
+        $this->form_validation->set_rules('declaracion', 'Identificador de la declaración','required|trim|xss_clean|is_exists[declaraciones.id]');
+
+        if ($this->form_validation->run() == false) {
+            $respuesta['mensaje'] = (validation_errors() ? validation_errors() : false);
+        }
+        else
+        {
+            # Se verifica que no exista otra solicitud abierta
+            $verificacion = $this->codegen_model->get(
+                'correcciones_declaraciones',
+                'id',
+                'id_declaracion = '. $this->input->post('declaracion').'
+                    AND estado = '. EquivalenciasFirmas::correccionIniciada(),
+                1,NULL,true
+            );
+
+            if(!$verificacion)
+            {
+                $declaracion = $this->codegen_model->get(
+                    'declaraciones AS d',
+                    'd.id_empresa, empresa.nombre AS empresa, d.tipo_declaracion',
+                    'd.id = '. $this->input->post('declaracion'),
+                    1,NULL,true, '',
+                    'con_contratantes empresa',
+                    'empresa.id = d.id_empresa'
+                );
+
+                if($declaracion->tipo_declaracion == Equivalencias::declaracionInicial())
+                {
+                    $guardo = $this->codegen_model->add('correcciones_declaraciones', [
+                        'id_declaracion'        => $this->input->post('declaracion'),
+                        'id_usuario_solicito'   => $this->session->userdata('user_id'),
+                        'estado'                => EquivalenciasFirmas::correccionIniciada(),
+                        'fecha_creacion'        => date('Y-m-d H:i:s'),
+                    ]);
+    
+                    if ($guardo->bandRegistroExitoso)
+                    {
+                        $this->codegen_model->edit(
+                            'declaraciones',
+                            [ 'estado' => EquivalenciasFirmas::declaracionSolicitadaCorreccion() ],
+                            'id', $this->input->post('declaracion')
+                        );
+    
+                        $this->codegen_model->add('notificaciones', [
+                            'tipo'              => EquivalenciasNotificaciones::solicitudCorreccion(),
+                            'texto'             => 'Solicitado por la empresa '. $declaracion->empresa . ' para la declaración '. $this->input->post('declaracion'),
+                            'id_empresa'        => $declaracion->id_empresa,
+                            'adicional'         => $guardo->idInsercion,
+                            'fecha_creacion'    => date('Y-m-d H:i:s')
+                        ]);
+    
+                        $respuesta['exito'] = true;
+                        $respuesta['mensaje'] = 'Solicitud registrada con exito';
+                    } else {
+                        $respuesta['mensaje'] = 'Ocurrió un problema al registrar la solicitud';
+                    }
+                } else {
+                    $respuesta['mensaje'] = 'La declaración no es inicial';
+                }
+            } else {
+                $respuesta['mensaje'] = 'Ya existe una solicitud de declaración iniciada';
+            }
+        }
+
+        echo json_encode($respuesta, JSON_UNESCAPED_UNICODE); 
+    }
+
+    /**
+     * Confirma o rechaza la solicitud de una correccion de declaracion
+     * 
+     * @return null
+     */
+    public function contestarCorreccion()
+    {
+        if ($this->ion_auth->logged_in())
+        { 
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/contestarCorreccion'))
+            {
+                $this->form_validation->set_rules('id_correccion', 'Identificador de correccion','required|trim|xss_clean|is_exists[correcciones_declaraciones.id]');
+                $this->form_validation->set_rules('observaciones', 'Observaciones', 'trim|xss_clean|max_length[500]');
+
+                if ($this->form_validation->run() == false) {
+                    $this->session->set_flashdata('errormessage', (validation_errors() ? validation_errors() : false));
+                }
+                else
+                {
+                    $estadoCorreccion = null;
+                    $estadoDeclaracion = null;
+                    $tipoNotificacion = null;
+
+                    $solicitudCorreccion = $this->codegen_model->get(
+                        'correcciones_declaraciones',
+                        'id_declaracion',
+                        'id = '. $this->input->post('id_correccion').'
+                            AND estado = '. EquivalenciasFirmas::correccionIniciada(),
+                        1,NULL,true
+                    );
+
+                    if($solicitudCorreccion)
+                    {
+                        $declaracion = $this->codegen_model->get(
+                            'declaraciones',
+                            'soporte, id_empresa',
+                            'id = '. $solicitudCorreccion->id_declaracion,
+                            1,NULL,true
+                        );
+    
+                        if($this->input->post('confirmar'))
+                        {
+                            $estadoCorreccion = EquivalenciasFirmas::correccionAceptada();
+                            $estadoDeclaracion = EquivalenciasFirmas::declaracionCorregida();
+                            $tipoNotificacion = EquivalenciasNotificaciones::correccionAprobada();
+                        }
+                        elseif($this->input->post('rechazar'))
+                        {
+                            $estadoCorreccion = EquivalenciasFirmas::correccionRechazada();
+
+                            # Si tiene soporte cargado es porque ya el estado anterior era pagado, de caso contrario iniciada
+                            $estadoDeclaracion = $declaracion->soporte ? EquivalenciasFirmas::declaracionPagada() : EquivalenciasFirmas::declaracionIniciada();
+                            $tipoNotificacion = EquivalenciasNotificaciones::correccionNegada();
+                        }
+    
+                        $this->codegen_model->edit(
+                            'correcciones_declaraciones',
+                            [
+                                'estado' => $estadoCorreccion,
+                                'id_usuario_verifico' => $this->session->userdata('user_id'),
+                            ],
+                            'id', $this->input->post('id_correccion')
+                        );
+    
+                        $this->codegen_model->edit(
+                            'declaraciones',
+                            [ 'estado' => $estadoDeclaracion ],
+                            'id', $solicitudCorreccion->id_declaracion
+                        );
+    
+                        $this->codegen_model->add('notificaciones', [
+                            'tipo'              => $tipoNotificacion,
+                            'texto'             => 'Declaración # '. $solicitudCorreccion->id_declaracion . '. ' . $this->input->post('observaciones'),
+                            'id_empresa'        => $declaracion->id_empresa,
+                            'adicional'         => $this->input->post('id_correccion'),
+                            'fecha_creacion'    => date('Y-m-d H:i:s')
+                        ]);
+    
+                        $this->session->set_flashdata('message', 'La solicitud de corrección fue '. ($this->input->post('confirmar') ? 'aprobada' : 'rechazada') .' con exito');
+                    } else {
+                        $this->session->set_flashdata('errormessage', 'La solicitud ya fue verificada');
+                    }
+                }
+
+                redirect(base_url().'index.php/notificaciones/detalle/'.$this->input->post('id_notificacion'));
+            } else {
+                redirect(base_url().'index.php/error_404');
+            }
+
+        } else {
+            redirect(base_url().'index.php/users/login');
+        }
+    }
+
+    /**
+     * Solicita a la empresa la correccion de esa declaración
+     * 
+     * @return null
+     */
+    public function corregir()
+    {
+        header('Content-type: application/json; charset=utf-8');
+
+        $respuesta = [
+            'exito' => false,
+            'mensaje' => '',
+        ];
+
+        if ($this->ion_auth->logged_in())
+        { 
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/corregir'))
+            {
+                $this->form_validation->set_rules('declaracion', 'Identificador de la declaración','required|trim|xss_clean|is_exists[declaraciones.id]');
+                $this->form_validation->set_rules('observaciones', 'Observaciones', 'trim|xss_clean|max_length[500]');
+
+                if ($this->form_validation->run() == false) {
+                    $respuesta['mensaje'] = (validation_errors() ? validation_errors() : false);
+                }
+                else
+                {
+                    # Se verifica que no exista otra solicitud abierta
+                    $verificacion = $this->codegen_model->get(
+                        'correcciones_declaraciones',
+                        'id',
+                        'id_declaracion = '. $this->input->post('declaracion').'
+                            AND estado = '. EquivalenciasFirmas::correccionIniciada(),
+                        1,NULL,true
+                    );
+
+                    if(!$verificacion)
+                    {
+                        $declaracion = $this->codegen_model->get(
+                            'declaraciones AS d',
+                            'd.id_empresa, d.tipo_declaracion, estado',
+                            'd.id = '. $this->input->post('declaracion'),
+                            1,NULL,true
+                        );
+
+                        if($declaracion->estado == EquivalenciasFirmas::declaracionCorregida()) {
+                            $respuesta['mensaje'] = 'La declaración ya esta corregida';
+                        }
+        
+                        if($declaracion->tipo_declaracion != Equivalencias::declaracionInicial()){
+                            $respuesta['mensaje'] = 'La declaración no es inicial';
+                        }
+
+                        if($respuesta['mensaje'] === '')
+                        {
+                            $guardo = $this->codegen_model->add('correcciones_declaraciones', [
+                                'id_declaracion'        => $this->input->post('declaracion'),
+                                'id_usuario_verifico'   => $this->session->userdata('user_id'),
+                                'estado'                => EquivalenciasFirmas::correccionAceptada(),
+                                'fecha_creacion'        => date('Y-m-d H:i:s'),
+                            ]);
+
+                            if ($guardo->bandRegistroExitoso)
+                            {
+                                $this->codegen_model->edit(
+                                    'declaraciones',
+                                    [ 'estado' => EquivalenciasFirmas::declaracionCorregida() ],
+                                    'id', $this->input->post('declaracion')
+                                );
+            
+                                $this->codegen_model->add('notificaciones', [
+                                    'tipo'              => EquivalenciasNotificaciones::correccion(),
+                                    'texto'             => 'Declaración # '.  $this->input->post('declaracion') . '. ' . $this->input->post('observaciones'),
+                                    'id_empresa'        => $declaracion->id_empresa,
+                                    'adicional'         => $guardo->idInsercion,
+                                    'fecha_creacion'    => date('Y-m-d H:i:s')
+                                ]);
+
+                                $respuesta['exito'] = true;
+                                $respuesta['mensaje'] = 'La corrección ha sido notificada con exito';
+                            } else {
+                                $respuesta['mensaje'] = 'Ocurrió un problema al registrar la solicitud';
+                            }
+                        }
+                    } else {
+                        $respuesta['mensaje'] = 'Ya existe una solicitud de declaración iniciada';
+                    }
+                }
+            } else {
+                $respuesta['mensaje'] = 'No cuenta con los permisos necesarios para realizar esta acción';
+            }
+
+        } else {
+            $respuesta['mensaje'] = 'No se encuentra registrado en el aplicativo';
+        }
+
+        echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * Acepta o niega la declaracion
+     * 
+     * @return null
+     */
+    public function comprobar()
+    {
+        header('Content-type: application/json; charset=utf-8');
+
+        $respuesta = [
+            'exito' => false,
+            'mensaje' => '',
+        ];
+
+        if ($this->ion_auth->logged_in())
+        { 
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/comprobar'))
+            {
+                $this->form_validation->set_rules('declaracion', 'Identificador de la declaración','required|trim|xss_clean|is_exists[declaraciones.id]');
+                $this->form_validation->set_rules('observaciones', 'Observaciones', 'trim|xss_clean|max_length[500]');
+
+                if ($this->form_validation->run() == false) {
+                    $respuesta['mensaje'] = (validation_errors() ? validation_errors() : false);
+                }
+                else
+                {
+                    $declaracion = $this->codegen_model->get(
+                        'declaraciones AS d',
+                        'd.id_empresa, estado',
+                        'd.id = '. $this->input->post('declaracion'),
+                        1,NULL,true
+                    );
+
+                    if($declaracion->estado == EquivalenciasFirmas::declaracionFirmada())
+                    {
+                        $acepto = $this->input->post('opcion') == 'aceptar';
+
+                        # Si la niega permita registrar la correccion
+                        if(!$acepto) {
+                            $this->codegen_model->add('correcciones_declaraciones', [
+                                'id_declaracion'        => $this->input->post('declaracion'),
+                                'id_usuario_verifico'   => $this->session->userdata('user_id'),
+                                'estado'                => EquivalenciasFirmas::correccionAceptada(),
+                                'fecha_creacion'        => date('Y-m-d H:i:s'),
+                            ]);
+                        }
+
+                        $this->codegen_model->edit(
+                            'declaraciones',
+                            [ 'estado' => ($acepto ? EquivalenciasFirmas::declaracionAceptada() : EquivalenciasFirmas::declaracionRechazada()) ],
+                            'id', $this->input->post('declaracion')
+                        );
+    
+                        $this->codegen_model->add('notificaciones', [
+                            'tipo'              => ($acepto ? EquivalenciasNotificaciones::aceptada() : EquivalenciasNotificaciones::negada()),
+                            'texto'             => 'Declaración # '.  $this->input->post('declaracion') . '. ' . $this->input->post('observaciones'),
+                            'id_empresa'        => $declaracion->id_empresa,
+                            'adicional'         => $this->input->post('declaracion'),
+                            'fecha_creacion'    => date('Y-m-d H:i:s')
+                        ]);
+
+                        $respuesta['exito'] = true;
+                        $respuesta['mensaje'] = 'La declaración ha sido comprobada con exito';
+                    } else {
+                        $respuesta['mensaje'] = 'La declaración no esta actualmente firmada';
+                    }
+                }
+            } else {
+                $respuesta['mensaje'] = 'No cuenta con los permisos necesarios para realizar esta acción';
+            }
+
+        } else {
+            $respuesta['mensaje'] = 'No se encuentra registrado en el aplicativo';
+        }
+
+        echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * Verifica si el usuario esta asociado a una empresa o tiene control total
+     * 
+     * @return bool|int
+    */
+    public function verificarRestriccionEmpresa()
+    {
+        if($this->ion_auth->is_admin()) {
+            return true;
+        }
+
+        $usuario = $this->ion_auth->user()->row();
+
+        return $usuario->id_empresa;
     }
 }

@@ -175,7 +175,81 @@
       
       </ul>
 
-        <?php } ?>        
+        <?php } ?>
+        
+
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        <span class="glyphicon glyphicon-bell"></span>
+                    </a>
+                    <ul class="dropdown-menu notify-drop">
+                        <div class="notify-drop-title">
+                            <div class="row">
+                                <div class="col-md-12"><b>Notificaciones</b></div>
+                            </div>
+                        </div>
+                        <div class="drop-content">
+                            <!-- <li class="text-center" style="font-size: 13px;">
+                                Sin notificaciones
+                            </li> -->
+                            <li>
+                                <div class="col-md-3 col-sm-3 col-xs-3">
+                                    <div class="notify-img text-danger">
+                                        <i class="glyphicon glyphicon-exclamation-sign"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-9 col-sm-9 col-xs-9 pd-l0">
+                                    <div class="notify-header">
+                                        <a href="">Ahmet</a>
+                                        <span class="text-muted">03-08 9:30</span>
+                                    </div>
+                                    <p>Lorem ipsum sit dolor amet consilium  weffewfew klqwe ioqwe c9cas odanwq wqnw qw weofenw wefiefw.</p>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="col-md-3 col-sm-3 col-xs-3">
+                                    <div class="notify-img text-success">
+                                        <i class="glyphicon glyphicon-ok-sign"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-9 col-sm-9 col-xs-9 pd-l0">
+                                    <div class="notify-header">
+                                        <a href="">Ahmet</a>
+                                        <span class="text-muted">03-08 9:30</span>
+                                    </div>
+                                    <p>Lorem ipsum sit dolor amet consilium.</p>
+                                </div>
+                            </li>
+                        </div>
+                        <div class="notify-drop-footer text-center">
+                            <div class="btn-group">
+                                <a id="previo_n"
+                                    class="btn btn-default btn-xs disabled"
+                                    href="#"
+                                    title="Página anterior"
+                                >
+                                    <i class="glyphicon glyphicon-backward"></i>
+                                </a>
+                                <a id="siguiente_n"
+                                    class="btn btn-default btn-xs"
+                                    href="#"
+                                    title="Página siguiente"
+                                >
+                                    <i class="glyphicon glyphicon-forward"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </ul>
+                </li>
+            </ul>
+
+            <!-- 
+            glyphicon glyphicon-backward
+            glyphicon-forward
+            glyphicon-exclamation-sign
+            glyphicon-ok-sign
+             -->
 
 
           <ul class="nav navbar-nav navbar-right">
@@ -212,7 +286,7 @@
                 <?php } ?>           
               </ul>
             </li>
-          </ul> 
+          </ul>
 
         </div><!--/.nav-collapse -->
       </div>
@@ -323,6 +397,120 @@
       </div>
     </footer>
 </nav>
+
+    <script type="text/javascript" language="javascript" charset="utf-8">
+
+        var notificaciones = {
+
+            pagina: 1,
+            por_pagina: 10,
+
+            init: function(){
+                notificaciones.eventos();
+                notificaciones.consultar();
+            },
+            eventos: function(){
+                $('#previo_n').click(notificaciones.cambiarPaginaPrevio)
+                $('#siguiente_n').click(notificaciones.cambiarPaginaSiguiente)
+
+                // Evitar que el menu se cierre
+                $(document).on('click', '.dropdown-menu.notify-drop', function (e) {
+                    e.stopPropagation();
+                })
+            },
+            cambiarPaginaPrevio: function(){
+                if(!$(this).hasClass('disabled')){
+                    notificaciones.consultar(notificaciones.pagina - 1)
+                }
+            },
+            cambiarPaginaSiguiente: function(){
+                if(!$(this).hasClass('disabled')){
+                    notificaciones.consultar(notificaciones.pagina + 1)
+                }
+            },
+            consultar: function(pagina=1){
+
+                notificaciones.iniciarCargado();
+
+                // Se desactivan temporalmente los botones
+                $('#previo_n').addClass('disabled');
+                $('#siguiente_n').addClass('disabled');
+
+                $.ajax({
+                    url : `${base_url}/index.php/notificaciones/listado?pagina=${pagina}`,
+                    type: 'GET',
+                    success: function ( datos ){
+                        if(datos.exito){
+
+                            notificaciones.pagina = pagina;
+
+                            var html = '';
+                            var estilos = datos.estilos;
+
+                            datos.notificaciones.forEach(function(notificacion){
+                                html += `<li>
+                                    <div class="col-md-3 col-sm-3 col-xs-3">
+                                        <div class="notify-img text-${estilos[notificacion.tipo].color}">
+                                            <i class="glyphicon glyphicon-${estilos[notificacion.tipo].icono}"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9 col-sm-9 col-xs-9 pd-l0">
+                                        <div class="notify-header">
+                                            <a href="${base_url}/index.php/notificaciones/detalle/${notificacion.id}">${datos.descripciones[notificacion.tipo]}</a>
+                                            <span class="text-muted">${notificacion.fecha}</span>
+                                        </div>
+                                        <p>${notificacion.texto}...</p>
+                                    </div>
+                                </li>`;
+                            })
+                            $('.drop-content').html(html);
+
+                            notificaciones.actualizarPaginador(datos.notificaciones)
+
+                            if(datos.notificaciones.length == 0){
+                                notificaciones.notificacionSimple('Sin notificaciones');
+                            }
+                        } else {
+                            notificaciones.notificacionSimple(datos.mensaje);
+                        }
+                    }
+                })
+            },
+            actualizarPaginador: function(datos){
+
+                if(notificaciones.pagina > 1){
+                    $('#previo_n').removeClass('disabled');
+                }else{
+                    $('#previo_n').addClass('disabled');
+                }
+
+                if(datos.length == notificaciones.por_pagina){
+                    $('#siguiente_n').removeClass('disabled');
+                }else{
+                    $('#siguiente_n').addClass('disabled');
+                }
+            },
+            iniciarCargado : function() {
+                notificaciones.notificacionSimple('Cargando <span class="fa fa-spinner spinning" style="font-size: 20px;"></span>');
+            },
+            notificacionSimple : function(contenido) {
+                $('.drop-content').html(`<li>
+                    <div class="col-xs-12">
+                        <div class="notify-header">
+                            <div class="w-100 text-center">
+                                ${contenido}
+                            </div>
+                        </div>
+                    </div>
+                </li>`);
+            }
+        }
+
+        $(function () {
+            notificaciones.init();
+        });
+    </script>
+
 </body>
 </html>
 <?php

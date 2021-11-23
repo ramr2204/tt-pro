@@ -24,11 +24,25 @@ Class EquivalenciasFirmas extends CI_Controller
 
     private static $estadosDeclaracion = [
         1 => 'Iniciado',
+        3 => 'Pagado',
         2 => 'Firmado',
+        4 => 'Solicitado Corrección',
+        5 => 'Corregido',
+        6 => 'Aceptado',
+        7 => 'Rechazado',
     ];
 
     private static $declaracionIniciada = 1;
+    private static $declaracionPagada = 3;
     private static $declaracionFirmada = 2;
+    private static $declaracionSolicitadaCorreccion = 4;
+    private static $declaracionCorregida = 5;
+    private static $declaracionAceptada = 6;
+    private static $declaracionRechazada = 7;
+
+    private static $correccionIniciada = 1;
+    private static $correccionAceptada = 2;
+    private static $correccionRechazada = 3;
 
     public static function tiposUsuarios(){
         return self::$tiposUsuarios;
@@ -54,8 +68,39 @@ Class EquivalenciasFirmas extends CI_Controller
         return self::$declaracionIniciada;
     }
 
+    public static function declaracionPagada(){
+        return self::$declaracionPagada;
+    }
+
     public static function declaracionFirmada(){
         return self::$declaracionFirmada;
     }
 
+    public static function declaracionSolicitadaCorreccion(){
+        return self::$declaracionSolicitadaCorreccion;
+    }
+
+    public static function declaracionCorregida(){
+        return self::$declaracionCorregida;
+    }
+
+    public static function declaracionAceptada(){
+        return self::$declaracionAceptada;
+    }
+
+    public static function declaracionRechazada(){
+        return self::$declaracionRechazada;
+    }
+
+    public static function correccionIniciada(){
+        return self::$correccionIniciada;
+    }
+
+    public static function correccionAceptada(){
+        return self::$correccionAceptada;
+    }
+
+    public static function correccionRechazada(){
+        return self::$correccionRechazada;
+    }
 }
