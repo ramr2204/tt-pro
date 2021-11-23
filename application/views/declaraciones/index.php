@@ -143,7 +143,8 @@
         'cargar_pago': <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/cargarPago')) ?>,
         'detalles': <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/detalles')) ?>,
         'solicitar_correccion': <?= (int)$this->ion_auth->in_menu('declaraciones/solicitarCorreccion') ?>,
-        'corregir': <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('	declaraciones/corregir')) ?>,
+        'corregir': <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/corregir')) ?>,
+        'comprobar': <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/comprobar')) ?>,
     }
 
     $(function () {
@@ -156,6 +157,7 @@
         $(document).on('click', '.free-sign', liberarFirma);
         $(document).on('click', '.cargar-soporte', cargarSoporte);
         $(document).on('click', '.solicitar-correccion', solicitarCorreccion);
+        $(document).on('click', '.corregir', corregir);
 
         $('#soporte_pago').fileinput({
             showCaption: false,
@@ -199,6 +201,7 @@
             'bServerSide': true,
             'sAjaxSource': '<?php echo base_url(); ?>index.php/declaraciones/dataTable',
             'sServerMethod': 'POST',
+            'aaSorting': [[0,'desc']],
             'aoColumns': [
                 { 'sClass': 'center','sWidth': '5%' }, /*id 0*/
                 { 'sClass': 'item' },
@@ -278,14 +281,25 @@
                 }
 
                 // Permita solicitar correccion si es iniciada o pagada y es inicial
-                if(['1', '3'].includes(aData[6]) && permiso.solicitar_correccion && aData[4] == declaracion_inicial) {
-                    acciones += `<button
-                        class="btn btn-info solicitar-correccion"
-                        data-cod="${aData[0]}"
-                        title="Solicitar Corrección"
-                    >
-                        <i class="fa fa-send"></i>
-                    </button>`;
+                if(['1', '3'].includes(aData[6]) && aData[4] == declaracion_inicial) {
+                    if(permiso.corregir) {
+                        acciones += `<button
+                            class="btn btn-info corregir"
+                            data-cod="${aData[0]}"
+                            title="Corregir"
+                        >
+                            <i class="fa fa-wrench"></i>
+                        </button>`;
+                    }
+                    if(permiso.solicitar_correccion) {
+                        acciones += `<button
+                            class="btn btn-info solicitar-correccion"
+                            data-cod="${aData[0]}"
+                            title="Solicitar Corrección"
+                        >
+                            <i class="fa fa-send"></i>
+                        </button>`;
+                    }
                 }
 
                 acciones = acciones ? '<div class="btn-group">'+ acciones +'</div>' : ''
@@ -526,7 +540,6 @@
     }
 
     function solicitarCorreccion() {
-        var element = $(this);
         var cod = $(this).data('cod');
 
         swal({
@@ -543,6 +556,36 @@
                     type: 'POST',
                     dataType: 'json',
                     data: {declaracion: cod},
+                    success: function (response) {
+                        if(response.exito) {
+                            swal('Atenci\u00F3n', response.mensaje, 'success');
+                        } else {
+                            swal('Error', response.mensaje, 'error');
+                        }
+                    },
+                });
+            }
+        });
+    }
+
+    function corregir() {
+        var cod = $(this).data('cod');
+
+        swal({
+            title: '¿Esta seguro de corregir esta declaración?',
+            content: { element: 'textarea', attributes: {'placeholder': 'Observaciones'} },
+            icon: 'warning',
+            buttons: true,
+            buttons: ['Cancelar', 'Aceptar'],
+        }).then(function(confirmo) {
+            if(confirmo) {
+                var observaciones = document.querySelector('.swal-content__textarea').value;
+
+                $.ajax({
+                    url: base_url + 'index.php/declaraciones/corregir',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {declaracion: cod, observaciones: observaciones},
                     success: function (response) {
                         if(response.exito) {
                             swal('Atenci\u00F3n', response.mensaje, 'success');

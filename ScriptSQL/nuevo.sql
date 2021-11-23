@@ -206,7 +206,7 @@ ALTER TABLE estampillas_pro_boyaca.cuotas_liquidacion CHANGE tipo tipo TINYINT D
 CREATE TABLE estampillas_pro_boyaca.correcciones_declaraciones (
 	id INT auto_increment NOT NULL,
 	id_declaracion INT NOT NULL,
-	id_usuario_solicito INT unsigned NOT NULL,
+	id_usuario_solicito INT unsigned NULL,
 	id_usuario_verifico INT unsigned NULL,
 	estado TINYINT DEFAULT 1 NOT NULL,
 	fecha_creacion DATETIME NOT NULL,

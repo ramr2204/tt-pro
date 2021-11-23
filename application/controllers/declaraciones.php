@@ -878,7 +878,7 @@ class Declaraciones extends MY_Controller
 
             if(!$verificacion)
             {
-                $declaracion = $verificacion = $this->codegen_model->get(
+                $declaracion = $this->codegen_model->get(
                     'declaraciones AS d',
                     'd.id_empresa, empresa.nombre AS empresa, d.tipo_declaracion',
                     'd.id = '. $this->input->post('declaracion'),
@@ -1020,6 +1020,104 @@ class Declaraciones extends MY_Controller
         } else {
             redirect(base_url().'index.php/users/login');
         }
+    }
+
+    /**
+     * Solicita a la empresa la correccion de esa declaración
+     * 
+     * @return null
+     */
+    public function corregir()
+    {
+        header('Content-type: application/json; charset=utf-8');
+
+        $respuesta = [
+            'exito' => false,
+            'mensaje' => '',
+        ];
+
+        if ($this->ion_auth->logged_in())
+        { 
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/corregir'))
+            {
+                $this->form_validation->set_rules('declaracion', 'Identificador de la declaración','required|trim|xss_clean|is_exists[declaraciones.id]');
+                $this->form_validation->set_rules('observaciones', 'Observaciones', 'trim|xss_clean|max_length[500]');
+
+                if ($this->form_validation->run() == false) {
+                    $respuesta['mensaje'] = (validation_errors() ? validation_errors() : false);
+                }
+                else
+                {
+                    # Se verifica que no exista otra solicitud abierta
+                    $verificacion = $this->codegen_model->get(
+                        'correcciones_declaraciones',
+                        'id',
+                        'id_declaracion = '. $this->input->post('declaracion').'
+                            AND estado = '. EquivalenciasFirmas::correccionIniciada(),
+                        1,NULL,true
+                    );
+
+                    if(!$verificacion)
+                    {
+                        $declaracion = $this->codegen_model->get(
+                            'declaraciones AS d',
+                            'd.id_empresa, d.tipo_declaracion, estado',
+                            'd.id = '. $this->input->post('declaracion'),
+                            1,NULL,true
+                        );
+
+                        if($declaracion->estado == EquivalenciasFirmas::declaracionCorregida()) {
+                            $respuesta['mensaje'] = 'La declaración ya esta corregida';
+                        }
+        
+                        if($declaracion->tipo_declaracion != Equivalencias::declaracionInicial()){
+                            $respuesta['mensaje'] = 'La declaración no es inicial';
+                        }
+
+                        if($respuesta['mensaje'] === '')
+                        {
+                            $guardo = $this->codegen_model->add('correcciones_declaraciones', [
+                                'id_declaracion'        => $this->input->post('declaracion'),
+                                'id_usuario_verifico'   => $this->session->userdata('user_id'),
+                                'estado'                => EquivalenciasFirmas::correccionAceptada(),
+                                'fecha_creacion'        => date('Y-m-d H:i:s'),
+                            ]);
+
+                            if ($guardo->bandRegistroExitoso)
+                            {
+                                $this->codegen_model->edit(
+                                    'declaraciones',
+                                    [ 'estado' => EquivalenciasFirmas::declaracionCorregida() ],
+                                    'id', $this->input->post('declaracion')
+                                );
+            
+                                $this->codegen_model->add('notificaciones', [
+                                    'tipo'              => EquivalenciasNotificaciones::correccion(),
+                                    'texto'             => 'Declaración # '.  $this->input->post('declaracion') . '. ' . $this->input->post('observaciones'),
+                                    'id_empresa'        => $declaracion->id_empresa,
+                                    'adicional'         => $guardo->idInsercion,
+                                    'fecha_creacion'    => date('Y-m-d H:i:s')
+                                ]);
+
+                                $respuesta['exito'] = true;
+                                $respuesta['mensaje'] = 'La corrección ha sido notificada con exito';
+                            } else {
+                                $respuesta['mensaje'] = 'Ocurrió un problema al registrar la solicitud';
+                            }
+                        }
+                    } else {
+                        $respuesta['mensaje'] = 'Ya existe una solicitud de declaración iniciada';
+                    }
+                }
+            } else {
+                $respuesta['mensaje'] = 'No cuenta con los permisos necesarios para realizar esta acción';
+            }
+
+        } else {
+            $respuesta['mensaje'] = 'No se encuentra registrado en el aplicativo';
+        }
+
+        echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
     }
 
     /**

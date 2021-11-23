@@ -41,7 +41,7 @@ Class EquivalenciasNotificaciones extends CI_Controller
         ],
         6 => [
             'icono' => 'exclamation-sign',
-            'color' => 'danger',
+            'color' => 'primary',
         ],
     ];
 
