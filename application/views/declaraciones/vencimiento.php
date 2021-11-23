@@ -72,8 +72,6 @@
                     swal('Atenci\u00F3n', 'Se edit\u00F3 correctamente', 'success');
                     $('#modificado-'+id).text(respuesta.modificado);
                 } else {
-                    // swal('Atenci\u00F3n', respuesta.errores, 'error');
-
                     const contenedor = document.createElement('div');
                     contenedor.innerHTML = respuesta.errores;
 

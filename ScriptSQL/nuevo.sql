@@ -202,3 +202,30 @@ COLLATE=utf8_general_ci;
 
 ALTER TABLE estampillas_pro_boyaca.cuotas_liquidacion ADD tipo TINYINT DEFAULT 1 NOT NULL;
 ALTER TABLE estampillas_pro_boyaca.cuotas_liquidacion CHANGE tipo tipo TINYINT DEFAULT 1 NOT NULL AFTER valor;
+
+CREATE TABLE estampillas_pro_boyaca.correcciones_declaraciones (
+	id INT auto_increment NOT NULL,
+	id_declaracion INT NOT NULL,
+	id_usuario_solicito INT unsigned NOT NULL,
+	id_usuario_verifico INT unsigned NULL,
+	estado TINYINT DEFAULT 1 NOT NULL,
+	fecha_creacion DATETIME NOT NULL,
+	CONSTRAINT correcciones_declaraciones_pk PRIMARY KEY (id)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8
+COLLATE=utf8_general_ci;
+
+CREATE TABLE estampillas_pro_boyaca.notificaciones (
+	id BIGINT auto_increment NOT NULL,
+	tipo TINYINT NOT NULL,
+	texto varchar(300) NOT NULL,
+	id_empresa INT(11) unsigned NOT NULL,
+	adicional varchar(100) NULL,
+	CONSTRAINT notificaciones_pk PRIMARY KEY (id)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8
+COLLATE=utf8_general_ci;
+
+ALTER TABLE estampillas_pro_boyaca.notificaciones ADD fecha_creacion DATETIME NOT NULL;

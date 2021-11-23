@@ -15,7 +15,7 @@ class Declaraciones extends MY_Controller
         $this->load->model('codegen_model','',TRUE);
         
         $this->load->helper(['form','url','codegen_helper', 'array']);
-        $this->load->helper(['Equivalencias', 'EquivalenciasFirmas']);
+        $this->load->helper(['Equivalencias', 'EquivalenciasFirmas', 'EquivalenciasNotificaciones']);
         $this->load->helper('HelperGeneral');
 
         setlocale(LC_TIME, 'es_CO');
@@ -64,6 +64,8 @@ class Declaraciones extends MY_Controller
 
             $this->data['meses'] = $this->obtenerMeses();
             $this->data['tipos_declaraciones'] = Equivalencias::tipoDeclaraciones();
+            $this->data['estados_declaraciones'] = EquivalenciasFirmas::estadosDeclaracion();
+            $this->data['declaracion_inicial'] = Equivalencias::declaracionInicial();
 
             $this->data['firma'] = $this->codegen_model->get(
                 'usuarios_firma',
@@ -174,10 +176,13 @@ class Declaraciones extends MY_Controller
                     'js/autoNumeric.js',
                 ];
 
+                $id_empresa = $this->verificarRestriccionEmpresa();
+
                 $this->data['empresas'] = $this->codegen_model->getSelect(
                     'con_contratantes',
                     'id, nombre',
-                    '', '', '',
+                    ($id_empresa === true ? '' : 'WHERE id = '.$id_empresa),
+                    '', '',
                     'ORDER BY nombre'
                 );
                 $this->data['estampillas'] = $this->codegen_model->getSelect('est_estampillas', 'estm_id AS id, estm_nombre AS nombre');
@@ -229,46 +234,7 @@ class Declaraciones extends MY_Controller
     private function consultarDatos()
     {
         $consulta = [];
-
-        $pagos = $this->codegen_model->getSelect(
-            'pagos_estampillas AS pagos',
-            'contrato.clasificacion,
-                SUM(cuota.valor) as base,
-                SUM(pagos.valor) as pagado,
-                factura.fact_porcentaje AS porcentaje',
-            'WHERE factura.fact_estampillaid = '. $this->input->post('tipo_estampilla') .'
-                AND DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. $this->input->post('periodo') .'"
-                AND contrato.cntr_contratanteid = '. $this->input->post('empresa'),
-            'INNER JOIN est_facturas factura ON factura.fact_id = pagos.factura_id
-                INNER JOIN cuotas_liquidacion cuota ON (
-                    cuota.id = factura.id_cuota_liquidacion
-                    AND cuota.estado = '. Equivalencias::cuotaPaga() .'
-                    AND cuota.tipo = '. Equivalencias::cuotaNormal() .'
-                )
-                INNER JOIN est_liquidaciones liquidacion ON liquidacion.liqu_id = factura.fact_liquidacionid
-                INNER JOIN con_contratos contrato ON contrato.cntr_id = liquidacion.liqu_contratoid',
-            'GROUP BY contrato.clasificacion'
-        );
-        $pagos = HelperGeneral::lists($pagos, '', 'clasificacion');
-
-        if(count($pagos) > 0)
-        {
-            foreach(Equivalencias::clasificacionContratos() AS $id => $nombre)
-            {
-                if( isset($pagos[$id]) ) {
-                    $pagos[$id]->clase = $nombre;
-                    $consulta[$id] = $pagos[$id];
-                } else {
-                    $consulta[$id] = (object)[
-                        'clasificacion' => $id,
-                        'clase'         => $nombre,
-                        'base'          => 0,
-                        'pagado'        => 0,
-                        'porcentaje'    => 0,
-                    ];
-                }
-            }
-        }
+        $consulto = false;
 
         $adiciones = $this->codegen_model->getSelect(
             'pagos_estampillas AS pagos',
@@ -292,16 +258,68 @@ class Declaraciones extends MY_Controller
         {
             $adiciones = $adiciones[0];
 
-            $consulta[3] = (object)[
-                'clasificacion' => 3,
-                'clase'         => 'Adiciones',
-                'base'          => $adiciones->base,
-                'pagado'        => $adiciones->pagado,
-                'porcentaje'    => $adiciones->porcentaje,
-            ];
+            if($adiciones->porcentaje) {
+                $consulto = true;
+                $consulta[3] = (object)[
+                    'clasificacion' => 3,
+                    'clase'         => 'Adiciones',
+                    'base'          => $adiciones->base,
+                    'pagado'        => $adiciones->pagado,
+                    'porcentaje'    => $adiciones->porcentaje,
+                ];
+            } else {
+                $consulta[3] = (object)[
+                    'clasificacion' => 3,
+                    'clase'         => 'Adiciones',
+                    'base'          => 0,
+                    'pagado'        => 0,
+                    'porcentaje'    => 0,
+                ];
+            }
         }
 
-        if(count($consulta) > 0)
+        $pagos = $this->codegen_model->getSelect(
+            'pagos_estampillas AS pagos',
+            'contrato.clasificacion,
+                SUM(cuota.valor) as base,
+                SUM(pagos.valor) as pagado,
+                factura.fact_porcentaje AS porcentaje',
+            'WHERE factura.fact_estampillaid = '. $this->input->post('tipo_estampilla') .'
+                AND DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. $this->input->post('periodo') .'"
+                AND contrato.cntr_contratanteid = '. $this->input->post('empresa'),
+            'INNER JOIN est_facturas factura ON factura.fact_id = pagos.factura_id
+                INNER JOIN cuotas_liquidacion cuota ON (
+                    cuota.id = factura.id_cuota_liquidacion
+                    AND cuota.estado = '. Equivalencias::cuotaPaga() .'
+                    AND cuota.tipo = '. Equivalencias::cuotaNormal() .'
+                )
+                INNER JOIN est_liquidaciones liquidacion ON liquidacion.liqu_id = factura.fact_liquidacionid
+                INNER JOIN con_contratos contrato ON contrato.cntr_id = liquidacion.liqu_contratoid',
+            'GROUP BY contrato.clasificacion'
+        );
+        $pagos = HelperGeneral::lists($pagos, '', 'clasificacion');
+
+        if(count($pagos) > 0 || $consulto)
+        {
+            foreach(Equivalencias::clasificacionContratos() AS $id => $nombre)
+            {
+                if( isset($pagos[$id]) ) {
+                    $consulto = true;
+                    $pagos[$id]->clase = $nombre;
+                    $consulta[$id] = $pagos[$id];
+                } else {
+                    $consulta[$id] = (object)[
+                        'clasificacion' => $id,
+                        'clase'         => $nombre,
+                        'base'          => 0,
+                        'pagado'        => 0,
+                        'porcentaje'    => 0,
+                    ];
+                }
+            }
+        }
+
+        if($consulto)
         {
             # Se ordenan los detalles por el indice
             ksort($consulta);
@@ -720,12 +738,21 @@ class Declaraciones extends MY_Controller
      */
     public function cargarPago()
     {
+        //redirect them to the login page
+        if (!$this->ion_auth->logged_in()) {
+			redirect('users/login', 'refresh');
+		}
+		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/cargarPago'))) {
+			redirect('error_404', 'refresh');
+		}
+
         $this->form_validation->set_rules('declaracion', 'Identificador de la declaración','required|trim|xss_clean|is_exists[declaraciones.id]');
 
         if ($this->form_validation->run() == false) {
             $this->session->set_flashdata('errormessage', (validation_errors() ? validation_errors() : false));
-        } else {
-
+        }
+        else
+        {
             # Cargue del anexo
             $ruta_soporte = '';
 
@@ -785,5 +812,207 @@ class Declaraciones extends MY_Controller
         }
 
         redirect(base_url().'index.php/declaraciones/index');
+    }
+
+    /**
+     * Crea la solicitud de una correccion de declaracion
+     * 
+     * @return null
+     */
+    public function solicitarCorreccion()
+    {
+        header('Content-type: application/json; charset=utf-8');
+
+        $respuesta = [
+            'exito' => false,
+            'mensaje' => '',
+        ];
+
+        //redirect them to the login page
+        if (!$this->ion_auth->logged_in()) {
+			$respuesta['mensaje'] = 'No se encuentra registrado en el aplicativo';
+            echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
+		}
+		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/solicitarCorreccion'))) {
+			$respuesta['mensaje'] = 'No cuenta con los permisos necesarios para realizar esta acción';
+            echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
+		}
+
+        $this->form_validation->set_rules('declaracion', 'Identificador de la declaración','required|trim|xss_clean|is_exists[declaraciones.id]');
+
+        if ($this->form_validation->run() == false) {
+            $respuesta['mensaje'] = (validation_errors() ? validation_errors() : false);
+        }
+        else
+        {
+            # Se verifica que no exista otra solicitud abierta
+            $verificacion = $this->codegen_model->get(
+                'correcciones_declaraciones',
+                'id',
+                'id_declaracion = '. $this->input->post('declaracion').'
+                    AND estado = '. EquivalenciasFirmas::correccionIniciada(),
+                1,NULL,true
+            );
+
+            if(!$verificacion)
+            {
+                $declaracion = $verificacion = $this->codegen_model->get(
+                    'declaraciones AS d',
+                    'd.id_empresa, empresa.nombre AS empresa, d.tipo_declaracion',
+                    'd.id = '. $this->input->post('declaracion'),
+                    1,NULL,true, '',
+                    'con_contratantes empresa',
+                    'empresa.id = d.id_empresa'
+                );
+
+                if($declaracion->tipo_declaracion == Equivalencias::declaracionInicial())
+                {
+                    $guardo = $this->codegen_model->add('correcciones_declaraciones', [
+                        'id_declaracion'        => $this->input->post('declaracion'),
+                        'id_usuario_solicito'   => $this->session->userdata('user_id'),
+                        'estado'                => EquivalenciasFirmas::correccionIniciada(),
+                        'fecha_creacion'        => date('Y-m-d H:i:s'),
+                    ]);
+    
+                    if ($guardo->bandRegistroExitoso)
+                    {
+                        $this->codegen_model->edit(
+                            'declaraciones',
+                            [ 'estado' => EquivalenciasFirmas::declaracionSolicitadaCorreccion() ],
+                            'id', $this->input->post('declaracion')
+                        );
+    
+                        $this->codegen_model->add('notificaciones', [
+                            'tipo'              => EquivalenciasNotificaciones::solicitudCorreccion(),
+                            'texto'             => 'Solicitado por la empresa '. $declaracion->empresa . ' para la declaración '. $this->input->post('declaracion'),
+                            'id_empresa'        => $declaracion->id_empresa,
+                            'adicional'         => $guardo->idInsercion,
+                            'fecha_creacion'    => date('Y-m-d H:i:s')
+                        ]);
+    
+                        $respuesta['exito'] = true;
+                        $respuesta['mensaje'] = 'Solicitud registrada con exito';
+                    } else {
+                        $respuesta['mensaje'] = 'Ocurrió un problema al registrar la solicitud';
+                    }
+                } else {
+                    $respuesta['mensaje'] = 'La declaración no es inicial';
+                }
+            } else {
+                $respuesta['mensaje'] = 'Ya existe una solicitud de declaración iniciada';
+            }
+        }
+
+        echo json_encode($respuesta, JSON_UNESCAPED_UNICODE); 
+    }
+
+    /**
+     * Confirma o rechaza la solicitud de una correccion de declaracion
+     * 
+     * @return null
+     */
+    public function contestarCorreccion()
+    {
+        if ($this->ion_auth->logged_in())
+        { 
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/contestarCorreccion'))
+            {
+                $this->form_validation->set_rules('id_correccion', 'Identificador de correccion','required|trim|xss_clean|is_exists[correcciones_declaraciones.id]');
+                $this->form_validation->set_rules('observaciones', 'Observaciones', 'trim|xss_clean|max_length[500]');
+
+                if ($this->form_validation->run() == false) {
+                    $this->session->set_flashdata('errormessage', (validation_errors() ? validation_errors() : false));
+                }
+                else
+                {
+                    $estadoCorreccion = null;
+                    $estadoDeclaracion = null;
+                    $tipoNotificacion = null;
+
+                    $solicitudCorreccion = $this->codegen_model->get(
+                        'correcciones_declaraciones',
+                        'id_declaracion',
+                        'id = '. $this->input->post('id_correccion').'
+                            AND estado = '. EquivalenciasFirmas::correccionIniciada(),
+                        1,NULL,true
+                    );
+
+                    if($solicitudCorreccion)
+                    {
+                        $declaracion = $this->codegen_model->get(
+                            'declaraciones',
+                            'soporte, id_empresa',
+                            'id = '. $solicitudCorreccion->id_declaracion,
+                            1,NULL,true
+                        );
+    
+                        if($this->input->post('confirmar'))
+                        {
+                            $estadoCorreccion = EquivalenciasFirmas::correccionAceptada();
+                            $estadoDeclaracion = EquivalenciasFirmas::declaracionCorregida();
+                            $tipoNotificacion = EquivalenciasNotificaciones::correccionAprobada();
+                        }
+                        elseif($this->input->post('rechazar'))
+                        {
+                            $estadoCorreccion = EquivalenciasFirmas::correccionRechazada();
+
+                            # Si tiene soporte cargado es porque ya el estado anterior era pagado, de caso contrario iniciada
+                            $estadoDeclaracion = $declaracion->soporte ? EquivalenciasFirmas::declaracionPagada() : EquivalenciasFirmas::declaracionIniciada();
+                            $tipoNotificacion = EquivalenciasNotificaciones::correccionNegada();
+                        }
+    
+                        $this->codegen_model->edit(
+                            'correcciones_declaraciones',
+                            [
+                                'estado' => $estadoCorreccion,
+                                'id_usuario_verifico' => $this->session->userdata('user_id'),
+                            ],
+                            'id', $this->input->post('id_correccion')
+                        );
+    
+                        $this->codegen_model->edit(
+                            'declaraciones',
+                            [ 'estado' => $estadoDeclaracion ],
+                            'id', $solicitudCorreccion->id_declaracion
+                        );
+    
+                        $this->codegen_model->add('notificaciones', [
+                            'tipo'              => $tipoNotificacion,
+                            'texto'             => 'Declaración # '. $solicitudCorreccion->id_declaracion . '. ' . $this->input->post('observaciones'),
+                            'id_empresa'        => $declaracion->id_empresa,
+                            'adicional'         => $this->input->post('id_correccion'),
+                            'fecha_creacion'    => date('Y-m-d H:i:s')
+                        ]);
+    
+                        $this->session->set_flashdata('message', 'La solicitud de corrección fue '. ($this->input->post('confirmar') ? 'aprobada' : 'rechazada') .' con exito');
+                    } else {
+                        $this->session->set_flashdata('errormessage', 'La solicitud ya fue verificada');
+                    }
+                }
+
+                redirect(base_url().'index.php/notificaciones/detalle/'.$this->input->post('id_notificacion'));
+            } else {
+                redirect(base_url().'index.php/error_404');
+            }
+
+        } else {
+            redirect(base_url().'index.php/users/login');
+        }
+    }
+
+    /**
+     * Verifica si el usuario esta asociado a una empresa o tiene control total
+     * 
+     * @return bool|int
+    */
+    public function verificarRestriccionEmpresa()
+    {
+        if($this->ion_auth->is_admin()) {
+            return true;
+        }
+
+        $usuario = $this->ion_auth->user()->row();
+
+        return $usuario->id_empresa;
     }
 }

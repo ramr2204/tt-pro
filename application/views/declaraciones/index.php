@@ -41,6 +41,7 @@
                         <th>Periodo</th>
                         <th>Tipo de Declaracion</th>
                         <th>Fecha</th>
+                        <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -132,10 +133,18 @@
     meses = JSON.parse('<?= json_encode($meses) ?>');
     tipos_declaraciones = JSON.parse('<?= json_encode($tipos_declaraciones) ?>');
     firma = JSON.parse('<?= json_encode($firma) ?>');
-    permiso_firmar = <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/firmar')) ?>;
-    permiso_liberar_firmas = <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/liberarFirmas')) ?>;
-    permiso_cargar_pago = <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/cargarPago')) ?>;
-    permiso_detalles = <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/detalles')) ?>;
+    estados_declaraciones = JSON.parse('<?= json_encode($estados_declaraciones) ?>');
+
+    declaracion_inicial = '<?= $declaracion_inicial ?>';
+
+    permiso = {
+        'firmar': <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/firmar')) ?>,
+        'liberar_firmas': <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/liberarFirmas')) ?>,
+        'cargar_pago': <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/cargarPago')) ?>,
+        'detalles': <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/detalles')) ?>,
+        'solicitar_correccion': <?= (int)$this->ion_auth->in_menu('declaraciones/solicitarCorreccion') ?>,
+        'corregir': <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('	declaraciones/corregir')) ?>,
+    }
 
     $(function () {
         construirTablaDeclaraciones()
@@ -146,6 +155,7 @@
         $(document).on('click', '.sign-modal', openModalSign);
         $(document).on('click', '.free-sign', liberarFirma);
         $(document).on('click', '.cargar-soporte', cargarSoporte);
+        $(document).on('click', '.solicitar-correccion', solicitarCorreccion);
 
         $('#soporte_pago').fileinput({
             showCaption: false,
@@ -170,7 +180,7 @@
     function construirTablaDeclaraciones() {
         var boton_firmar = ''
 
-        if(firma.id && permiso_firmar) {
+        if(firma.id && permiso.firmar) {
             var cambio_firma = firma.change_password == 1 ? 1 : 0
 
             boton_firmar = `<button type="button"
@@ -196,8 +206,8 @@
                 { 'sClass': 'item', 'bSortable': false,'bSearchable': false },
                 { 'sClass': 'item', 'bSortable': false,'bSearchable': false },
                 { 'sClass': 'item' },
+                { 'sClass': 'item','bSortable': false,'bSearchable': false },
                 { 'sClass': 'center','bSortable': false,'bSearchable': false },
-                { 'sClass': 'item','bSortable': false,'bSearchable': false, 'bVisible': false },
             ],
             'fnRowCallback':function( nRow, aData, iDataIndex ) {
 
@@ -209,7 +219,7 @@
 
                 var acciones = '';
 
-                if(permiso_detalles) {
+                if(permiso.detalles) {
                     acciones += `<a class="btn btn-info"
                         href="${base_url}declaraciones/detalles/${aData[0]}"
                         title="Ver detalles"
@@ -231,7 +241,7 @@
                 switch (aData[6]) {
                     // Inicializada
                     case '1':
-                        if(permiso_cargar_pago) {
+                        if(permiso.cargar_pago) {
                             acciones += `<button type="button"
                                 class="btn btn-primary cargar-soporte"
                                 title="Cargar soporte"
@@ -255,7 +265,7 @@
                             <i class="fa fa-file-pdf-o"></i>
                         </a>`;
 
-                        if(permiso_liberar_firmas) {
+                        if(permiso.liberar_firmas) {
                             acciones += `<button
                                 class="btn btn-primary sign-modal"
                                 data-cod="${aData[0]}"
@@ -267,9 +277,21 @@
                         break;
                 }
 
+                // Permita solicitar correccion si es iniciada o pagada y es inicial
+                if(['1', '3'].includes(aData[6]) && permiso.solicitar_correccion && aData[4] == declaracion_inicial) {
+                    acciones += `<button
+                        class="btn btn-info solicitar-correccion"
+                        data-cod="${aData[0]}"
+                        title="Solicitar Corrección"
+                    >
+                        <i class="fa fa-send"></i>
+                    </button>`;
+                }
+
                 acciones = acciones ? '<div class="btn-group">'+ acciones +'</div>' : ''
 
-                $('td:eq(6)', nRow).html(acciones);
+                $('td:eq(7)', nRow).html(acciones);
+                $('td:eq(6)', nRow).html(estados_declaraciones[aData[6]]);
             }, 
 
         } );
@@ -501,5 +523,35 @@
 
         $('#declaracion').val(ref);
         $('#modalSoporte').modal('show');
+    }
+
+    function solicitarCorreccion() {
+        var element = $(this);
+        var cod = $(this).data('cod');
+
+        swal({
+            title: '¿Esta seguro de solicitar una corrección?',
+            text: 'Una vez solicitada la corrección no se podrá realizar acciones sobre la declaración hasta que obtenga una respuesta.',
+            icon: 'warning',
+            buttons: true,
+            buttons: ['Cancelar', 'Aceptar'],
+        })
+        .then(function(confirmo) {
+            if (confirmo) {
+                $.ajax({
+                    url: base_url + 'index.php/declaraciones/solicitarCorreccion',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {declaracion: cod},
+                    success: function (response) {
+                        if(response.exito) {
+                            swal('Atenci\u00F3n', response.mensaje, 'success');
+                        } else {
+                            swal('Error', response.mensaje, 'error');
+                        }
+                    },
+                });
+            }
+        });
     }
 </script>
