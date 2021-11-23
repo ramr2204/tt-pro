@@ -1157,6 +1157,16 @@ class Declaraciones extends MY_Controller
                     {
                         $acepto = $this->input->post('opcion') == 'aceptar';
 
+                        # Si la niega permita registrar la correccion
+                        if(!$acepto) {
+                            $this->codegen_model->add('correcciones_declaraciones', [
+                                'id_declaracion'        => $this->input->post('declaracion'),
+                                'id_usuario_verifico'   => $this->session->userdata('user_id'),
+                                'estado'                => EquivalenciasFirmas::correccionAceptada(),
+                                'fecha_creacion'        => date('Y-m-d H:i:s'),
+                            ]);
+                        }
+
                         $this->codegen_model->edit(
                             'declaraciones',
                             [ 'estado' => ($acepto ? EquivalenciasFirmas::declaracionAceptada() : EquivalenciasFirmas::declaracionRechazada()) ],
@@ -1174,7 +1184,7 @@ class Declaraciones extends MY_Controller
                         $respuesta['exito'] = true;
                         $respuesta['mensaje'] = 'La declaración ha sido comprobada con exito';
                     } else {
-                        $respuesta['mensaje'] = 'La declaración no es esta firmada';
+                        $respuesta['mensaje'] = 'La declaración no esta actualmente firmada';
                     }
                 }
             } else {
