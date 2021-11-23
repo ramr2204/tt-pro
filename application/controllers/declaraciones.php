@@ -413,6 +413,29 @@ class Declaraciones extends MY_Controller
             $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);
             return false;
         } else {
+
+            if($es_correccion)
+            {
+                $declaracion_correccion = ltrim($this->input->post('declaracion_correccion'), '0');
+
+                $verificacion = $this->codegen_model->getSelect(
+                    'correcciones_declaraciones',
+                    'estado',
+                    'WHERE id_declaracion = "'. $declaracion_correccion .'"',
+                    '', '',
+                    'ORDER BY id DESC',
+                    'LIMIT 1'
+                );
+
+                if(!(
+                    $verificacion &&
+                    $verificacion[0]->estado == EquivalenciasFirmas::correccionAceptada()
+                )) {
+                    $this->data['errormessage'] = 'La declaración a corregir no existe o no está autorizada, en el último caso por favor solicite su correspondiente corrección.';
+                    return false;
+                }
+            }
+
             if($this->input->post('tipo_declaracion') != Equivalencias::declaracionCorreccion()) {
                 $validacion = $this->codegen_model->countwhere('declaraciones',
                     'id_empresa = "'. $this->input->post('empresa') .'"
@@ -525,8 +548,7 @@ class Declaraciones extends MY_Controller
             'renglon, base, vigencia_actual,
                 vigencia_anterior, porcentaje, valor_estampilla',
             'WHERE id_declaracion = "'. $id_declaracion .'"',
-            '',
-            '',
+            '', '',
             'ORDER BY renglon'
         );
 
