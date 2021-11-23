@@ -1121,6 +1121,74 @@ class Declaraciones extends MY_Controller
     }
 
     /**
+     * Acepta o niega la declaracion
+     * 
+     * @return null
+     */
+    public function comprobar()
+    {
+        header('Content-type: application/json; charset=utf-8');
+
+        $respuesta = [
+            'exito' => false,
+            'mensaje' => '',
+        ];
+
+        if ($this->ion_auth->logged_in())
+        { 
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/comprobar'))
+            {
+                $this->form_validation->set_rules('declaracion', 'Identificador de la declaración','required|trim|xss_clean|is_exists[declaraciones.id]');
+                $this->form_validation->set_rules('observaciones', 'Observaciones', 'trim|xss_clean|max_length[500]');
+
+                if ($this->form_validation->run() == false) {
+                    $respuesta['mensaje'] = (validation_errors() ? validation_errors() : false);
+                }
+                else
+                {
+                    $declaracion = $this->codegen_model->get(
+                        'declaraciones AS d',
+                        'd.id_empresa, estado',
+                        'd.id = '. $this->input->post('declaracion'),
+                        1,NULL,true
+                    );
+
+                    if($declaracion->estado == EquivalenciasFirmas::declaracionFirmada())
+                    {
+                        $acepto = $this->input->post('opcion') == 'aceptar';
+
+                        $this->codegen_model->edit(
+                            'declaraciones',
+                            [ 'estado' => ($acepto ? EquivalenciasFirmas::declaracionAceptada() : EquivalenciasFirmas::declaracionRechazada()) ],
+                            'id', $this->input->post('declaracion')
+                        );
+    
+                        $this->codegen_model->add('notificaciones', [
+                            'tipo'              => ($acepto ? EquivalenciasNotificaciones::aceptada() : EquivalenciasNotificaciones::negada()),
+                            'texto'             => 'Declaración # '.  $this->input->post('declaracion') . '. ' . $this->input->post('observaciones'),
+                            'id_empresa'        => $declaracion->id_empresa,
+                            'adicional'         => $this->input->post('declaracion'),
+                            'fecha_creacion'    => date('Y-m-d H:i:s')
+                        ]);
+
+                        $respuesta['exito'] = true;
+                        $respuesta['mensaje'] = 'La declaración ha sido comprobada con exito';
+                    } else {
+                        $respuesta['mensaje'] = 'La declaración no es esta firmada';
+                    }
+                }
+            } else {
+                $respuesta['mensaje'] = 'No cuenta con los permisos necesarios para realizar esta acción';
+            }
+
+        } else {
+            $respuesta['mensaje'] = 'No se encuentra registrado en el aplicativo';
+        }
+
+        echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
      * Verifica si el usuario esta asociado a una empresa o tiene control total
      * 
      * @return bool|int

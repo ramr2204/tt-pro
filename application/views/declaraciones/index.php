@@ -158,6 +158,7 @@
         $(document).on('click', '.cargar-soporte', cargarSoporte);
         $(document).on('click', '.solicitar-correccion', solicitarCorreccion);
         $(document).on('click', '.corregir', corregir);
+        $(document).on('click', '.comprobar', comprobar);
 
         $('#soporte_pago').fileinput({
             showCaption: false,
@@ -223,7 +224,7 @@
                 var acciones = '';
 
                 if(permiso.detalles) {
-                    acciones += `<a class="btn btn-info"
+                    acciones += `<a class="btn btn-info btn-xs"
                         href="${base_url}declaraciones/detalles/${aData[0]}"
                         title="Ver detalles"
                     >
@@ -232,7 +233,7 @@
                 }
 
                 if(aData[7] != '') {
-                    acciones += `<a class="btn btn-primary"
+                    acciones += `<a class="btn btn-primary btn-xs"
                         href="${base_url}${aData[7]}"
                         title="Ver anexo"
                         target="_blank"
@@ -246,7 +247,7 @@
                     case '1':
                         if(permiso.cargar_pago) {
                             acciones += `<button type="button"
-                                class="btn btn-primary cargar-soporte"
+                                class="btn btn-primary cargar-soporte btn-xs"
                                 title="Cargar soporte"
                                 data-ref="${aData[0]}"
                             >
@@ -260,21 +261,23 @@
                         break;
                     // Firmada
                     case '2':
-                        acciones += `<a class="btn btn-danger"
-                            href="${base_url}uploads/declaraciones/comprobante_declaracion_${aData[0]}.pdf"
-                            title="Ver declaración"
-                            target="_blank"
-                        >
-                            <i class="fa fa-file-pdf-o"></i>
-                        </a>`;
-
                         if(permiso.liberar_firmas) {
                             acciones += `<button
-                                class="btn btn-primary sign-modal"
+                                class="btn btn-primary sign-modal btn-xs"
                                 data-cod="${aData[0]}"
                                 title="Visualizar Firmas"
                             >
                                 <i class="fa fa-eye"></i>
+                            </button>`;
+                        }
+
+                        if(permiso.comprobar) {
+                            acciones += `<button
+                                class="btn btn-info comprobar btn-xs"
+                                data-cod="${aData[0]}"
+                                title="Comprobar"
+                            >
+                                <i class="fa fa-check-square"></i>
                             </button>`;
                         }
                         break;
@@ -284,7 +287,7 @@
                 if(['1', '3'].includes(aData[6]) && aData[4] == declaracion_inicial) {
                     if(permiso.corregir) {
                         acciones += `<button
-                            class="btn btn-info corregir"
+                            class="btn btn-info corregir btn-xs"
                             data-cod="${aData[0]}"
                             title="Corregir"
                         >
@@ -293,13 +296,23 @@
                     }
                     if(permiso.solicitar_correccion) {
                         acciones += `<button
-                            class="btn btn-info solicitar-correccion"
+                            class="btn btn-info solicitar-correccion btn-xs"
                             data-cod="${aData[0]}"
                             title="Solicitar Corrección"
                         >
                             <i class="fa fa-send"></i>
                         </button>`;
                     }
+                }
+
+                if(['2','6','7'].includes(aData[6])){
+                    acciones += `<a class="btn btn-danger btn-xs"
+                        href="${base_url}uploads/declaraciones/comprobante_declaracion_${aData[0]}.pdf"
+                        title="Ver declaración"
+                        target="_blank"
+                    >
+                        <i class="fa fa-file-pdf-o"></i>
+                    </a>`;
                 }
 
                 acciones = acciones ? '<div class="btn-group">'+ acciones +'</div>' : ''
@@ -556,13 +569,7 @@
                     type: 'POST',
                     dataType: 'json',
                     data: {declaracion: cod},
-                    success: function (response) {
-                        if(response.exito) {
-                            swal('Atenci\u00F3n', response.mensaje, 'success');
-                        } else {
-                            swal('Error', response.mensaje, 'error');
-                        }
-                    },
+                    success: respuestaGenerica,
                 });
             }
         });
@@ -582,19 +589,55 @@
                 var observaciones = document.querySelector('.swal-content__textarea').value;
 
                 $.ajax({
-                    url: base_url + 'index.php/declaraciones/corregir',
+                    url: base_url + 'index.php/declaraciones/comprobar',
                     type: 'POST',
                     dataType: 'json',
                     data: {declaracion: cod, observaciones: observaciones},
-                    success: function (response) {
-                        if(response.exito) {
-                            swal('Atenci\u00F3n', response.mensaje, 'success');
-                        } else {
-                            swal('Error', response.mensaje, 'error');
-                        }
-                    },
+                    success: respuestaGenerica,
                 });
             }
         });
+    }
+
+    function comprobar() {
+        var cod = $(this).data('cod');
+
+        swal({
+            title: '¿Esta seguro de comprobar esta declaración?',
+            content: { element: 'textarea', attributes: {'placeholder': 'Observaciones'} },
+            icon: 'warning',
+            buttons: {
+                cancel: 'Cancelar',
+                catch: {
+                    text: 'Aceptar',
+                    value: 'aceptar',
+                },
+                defeat: {
+                    text: 'Rechazar',
+                    value: 'rechazar',
+                    className: 'swal-button--danger',
+                },
+            },
+        }).then(function(opcion) {
+            if(opcion) {
+                var observaciones = document.querySelector('.swal-content__textarea').value;
+
+                $.ajax({
+                    url: base_url + 'index.php/declaraciones/comprobar',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {declaracion: cod, observaciones: observaciones, opcion: opcion},
+                    success: respuestaGenerica,
+                });
+            }
+        });
+    }
+
+    function respuestaGenerica(response) {
+        if(response.exito) {
+            swal('Atenci\u00F3n', response.mensaje, 'success');
+        } else {
+            swal('Error', response.mensaje, 'error');
+        }
     }
 </script>
