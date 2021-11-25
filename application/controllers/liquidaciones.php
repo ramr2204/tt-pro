@@ -3815,10 +3815,21 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                         );
                     }
 
+                    $contratista = $this->codegen_model->get(
+                        'con_contratos contrato',
+                        'c.cont_email',
+                        'contrato.cntr_id = "'. $this->input->post('id_contrato') .'"',
+                        1,NULL,true, '',
+                        'con_contratistas AS c', 'c.cont_id = contrato.cntr_contratistaid'
+                    );
+
                     $this->load->library('encrypt');
+                    $hash = $this->encrypt->encode(implode(',', $is_pagos), Equivalencias::generadorHash());
+
+                    $this->enviarCorreoEstampillas($contratista->cont_email, $hash);
    
 					$this->session->set_flashdata('successmessage', 'Se pagó con éxito la factura');
-					$this->session->set_flashdata('idPagoFactura', $this->encrypt->encode(implode(',', $is_pagos), Equivalencias::generadorHash()));
+					$this->session->set_flashdata('idPagoFactura', $hash);
 				}
 				else{
 					$this->session->set_flashdata('errormessage', '<strong>Error!</strong> Ocurrió un error al registrar el pago.');
@@ -3834,6 +3845,46 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
             redirect(base_url().'index.php/users/login');
         }
 	}
+
+    /**
+     * Envia el correo para que puedan consultar las facturas
+     * 
+     * @param string $correo
+     * @param string $hash
+     * @return array
+     */
+    private function enviarCorreoEstampillas($correo, $hash)
+    {
+        $result = [
+            'status' => 0,
+            'message' => '',
+        ];
+
+        $this->load->helper('EnvioCorreoHelper');
+        $mail = new EnvioCorreoHelper();
+
+        $datos_vista = [
+            'ruta' => base_url().'generarpdf/certificadoPagoEstampilla?id='.urlencode($hash)
+        ];
+        $view = $this->load->view('facturas/correo', $datos_vista, true);
+
+        $envio = $mail->enviar([
+            'to'          => $correo,
+            'sender_name' => 'Estampillas Pro Boyacá',
+            'subject'     => 'Facturas Electrónica',
+            'body'        => $view,
+            'alt'         => 'Puede consultar sus facturas generadas'
+        ]);
+
+        if($envio === true) {
+            $result['message'] = 'El correo electrónico se envió correctamente, por favor verificar el código enviado.';
+            $result['status'] = 1;
+        } else {
+            $result['message'] = 'Se presento un problema al enviar el correo.';
+        }
+
+        return $result;
+    }
 
     private function pagarEstampillaIndividual($id_factura, $id_contrato, $fecha, $observaciones, $valor, $factura = null)
     {

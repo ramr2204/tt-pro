@@ -187,7 +187,7 @@
             var cambio_firma = firma.change_password == 1 ? 1 : 0
 
             boton_firmar = `<button type="button"
-                    class="btn-sign sign btn btn-success"
+                    class="btn-sign sign btn btn-success btn-xs"
                     data-st="${cambio_firma}"
                     data-user="${firma.id}"
                     data-ref=":id"
