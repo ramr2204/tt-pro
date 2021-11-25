@@ -48,7 +48,7 @@ $total = 0;
                             </td>
                             <td>
                                 <?
-                                    if(!$cuota && number_format($saldo_contrato, 0, '', '') != 0)
+                                    if(!$cuota && number_format(($saldo_contrato +  $saldo_adiciones), 0, '', '') != 0)
                                     {
                                         ?>
                                         <button class="btn btn-primary" type="submit" style="margin-bottom: 5px;">Confirmar</button>
