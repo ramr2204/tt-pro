@@ -142,7 +142,7 @@ class Firma extends MY_Controller
             # Verificamos si el elemento esta creado , si no es la primera firma
             if (isset($elemento['elemento']))
             {
-                if ($elemento['elemento']->estado != EquivalenciasFirmas::declaracionIniciada())
+                if ($elemento['elemento']->estado != EquivalenciasFirmas::declaracionPagada())
                 {
                     $response->message = 'Ya declaración ya ha sido firmada por todos.';
                     return $response;
