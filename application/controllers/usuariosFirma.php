@@ -217,7 +217,7 @@ class usuariosFirma extends MY_Controller
         }
 
         header('Content-type: application/json; charset=utf-8');
-        echo json_encode($respuesta);
+        echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
     }
 
     public function estadoFirma()
@@ -264,7 +264,7 @@ class usuariosFirma extends MY_Controller
         }
 
         header('Content-type: application/json; charset=utf-8');
-        echo json_encode($response);
+        echo json_encode($response, JSON_UNESCAPED_UNICODE);
     }
 
     public function requestChange()
@@ -292,7 +292,7 @@ class usuariosFirma extends MY_Controller
         }
 
         header('Content-type: application/json; charset=utf-8');
-        echo json_encode($response);
+        echo json_encode($response, JSON_UNESCAPED_UNICODE);
     }
 
     private function inactivarFirmantesAnteriores($id_empresa, $exepcion)
@@ -375,7 +375,7 @@ class usuariosFirma extends MY_Controller
         }
 
         header('Content-type: application/json; charset=utf-8');
-        echo json_encode($respuesta);
+        echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
     }
 
     /**
