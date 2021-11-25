@@ -374,129 +374,120 @@ class Generarpdf extends CI_controller {
 
     function certificadoPagoEstampilla()
     {
-        if ($this->ion_auth->logged_in())
-        {
-            if (!isset($_GET['id'])){
-                 redirect(base_url().'index.php/error_404');
-            }
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')){
-                $this->load->library('Pdf');
-                $this->load->library('encrypt');
-
-                $hash = $_GET['id'];
-                $ids_pago = $this->encrypt->decode($hash, Equivalencias::generadorHash());
-
-                # Para que valide que sean numeros separados por coma (tambien acepta uno)
-                if(!preg_match('/^[0-9]+((,[0-9]+)*)?$/', $ids_pago)){
-                    redirect(base_url().'index.php/error_404');
-                }
-
-                $pagos = $this->codegen_model->getSelect(
-                    'pagos_estampillas AS pago',
-                    'factura.fact_liquidacionid AS id_liquidacion, pago.valor AS valor_cuota, factura.fact_valor AS valor_total,
-                        pago.numero AS cuota, factura.fact_nombre, pago.id, factura.fact_porcentaje AS porcentaje',
-                    'WHERE pago.id IN (' . $ids_pago . ')',
-                    'INNER JOIN est_facturas factura ON factura.fact_id = pago.factura_id'
-                );
-
-                $this->data['result'] = $this->liquidaciones_model->getrecibos(null, $pagos[0]->id_liquidacion);
-                $liquidacion = $this->data['result'];
-  
-                $contrato = $this->codegen_model->getSelect(
-                      'con_contratos',
-                      'date_format(fecha_insercion,"%Y-%m-%d") AS fecha_insercion,cntr_contratistaid,cntr_objeto',
-                      'WHERE cntr_id = "'.$liquidacion->liqu_contratoid.'"'
-                );
-                $contratista = $this->codegen_model->getSelect(
-                    'con_contratistas',
-                    'cont_direccion,cont_telefono,cont_email',
-                    'WHERE cont_id = "'.$contrato[0]->cntr_contratistaid.'"'
-                );
-                $liquidador = $this->codegen_model->getSelect(
-                    'users',
-                    'first_name,last_name',
-                    'WHERE id = "'.$liquidacion->liqu_usuarioliquida.'"',
-                    ''
-                );
-
-                $this->data['contrato']     = $contrato[0];
-                $this->data['contratista']  = $contratista[0];
-                $this->data['liquidador']   = $liquidador[0];
-                $this->data['pagos']        = $pagos;
-  
-                // create new PDF document
-                $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-  
-                // set document information
-                $pdf->SetCreator(PDF_CREATOR);
-                $pdf->SetAuthor('turrisystem');
-                $pdf->SetTitle('Pago de estampilla');
-                $pdf->SetSubject('Gobernación del Putumayo');
-                $pdf->SetKeywords('estampillas,gobernación');
-                $pdf->SetPrintHeader(false);
-                $pdf->SetPrintFooter(false);
-                // set default monospaced font
-                $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-  
-                // set margins
-                $pdf->SetMargins(PDF_MARGIN_LEFT, 2, PDF_MARGIN_RIGHT);
-                $pdf->SetHeaderMargin(0);
-                $pdf->SetFooterMargin(0);
-  
-                // set auto page breaks
-                $pdf->SetAutoPageBreak(TRUE, 2);
-  
-                // set image scale factor
-                $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-  
-                // set some language-dependent strings (optional)
-                if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-                    require_once(dirname(__FILE__).'/lang/eng.php');
-                    $pdf->setLanguageArray($l);
-                }
-  
-                // ---------------------------------------------------------
-  
-                // set font
-                $pdf->SetFont('times', 'BI', 8);
-  
-                $pdf->AddPage();
-
-                // set style for barcode
-                $style = array(
-                    'position' => 'C',
-                    'padding' => 'auto',
-                    'fgcolor' => array(0,0,0),
-                    'bgcolor' => false, //array(255,255,255)
-                    'module_width' => 1, // width of a single module in points
-                    'module_height' => 1 // height of a single module in points
-                );
-
-                $this->data['estilos_qr'] = array(
-                    '',
-                    'QRCODE,H',
-                    '',# Posicion x
-                    '',# Posicion y
-                    30,# Ancho
-                    30,# Alto
-                    $style,
-                    'B'# Alineacion
-                );
-
-                $html = $this->load->view('generarpdf/generarpdf_recibo_pago_estampilla', $this->data, TRUE);
-                $pdf->writeHTML($html, true, false, true, false, '');
-  
-                // ---------------------------------------------------------
-  
-                //Close and output PDF document
-                $pdf->Output('recibos_estampilla.pdf', 'I');
-            } else {
-                redirect(base_url().'index.php/error_404');
-            }
-  
-        } else {
-                redirect(base_url().'index.php/users/login');
+        if (!isset($_GET['id'])){
+            redirect(base_url().'index.php/error_404');
         }
+
+        $this->load->library('Pdf');
+        $this->load->library('encrypt');
+
+        $hash = $_GET['id'];
+        $ids_pago = $this->encrypt->decode($hash, Equivalencias::generadorHash());
+
+        # Para que valide que sean numeros separados por coma (tambien acepta uno)
+        if(!preg_match('/^[0-9]+((,[0-9]+)*)?$/', $ids_pago)){
+            redirect(base_url().'index.php/error_404');
+        }
+
+        $pagos = $this->codegen_model->getSelect(
+            'pagos_estampillas AS pago',
+            'factura.fact_liquidacionid AS id_liquidacion, pago.valor AS valor_cuota, factura.fact_valor AS valor_total,
+                pago.numero AS cuota, factura.fact_nombre, pago.id, factura.fact_porcentaje AS porcentaje',
+            'WHERE pago.id IN (' . $ids_pago . ')',
+            'INNER JOIN est_facturas factura ON factura.fact_id = pago.factura_id'
+        );
+
+        $this->data['result'] = $this->liquidaciones_model->getrecibos(null, $pagos[0]->id_liquidacion);
+        $liquidacion = $this->data['result'];
+
+        $contrato = $this->codegen_model->getSelect(
+            'con_contratos',
+            'date_format(fecha_insercion,"%Y-%m-%d") AS fecha_insercion,cntr_contratistaid,cntr_objeto',
+            'WHERE cntr_id = "'.$liquidacion->liqu_contratoid.'"'
+        );
+        $contratista = $this->codegen_model->getSelect(
+            'con_contratistas',
+            'cont_direccion,cont_telefono,cont_email',
+            'WHERE cont_id = "'.$contrato[0]->cntr_contratistaid.'"'
+        );
+        $liquidador = $this->codegen_model->getSelect(
+            'users',
+            'first_name,last_name',
+            'WHERE id = "'.$liquidacion->liqu_usuarioliquida.'"',
+            ''
+        );
+
+        $this->data['contrato']     = $contrato[0];
+        $this->data['contratista']  = $contratista[0];
+        $this->data['liquidador']   = $liquidador[0];
+        $this->data['pagos']        = $pagos;
+
+        // create new PDF document
+        $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+        // set document information
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('turrisystem');
+        $pdf->SetTitle('Pago de estampilla');
+        $pdf->SetSubject('Gobernación del Putumayo');
+        $pdf->SetKeywords('estampillas,gobernación');
+        $pdf->SetPrintHeader(false);
+        $pdf->SetPrintFooter(false);
+        // set default monospaced font
+        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+        // set margins
+        $pdf->SetMargins(PDF_MARGIN_LEFT, 2, PDF_MARGIN_RIGHT);
+        $pdf->SetHeaderMargin(0);
+        $pdf->SetFooterMargin(0);
+
+        // set auto page breaks
+        $pdf->SetAutoPageBreak(TRUE, 2);
+
+        // set image scale factor
+        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+
+        // set some language-dependent strings (optional)
+        if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+            require_once(dirname(__FILE__).'/lang/eng.php');
+            $pdf->setLanguageArray($l);
+        }
+
+        // ---------------------------------------------------------
+
+        // set font
+        $pdf->SetFont('times', 'BI', 8);
+
+        $pdf->AddPage();
+
+        // set style for barcode
+        $style = array(
+            'position' => 'C',
+            'padding' => 'auto',
+            'fgcolor' => array(0,0,0),
+            'bgcolor' => false, //array(255,255,255)
+            'module_width' => 1, // width of a single module in points
+            'module_height' => 1 // height of a single module in points
+        );
+
+        $this->data['estilos_qr'] = array(
+            '',
+            'QRCODE,H',
+            '',# Posicion x
+            '',# Posicion y
+            30,# Ancho
+            30,# Alto
+            $style,
+            'B'# Alineacion
+        );
+
+        $html = $this->load->view('generarpdf/generarpdf_recibo_pago_estampilla', $this->data, TRUE);
+        $pdf->writeHTML($html, true, false, true, false, '');
+
+        // ---------------------------------------------------------
+
+        //Close and output PDF document
+        $pdf->Output('recibos_estampilla.pdf', 'I');
     }
 
     function generar_estampilla_retencion()
