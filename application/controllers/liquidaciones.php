@@ -1295,7 +1295,7 @@ function verliquidartramite()
                   'c.cntr_id,c.cntr_numero,co.cont_nit,
                   co.cont_nombre,c.cntr_fecha_firma,c.cntr_objeto,
                   c.cntr_valor,
-                  ((l.liqu_valorsiniva + adicion.total) - COALESCE(SUM(cuota.valor), 0)) AS saldo,
+                  ((l.liqu_valorsiniva + COALESCE(adicion.total, 0)) - COALESCE(SUM(cuota.valor), 0)) AS saldo,
                   el.eslo_nombre,COALESCE(l.liqu_soporteobjeto, "") AS copia_contrato', false);
               $this->datatables->from('con_contratos c');
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
@@ -1305,7 +1305,7 @@ function verliquidartramite()
 
               $this->datatables->join(
                 '(
-                    SELECT COALESCE(SUM(ac.valor), 0) AS total, ac.id_contrato
+                    SELECT SUM(ac.valor) AS total, ac.id_contrato
                     FROM adiciones_contratos ac
                     GROUP by ac.id_contrato
                 ) adicion',
