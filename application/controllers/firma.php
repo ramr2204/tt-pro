@@ -563,7 +563,7 @@ class Firma extends MY_Controller
             'declaraciones',
             'id',
             'id = "'. $referencia . '"
-                AND estado = '. EquivalenciasFirmas::declaracionFirmada(),
+                AND estado = '. EquivalenciasFirmas::declaracionPagada(),
             1,NULL,true
         );
         
