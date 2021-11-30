@@ -10,17 +10,9 @@ Class EnvioCorreoHelper extends CI_Controller
 
 	public function enviar($data)
     {
-        $config['protocol']     = $this->config->item('protocol');
-        $config['smtp_host']    = $this->config->item('smtp_host');
-        $config['smtp_port']    = $this->config->item('smtp_port');
-        $config['smtp_timeout'] = '7';
-        $config['smtp_user']    = $this->config->item('smtp_user');
-        $config['smtp_pass']    = $this->config->item('smtp_pass');
-        $config['charset']      = $this->config->item('charset');
-        $config['newline']      = "\r\n";
-        $config['mailtype']     = 'html'; // or text
-        $config['validation']   = TRUE; // bool whether to validate email or not      
-
+        $config = $this->config->item('email_config');
+        $config['newline']  = "\r\n";
+        $config['mailtype'] = 'html'; // or text
         $this->email->initialize($config);
 
         $this->email->from($this->config->item('smtp_user'), $data['sender_name']);
