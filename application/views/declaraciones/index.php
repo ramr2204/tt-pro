@@ -589,7 +589,7 @@
                 var observaciones = document.querySelector('.swal-content__textarea').value;
 
                 $.ajax({
-                    url: base_url + 'index.php/declaraciones/comprobar',
+                    url: base_url + 'index.php/declaraciones/corregir',
                     type: 'POST',
                     dataType: 'json',
                     data: {declaracion: cod, observaciones: observaciones},
