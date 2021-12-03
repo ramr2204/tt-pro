@@ -233,6 +233,7 @@ class Declaraciones extends MY_Controller
      */
     private function consultarDatos()
     {
+        $clasificaciones = Equivalencias::clasificacionContratos();
         $consulta = [];
         $consulto = false;
 
@@ -297,29 +298,36 @@ class Declaraciones extends MY_Controller
                 INNER JOIN con_contratos contrato ON contrato.cntr_id = liquidacion.liqu_contratoid',
             'GROUP BY contrato.clasificacion'
         );
-        $pagos = HelperGeneral::lists($pagos, '', 'clasificacion');
 
-        if(count($pagos) > 0 || $consulto)
+        foreach($clasificaciones AS $id => $nombre)
         {
-            foreach(Equivalencias::clasificacionContratos() AS $id => $nombre)
-            {
-                if( isset($pagos[$id]) ) {
-                    $consulto = true;
-                    $pagos[$id]->clase = $nombre;
-                    $consulta[$id] = $pagos[$id];
-                } else {
-                    $consulta[$id] = (object)[
-                        'clasificacion' => $id,
-                        'clase'         => $nombre,
-                        'base'          => 0,
-                        'pagado'        => 0,
-                        'porcentaje'    => 0,
-                    ];
-                }
+            if( isset($pagos[$id]) ) {
+                $consulto = true;
+                $pagos[$id]->clase = $nombre;
+                $consulta[$id] = $pagos[$id];
+            } else {
+                $consulta[$id] = (object)[
+                    'clasificacion' => $id,
+                    'clase'         => $nombre,
+                    'base'          => 0,
+                    'pagado'        => 0,
+                    'porcentaje'    => 0,
+                ];
             }
         }
 
-        if($consulto)
+        if(count($pagos) > 0 || $consulto)
+        {
+            foreach($pagos AS $pago)
+            {
+                $consulto = true;
+                $pago->clase = $clasificaciones[$pago->clasificacion];
+                $consulta[$id] = $pago;
+            }
+        }
+
+        if(true)
+        // if($consulto)
         {
             # Se ordenan los detalles por el indice
             ksort($consulta);
