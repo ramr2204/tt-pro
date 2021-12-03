@@ -39,7 +39,7 @@ var oTable = $('#tablaq').dataTable( {
   if (aData[6]=='Legalizado') {
    $("td:eq(6)", nRow).html('<a href="#" class="btn btn-success btn-xs terminar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-tags"></i></a>');
   }
-   if (aData[6]=='Liquidado') {
+   if (aData[6]=='Activo') {
    $("td:eq(6)", nRow).html('<a href="#" class="btn btn-primary btn-xs pagar" title="Cambiar estado" id="'+aData[0]+'"><i class="fa fa-money"></i></a>');
   }
   if (aData[6]==null) {
