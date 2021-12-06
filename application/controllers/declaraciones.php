@@ -322,7 +322,7 @@ class Declaraciones extends MY_Controller
             {
                 $consulto = true;
                 $pago->clase = $clasificaciones[$pago->clasificacion];
-                $consulta[$id] = $pago;
+                $consulta[$pago->clasificacion] = $pago;
             }
         }
 
