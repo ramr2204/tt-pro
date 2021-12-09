@@ -3996,7 +3996,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                         FROM adiciones_contratos ac
                         GROUP by ac.id_contrato
                     ) adicion ON adicion.id_contrato = l.liqu_contratoid',
-                    'group by l.liqu_id'
+                    'GROUP BY l.liqu_id'
                 );
                 $liquidacion = $liquidacion[0];
 
@@ -4013,6 +4013,20 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 
                 $this->data['saldo_contrato'] = $liquidacion->valor_total - $liquidacion->total_pagado;
                 $this->data['saldo_adiciones'] = $liquidacion->total_adicion - $liquidacion->total_pagado_adicion;
+
+                $this->load->library('encrypt');
+                $this->data['historial_cuotas'] = $this->codegen_model->getSelect(
+                    'cuotas_liquidacion AS cuotas',
+                    'cuotas.valor, cuotas.tipo, cuotas.fecha_creacion,
+                        GROUP_CONCAT(pagos.id) AS pagos_ids',
+                    'WHERE id_liquidacion = "'. $liquidacion->liqu_id .'"
+                        AND cuotas.estado = '. Equivalencias::cuotaPaga(),
+                    'LEFT JOIN est_facturas facturas ON facturas.id_cuota_liquidacion = cuotas.id
+                    LEFT JOIN pagos_estampillas pagos ON pagos.factura_id = facturas.fact_id',
+                    'GROUP BY cuotas.id',
+                    'ORDER BY cuotas.fecha_creacion DESC'
+                );
+                $this->data['tipos_cuotas'] = Equivalencias::tiposCuotas();
 
 				$this->template->set('title', 'Contrato liquidado');
 

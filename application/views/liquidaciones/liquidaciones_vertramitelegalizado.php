@@ -21,7 +21,7 @@
      <th colspan="1" class="text-center small" width="22%">
            <img src="<?php echo base_url() ?>images/gobernacion.jpg" height="60" width="70" >
      </th>
-     <th colspan="3" class="text-center small" width="56%">Gobernación de Boyacá <br> Secretaría de Hacienda <br> Dirección de Recaudo y Fiscalización</th>
+     <th colspan="2" class="text-center small" width="56%">Gobernación de Boyacá <br> Secretaría de Hacienda <br> Dirección de Recaudo y Fiscalización</th>
      <th colspan="1" class="text-center small" width="22%">
            <img src="<?php echo base_url() ?>images/logo.png" height="50" width="80" >
      </th>
@@ -35,13 +35,13 @@
 </tr>
 <tr>
      <td colspan="1"><strong>Nombre</strong></td>
-     <td colspan="4"><?php echo $result->liqu_nombrecontratista; ?></td>
+     <td colspan="3"><?php echo $result->liqu_nombrecontratista; ?></td>
 
 </tr>
 
  <tr>
      <td colspan="1"><strong>Documento</strong></td>
-     <td colspan="4"><?php echo $result->liqu_nit; ?>
+     <td colspan="3"><?php echo $result->liqu_nit; ?>
      </td>
 </tr>
 
@@ -51,105 +51,50 @@
      <td colspan="1"><?php echo $result->liqu_numero; ?>
      </td>
      <td colspan="1"><strong>Vigencia</strong></td>
-     <td colspan="2"><?php echo $result->liqu_vigencia; ?></td>
+     <td colspan="1"><?php echo $result->liqu_vigencia; ?></td>
 </tr>
 <tr>
-     <td colspan="2"><strong>Valor salario mínimo</strong></td>
+     <td colspan="1"><strong>Valor salario mínimo</strong></td>
      <td colspan="3"><?php echo '$'.number_format($result->liqu_valorsiniva, 2, ',', '.'); ?></td>
 </tr>
 
 <tr>
-     <td colspan="5"></td>
+     <td colspan="4"></td>
 </tr>
 <tr>
-     <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
-     <td colspan="1" class="text-center"><strong>Cuenta de ahorro</strong></td>
+     <td colspan="2" class="text-center"><strong>Estampilla</strong></td>
      <td colspan="1" class="text-center"><strong>Porcentaje</strong></td>
      <td colspan="1" class="text-center"><strong>Valor</strong></td>
-     <td colspan="1" class="text-center"><strong>Procesos</strong></td>
 </tr>
 
-<?php //para usuarios con perfil de liquidador
-      if(isset($proximaImpresion)){ ?>
-<input type="hidden" id="siguienteEstampilla" value="<?= $proximaImpresion; ?>" >
-<?php } ?>
-
-<?php $x=0; ?>
-<?php foreach($facturas as $row2) { ?>
-<tr>
-     <td colspan="1"><?php echo $row2->fact_nombre; ?>
-       <?php if ($row2->fact_rutaimagen) { ?>
-           <img src="<?php echo base_url().$row2->fact_rutaimagen; ?>" height="60" width="60" >
-       <?php } ?>
-
-      </td>
-     <td colspan="1" class="text-center"><?php echo $row2->fact_cuenta; ?><br><?php echo $row2->fact_banco; ?></td>
-     <td colspan="1" class="text-center"><?php echo $row2->fact_porcentaje; ?>%</td>
-     <td colspan="1" class="text-right"><?php echo '$'.number_format($row2->fact_valor, 2, ',', '.'); ?>
-
-     </td>
-     <td colspan="1" class="text-center">
-       
-     <div>
-      <?php   if ($row2->fact_rutacomprobante != '') { ?>     
-       <a href='<?php echo base_url().$row2->fact_rutacomprobante; ?>' target='_blank'><img src='<?php echo base_url().$row2->fact_rutacomprobante; ?>' class='file-preview-image' alt='comprobante de pago' title='comprobante de pago'  height="42" width="42"></a>
-      <?php } ?> 
-     </div>
-     <?php if ($facturapagada[$row2->fact_id]) {  ?>           
-     <div class="bg-info">legalizado: <?php  ?> <i class="fa fa-gavel"></i> </div>
-
-                <?php //verifica si el perfil del usuario logueado es 
-                      //de liquidador para permitir o denegar la orden 
-                      //de impresion de estampillas   
-              
-                      $usuarioLogueado=$this->ion_auth->user()->row();
-
-                      if ($usuarioLogueado->perfilid==4)
-                      {   
-                          //Verifica si el valor de la factura es mayor
-                          //que cero si es menor no habilita el boton
-                          if($row2->fact_valor > 0)
-                          {                            
-                              //Verifica si hay registrado un estado de impresion
-                              //y si es 2 (anulado) para habilitar el boton                         
-                              if($row2->impr_estado)
-                              {
-                                  if($row2->impr_estado == 2)
-                                  { 
-                                      echo anchor(base_url().'liquidaciones/procesarConsecutivos/'.$row2->fact_id,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large btn-default confirmar_impresion" target="_blank"');
-    
-                                  }else{ ?>
-                                         <a href="#" class="btn btn-large  btn-default" disabled><i class="fa fa-print"></i>Imprimir estampilla</a>    
-                         <?php         }  
-                              }else{ //si no hay registrado un estado de impresion es porque no se ha impreso
-                                     //entonces se habilita el boton
-                                        echo anchor(base_url().'liquidaciones/procesarConsecutivos/'.$row2->fact_id,'<i class="fa fa-print"></i> Imprimir estampilla','class="btn btn-large btn-default confirmar_impresion" target="_blank"'); 
-                                    }
-                          }else
-                              { ?>
-   
-                                  <a href="#" class="btn btn-large  btn-default" disabled><i class="fa fa-print"></i>Imprimir estampilla</a>
-   
-                      <?php   }
-
-                      }else
-                           { ?>
-
-                            <a href="#" class="btn btn-large  btn-default" disabled><i class="fa fa-print"></i>Imprimir estampilla</a>
-
-                   <?php   }?>
-
-
-                    
+<?php
+     //para usuarios con perfil de liquidador
+     if(isset($proximaImpresion))
+     {
+          ?>
+          <input type="hidden" id="siguienteEstampilla" value="<?= $proximaImpresion; ?>" >
+          <?php
+     }
+     $x=0;
      
-
-
-     <?php  } else { ?>
-      <div class="bg-danger">Pagado: <?php echo '$'.number_format($row2->pago_valor, 2, ',', '.'); ?> <i class="fa fa-times"></i> </div> 
-     <?php  } ?>
-     
-     </td>
-</tr>
+     foreach($facturas as $row2)
+     {
+          ?>
+          <tr>
+               <td colspan="2">
+                    <?php echo $row2->fact_nombre; ?>
+                    <?php
+                         if ($row2->fact_rutaimagen)
+                         {
+                              ?>
+                              <img src="<?php echo base_url().$row2->fact_rutaimagen; ?>" height="60" width="60" >
+                              <?php
+                         }
+                    ?>
+               </td>
+               <td colspan="1" class="text-center"><?php echo $row2->fact_porcentaje; ?>%</td>
+               <td colspan="1" class="text-right"><?php echo '$'.number_format($row2->fact_valor, 2, ',', '.'); ?></td>
+          </tr>
 
 
 <?php $x++; ?>
