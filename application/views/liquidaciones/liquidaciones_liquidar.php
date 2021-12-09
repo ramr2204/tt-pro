@@ -110,7 +110,7 @@ $(document).ready(function() {
                 // $("td:eq(8)", nRow).append('<a href="#" class="btn btn-info btn-xs pagar-contrato" data-toggle="modal" data-target="#modalLiquidacion" title="pse" id="'+aData[0]+'"><i class="fa fa-shopping-cart"></i></a>');
             }
 
-            if(aData[8] == 'Activo') {
+            if(aData[8] == 'Activo' || aData[8] == 'Liquidado') {
                 $("td:eq(8)", nRow).append('<a href="'+ base_url + 'liquidaciones/estampillasRetencion/' + aData[0]+'" target="_blank" class="btn btn-warning btn-xs" title="Pagar estampillas por retencion"><i class="fa fa-legal"></i></a>');
             }
 

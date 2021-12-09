@@ -134,7 +134,7 @@ $total = 0;
                         </table>
 
                         <div class="col-sm-12 text-center">
-                            <button class="btn btn-info" type="button" id="pagar_todo">Pagar Todo</button>
+                            <button class="btn btn-info" type="button" id="pagar_todo">Liquidar Todo</button>
                         </div>
                         <?php
                     }
@@ -216,6 +216,55 @@ $total = 0;
                     <button type="submit" class="btn btn-success">Registrar</button>
                 </div>
             <?= form_close() ?>
+        </div>
+    </div>
+
+    <div class="col-sm-12 col-md-6 col-md-offset-3" style="margin-top: 20px;">
+        <div class="panel panel-success">
+            <div class="panel-heading text-center">
+                <h4><b>Historico de Cuotas</b></h4>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Fecha de creación</th>
+                        <th>Valor</th>
+                        <th>Tipo</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?
+                        if(count($historial_cuotas) > 0)
+                        {
+                            foreach($historial_cuotas AS $historico)
+                            {
+                                ?>
+                                <tr>
+                                    <td><?= $historico->fecha_creacion ?></td>
+                                    <td>$<?= number_format($historico->valor, 2, ',', '.') ?></td>
+                                    <td><?= $tipos_cuotas[$historico->tipo] ?></td>
+                                    <td class="text-center">
+                                        <a href="<?= base_url() ?>generarpdf/certificadoPagoEstampilla?id=<?= urlencode($this->encrypt->encode($historico->pagos_ids, Equivalencias::generadorHash())) ?>"
+                                            class="btn btn-primary btn-xs"
+                                            target="_blank"
+                                            title="Consultar facturas">
+                                            <i class="fa fa-qrcode"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <?
+                            }
+                        }else{
+                            ?>
+                            <tr>
+                                <td colspan="4" class="text-center">Sin datos</td>
+                            </tr>
+                            <?
+                        }
+                    ?>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
