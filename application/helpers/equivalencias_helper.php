@@ -45,6 +45,11 @@ class Equivalencias extends CI_Controller
 
     private static $perfilFirmante = 9;
 
+    private static $tiposCuotas = [
+        1 => 'Normal',
+        2 => 'Adicion',
+    ];
+
     public static function generadorHash(){
         return self::$generadorHash;
     }
@@ -111,5 +116,9 @@ class Equivalencias extends CI_Controller
 
     public static function cuotaAdicion(){
         return self::$cuotaAdicion;
+    }
+
+    public static function tiposCuotas(){
+        return self::$tiposCuotas;
     }
 }
