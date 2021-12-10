@@ -255,6 +255,17 @@ class Declaraciones extends MY_Controller
                 INNER JOIN con_contratos contrato ON contrato.cntr_id = liquidacion.liqu_contratoid'
         );
 
+        # Por defecto para la generacion de la declaracion se toma un porcentaje del ultimo contrato
+        $porcentajeDefecto = $this->data['empresas'] = $this->codegen_model->getSelect(
+            'est_estampillas_tiposcontratos',
+            'MAX(esti_porcentaje) AS porcentaje',
+            'WHERE esti_estampillaid = '. $this->input->post('tipo_estampilla'),
+            '', '', '',
+            'LIMIT 1'
+        );
+        $porcentajeDefecto = (isset($porcentajeDefecto[0]) && isset($porcentajeDefecto[0]->porcentaje)) ?
+            $porcentajeDefecto[0]->porcentaje : 0;
+
         if(count($adiciones) > 0)
         {
             $adiciones = $adiciones[0];
@@ -274,7 +285,7 @@ class Declaraciones extends MY_Controller
                     'clase'         => 'Adiciones',
                     'base'          => 0,
                     'pagado'        => 0,
-                    'porcentaje'    => 0,
+                    'porcentaje'    => $porcentajeDefecto,
                 ];
             }
         }
@@ -311,7 +322,7 @@ class Declaraciones extends MY_Controller
                     'clase'         => $nombre,
                     'base'          => 0,
                     'pagado'        => 0,
-                    'porcentaje'    => 0,
+                    'porcentaje'    => $porcentajeDefecto,
                 ];
             }
         }
