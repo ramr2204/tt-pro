@@ -56,75 +56,104 @@ class Contratistas extends MY_Controller {
       }
 
   }
-	
-  function add()
-  {
-      if ($this->ion_auth->logged_in()) {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/add')) {
+    /**
+     * Procesa el renderizado de la vista de creacion
+     * y el registro del mismo
+     * 
+     * @return null
+     */
+    public function add()
+    {
+        if ($this->ion_auth->logged_in())
+        {
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratistas/add'))
+            {
+                $this->data['successmessage']=$this->session->flashdata('message');
 
-              $this->data['successmessage']=$this->session->flashdata('message');  
-        		  $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
-              $this->form_validation->set_rules('nit', 'NIT', 'required|numeric|trim|xss_clean|max_length[100]|is_unique[con_contratistas.cont_nit]');   
-              $this->form_validation->set_rules('direccion', 'Dirección', 'required|trim|xss_clean|max_length[256]');
-              $this->form_validation->set_rules('telefono', 'Telefono', 'required|numeric|trim|xss_clean|max_length[15]');
-              $this->form_validation->set_rules('email', 'Email', 'required|valid_email|is_unique[con_contratistas.cont_email]');
-              $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
-              $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
-              $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|greater_than[0]'); 
+                $respuestaRegistro = $this->registrarContratista();
 
-              if ($this->form_validation->run() == false) {
+                if($respuestaRegistro['exito'])
+                {
+                    $this->session->set_flashdata('message', 'El contratista se ha creado con éxito');
+                    redirect(base_url().'index.php/contratistas/add');
+                } else {
+                    $this->data['errormessage'] = $respuestaRegistro['error'];
+                }
 
-                  $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
-              } else {    
-
-                  $data = array(
-                        'cont_nombre' => $this->input->post('nombre'),
-                        'cont_tipocontratistaid' => $this->input->post('tipocontratistaid'),
-                        'cont_nit' => $this->input->post('nit'),
-                        'cont_direccion' => $this->input->post('direccion'),
-                        'cont_municipioid' => $this->input->post('municipioid'),
-                        'cont_regimenid' => $this->input->post('regimenid'),
-                        'cont_telefono' => $this->input->post('telefono'),
-                        'cont_email' => $this->input->post('email'),
-                        'cont_fecha' => date('Y-m-d')
-                     );
-
-                        $respuestaProceso = $this->codegen_model->add('con_contratistas',$data);
-    			        if ($respuestaProceso->bandRegistroExitoso) {
-
-                      $this->session->set_flashdata('message', 'El contratista se ha creado con éxito');
-                      redirect(base_url().'index.php/contratistas/add');
-    			        } else {
-
-    				          $this->data['errormessage'] = 'No se pudo registrar el contratista';
-
-    			        }
-
-    		      }
-              $this->template->set('title', 'Nueva aplicación');
-              $this->data['style_sheets']= array(
-                        'css/chosen.css' => 'screen'
-                    );
-              $this->data['javascripts']= array(
-                        'js/chosen.jquery.min.js'
-                    );  
-              $this->template->set('title', 'Nuevo contratista');
-              $this->data['municipios']  = $this->codegen_model->getMunicipios();
-              $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
-              $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
-              $this->template->load($this->config->item('admin_template'),'contratistas/contratistas_add', $this->data);
-             
-          } else {
-              redirect(base_url().'index.php/error_404');
-          }
-
-      } else {
+                $this->template->set('title', 'Nueva aplicación');
+                $this->data['style_sheets']= array(
+                            'css/chosen.css' => 'screen'
+                        );
+                $this->data['javascripts']= array(
+                            'js/chosen.jquery.min.js'
+                        );  
+                $this->template->set('title', 'Nuevo contratista');
+                $this->data['municipios']  = $this->codegen_model->getMunicipios();
+                $this->data['tiposcontratistas']  = $this->codegen_model->getSelect('con_tiposcontratistas','tpco_id,tpco_nombre');
+                $this->data['regimenes']  = $this->codegen_model->getSelect('con_regimenes','regi_id,regi_nombre');
+                $this->template->load($this->config->item('admin_template'),'contratistas/contratistas_add', $this->data);
+            } else {
+                redirect(base_url().'index.php/error_404');
+            }
+        } else {
           redirect(base_url().'index.php/users/login');
-      }
+        }
+    }
 
-  }	
+    /**
+     * Procesa el registro del contratista
+     * (sin redirecciones o validaciones de usuario)
+     * 
+     * @return array
+     */
+    public function registrarContratista()
+    {
+        $resuesta = [
+            'exito' => false,
+            'error' => '',
+            'id' => null
+        ];
 
+        $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[128]');
+        $this->form_validation->set_rules('nit', 'NIT', 'required|numeric|trim|xss_clean|max_length[100]|is_unique[con_contratistas.cont_nit]');   
+        $this->form_validation->set_rules('direccion', 'Dirección', 'required|trim|xss_clean|max_length[256]');
+        $this->form_validation->set_rules('telefono', 'Telefono', 'required|numeric|trim|xss_clean|max_length[15]');
+        $this->form_validation->set_rules('email', 'Email', 'required|valid_email|is_unique[con_contratistas.cont_email]');
+        $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|is_exists[par_municipios.muni_id]');
+        $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|is_exists[con_regimenes.regi_id]');
+        $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|is_exists[con_tiposcontratistas.tpco_id]');
+
+        if ($this->form_validation->run() == false) {
+            $resuesta['error'] = (validation_errors() ? validation_errors(): false);
+        }
+        else
+        {
+            $data = [
+                'cont_nombre'               => $this->input->post('nombre'),
+                'cont_nit'                  => $this->input->post('nit'),
+                'cont_direccion'            => $this->input->post('direccion'),
+                'cont_telefono'             => $this->input->post('telefono'),
+                'cont_email'                => $this->input->post('email'),
+                'cont_municipioid'          => $this->input->post('municipioid'),
+                'cont_regimenid'            => $this->input->post('regimenid'),
+                'cont_tipocontratistaid'    => $this->input->post('tipocontratistaid'),
+                'cont_fecha'                => date('Y-m-d')
+            ];
+
+            $respuestaProceso = $this->codegen_model->add('con_contratistas',$data);
+
+            if ($respuestaProceso->bandRegistroExitoso) {
+                $resuesta['exito'] = true;
+                $resuesta['id'] = $respuestaProceso->idInsercion;
+            } else {
+                $resuesta['error'] = 'No se pudo registrar el contratista';
+            }
+        }
+
+        $this->form_validation->reset_validation();
+        return $resuesta;
+    }
 
 	function edit()
     {
