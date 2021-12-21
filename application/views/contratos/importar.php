@@ -18,7 +18,7 @@
             </div>
             <div class="col-md-4 column">
                 <div class="panel panel-default">
-                    <div class="panel-heading"><h1>Importar contratos</h1></div>
+                    <div class="panel-heading"><h1>Importar Contratos</h1></div>
                     <div class="panel-body">
                         <?php echo form_open_multipart('contratos/cargarImportarContratos'); ?>
                             <div class="form-group">
@@ -29,7 +29,7 @@
                                 <div class="pull-right btn-group">
                                     <a href="<?= base_url() ?>contratos/plantillaExcel" target="_blank" class="btn btn-default">
                                         <i class="fa fa-file-excel-o"></i> 
-                                        <span>Plantilla de Ejemplo</span>
+                                        <span>Plantilla</span>
                                     </a>
                                     <button type="submit" class="btn btn-success">
                                         <i class="fa fa-level-down"></i> 

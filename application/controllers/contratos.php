@@ -785,7 +785,7 @@ class Contratos extends MY_Controller {
     {
         if ($this->ion_auth->logged_in())
         {
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/importarcontratos'))
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/importarContratosExcel'))
             {
                 $this->data['successmessage'] = $this->session->flashdata('successmessage');
                 $this->data['errormessage'] = $this->session->flashdata('errormessage');
@@ -793,9 +793,7 @@ class Contratos extends MY_Controller {
 
                 $this->template->set('title', 'Importar Contratos');
 
-                $this->data['style_sheets'] = [
-                    'css/chosen.css' => 'screen'
-                ];
+                $this->data['style_sheets'] = [];
                 $this->data['javascripts'] = [
                     'js/chosen.jquery.min.js'
                 ];
@@ -846,6 +844,9 @@ class Contratos extends MY_Controller {
 
 
         try {
+            # Para que se puedan revertir o aprobar todas las operaciones de la bd
+            $this->db->trans_begin();
+
             $inputFileType = PHPExcel_IOFactory::identify($inputFileName);
             $objReader = PHPExcel_IOFactory::createReader($inputFileType);
             $objPHPExcel = $objReader->load($inputFileName);
@@ -914,7 +915,7 @@ class Contratos extends MY_Controller {
                     {
                         $id_contratista = $respuestaRegistro['id'];
                     } else {
-                        $errores[] = '<b>Fila '. ($linea+1) .'</b>' . $respuestaRegistro['error'];
+                        $errores[] = '<b>Fila '. ($linea+1) .'</b> ' . $respuestaRegistro['error'];
                     }
                 }
 
@@ -934,7 +935,8 @@ class Contratos extends MY_Controller {
                         'fecha'                     => $datos[8],
                         'numero'                    => $datos[9],
                         'valor'                     => $datos[10],
-                        'cntr_municipio_origen'     => isset($municipio->id) ? $municipio->id : '',
+                        # Se deja un numero alto para que falle con la regla exists
+                        'cntr_municipio_origen'     => isset($municipio->id) ? $municipio->id : 999999,
                         'clasificacion_contrato'    => $datos[12],
                         'objeto'                    => $datos[13],
                         'contrato_relacionado'      => $datos[14],
@@ -948,17 +950,20 @@ class Contratos extends MY_Controller {
                     {
                         $registrosExitosos++;
                     } else {
-                        $errores[] = '<b>Fila '. ($linea+1) .'</b>' . $respuestaRegistro['error'];
+                        $errores[] = '<b>Fila '. ($linea+1) .'</b> ' . $respuestaRegistro['error'];
                     }
                 }
             }
 
-            $this->session->set_flashdata('successmessage', "Se han registrado correctamente $registrosExitosos contrato(s)");
-
-            if(count($errores) > 0) {
+            if(count($errores) == 0) {
+                $this->db->trans_commit();
+                $this->session->set_flashdata('successmessage', "Se han registrado correctamente $registrosExitosos contrato(s)");
+            } else {
+                $this->db->trans_rollback();
                 $this->session->set_flashdata('errormessage', implode('<br>', $errores));
             }
         } catch (Exception $e) {
+            $this->db->trans_rollback();
             $this->session->set_flashdata('errormessage', 'Ocurrio un problema al proecesar el archivo.');
         }
 

@@ -3718,7 +3718,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
     return $bandRegistrarFactura;
 }
 
-	function pagarEstampilla()
+	public function pagarEstampilla()
 	{
         if ($this->ion_auth->logged_in())
 		{
@@ -3727,116 +3727,17 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 				$this->data['successmessage'] = $this->session->flashdata('message');
 				$this->data['errormessage'] = '';
 
-				$this->form_validation->set_rules('id_factura', 'Identificador de la facturas', 'trim|xss_clean|numeric|integer|greater_than[0]');
-				$this->form_validation->set_rules('fecha', 'Fecha', 'required|trim|xss_clean|required');
-				$this->form_validation->set_rules('observaciones', 'Observaciones', 'trim|xss_clean');
-                $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');
+				$respuestaRegistro = $this->procesarPagarEstampilla();
 
-				if ($this->form_validation->run() == false) {
-					$this->session->set_flashdata('errorModal', true);
-					$this->session->set_flashdata('errormessage', (validation_errors() ? validation_errors(): false));
-					$this->session->set_flashdata('accion', 'retencion');
-					redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$this->input->post('id_contrato'));
-				}
-
-                $is_pagos = array();
-
-                # Se toma una factura de todo el contrato para obtener la liquidacion y buscar las demas
-                $factura_muestra = $this->codegen_model->get(
-                    'est_facturas',
-                    'fact_liquidacionid AS id_liquidacion, id_cuota_liquidacion',
-                    'fact_id = "' . $this->input->post('id_factura') . '"',
-                    1, null, true
-                );
-
-                $facturas = $this->liquidaciones_model->obtenerFacturasRetencion('factura.id_cuota_liquidacion', $factura_muestra->id_cuota_liquidacion);
-
-                foreach($facturas AS $factura)
+                if($respuestaRegistro['exito'])
                 {
-                    $saldo = floor($factura->valor_total - $factura->valor_pagado);
-
-                    # Si el saldo no es cero, es decir no ha sido pagada
-                    if($saldo != 0)
-                    {
-                        $guardo = $this->pagarEstampillaIndividual(
-                            $factura->fact_id,
-                            $this->input->post('id_contrato'),
-                            $this->input->post('fecha'),
-                            $this->input->post('observaciones'),
-                            # El valor de la cuota sera el total restante (saldo)
-                            $saldo,
-                            $factura
-                        );
-                        $is_pagos[] = $guardo->idInsercion;
-
-                        # Si falla algun proceso rompa el for y se valide despues
-                        if (!$guardo->bandRegistroExitoso){
-                            break;
-                        }
-                    }
+                    $this->session->set_flashdata('successmessage', 'Se pagó con éxito la factura');
+                    $this->session->set_flashdata('idPagoFactura', $respuestaRegistro['id']);
+                } else {
+                    $this->session->set_flashdata('errormessage', $respuestaRegistro['error']);
                 }
 
-				if ($guardo->bandRegistroExitoso)
-                {
-                    $this->codegen_model->edit(
-                        'cuotas_liquidacion',
-                        [
-                            'estado' => Equivalencias::cuotaPaga()
-                        ],
-                        'id', $factura_muestra->id_cuota_liquidacion
-                    );
-
-                    $liquidacion = $this->codegen_model->getSelect(
-                        'est_liquidaciones AS l',
-                        'liqu_valorsiniva AS valor_total, adicion.total AS total_adicion,
-                            COALESCE(SUM(cuota.valor), 0) AS total_pagado',
-                        'WHERE l.liqu_id = '.$factura_muestra->id_liquidacion,
-                        'LEFT JOIN cuotas_liquidacion cuota ON (
-                            cuota.id_liquidacion = l.liqu_id
-                            AND estado = '. Equivalencias::cuotaPaga() .'
-                        )
-                        LEFT JOIN (
-                            SELECT COALESCE(SUM(ac.valor), 0) AS total, ac.id_contrato
-                            FROM adiciones_contratos ac
-                            GROUP by ac.id_contrato
-                        ) adicion ON adicion.id_contrato = l.liqu_contratoid',
-                        'group by l.liqu_id'
-                    );
-                    $liquidacion = $liquidacion[0];
-
-                    $saldo = ($liquidacion->valor_total + $liquidacion->total_adicion) - $liquidacion->total_pagado;
-
-                    # Si el saldo es 0, es decir se pago todo pase a estado liquidado
-                    if(number_format($saldo, 0, '', '') == 0) {
-                        $this->codegen_model->edit(
-                            'con_contratos',
-                            [ 'cntr_estadolocalid' => 5 ],# Liquidado
-                            'cntr_id', $this->input->post('id_contrato')
-                        );
-                    }
-
-                    $contratista = $this->codegen_model->get(
-                        'con_contratos contrato',
-                        'c.cont_email',
-                        'contrato.cntr_id = "'. $this->input->post('id_contrato') .'"',
-                        1,NULL,true, '',
-                        'con_contratistas AS c', 'c.cont_id = contrato.cntr_contratistaid'
-                    );
-
-                    $this->load->library('encrypt');
-                    $hash = $this->encrypt->encode(implode(',', $is_pagos), Equivalencias::generadorHash());
-
-                    $this->enviarCorreoEstampillas($contratista->cont_email, $hash);
-   
-					$this->session->set_flashdata('successmessage', 'Se pagó con éxito la factura');
-					$this->session->set_flashdata('idPagoFactura', $hash);
-				}
-				else{
-					$this->session->set_flashdata('errormessage', '<strong>Error!</strong> Ocurrió un error al registrar el pago.');
-				}
-
-				$this->session->set_flashdata('accion', 'retencion');
-				redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$this->input->post('id_contrato'));
+                redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$this->input->post('id_contrato'));
 			}
 			else {
 				redirect(base_url().'index.php/error_404');
@@ -3845,6 +3746,126 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
             redirect(base_url().'index.php/users/login');
         }
 	}
+
+    private function procesarPagarEstampilla()
+    {
+        $respuesta = [
+            'exito' => false,
+            'error' => '',
+            'id' => null
+        ];
+
+        $this->form_validation->set_rules('id_cuota', 'Identificador de la facturas', 'required|trim|xss_clean|numeric|integer|is_exists[cuotas_liquidacion.id]');
+        $this->form_validation->set_rules('id_contrato', 'Identificador del contrato', 'required|trim|xss_clean|numeric|integer|is_exists[con_contratos.cntr_id]');
+        $this->form_validation->set_rules('fecha', 'Fecha', [
+            'required',
+            'trim',
+            'xss_clean',
+            'regex_match[/^(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/]',
+        ]);
+        $this->form_validation->set_rules('observaciones', 'Observaciones', 'trim|xss_clean');
+
+        if ($this->form_validation->run() == false) {
+            $respuesta['error'] = ($this->form_validation->error_string() ? $this->form_validation->error_string(): false);
+            return $respuesta;
+        }
+
+        $is_pagos = [];
+
+        $facturas = $this->liquidaciones_model->obtenerFacturasRetencion('factura.id_cuota_liquidacion', $this->input->post('id_cuota'));
+
+        # Se crea por defecto por si no recorre el foreach
+        $guardo = (object)['bandRegistroExitoso' => false];
+
+        foreach($facturas AS $factura)
+        {
+            $saldo = floor($factura->valor_total - $factura->valor_pagado);
+
+            # Si el saldo no es cero, es decir no ha sido pagada
+            if($saldo != 0)
+            {
+                $guardo = $this->pagarEstampillaIndividual(
+                    $factura->fact_id,
+                    $this->input->post('id_contrato'),
+                    $this->input->post('fecha'),
+                    $this->input->post('observaciones'),
+                    # El valor de la cuota sera el total restante (saldo)
+                    $saldo,
+                    $factura
+                );
+                $is_pagos[] = $guardo->idInsercion;
+
+                # Si falla algun proceso rompa el for y se valide despues
+                if (!$guardo->bandRegistroExitoso){
+                    break;
+                }
+            }
+        }
+
+        if ($guardo->bandRegistroExitoso)
+        {
+            $this->codegen_model->edit(
+                'cuotas_liquidacion',
+                [
+                    'estado' => Equivalencias::cuotaPaga()
+                ],
+                'id', $this->input->post('id_cuota')
+            );
+
+            $liquidacion = $this->codegen_model->getSelect(
+                'est_liquidaciones AS l',
+                'liqu_valorsiniva AS valor_total, adicion.total AS total_adicion,
+                    COALESCE(SUM(cuota.valor), 0) AS total_pagado',
+                'WHERE l.liqu_id = '. $facturas[0]->id_liquidacion,
+                'LEFT JOIN cuotas_liquidacion cuota ON (
+                    cuota.id_liquidacion = l.liqu_id
+                    AND estado = '. Equivalencias::cuotaPaga() .'
+                )
+                LEFT JOIN (
+                    SELECT COALESCE(SUM(ac.valor), 0) AS total, ac.id_contrato
+                    FROM adiciones_contratos ac
+                    GROUP by ac.id_contrato
+                ) adicion ON adicion.id_contrato = l.liqu_contratoid',
+                'group by l.liqu_id'
+            );
+            $liquidacion = $liquidacion[0];
+
+            $saldo = ($liquidacion->valor_total + $liquidacion->total_adicion) - $liquidacion->total_pagado;
+
+            echo '$algo<pre>';var_dump( $this->input->post('id_contrato') );echo '</pre>'; 
+            # Si el saldo es 0, es decir se pago todo, pase a estado liquidado
+            if(number_format($saldo, 0, '', '') == 0) {
+                $this->codegen_model->edit(
+                    'con_contratos',
+                    [ 'cntr_estadolocalid' => 5 ],# Liquidado
+                    'cntr_id', $this->input->post('id_contrato')
+                );
+            }
+            echo '$post<pre>';var_dump( $this->input->post('id_contrato') );echo '</pre>'; 
+
+            $contratista = $this->codegen_model->get(
+                'con_contratos contrato',
+                'c.cont_email',
+                'contrato.cntr_id = "'. $this->input->post('id_contrato') .'"',
+                1,NULL,true, '',
+                'con_contratistas AS c', 'c.cont_id = contrato.cntr_contratistaid'
+            );
+
+            $this->load->library('encrypt');
+            $hash = $this->encrypt->encode(implode(',', $is_pagos), Equivalencias::generadorHash());
+
+            $this->enviarCorreoEstampillas($contratista->cont_email, $hash);
+
+            $respuesta['exito'] = true;
+            $respuesta['id'] = $hash;
+        }
+        else{
+            $respuesta['error'] = 'Ocurrió un error al registrar el pago.';
+        }
+
+        $this->form_validation->reset_validation();
+        return $respuesta;
+    }
 
     /**
      * Envia el correo para que puedan consultar las facturas
@@ -3890,12 +3911,11 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
     {
         $ruta_soporte = '';
 
-        if (!isset($_FILES['upload_field_name']) && !is_uploaded_file($_FILES['soporte']['tmp_name'])) 
-        {
-            // $this->session->set_flashdata('errorModal', true);
-            // $this->session->set_flashdata('errormessage', '<strong>Error!</strong> Debe cargar el soporte del pago.');
-        }
-        else
+        if (
+            isset($_FILES['soporte']) &&
+            isset($_FILES['upload_field_name']) &&
+            is_uploaded_file($_FILES['soporte']['tmp_name'])
+        )
         {
             $path = 'uploads/pagosFacturas';
             if(!is_dir($path)) { //crea la carpeta para los objetos si no existe
@@ -3958,7 +3978,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
         return $guardo;
     }
 
-    function estampillasRetencion()
+    public function estampillasRetencion()
     {
 		if ($this->ion_auth->logged_in()) {
 			if ($this->uri->segment(3)==''){
@@ -4051,7 +4071,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 		}
 	}
 
-    function descuentoEstampilla()
+    public function descuentoEstampilla()
 	{
 		if ($this->ion_auth->logged_in())
 		{
@@ -4216,132 +4236,14 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
         {
             if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar'))
             {
-                $this->form_validation->set_rules('id_contrato', 'Identificador del contrato', 'trim|xss_clean|numeric|integer|greater_than[0]'); 
-                $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');
+                $respuestaRegistro = $this->procesarRegistroCuota();
 
-                if ($this->form_validation->run() == false) {
-					$this->session->set_flashdata('errorModal', true);
-					$this->session->set_flashdata('errormessage', (validation_errors() ? validation_errors(): false));
-					$this->session->set_flashdata('accion', 'retencion');
-                    redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$this->input->post('id_contrato'));
-				}
-
-                $es_adicion = $this->input->post('es_adicion') == Equivalencias::cuotaAdicion();
-
-                # Se da formato al valor para que guarde los valores decimales
-                $valor = str_replace(',', '.', str_replace('.','',$this->input->post('valor')));
-
-                $liquidacion = $this->codegen_model->get(
-                    'est_liquidaciones',
-                    'liqu_id, liqu_valorsiniva AS valor_total',
-                    'liqu_contratoid = '.$this->input->post('id_contrato'),
-                    1,NULL,true
-                );
-
-                if($es_adicion) {
-                    $liquidacion = $this->codegen_model->getSelect(
-                        'est_liquidaciones AS l',
-                        'l.liqu_id, adicion.total AS valor_total, COALESCE(SUM(c.valor), 0) AS total_pagado',
-                        'WHERE l.liqu_contratoid = '.$this->input->post('id_contrato'),
-                        'LEFT JOIN cuotas_liquidacion c ON (
-                            c.id_liquidacion = l.liqu_id
-                            AND estado = '. Equivalencias::cuotaPaga() .'
-                            AND tipo = '. Equivalencias::cuotaAdicion() .'
-                        )
-                        LEFT JOIN (
-                            SELECT coalesce(SUM(ac.valor), 0) AS total, ac.id_contrato
-                            FROM adiciones_contratos ac
-                            GROUP by ac.id_contrato
-                        ) adicion ON adicion.id_contrato = l.liqu_contratoid',
-                        'GROUP BY l.liqu_id'
-                    );
-                } else {
-                    $liquidacion = $this->codegen_model->getSelect(
-                        'est_liquidaciones AS l',
-                        'l.liqu_id, l.liqu_valorsiniva AS valor_total, COALESCE(SUM(c.valor), 0) AS total_pagado',
-                        'WHERE l.liqu_contratoid = '.$this->input->post('id_contrato'),
-                        'LEFT JOIN cuotas_liquidacion c ON (
-                            c.id_liquidacion = l.liqu_id
-                            AND estado = '. Equivalencias::cuotaPaga() .'
-                            AND tipo = '. Equivalencias::cuotaNormal() .'
-                        )',
-                        'GROUP BY l.liqu_id'
-                    );
-                }
-                $liquidacion = $liquidacion[0];
-
-                $datos = $this->obtenerInfoFacturas( $this->input->post('id_contrato'), $valor );
-
-                $saldo_contrato = $liquidacion->valor_total - $liquidacion->total_pagado;
-
-                if($valor > $saldo_contrato){
-                    $this->session->set_flashdata('errorModal', true);
-                    $this->session->set_flashdata('errormessage', '<strong>Error!</strong> El pago de la cuota no puede ser mayor que el saldo.');
-					$this->session->set_flashdata('accion', 'retencion');
-                    redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$this->input->post('id_contrato'));
-                }
-
-                $guardo = $this->codegen_model->add(
-					'cuotas_liquidacion',
-					array(
-						'id_liquidacion'	=> $liquidacion->liqu_id,
-						'valor'				=> $valor,
-						'estado'		    => Equivalencias::cuotaPendiente(),
-                        'tipo'              => ($es_adicion ? Equivalencias::cuotaAdicion() : Equivalencias::cuotaNormal()),
-						'fecha_creacion'	=> date('Y-m-d H:i:s')
-					)
-				);
-
-                if ($guardo->bandRegistroExitoso)
+                if($respuestaRegistro['exito'])
                 {
-                    foreach($datos['estampillas'] AS $factura)
-					{
-						//Valida si la factura viene en valor cero
-						//no guarda factura
-						$valor = $datos['est_totalestampilla'][$factura->estm_id];
-
-						if($valor > 0)
-						{
-							$data = array(
-								'fact_nombre'			=> $factura->estm_nombre,
-								'fact_porcentaje'		=> $factura->esti_porcentaje,
-								'fact_valor'			=> $datos['est_totalestampilla'][$factura->estm_id],
-								'fact_banco'			=> $factura->banc_nombre,
-								'fact_cuenta'			=> $factura->estm_cuenta,
-								'fact_liquidacionid'	=> $liquidacion->liqu_id,
-								'fact_estampillaid'		=> $factura->estm_id,
-								'fact_rutaimagen'		=> $factura->estm_rutaimagen,
-                                'id_cuota_liquidacion'  => $guardo->idInsercion,
-							);
-
-							/*
-							* Se valida si la estampilla a almacenar es pro electrificacion
-							* y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
-							* no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
-							*/
-							$bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla(
-                                $data['fact_estampillaid'],
-                                $datos['result']->cntr_fecha_firma,
-                                $datos['result']->cntr_tipocontratoid
-                            );
-							if($bandRegistrarFactura)
-							{
-								$respuestaProceso = $this->codegen_model->add('est_facturas',$data);
-
-								/**
-								* Solicita la Asignación del codigo para el codigo de barras
-								*/
-								$this->asignarCodigoParaBarras($liquidacion->liqu_id, $factura->estm_id);
-							}
-							
-						}
-					}
-
-					$this->session->set_flashdata('successmessage', 'Se registro el valor de la cuota');
-				}
-				else{
-					$this->session->set_flashdata('errormessage', '<strong>Error!</strong> Ocurrió un error al registrar el pago.');
-				}
+                    $this->session->set_flashdata('successmessage', 'Se registro el valor de la cuota');
+                } else {
+                    $this->session->set_flashdata('errormessage', $respuestaRegistro['error']);
+                }
 
                 redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$this->input->post('id_contrato'));
             } else {
@@ -4350,6 +4252,140 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
         } else {
             redirect(base_url().'index.php/users/login');
         }
+    }
+
+    private function procesarRegistroCuota()
+    {
+        $respuesta = [
+            'exito' => false,
+            'error' => '',
+            'id' => null,
+        ];
+
+        $this->form_validation->set_rules('id_contrato', 'Identificador del contrato', 'trim|xss_clean|numeric|integer|greater_than[0]'); 
+        $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');
+
+        if ($this->form_validation->run() == false) {
+            $respuesta['error'] = ($this->form_validation->error_string() ? $this->form_validation->error_string(): false);
+            return $respuesta;
+        }
+
+        $es_adicion = $this->input->post('es_adicion') == '1';
+
+        # Se da formato al valor para que guarde los valores decimales
+        $valor = str_replace(',', '.', str_replace('.','',$this->input->post('valor')));
+
+        $liquidacion = $this->codegen_model->get(
+            'est_liquidaciones',
+            'liqu_id, liqu_valorsiniva AS valor_total',
+            'liqu_contratoid = '.$this->input->post('id_contrato'),
+            1,NULL,true
+        );
+
+        if($es_adicion) {
+            $liquidacion = $this->codegen_model->getSelect(
+                'est_liquidaciones AS l',
+                'l.liqu_id, adicion.total AS valor_total, COALESCE(SUM(c.valor), 0) AS total_pagado',
+                'WHERE l.liqu_contratoid = '.$this->input->post('id_contrato'),
+                'LEFT JOIN cuotas_liquidacion c ON (
+                    c.id_liquidacion = l.liqu_id
+                    AND estado = '. Equivalencias::cuotaPaga() .'
+                    AND tipo = '. Equivalencias::cuotaAdicion() .'
+                )
+                LEFT JOIN (
+                    SELECT coalesce(SUM(ac.valor), 0) AS total, ac.id_contrato
+                    FROM adiciones_contratos ac
+                    GROUP by ac.id_contrato
+                ) adicion ON adicion.id_contrato = l.liqu_contratoid',
+                'GROUP BY l.liqu_id'
+            );
+        } else {
+            $liquidacion = $this->codegen_model->getSelect(
+                'est_liquidaciones AS l',
+                'l.liqu_id, l.liqu_valorsiniva AS valor_total, COALESCE(SUM(c.valor), 0) AS total_pagado',
+                'WHERE l.liqu_contratoid = '.$this->input->post('id_contrato'),
+                'LEFT JOIN cuotas_liquidacion c ON (
+                    c.id_liquidacion = l.liqu_id
+                    AND estado = '. Equivalencias::cuotaPaga() .'
+                    AND tipo = '. Equivalencias::cuotaNormal() .'
+                )',
+                'GROUP BY l.liqu_id'
+            );
+        }
+        $liquidacion = $liquidacion[0];
+
+        $datos = $this->obtenerInfoFacturas( $this->input->post('id_contrato'), $valor );
+
+        $saldo_contrato = $liquidacion->valor_total - $liquidacion->total_pagado;
+
+        if($valor > $saldo_contrato){
+            $respuesta['error'] = 'El pago de la cuota no puede ser mayor que el saldo.';
+            return $respuesta;
+        }
+
+        $guardo = $this->codegen_model->add(
+            'cuotas_liquidacion',
+            array(
+                'id_liquidacion'	=> $liquidacion->liqu_id,
+                'valor'				=> $valor,
+                'estado'		    => Equivalencias::cuotaPendiente(),
+                'tipo'              => ($es_adicion ? Equivalencias::cuotaAdicion() : Equivalencias::cuotaNormal()),
+                'fecha_creacion'	=> date('Y-m-d H:i:s')
+            )
+        );
+
+        if ($guardo->bandRegistroExitoso)
+        {
+            foreach($datos['estampillas'] AS $factura)
+            {
+                # Valida si la factura viene en valor cero no guarda factura
+                $valor = $datos['est_totalestampilla'][$factura->estm_id];
+
+                if($valor > 0)
+                {
+                    $data = array(
+                        'fact_nombre'			=> $factura->estm_nombre,
+                        'fact_porcentaje'		=> $factura->esti_porcentaje,
+                        'fact_valor'			=> $valor,
+                        'fact_banco'			=> $factura->banc_nombre,
+                        'fact_cuenta'			=> $factura->estm_cuenta,
+                        'fact_liquidacionid'	=> $liquidacion->liqu_id,
+                        'fact_estampillaid'		=> $factura->estm_id,
+                        'fact_rutaimagen'		=> $factura->estm_rutaimagen,
+                        'id_cuota_liquidacion'  => $guardo->idInsercion,
+                    );
+
+                    /*
+                    * Se valida si la estampilla a almacenar es pro electrificacion
+                    * y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
+                    * no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
+                    */
+                    $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla(
+                        $data['fact_estampillaid'],
+                        $datos['result']->cntr_fecha_firma,
+                        $datos['result']->cntr_tipocontratoid
+                    );
+                    if($bandRegistrarFactura)
+                    {
+                        $this->codegen_model->add('est_facturas',$data);
+
+                        /**
+                        * Solicita la Asignación del codigo para el codigo de barras
+                        */
+                        $this->asignarCodigoParaBarras($liquidacion->liqu_id, $factura->estm_id);
+                    }
+                }
+            }
+
+            $respuesta['exito'] = true;
+            $respuesta['id'] = $guardo->idInsercion;
+        }
+        else{
+            $respuesta['exito'] = 'Ocurrió un error al registrar el pago.';
+        }
+
+        $this->form_validation->reset_validation();
+        return $respuesta;
     }
 
     /**
@@ -4452,5 +4488,246 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
         } else {
             redirect(base_url().'index.php/users/login');
         }
+    }
+
+    /**
+     * Renderiza la vista para cargar los pagos de las facturas
+     * 
+     * @return null
+     */
+    public function importarLiquidaciones()
+    {
+        if ($this->ion_auth->logged_in())
+        {
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/importar'))
+            {
+                $this->data['successmessage'] = $this->session->flashdata('successmessage');
+                $this->data['errormessage'] = $this->session->flashdata('errormessage');
+                $this->data['infomessage'] = $this->session->flashdata('infomessage');
+                $this->data['datosCargue'] = [];
+                $this->data['rutaArchivo'] = '';
+
+                if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+                    $this->previsualizarImportacion();
+                }
+
+                $this->template->set('title', 'Importar Liquidaciones');
+
+                $this->data['style_sheets'] = [];
+                $this->data['javascripts'] = [
+                    'js/chosen.jquery.min.js'
+                ];
+
+                $this->template->load($this->config->item('admin_template'),'liquidaciones/importar', $this->data);
+            } else {
+                redirect(base_url().'index.php/error_404');
+            }
+        } else {
+            redirect(base_url().'index.php/users/login');
+        }
+    }
+
+    /**
+     * Se encarga de mostrar los valores que se liquidarian
+     * al realizar el cargue para que verifiquen (no altera la bd solo conulta)
+     * (Altera la variable global data)
+     * 
+     * @return null
+     */
+    private function previsualizarImportacion()
+    {
+        $path = 'uploads/temporal/excel/';
+        if(!is_dir($path))
+        {
+            mkdir($path,0777,TRUE);
+        }
+
+		$config['upload_path'] = $path;
+		$config['allowed_types'] = 'xls|xlsx';
+		$config['max_size'] = '0';
+        $config['remove_spaces']= TRUE;
+        $config['max_size'] = '3000';
+        $config['overwrite'] = TRUE;
+        $config['file_name'] = 'liquidacion_'. time() .'_'. rand(1, 100);
+
+		$this->load->library('upload', $config);
+
+		if ( ! $this->upload->do_upload('archivo') ){
+            $this->data['errormessage'] = 'Ocurrio un problema al cargar el archivo.';
+            return;
+		}
+
+        $this->load->library('excel');
+
+        $data = array('upload_data' => $this->upload->data());
+        $inputFileName = $path . $data['upload_data']['file_name'];
+        $datosCargue = [];
+
+        try {
+            $inputFileType = PHPExcel_IOFactory::identify($inputFileName);
+            $objReader = PHPExcel_IOFactory::createReader($inputFileType);
+            $objPHPExcel = $objReader->load($inputFileName);
+            $datosExcel = $objPHPExcel->getActiveSheet()->toArray(null, true, true);
+
+            # Se elimina la primera fila del encabezado
+            unset($datosExcel[0]);
+
+            $errores = [];
+
+            foreach($datosExcel AS $linea => $datos)
+            {
+                $contrato = $this->codegen_model->get(
+                    'con_contratos',
+                    'cntr_id AS id',
+                    'cntr_numero = "'. $datos[0] .'"
+                        AND cntr_vigencia = "'. $datos[1] .'"',
+                    1,NULL,true
+                );
+
+                if(empty($contrato) == false)
+                {
+                    $valor = str_replace(',', '.', str_replace('.','', $datos[2]));
+
+                    $datosCargue[] = [
+                        'id'        => $contrato->id,
+                        'numero'    => $datos[0],
+                        'vigencia'  => $datos[1],
+                        'facturas'  => $this->obtenerInfoFacturas($contrato->id, $valor),
+                    ];
+                }
+                else
+                {
+                    $errores[] = '<b>Fila '. ($linea+1) .'</b> El contrato no se encuentra';
+                }
+            }
+
+            if(count($errores) > 0) {
+                # Elimina el archivo
+                unlink($inputFileName);
+
+                $this->data['errormessage'] = implode('<br>', $errores);
+            } else {
+                $this->data['datosCargue'] = $datosCargue;
+                $this->data['rutaArchivo'] = $inputFileName;
+            }
+        } catch (Exception $e) {
+            $this->data['errormessage'] = 'Ocurrio un problema al proecesar el archivo.';
+        }
+    }
+
+    /**
+     * Procesa la subida del cargue de contratos
+     * 
+     * @return null
+     */
+    public function cargarLiquidacionesEstampillas()
+    {
+        $inputFileName = $this->input->post('rutaArchivo');
+
+        if( ! preg_match('/^uploads\/temporal\/excel\/liquidacion_.*$/', $inputFileName)) {
+            $this->session->set_flashdata('errormessage', 'La ruta del archivo no es permitida');
+            redirect(base_url().'index.php/liquidaciones/importarLiquidaciones');
+        }
+
+        $this->load->library('excel');
+
+        $registrosExitosos = 0;
+
+        try {
+            # Para que se puedan revertir o aprobar todas las operaciones de la bd
+            $this->db->trans_begin();
+
+            $inputFileType = PHPExcel_IOFactory::identify($inputFileName);
+            $objReader = PHPExcel_IOFactory::createReader($inputFileType);
+            $objPHPExcel = $objReader->load($inputFileName);
+            $datosExcel = $objPHPExcel->getActiveSheet()->toArray(null, true, true);
+
+            # Elimina el archivo
+            unlink($inputFileName); 
+
+            # Se elimina la primera fila del encabezado
+            unset($datosExcel[0]);
+
+            $errores = [];
+
+            foreach($datosExcel AS $linea => $datos)
+            {
+                $contrato = $this->codegen_model->get(
+                    'con_contratos contrato',
+                    'contrato.cntr_id AS id, liquidacion.liqu_id AS id_liquidacion',
+                    'contrato.cntr_numero = "'. $datos[0] .'"
+                        AND contrato.cntr_vigencia = "'. $datos[1] .'"',
+                    1,NULL,true, '',
+                    'est_liquidaciones liquidacion',
+                    'liquidacion.liqu_contratoid = contrato.cntr_id'
+                );
+
+                if(empty($contrato) == false)
+                {
+                    $cuota_activa = $this->liquidaciones_model->cuotaLiquidacionActiva('id, valor, tipo', $contrato->id_liquidacion);
+                    $id_cuota = null;
+
+                    if($cuota_activa) {
+                        $es_adicion = $datos[3] == '1' ? Equivalencias::cuotaAdicion() : Equivalencias::cuotaNormal();
+
+                        if($datos[2] == $cuota_activa->valor && $es_adicion == $cuota_activa->tipo) {
+                            $id_cuota = $cuota_activa->id;
+                        } else {
+                            $errores[] = '<b>Fila '. ($linea+1) .'</b> <p>Ya se encuentra una cuota activa para ese contrato que no coincide con los valores suministrados.</p>';
+                        }
+                    } else {
+                        # Definir los datos para la validacion y registro
+                        $_POST = [
+                            'id_contrato'   => $contrato->id,
+                            'valor'         => $datos[2],
+                            'es_adicion'    => $datos[3],
+                        ];
+
+                        $respuestaCuota = $this->procesarRegistroCuota();
+
+                        if($respuestaCuota['exito'])
+                        {
+                            $id_cuota = $respuestaCuota['id'];
+                        } else {
+                            $errores[] = '<b>Fila '. ($linea+1) .'</b> ' . $respuestaCuota['error'];
+                        }
+                    }
+
+                    if($id_cuota !== null)
+                    {
+                        $_POST = [
+                            'id_contrato'   => $contrato->id,
+                            'id_cuota'      => $id_cuota,
+                            'fecha'         => $datos[4],
+                            'observaciones' => '',
+                        ];
+
+                        $respuestaPago = $this->procesarPagarEstampilla();
+
+                        if($respuestaPago['exito'] == true) {
+                            $registrosExitosos++;
+                        } else {
+                            $errores[] = '<b>Fila '. ($linea+1) .'</b> ' . $respuestaPago['error'];
+                        }
+                    }
+                }
+                else {
+                    $errores[] = '<b>Fila '. ($linea+1) .'</b> <p>El contrato no se encuentra</p>';
+                }
+            }
+
+            if(count($errores) == 0) {
+                $this->db->trans_commit();
+                $this->session->set_flashdata('successmessage', "Se han registrado correctamente $registrosExitosos liquidacion(es)");
+            } else {
+                $this->db->trans_rollback();
+                $this->session->set_flashdata('errormessage', implode('<br>', $errores));
+            }
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            $this->session->set_flashdata('errormessage', 'Ocurrio un problema al proecesar el archivo.');
+        }
+
+		redirect(base_url().'index.php/liquidaciones/importarLiquidaciones');
     }
 }
