@@ -3669,53 +3669,16 @@ public function verificarEstadoDisponibilidadEstampillas($objRango)
     return $respuestaProceso;
 }
 
-/*
-* Funcion de apoyo que realiza la validacion para inclusion
-* o exclusion de una estampilla según casos especificos
-*/
+/**
+ * Funcion de apoyo que realiza la validacion para inclusion
+ * o exclusion de una estampilla según casos especificos
+ * Se deja el retorno quemado por si piden algun cambio en el futuro
+ * 
+ * @return bool true
+ */
 public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_validar = '', $contrato_validar = '')
 {
-    /*
-    * Si no se suministró fecha para validar se establece la fecha actual
-    */
-    if($fecha_validar == '')
-    {
-        $fecha_validar = date('Y-m-d');
-    }
-
-    $bandRegistrarFactura = true;
-
-    /*
-    | PRO ELECTRIFICACION
-    | Se valida si la estampilla a almacenar es pro electrificacion y la fecha de liquidacion
-    | (fecha actual) es mayor al 21 de mayo de 2017, no se incluya la estampilla 
-    | en las liquidaciones según ordenanza 026 de 20017
-    | [SE REACTIVA EL COBRO DE LA ESTAMPILLA A PARTIR DEL 9 DE ENERO DE 2018]
-    */
-    // if($idTipoEstampilla == 7)
-    // {
-    //     if(strtotime('2017-05-21') < strtotime($fecha_validar) && strtotime('2018-01-01') > strtotime($fecha_validar))
-    //     {
-    //         $bandRegistrarFactura = false;
-    //     }
-    // }
-
-    // /*
-    // | PRO CULTURA
-    // | Se valida si la estampilla a almacenar es pro cultura, el tipo de contrato es OBRA
-    // | y la fecha del contrato es anterior al 2018, no se incluya la estampilla
-    // | en las liquidaciones según ordenanza DFRI-163-5709 de 2018
-    // */
-    // $idsContratoObra = array(4);
-    // if($idTipoEstampilla == 9 && in_array($contrato_validar, $idsContratoObra))
-    // {
-    //     if(strtotime('2018-01-01') > strtotime($fecha_validar))
-    //     {
-    //         $bandRegistrarFactura = false;
-    //     }
-    // }
-
-    return $bandRegistrarFactura;
+    return true;
 }
 
 	public function pagarEstampilla()
@@ -4131,48 +4094,30 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
         $respuesta['result'] = $this->liquidaciones_model->get($idcontrato);
         $contrato = $respuesta['result'];
 
-        $estampillas = $this->liquidaciones_model->getestampillas($contrato->cntr_tipocontratoid);  
+        $estampillas = $this->codegen_model->getSelect(
+            'estampillas_contratos ec',
+            'e.estm_id, e.estm_nombre, e.estm_cuenta,
+                b.banc_nombre,ec.porcentaje AS esti_porcentaje, e.estm_rutaimagen',
+            'WHERE ec.id_contrato = '.$idcontrato,
+            'INNER JOIN est_estampillas e ON e.estm_id = ec.id_estampilla
+                LEFT JOIN par_bancos b ON b.banc_id = e.estm_bancoid',
+            '', ''
+        );
         $respuesta['estampillas'] = [];
 
-        /*
-        * Valida si el régimen del contratista es otros para calcular el valor
-        * restando el valor del IVA suministrado en la creación del contrato
-        */
-        if($contrato->regi_id == 6 || $contrato->regi_id == 8)
-        {
-            $valorsiniva = (float)$contrato->cntr_valor - (float)$contrato->cntr_iva_otros;
-        }else
-            {
-                //valida el valor del porcentaje según el regimen
-                //del contratista para realizar un calcúlo acertado
-                if($contrato->regi_iva > 0)
-                {
-                    $valorsiniva = (float)$contrato->cntr_valor/(((float)$contrato->regi_iva/100)+1);
-    
-                    //Formatea el resultado del calculo de valor sin iva
-                    //para que redondee por decimales y unidades de mil
-                    //ej valorsiniva=204519396.55172 ->decimales -> 204519397 ->centenas ->204519400
-                    $sinIvaRedondeoDecimales = round($valorsiniva);
-                    $sinIvaRedondeoCentenas = round($sinIvaRedondeoDecimales, -2);  
-                    unset($valorsiniva);
-                    $valorsiniva = $sinIvaRedondeoCentenas;
-                }else
-                    {
-                        $valorsiniva = (float)$contrato->cntr_valor;
-                    }
-            }
-        $respuesta['valor_verdadero'] = $valorsiniva;
-        
+        $valorsiniva = (float)$contrato->cntr_valor;
+
         if($valor != null) {
             $valorsiniva = (float)$valor;
         }
 
-        //arreglo que guarda los distintos valores
-        //de liquidacion de las estampillas
-        $totalestampilla= array();
+        $respuesta['valor_verdadero'] = $valorsiniva;
 
-        $valortotal=0;
-        $parametros=$this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo','para_id = 1',1,NULL,true);
+        # Arreglo que guarda los distintos valores de liquidacion de las estampillas
+        $totalestampilla = [];
+
+        $valortotal = 0;
+        $parametros = $this->codegen_model->get('adm_parametros','para_redondeo,para_salariominimo','para_id = 1',1,NULL,true);
 
         foreach ($estampillas as $key => $value) 
         {
@@ -4343,7 +4288,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 
                 if($valor > 0)
                 {
-                    $data = array(
+                    $data = [
                         'fact_nombre'			=> $factura->estm_nombre,
                         'fact_porcentaje'		=> $factura->esti_porcentaje,
                         'fact_valor'			=> $valor,
@@ -4353,7 +4298,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                         'fact_estampillaid'		=> $factura->estm_id,
                         'fact_rutaimagen'		=> $factura->estm_rutaimagen,
                         'id_cuota_liquidacion'  => $guardo->idInsercion,
-                    );
+                    ];
 
                     /*
                     * Se valida si la estampilla a almacenar es pro electrificacion

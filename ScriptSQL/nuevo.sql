@@ -229,3 +229,11 @@ DEFAULT CHARSET=utf8
 COLLATE=utf8_general_ci;
 
 ALTER TABLE estampillas_pro_boyaca.notificaciones ADD fecha_creacion DATETIME NOT NULL;
+
+CREATE TABLE `estampillas_contratos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_contrato` int(11) NOT NULL,
+  `id_estampilla` varchar(100) DEFAULT NULL,
+  `porcentaje` float NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

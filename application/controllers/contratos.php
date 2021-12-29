@@ -201,6 +201,29 @@ class Contratos extends MY_Controller {
                 $msjError .= '<br>No existe el contratante seleccionado!';
             }
 
+            $estampillasAsociadas = $this->input->post('estampillas_asociadas');
+
+            if(is_array($estampillasAsociadas) && count($estampillasAsociadas) > 0)
+            {
+                $totalEstampillas = $this->estampillasAsociadas($this->input->post('tipocontratoid'), false);
+                $totalEstampillas = $totalEstampillas['datos'] ? HelperGeneral::lists($totalEstampillas['datos'], 'porcentaje', 'id') : [];
+
+                $estampillasFormateadas = [];
+
+                foreach($estampillasAsociadas AS $estampilla) {
+                    if(array_key_exists($estampilla, $totalEstampillas)) {
+                        $estampillasFormateadas[$estampilla] = $totalEstampillas[$estampilla];
+                    } else {
+                        $bandContinuar = false;
+                        $msjError .= '<br>Alguna de las estampillas no son validas!';
+                        break;
+                    }
+                }
+            } else {
+                $bandContinuar = false;
+                $msjError .= '<br>Ninguna estampilla selecccionada!';
+            }
+
             if($bandContinuar)
             {
                 $data = [
@@ -246,6 +269,14 @@ class Contratos extends MY_Controller {
                     $respuestaProceso = $this->codegen_model->add('con_contratos',$data);
                     if ($respuestaProceso->bandRegistroExitoso) 
                     {
+                        foreach($estampillasFormateadas AS $id => $porcentaje) {
+                            $this->codegen_model->add('estampillas_contratos', [
+                                'id_contrato'   => $respuestaProceso->idInsercion,
+                                'id_estampilla' => $id,
+                                'porcentaje'    => $porcentaje,
+                            ]);
+                        }
+
                         $respuesta['exito'] = true;
                         $respuesta['id'] = $respuestaProceso->idInsercion;
                     }else
@@ -1002,5 +1033,44 @@ class Contratos extends MY_Controller {
 
         // $this->template->load($this->config->item('excel_template'),'contratos/plantilla_excel.php', $this->data);
         $this->load->view('contratos/plantilla_excel.php', $this->data);
+    }
+
+    /**
+     * Muestra las estampillas segun el tipo de contrato
+     * 
+     * @return null
+     */
+    public function estampillasAsociadas($tipoContrato = '', $imprimir = true)
+    {
+        $respuesta = [
+            'exito' => false,
+            'mensaje' => '',
+            'datos' => [],
+        ];
+
+        $tipoContrato = $tipoContrato ? $tipoContrato : $this->uri->segment(3);
+
+        if (!$tipoContrato) {
+            $respuesta['mensaje'] = 'El tipo de contrato es invalido';
+        }
+        else
+        {
+            $respuesta['datos'] = $this->codegen_model->getSelect(
+                'est_estampillas_tiposcontratos AS tipo',
+                'tipo.esti_estampillaid AS id, estampilla.estm_nombre AS nombre, tipo.esti_porcentaje AS porcentaje',
+                'WHERE tipo.esti_tipocontratoid = '.$tipoContrato,
+                'INNER JOIN est_estampillas estampilla ON estampilla.estm_id = tipo.esti_estampillaid',
+                '',
+                'ORDER BY estampilla.estm_nombre'
+            );
+            $respuesta['exito'] = true;
+        }
+
+        if($imprimir) {
+            header('Content-type: application/json; charset=utf-8');
+            echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
+        } else {
+            return $respuesta;
+        }
     }
 }

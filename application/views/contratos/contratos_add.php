@@ -86,6 +86,20 @@
                                     <?php echo form_error('estadoid','<span class="text-danger">','</span>'); ?>
                                 </div>
                             </div>
+                            <div class="col-md-6 column">
+                                <div class="form-group">
+                                    <label for="estampillas_asociadas">Estampillas asociadas</label>
+                                    <select name="estampillas_asociadas[]"
+                                        class="form-control"
+                                        id="estampillas_asociadas"
+                                        multiple
+                                        data-placeholder="Seleccione al menos uno"
+                                    >
+                                    </select>
+
+                                    <?php echo form_error('estampillas_asociadas','<span class="text-danger">','</span>'); ?>
+                                </div>
+                            </div>
 
                             <div class="col-md-6 column">
                                 <div class="form-group">
@@ -224,7 +238,8 @@
       '#municipioid'  : {disable_search_threshold: 10},
       '#tipocontratoid'  : {disable_search_threshold: 10},
       '#cntr_municipio_origen'  : {disable_search_threshold: 10},
-      '#clasificacion_contrato'  : {disable_search_threshold: 10}
+      '#clasificacion_contrato'  : {disable_search_threshold: 10},
+      '#estampillas_asociadas'  : {disable_search_threshold: 10},
     }
     for (var selector in config) {
         $(selector).chosen(config[selector]);
@@ -244,31 +259,61 @@
 
             $('#clasificacion_contrato').change(handlerClasificacionContrato);
             $('#clasificacion_contrato').change();
+
+            $('#tipocontratoid').change(handlerTipoContrato);
+            $('#tipocontratoid').change();
       });
 
-        function handlerClasificacionContrato()
+    function handlerClasificacionContrato()
+    {
+        var valor = $(this).val();
+
+        if(valor != '0' && valor != '<?= $contrato_normal ?>')
         {
-            var valor = $(this).val();
-
-            if(valor != '0' && valor != '<?= $contrato_normal ?>')
-            {
-                $('#contrato_relacionado').closest('.column').show();
-            }else{
-                $('#contrato_relacionado').closest('.column').hide();
-            }
+            $('#contrato_relacionado').closest('.column').show();
+        }else{
+            $('#contrato_relacionado').closest('.column').hide();
         }
+    }
 
-        $('#btn-historial').click(function(){
-            var contratista = $('#contratistaid').val();
+    $('#btn-historial').click(function(){
+        var contratista = $('#contratistaid').val();
 
-            if(contratista != 0)
-            {
-                window.open(base_url+'liquidaciones/liquidar?person='+contratista);
-            }
-            else
-            {
-                alert("Seleccione por favor un contratista!!");
-            }
-        });
+        if(contratista != 0)
+        {
+            window.open(base_url+'liquidaciones/liquidar?person='+contratista);
+        }
+        else
+        {
+            alert("Seleccione por favor un contratista!!");
+        }
+    });
 
-  </script>
+    function handlerTipoContrato() {
+        var valor = $(this).val();
+
+        $('#estampillas_asociadas').empty().trigger('chosen:updated');
+
+        if(valor && valor != '0') {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: base_url + 'index.php/contratos/estampillasAsociadas/' + valor,
+                success: function (respuesta) {
+                    if(respuesta.exito) {
+                        var options = '';
+    
+                        respuesta.datos.forEach(function(estampilla) {
+                            options += `<option value="${estampilla.id}" selected>${estampilla.nombre}</option>`
+                        });
+    
+                        $('#estampillas_asociadas').html(options).trigger('chosen:updated');
+                    } else {
+                        alert('Ha ocurrido un error\n' + respuesta.mensaje);
+                    }
+                }
+            });
+        }
+    }
+
+</script>
