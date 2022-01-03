@@ -116,9 +116,11 @@ class Contratos extends MY_Controller {
      * Procesa el registro del contrato
      * (sin redirecciones o validaciones de usuario)
      * 
+     * @param boolean $aplicaTodasEstampillas Indica si se aplican
+     * todas las estampillas y sus porcentajes segun el tipo de contrato
      * @return array
      */
-    private function registrarContrato()
+    private function registrarContrato($aplicaTodasEstampillas=false)
     {
         $respuesta = [
             'exito' => false,
@@ -203,20 +205,26 @@ class Contratos extends MY_Controller {
 
             $estampillasAsociadas = $this->input->post('estampillas_asociadas');
 
-            if(is_array($estampillasAsociadas) && count($estampillasAsociadas) > 0)
+            if($aplicaTodasEstampillas || (is_array($estampillasAsociadas) && count($estampillasAsociadas) > 0))
             {
                 $totalEstampillas = $this->estampillasAsociadas($this->input->post('tipocontratoid'), false);
                 $totalEstampillas = $totalEstampillas['datos'] ? HelperGeneral::lists($totalEstampillas['datos'], 'porcentaje', 'id') : [];
 
-                $estampillasFormateadas = [];
-
-                foreach($estampillasAsociadas AS $estampilla) {
-                    if(array_key_exists($estampilla, $totalEstampillas)) {
-                        $estampillasFormateadas[$estampilla] = $totalEstampillas[$estampilla];
-                    } else {
-                        $bandContinuar = false;
-                        $msjError .= '<br>Alguna de las estampillas no son validas!';
-                        break;
+                if($aplicaTodasEstampillas) {
+                    $estampillasFormateadas = $totalEstampillas;
+                }
+                else
+                {
+                    $estampillasFormateadas = [];
+    
+                    foreach($estampillasAsociadas AS $estampilla) {
+                        if(array_key_exists($estampilla, $totalEstampillas)) {
+                            $estampillasFormateadas[$estampilla] = $totalEstampillas[$estampilla];
+                        } else {
+                            $bandContinuar = false;
+                            $msjError .= '<br>Alguna de las estampillas no son validas!';
+                            break;
+                        }
                     }
                 }
             } else {
@@ -975,7 +983,7 @@ class Contratos extends MY_Controller {
                         'contratanteid'             => $usuario->id_empresa,
                     ];
 
-                    $respuestaRegistro = $this->registrarContrato();
+                    $respuestaRegistro = $this->registrarContrato(true);
 
                     if($respuestaRegistro['exito'] == true)
                     {
