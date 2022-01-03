@@ -54,7 +54,7 @@ $total = 0;
                                         <button class="btn btn-primary" type="submit" style="margin-bottom: 5px;">Confirmar</button>
                                         <br>
                                         <label style="margin-bottom: 0;">
-                                            <input type="checkbox" name="es_adicion" value="<?= Equivalencias::cuotaAdicion() ?>">
+                                            <input type="checkbox" name="es_adicion" value="1">
                                             Adición
                                         </label>
                                         <?
@@ -108,22 +108,19 @@ $total = 0;
                             </thead>
                             <tbody>
                                 <?php
-                                        $id_factura_muestra = 0;
-
-                                        foreach($facturas as $factura)
-                                        {
-                                            ?>
-                                            <tr>
-                                                <td colspan="1">
-                                                    <?= $factura->fact_nombre; ?>
-                                                </td>
-                                                <td colspan="1" class="text-center"><?= number_format($factura->porcentaje, 2, ',', '.') ?>%</td>
-                                                <td colspan="1" class="text-center"><?= '$'.number_format($factura->valor_total, 2, ',', '.') ?></td>
-                                            </tr>
-                                            <?php
-                                                $total += $factura->valor_total;
-                                                $id_factura_muestra = $factura->fact_id;
-                                        }
+                                    foreach($facturas as $factura)
+                                    {
+                                        ?>
+                                        <tr>
+                                            <td colspan="1">
+                                                <?= $factura->fact_nombre; ?>
+                                            </td>
+                                            <td colspan="1" class="text-center"><?= number_format($factura->porcentaje, 2, ',', '.') ?>%</td>
+                                            <td colspan="1" class="text-center"><?= '$'.number_format($factura->valor_total, 2, ',', '.') ?></td>
+                                        </tr>
+                                        <?php
+                                            $total += $factura->valor_total;
+                                    }
                                 ?>
                                 <tr>
                                     <td colspan="1" class="text-right"><strong>Total</strong></td>
@@ -147,7 +144,7 @@ $total = 0;
         <div class="row">
             <hr>
             <?= form_open_multipart('liquidaciones/pagarEstampilla','role="form"') ?>
-                <input type="hidden" name="id_factura" id="id_factura_cont" value="<?= $id_factura_muestra ?>">
+                <input type="hidden" name="id_cuota" value="<?= $cuota->id ?>">
                 <input type="hidden" name="id_contrato" value="<?= $id_contrato ?>">
                 <input type="hidden" name="todos" class="todos_cont" value="0">
 
@@ -276,7 +273,6 @@ $total = 0;
         $('#form_descuento_estampilla').hide();
         $('#valor_cont').closest('.form-group').show();
 
-        $('#id_factura_cont').val($(this).attr('id-factura'));
         $('#nombre_estampilla').val($(this).attr('fact-nombre'));
 
         // El blur es para activar la libreria autoNumeric

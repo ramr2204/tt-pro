@@ -58,172 +58,249 @@ class Contratos extends MY_Controller {
       }
 
   }
-	
- function add()
-  {
-      if ($this->ion_auth->logged_in()) {
 
-          if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/add')) {
+    /**
+     * Procesa el renderizado de la vista de creacion
+     * y el registro del mismo
+     * 
+     * @return null
+     */
+    public function add()
+    {
+        if ($this->ion_auth->logged_in())
+        {
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/add'))
+            {
+                $this->data['successmessage'] = $this->session->flashdata('message');
 
-            $this->data['successmessage'] = $this->session->flashdata('message');
+                $respuestaRegistro = $this->registrarContrato();
+
+                if($respuestaRegistro['exito'])
+                {
+                    $this->session->set_flashdata('message', 'El contrato se ha creado con éxito');
+                    redirect(base_url().'index.php/contratos/add');
+                } else {
+                    $this->data['errormessage'] = $respuestaRegistro['error'];
+                }
+
+                $this->data['style_sheets'] = [
+                    'css/chosen.css' => 'screen',
+                    'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen'
+                ];
+                $this->data['javascripts'] = [
+                    'js/chosen.jquery.min.js',
+                    'js/plugins/bootstrap/moment.js',
+                    'js/plugins/bootstrap/bootstrap-datetimepicker.js',
+                    'js/autoNumeric.js'
+                ];
+                $this->template->set('title', 'Ingreso manual de contrato');
+
+                $this->data['tiposcontratos']           = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
+                $this->data['contratistas']             = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
+                $this->data['contratantes']             = $this->codegen_model->getSelect('con_contratantes', 'id,nombre,nit');
+                $this->data['municipios']               = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 6');
+                $this->data['clasificacion_contrato']   = Equivalencias::clasificacionContratos();
+                $this->data['contrato_normal']          = Equivalencias::contratoNormal();
+
+                $this->template->load($this->config->item('admin_template'),'contratos/contratos_add', $this->data);
+            } else {
+                redirect(base_url().'index.php/error_404');
+            }
+
+        } else {
+            redirect(base_url().'index.php/users/login');
+        }
+    }
+
+    /**
+     * Procesa el registro del contrato
+     * (sin redirecciones o validaciones de usuario)
+     * 
+     * @param boolean $aplicaTodasEstampillas Indica si se aplican
+     * todas las estampillas y sus porcentajes segun el tipo de contrato
+     * @return array
+     */
+    private function registrarContrato($aplicaTodasEstampillas=false)
+    {
+        $respuesta = [
+            'exito' => false,
+            'error' => '',
+            'id' => null
+        ];
+
+        /*
+        * Extrae el usuario autenticado para establecer que usuario
+        * creó el contrato
+        */
+        $usuario = $this->ion_auth->user()->row();
+        
+        /*
+        * Se da formato al valor del contrato para que guarde los valores decimales
+        */
+        $valor = str_replace(',', '.', str_replace('.','',$this->input->post('valor')));
+
+        $vigencia = explode("-", $this->input->post('fecha'));
+
+        $this->form_validation->set_rules('cntr_municipio_origen', 'Municipio Origen','required|trim|xss_clean|numeric|is_exists[par_municipios.muni_id]');
+        $this->form_validation->set_rules('contratistaid', 'contratista','required|trim|xss_clean|numeric|is_exists[con_contratistas.cont_id]');
+        $this->form_validation->set_rules('contratanteid', 'contratante', 'required|trim|xss_clean|numeric|is_exists[con_contratantes.id]');
+        $this->form_validation->set_rules('tipocontratoid', 'Tipo de contrato','required|trim|xss_clean|numeric|is_exists[con_tiposcontratos.tico_id]');
+        $this->form_validation->set_rules('fecha', 'Fecha', [
+            'required',
+            'trim',
+            'xss_clean',
+            'regex_match[/^(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/]',
+        ]);
+        $this->form_validation->set_rules('objeto', 'objeto',  'required|trim|xss_clean');  
+        $this->form_validation->set_rules('numero', 'Número','required|trim|xss_clean|numeric|greater_than[0]');
+        $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');
+        $this->form_validation->set_rules('clasificacion_contrato', 'Clasificación del contrato','required|trim|xss_clean|numeric|greater_than[0]');
+
+        $aplica_numero_relacionado = $this->input->post('clasificacion_contrato') != Equivalencias::contratoNormal();
+
+        if($aplica_numero_relacionado){
+            $this->form_validation->set_rules('contrato_relacionado', 'Número de contrato relacionado','required|trim|xss_clean|is_exists[con_contratos.cntr_numero]');
+        }
+
+        if ($this->form_validation->run() == false) {
+            $respuesta['error'] = $this->form_validation->error_string();
+        }
+        else
+        {
+            if($this->input->post('clasificacion_contrato') == Equivalencias::contratoModificacion())
+            {
+                $contrato_relacionado = $this->codegen_model->get(
+                    'con_contratos',
+                    'cntr_id',
+                    'cntr_numero = '. $this->input->post('contrato_relacionado') .' AND cntr_vigencia = "'. $vigencia[0] .'"',
+                    1,NULL,true
+                );
+
+                $this->codegen_model->edit(
+                    'con_contratos',
+                    ['cntr_estadolocalid' => Equivalencias::contratoModificado()],
+                    'cntr_id',$contrato_relacionado->cntr_id
+                );
+            }
 
             /*
-            * Extrae el usuario autenticado para establecer que usuario
-            * creó el contrato
+            * Valida que el contratista exista en la base de datos
             */
-            $usuario = $this->ion_auth->user()->row();
-            
-            /*
-            * Se da formato al valor del contrato para que guarde los valores decimales
-            */
-            $valor = str_replace(',', '.', str_replace('.','',$this->input->post('valor')));
+            $objContratista = $this->codegen_model->get('con_contratistas','cont_regimenid','cont_id = '.$this->input->post('contratistaid'),1,NULL,true);
+            $objContratante = $this->codegen_model->get('con_contratantes', 'regimenid', 'id = ' . $this->input->post('contratanteid'), 1, null, true);
 
-            $vigencia = explode("-", $this->input->post('fecha'));
-              
-              $this->form_validation->set_rules('cntr_municipio_origen', 'Municipio Origen','required|trim|xss_clean|numeric|greater_than[0]');
-              $this->form_validation->set_rules('contratistaid', 'contratista','required|trim|xss_clean|numeric|greater_than[0]');
-              $this->form_validation->set_rules('contratanteid', 'contratante', 'required|trim|xss_clean|numeric|greater_than[0]');
-              $this->form_validation->set_rules('tipocontratoid', 'Tipo de contrato','required|trim|xss_clean|numeric|greater_than[0]');
-              $this->form_validation->set_rules('fecha', 'Fecha',  'required|trim|xss_clean');  
-              $this->form_validation->set_rules('objeto', 'objeto',  'required|trim|xss_clean');  
-              $this->form_validation->set_rules('numero', 'Número','required|trim|xss_clean|numeric|greater_than[0]');
-              $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');
-              $this->form_validation->set_rules('clasificacion_contrato', 'Clasificación del contrato','required|trim|xss_clean|numeric|greater_than[0]');
+            $msjError = '';
+            $bandContinuar = true;
+            if(count($objContratista) <= 0)
+            {
+                $bandContinuar = false;
+                $msjError .= '<br>No existe el contratista seleccionado!';
+            }
 
-				$aplica_numero_relacionado = $this->input->post('clasificacion_contrato') != Equivalencias::contratoNormal();
+            if(count($objContratante) <= 0)
+            {
+                $bandContinuar = false;
+                $msjError .= '<br>No existe el contratante seleccionado!';
+            }
 
-              if($aplica_numero_relacionado){
-                $this->form_validation->set_rules('contrato_relacionado', 'Número de contrato relacionado','required|trim|xss_clean|is_exists[con_contratos.cntr_numero]');
-              }
+            $estampillasAsociadas = $this->input->post('estampillas_asociadas');
 
-              if ($this->form_validation->run() == false) {
+            if($aplicaTodasEstampillas || (is_array($estampillasAsociadas) && count($estampillasAsociadas) > 0))
+            {
+                $totalEstampillas = $this->estampillasAsociadas($this->input->post('tipocontratoid'), false);
+                $totalEstampillas = $totalEstampillas['datos'] ? HelperGeneral::lists($totalEstampillas['datos'], 'porcentaje', 'id') : [];
 
-                  $this->data['errormessage'] = (validation_errors() ? validation_errors(): false);
-              } else {
-
-                    if($this->input->post('clasificacion_contrato') == Equivalencias::contratoModificacion())
-                    {
-                        $contrato_relacionado = $this->codegen_model->get(
-                            'con_contratos',
-                            'cntr_id',
-                            'cntr_numero = '. $this->input->post('contrato_relacionado') .' AND cntr_vigencia = "'. $vigencia[0] .'"',
-                            1,NULL,true
-                        );
+                if($aplicaTodasEstampillas) {
+                    $estampillasFormateadas = $totalEstampillas;
+                }
+                else
+                {
+                    $estampillasFormateadas = [];
     
-                        $this->codegen_model->edit(
-                            'con_contratos',
-                            ['cntr_estadolocalid' => Equivalencias::contratoModificado()],
-                            'cntr_id',$contrato_relacionado->cntr_id
-                        );
+                    foreach($estampillasAsociadas AS $estampilla) {
+                        if(array_key_exists($estampilla, $totalEstampillas)) {
+                            $estampillasFormateadas[$estampilla] = $totalEstampillas[$estampilla];
+                        } else {
+                            $bandContinuar = false;
+                            $msjError .= '<br>Alguna de las estampillas no son validas!';
+                            break;
+                        }
                     }
+                }
+            } else {
+                $bandContinuar = false;
+                $msjError .= '<br>Ninguna estampilla selecccionada!';
+            }
 
-                    
+            if($bandContinuar)
+            {
+                $data = [
+                    'cntr_contratistaid'	=> $this->input->post('contratistaid'),
+                    'cntr_contratanteid'	=> $this->input->post('contratanteid'),
+                    'cntr_tipocontratoid'	=> $this->input->post('tipocontratoid'),
+                    'cntr_fecha_firma'		=> $this->input->post('fecha'),
+                    'cntr_numero'			=> $this->input->post('numero'),
+                    'cntr_objeto'			=> $this->input->post('objeto'),
+                    'cntr_valor'			=> $valor,
+                    'cntr_vigencia'			=> $vigencia[0],
+                    'fecha_insercion'		=> date('Y-m-d H:i:s'),
+                    'cntr_usuariocrea'		=> $usuario->id,
+                    'cntr_municipio_origen'	=> $this->input->post('cntr_municipio_origen'),
+                    'clasificacion'			=> $this->input->post('clasificacion_contrato'),
+                    'numero_relacionado'	=> $aplica_numero_relacionado ? $this->input->post('contrato_relacionado') : null
+                ];
+
+                /*
+                * Valida si el tipo de régimen es otros
+                */
+                $registrarContrato = true;
+                if($objContratista->cont_regimenid == 6 || $objContratista->cont_regimenid == 8)
+                {
                     /*
-                    * Valida que el contratista exista en la base de datos
+                    * Valida que se haya recibido valor de IVA otros
                     */
-                    $objContratista = $this->codegen_model->get('con_contratistas','cont_regimenid','cont_id = '.$this->input->post('contratistaid'),1,NULL,true);
-                    $objContratante = $this->codegen_model->get('con_contratantes', 'regimenid', 'id = ' . $this->input->post('contratanteid'), 1, null, true);
-    
-                    $msjError = '';
-                    $bandContinuar = true;
-                    if(count($objContratista) <= 0)
+                    if($this->input->post('valor_iva_otros') == '')
                     {
-                        $bandContinuar = false;
-                        $msjError .= '<br>No existe el contratista seleccionado!';
-                    }
-
-                    if(count($objContratante) <= 0)
-                    {
-                        $bandContinuar = false;
-                        $msjError .= '<br>No existe el contratante seleccionado!';
-                    }
-
-                    if($bandContinuar)
-                    {
-                        $data = [
-                            'cntr_contratistaid'	=> $this->input->post('contratistaid'),
-                            'cntr_contratanteid'	=> $this->input->post('contratanteid'),
-                            'cntr_tipocontratoid'	=> $this->input->post('tipocontratoid'),
-                            'cntr_fecha_firma'		=> $this->input->post('fecha'),
-                            'cntr_numero'			=> $this->input->post('numero'),
-                            'cntr_objeto'			=> $this->input->post('objeto'),
-                            'cntr_valor'			=> $valor,
-                            'cntr_vigencia'			=> $vigencia[0],
-                            'fecha_insercion'		=> date('Y-m-d H:i:s'),
-                            'cntr_usuariocrea'		=> $usuario->id,
-                            'cntr_municipio_origen'	=> $this->input->post('cntr_municipio_origen'),
-                            'clasificacion'			=> $this->input->post('clasificacion_contrato'),
-                            'numero_relacionado'	=> $aplica_numero_relacionado ? $this->input->post('contrato_relacionado') : null
-						];
-
-                        /*
-                        * Valida si el tipo de régimen es otros
-                        */
-                        $registrarContrato = true;
-                        if($objContratista->cont_regimenid == 6 || $objContratista->cont_regimenid == 8)
-                        {
-                            /*
-                            * Valida que se haya recibido valor de IVA otros
-                            */
-                            if($this->input->post('valor_iva_otros') == '')
-                            {
-                                $this->data['errormessage'] = 'Debe suministrar el valor del IVA!';
-                                $registrarContrato = false;
-                            }else
-                                {
-                                    $data['cntr_iva_otros'] = str_replace('.','',$this->input->post('valor_iva_otros'));
-                                }
-                        }
-
-                        /*
-                        * Valida si se debe registrar el contrato
-                        */
-                        if($registrarContrato)
-                        {
-                            $respuestaProceso = $this->codegen_model->add('con_contratos',$data);
-                            if ($respuestaProceso->bandRegistroExitoso) 
-                            {
-                                $this->session->set_flashdata('message', 'El contrato se ha creado con éxito');
-                                redirect(base_url().'index.php/contratos/add');
-                            }else
-                                {
-                                    $this->data['errormessage'] = 'No se pudo registrar el contrato';
-                                }
-                        }
+                        $respuesta['error'] = 'Debe suministrar el valor del IVA!';
+                        $registrarContrato = false;
                     }else
                         {
-                            $this->data['errormessage'] = $msjError;
+                            $data['cntr_iva_otros'] = str_replace('.','',$this->input->post('valor_iva_otros'));
                         }
-              }
+                }
 
-              $this->data['style_sheets']= array(
-                        'css/chosen.css' => 'screen',
-                        'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen'
-                    );
-              $this->data['javascripts']= array(
-                        'js/chosen.jquery.min.js',
-                        'js/plugins/bootstrap/moment.js',
-                        'js/plugins/bootstrap/bootstrap-datetimepicker.js',
-                        'js/autoNumeric.js'
-                    );
-                $this->template->set('title', 'Ingreso manual de contrato');
-                $this->data['tiposcontratos']  = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
-                $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
-                $this->data['contratantes'] = $this->codegen_model->getSelect('con_contratantes', 'id,nombre,nit');
-                $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 6');
-                $this->data['clasificacion_contrato']  = Equivalencias::clasificacionContratos();
-                $this->data['contrato_normal']  = Equivalencias::contratoNormal();
-                $this->template->load($this->config->item('admin_template'),'contratos/contratos_add', $this->data);
-             
-          } else {
-              redirect(base_url().'index.php/error_404');
-          }
+                /*
+                * Valida si se debe registrar el contrato
+                */
+                if($registrarContrato)
+                {
+                    $respuestaProceso = $this->codegen_model->add('con_contratos',$data);
+                    if ($respuestaProceso->bandRegistroExitoso) 
+                    {
+                        foreach($estampillasFormateadas AS $id => $porcentaje) {
+                            $this->codegen_model->add('estampillas_contratos', [
+                                'id_contrato'   => $respuestaProceso->idInsercion,
+                                'id_estampilla' => $id,
+                                'porcentaje'    => $porcentaje,
+                            ]);
+                        }
 
-      } else {
-          redirect(base_url().'index.php/users/login');
-      }
+                        $respuesta['exito'] = true;
+                        $respuesta['id'] = $respuestaProceso->idInsercion;
+                    }else
+                        {
+                            $respuesta['error'] = 'No se pudo registrar el contrato';
+                        }
+                }
+            }else
+                {
+                    $respuesta['error'] = $msjError;
+                }
+        }
 
-  }
+        $this->form_validation->reset_validation();
+        return $respuesta;
+    }
 
 	function edit()
 	{
@@ -736,5 +813,272 @@ class Contratos extends MY_Controller {
             {
                 redirect(base_url().'index.php/users/login');
             }
+    }
+
+    /**
+     * Renderiza la vista para cargar los contratos
+     * 
+     * @return null
+     */
+    public function importarContratosExcel()
+    {
+        if ($this->ion_auth->logged_in())
+        {
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/importarContratosExcel'))
+            {
+                $this->data['successmessage'] = $this->session->flashdata('successmessage');
+                $this->data['errormessage'] = $this->session->flashdata('errormessage');
+                $this->data['infomessage'] = $this->session->flashdata('infomessage');
+
+                $this->template->set('title', 'Importar Contratos');
+
+                $this->data['style_sheets'] = [];
+                $this->data['javascripts'] = [
+                    'js/chosen.jquery.min.js'
+                ];
+
+                $this->template->load($this->config->item('admin_template'),'contratos/importar', $this->data);
+            } else {
+                redirect(base_url().'index.php/error_404');
+            }
+        } else {
+            redirect(base_url().'index.php/users/login');
+        }
+    }
+
+    /**
+     * Procesa la subida del cargue de contratos
+     * 
+     * @return null
+     */
+    public function cargarImportarContratos()
+    {
+        $path = 'uploads/temporal/excel/';
+        if(!is_dir($path))
+        {
+            mkdir($path,0777,TRUE);
+        }
+
+		$config['upload_path'] = $path;
+		$config['allowed_types'] = 'xls|xlsx';
+		$config['max_size'] = '0';
+        $config['remove_spaces']= TRUE;
+        $config['max_size'] = '3000';
+        $config['overwrite'] = TRUE;
+        $config['file_name'] = 'contratos_'. time() .'_'. rand(1, 100);
+
+		$this->load->library('upload', $config);
+
+		if ( ! $this->upload->do_upload('archivo') ){
+            $this->session->set_flashdata('errormessage', 'Ocurrio un problema al cargar el archivo.');
+            redirect(base_url().'index.php/contratos/importarContratosExcel');
+            exit();
+		}
+
+        $this->load->library('excel');
+
+        $registrosExitosos = 0;
+        $data = array('upload_data' => $this->upload->data());
+        $inputFileName = $path . $data['upload_data']['file_name'];
+
+
+        try {
+            # Para que se puedan revertir o aprobar todas las operaciones de la bd
+            $this->db->trans_begin();
+
+            $inputFileType = PHPExcel_IOFactory::identify($inputFileName);
+            $objReader = PHPExcel_IOFactory::createReader($inputFileType);
+            $objPHPExcel = $objReader->load($inputFileName);
+            $datosExcel = $objPHPExcel->getActiveSheet()->toArray(null, true, true);
+
+            # Elimina el archivo
+            unlink($inputFileName); 
+
+            # Se elimina la primera fila del encabezado
+            unset($datosExcel[0]);
+
+            # Se obtiene un regimen de ejemplo
+            $regimen = $this->codegen_model->get(
+                'con_regimenes',
+                'regi_id AS id',
+                '',
+                1,NULL,true
+            );
+
+            $errores = [];
+
+            $this->load->library('../controllers/contratistas');
+
+            $usuario = $this->ion_auth->user()->row();
+
+            foreach($datosExcel AS $linea => $datos)
+            {
+                $municipio = $this->codegen_model->get(
+                    'par_municipios',
+                    'muni_id AS id',
+                    'codigo_dane = "'. $datos[6] .'"',
+                    1,NULL,true
+                );
+
+                $contratista = [
+                    'nit'               => $datos[0],
+                    'tipocontratistaid' => $datos[1],
+                    'nombre'            => $datos[2],
+                    'direccion'         => $datos[3],
+                    'telefono'          => $datos[4],
+                    'email'             => $datos[5],
+                    'municipioid'       => isset($municipio->id) ? $municipio->id : '',
+                    'regimenid'         => $regimen->id,
+                ];
+
+                $verificacion = $this->codegen_model->get(
+                    'con_contratistas',
+                    'cont_id AS id',
+                    'cont_nit = "'. $contratista['nit'] .'"',
+                    1,NULL,true
+                );
+
+                $id_contratista = null;
+
+                if(empty($verificacion) == false) {
+                    $id_contratista = $verificacion->id;
+                }
+                else
+                {
+                    # Definir los datos para la validacion y registro
+                    $_POST = $contratista;
+
+                    $respuestaRegistro = $this->contratistas->registrarContratista();
+
+                    if($respuestaRegistro['exito'])
+                    {
+                        $id_contratista = $respuestaRegistro['id'];
+                    } else {
+                        $errores[] = '<b>Fila '. ($linea+1) .'</b> ' . $respuestaRegistro['error'];
+                    }
+                }
+
+                if($id_contratista)
+                {
+                    $municipio = $this->codegen_model->get(
+                        'par_municipios',
+                        'muni_id AS id',
+                        'muni_departamentoid = 6
+                            AND codigo_dane = "'. $datos[11] .'"',
+                        1,NULL,true
+                    );
+
+                    # Definir los datos para la validacion y registro
+                    $_POST = [
+                        'tipocontratoid'            => $datos[7],
+                        'fecha'                     => $datos[8],
+                        'numero'                    => $datos[9],
+                        'valor'                     => $datos[10],
+                        # Se deja un numero alto para que falle con la regla exists
+                        'cntr_municipio_origen'     => isset($municipio->id) ? $municipio->id : 999999,
+                        'clasificacion_contrato'    => $datos[12],
+                        'objeto'                    => $datos[13],
+                        'contrato_relacionado'      => $datos[14],
+                        'contratistaid'             => $id_contratista,
+                        'contratanteid'             => $usuario->id_empresa,
+                    ];
+
+                    $respuestaRegistro = $this->registrarContrato(true);
+
+                    if($respuestaRegistro['exito'] == true)
+                    {
+                        $registrosExitosos++;
+                    } else {
+                        $errores[] = '<b>Fila '. ($linea+1) .'</b> ' . $respuestaRegistro['error'];
+                    }
+                }
+            }
+
+            if(count($errores) == 0) {
+                $this->db->trans_commit();
+                $this->session->set_flashdata('successmessage', "Se han registrado correctamente $registrosExitosos contrato(s)");
+            } else {
+                $this->db->trans_rollback();
+                $this->session->set_flashdata('errormessage', implode('<br>', $errores));
+            }
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            $this->session->set_flashdata('errormessage', 'Ocurrio un problema al proecesar el archivo.');
+        }
+
+		redirect(base_url().'index.php/contratos/importarContratosExcel');
+    }
+
+    /**
+     * Crea un excel para la guia de cargue de contratos
+     * (se deja asi para que cargue las equivalencias dinamicamente)
+     * 
+     * @return null
+     */
+    public function plantillaExcel()
+    {
+        //redirect them to the login page
+        if (!$this->ion_auth->logged_in()) {
+			redirect('users/login', 'refresh');
+		}
+		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/detalles'))) {
+			redirect('error_404', 'refresh');
+		}
+
+        $this->data['tipos_contratistas'] = $this->codegen_model->getSelect(
+            'con_tiposcontratistas AS tipo',
+            'tpco_id AS id, tpco_nombre AS nombre'
+        );
+
+        $this->data['tipos_contratos'] = $this->codegen_model->getSelect(
+            'con_tiposcontratos AS tipo',
+            'tico_id AS id, tico_nombre AS nombre'
+        );
+
+        $this->data['clasificacion_contrato']  = Equivalencias::clasificacionContratos();
+
+        $_SESSION['fecha_informe_excel'] = 'Plantilla cargue contratos';
+
+        // $this->template->load($this->config->item('excel_template'),'contratos/plantilla_excel.php', $this->data);
+        $this->load->view('contratos/plantilla_excel.php', $this->data);
+    }
+
+    /**
+     * Muestra las estampillas segun el tipo de contrato
+     * 
+     * @return null
+     */
+    public function estampillasAsociadas($tipoContrato = '', $imprimir = true)
+    {
+        $respuesta = [
+            'exito' => false,
+            'mensaje' => '',
+            'datos' => [],
+        ];
+
+        $tipoContrato = $tipoContrato ? $tipoContrato : $this->uri->segment(3);
+
+        if (!$tipoContrato) {
+            $respuesta['mensaje'] = 'El tipo de contrato es invalido';
+        }
+        else
+        {
+            $respuesta['datos'] = $this->codegen_model->getSelect(
+                'est_estampillas_tiposcontratos AS tipo',
+                'tipo.esti_estampillaid AS id, estampilla.estm_nombre AS nombre, tipo.esti_porcentaje AS porcentaje',
+                'WHERE tipo.esti_tipocontratoid = '.$tipoContrato,
+                'INNER JOIN est_estampillas estampilla ON estampilla.estm_id = tipo.esti_estampillaid',
+                '',
+                'ORDER BY estampilla.estm_nombre'
+            );
+            $respuesta['exito'] = true;
+        }
+
+        if($imprimir) {
+            header('Content-type: application/json; charset=utf-8');
+            echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
+        } else {
+            return $respuesta;
+        }
     }
 }
