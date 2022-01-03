@@ -4149,15 +4149,12 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                         array_push($respuesta['estampillas'], $value);
                     }
 
-                /*
-                * Valida si el valor establecido para la estampilla es igual a cero
-                * para establecer el valor minimo 1000
-                */
+                # Se establece el minimo en 0 debido a estampillas excentas
                 if(isset($totalestampilla[$value->estm_id]))
                 {
                     if($totalestampilla[$value->estm_id] <= 0)
                     {
-                        $totalestampilla[$value->estm_id] = 1000;
+                        $totalestampilla[$value->estm_id] = 0;
                     }
 
                     /*
