@@ -4149,12 +4149,15 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                         array_push($respuesta['estampillas'], $value);
                     }
 
-                # Se establece el minimo en 0 debido a estampillas excentas
                 if(isset($totalestampilla[$value->estm_id]))
                 {
-                    if($totalestampilla[$value->estm_id] <= 0)
-                    {
+                    if($value->esti_porcentaje == 0) {
                         $totalestampilla[$value->estm_id] = 0;
+                    }
+                    # Se establece el minimo en 1000 debido a estampillas excentas
+                    elseif($totalestampilla[$value->estm_id] <= 0)
+                    {
+                        $totalestampilla[$value->estm_id] = 1000;
                     }
 
                     /*
@@ -4267,13 +4270,13 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 
         $guardo = $this->codegen_model->add(
             'cuotas_liquidacion',
-            array(
+            [
                 'id_liquidacion'	=> $liquidacion->liqu_id,
                 'valor'				=> $valor,
                 'estado'		    => Equivalencias::cuotaPendiente(),
                 'tipo'              => ($es_adicion ? Equivalencias::cuotaAdicion() : Equivalencias::cuotaNormal()),
                 'fecha_creacion'	=> date('Y-m-d H:i:s')
-            )
+            ]
         );
 
         if ($guardo->bandRegistroExitoso)
