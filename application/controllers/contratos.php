@@ -870,7 +870,7 @@ class Contratos extends MY_Controller {
 		$this->load->library('upload', $config);
 
 		if ( ! $this->upload->do_upload('archivo') ){
-            $this->session->set_flashdata('errormessage', 'Ocurrio un problema al cargar el archivo.');
+            $this->session->set_flashdata('errormessage', 'Ocurrio un problema al cargar el archivo. '.$this->upload->display_errors());
             redirect(base_url().'index.php/contratos/importarContratosExcel');
             exit();
 		}
