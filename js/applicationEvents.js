@@ -473,40 +473,6 @@ function solicitarUltimoRotulo()
 }
 
 /*
-* Funcion que solicita al servidor la validacion del tipo de regimen
-* del contratista seleccionado
-*/
-function validarRegimenContratista(e)
-{
-    var idContratista = $(this).val();
-
-    if(idContratista != '0')
-    {
-        $.ajax({
-            type: "POST",
-            dataType: "json",
-            data: {idContratista : idContratista},
-            url: base_url+"index.php/contratos/validarRegimen",
-            success: function(objResponse) {
-                if(objResponse.msj == '')
-                {
-                    if(objResponse.es_otros == 'SI')
-                    {
-                        $('#cont_iva_otros').slideDown(400);
-                    }else
-                        {
-                            $('#cont_iva_otros').slideUp(400);
-                        }
-                }else
-                    {
-                        renderizarNotificacion('notificacion',objResponse.msj, 'alert-danger', 400);
-                    }
-            }
-        });
-    }
-}
-
-/*
 * Funcion que identifica si el checkbox de contingencia
 * está o no seleccionado para solicitar recargar
 * la pagina con los datos de contingencia

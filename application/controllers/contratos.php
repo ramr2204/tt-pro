@@ -186,8 +186,8 @@ class Contratos extends MY_Controller {
             /*
             * Valida que el contratista exista en la base de datos
             */
-            $objContratista = $this->codegen_model->get('con_contratistas','cont_regimenid','cont_id = '.$this->input->post('contratistaid'),1,NULL,true);
-            $objContratante = $this->codegen_model->get('con_contratantes', 'regimenid', 'id = ' . $this->input->post('contratanteid'), 1, null, true);
+            $objContratista = $this->codegen_model->get('con_contratistas','cont_id','cont_id = '.$this->input->post('contratistaid'),1,NULL,true);
+            $objContratante = $this->codegen_model->get('con_contratantes', 'id', 'id = ' . $this->input->post('contratanteid'), 1, null, true);
 
             $msjError = '';
             $bandContinuar = true;
@@ -250,48 +250,23 @@ class Contratos extends MY_Controller {
                     'numero_relacionado'	=> $aplica_numero_relacionado ? $this->input->post('contrato_relacionado') : null
                 ];
 
-                /*
-                * Valida si el tipo de régimen es otros
-                */
-                $registrarContrato = true;
-                if($objContratista->cont_regimenid == 6 || $objContratista->cont_regimenid == 8)
+                $respuestaProceso = $this->codegen_model->add('con_contratos',$data);
+                if ($respuestaProceso->bandRegistroExitoso) 
                 {
-                    /*
-                    * Valida que se haya recibido valor de IVA otros
-                    */
-                    if($this->input->post('valor_iva_otros') == '')
-                    {
-                        $respuesta['error'] = 'Debe suministrar el valor del IVA!';
-                        $registrarContrato = false;
-                    }else
-                        {
-                            $data['cntr_iva_otros'] = str_replace('.','',$this->input->post('valor_iva_otros'));
-                        }
-                }
+                    foreach($estampillasFormateadas AS $id => $porcentaje) {
+                        $this->codegen_model->add('estampillas_contratos', [
+                            'id_contrato'   => $respuestaProceso->idInsercion,
+                            'id_estampilla' => $id,
+                            'porcentaje'    => $porcentaje,
+                        ]);
+                    }
 
-                /*
-                * Valida si se debe registrar el contrato
-                */
-                if($registrarContrato)
-                {
-                    $respuestaProceso = $this->codegen_model->add('con_contratos',$data);
-                    if ($respuestaProceso->bandRegistroExitoso) 
+                    $respuesta['exito'] = true;
+                    $respuesta['id'] = $respuestaProceso->idInsercion;
+                }else
                     {
-                        foreach($estampillasFormateadas AS $id => $porcentaje) {
-                            $this->codegen_model->add('estampillas_contratos', [
-                                'id_contrato'   => $respuestaProceso->idInsercion,
-                                'id_estampilla' => $id,
-                                'porcentaje'    => $porcentaje,
-                            ]);
-                        }
-
-                        $respuesta['exito'] = true;
-                        $respuesta['id'] = $respuestaProceso->idInsercion;
-                    }else
-                        {
-                            $respuesta['error'] = 'No se pudo registrar el contrato';
-                        }
-                }
+                        $respuesta['error'] = 'No se pudo registrar el contrato';
+                    }
             }else
                 {
                     $respuesta['error'] = $msjError;
@@ -343,8 +318,8 @@ class Contratos extends MY_Controller {
                     /*
                      * Valida que el contratista exista en la base de datos
                      */
-                    $objContratista = $this->codegen_model->get('con_contratistas', 'cont_regimenid', 'cont_id = ' . $this->input->post('contratistaid'), 1, null, true);
-                    $objContratante = $this->codegen_model->get('con_contratantes', 'regimenid', 'id = ' . $this->input->post('contratanteid'), 1, null, true);
+                    $objContratista = $this->codegen_model->get('con_contratistas', 'cont_id', 'cont_id = ' . $this->input->post('contratistaid'), 1, null, true);
+                    $objContratante = $this->codegen_model->get('con_contratantes', 'id', 'id = ' . $this->input->post('contratanteid'), 1, null, true);
 
                     $msjError = '';
                     $bandContinuar = true;
@@ -376,39 +351,14 @@ class Contratos extends MY_Controller {
                             'numero_relacionado'	=> $aplica_numero_relacionado ? $this->input->post('contrato_relacionado') : null,
 						);
 
-                        /*
-                        * Valida si el tipo de régimen es otros
-                        */
-                        $registrarContrato = true;
-                        if($objContratista->cont_regimenid == 6 || $objContratista->cont_regimenid == 8)
+                        if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idcontrato) == TRUE) 
                         {
-                            /*
-                            * Valida que se haya recibido valor de IVA otros
-                            */
-                            if($this->input->post('valor_iva_otros') == '')
+                            $this->session->set_flashdata('message', 'El contrato se ha editado con éxito');
+                            redirect(base_url().'index.php/contratos/edit/'.$idcontrato);
+                        }else
                             {
-                                $this->data['errormessage'] = 'Debe suministrar el valor del IVA!';
-                                $registrarContrato = false;
-                            }else
-                                {
-                                    $data['cntr_iva_otros'] = str_replace('.','',$this->input->post('valor_iva_otros'));
-                                }
-                        }
-
-                        /*
-                        * Valida si se debe registrar el contrato
-                        */
-                        if($registrarContrato)
-                        {
-                            if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idcontrato) == TRUE) 
-                            {
-                                $this->session->set_flashdata('message', 'El contrato se ha editado con éxito');
-                                redirect(base_url().'index.php/contratos/edit/'.$idcontrato);
-                            }else
-                                {
-                                    $this->data['errormessage'] = 'No se pudo modificar el contrato';
-                                }
-                        }
+                                $this->data['errormessage'] = 'No se pudo modificar el contrato';
+                            }
                     }else
                         {
                             $this->data['errormessage'] = $msjError;
@@ -427,7 +377,7 @@ class Contratos extends MY_Controller {
 
                 $this->data['result'] = $this->codegen_model->get(
                     'con_contratos',
-                    'cont_regimenid,cntr_id,cntr_contratistaid,cntr_contratanteid,cntr_municipio_origen,
+                    'cntr_id,cntr_contratistaid,cntr_contratanteid,cntr_municipio_origen,
                         cntr_tipocontratoid,cntr_fecha_firma,cntr_numero,cntr_objeto,cntr_valor,
                         cntr_iva_otros,clasificacion,numero_relacionado',
                     'cntr_id = '.$idcontrato,
@@ -777,44 +727,6 @@ class Contratos extends MY_Controller {
       }           
   }
 
-    /*
-    * Funcion de apoyo que valida el tipo de regimen del contratista
-    * para verificar si es o no tipo otros (6)
-    */
-    public function validarRegimen()
-    {
-        if ($this->ion_auth->logged_in()) 
-        {
-            if(isset($_POST['idContratista']) && $_POST['idContratista'] != '0')
-            {
-                /*
-                * Valida que el contratista exista en la base de datos
-                */
-                $objContratista = $this->codegen_model->get('con_contratistas','cont_regimenid','cont_id = '.$_POST['idContratista'],1,NULL,true);
-
-                if(count($objContratista) > 0)
-                {
-                    /*
-                    * Valida si el tipo de régimen es otros
-                    */
-                    $esOtros = 'NO';
-                    if($objContratista->cont_regimenid == 6 || $objContratista->cont_regimenid == 8)
-                    {
-                        $esOtros = 'SI';
-                    }
-
-                    echo json_encode(array('msj' => '', 'es_otros' => $esOtros));
-                }else
-                    {
-                        echo json_encode(array('msj' => 'No existe el contratista seleccionado!'));
-                    }
-            }
-        }else
-            {
-                redirect(base_url().'index.php/users/login');
-            }
-    }
-
     /**
      * Renderiza la vista para cargar los contratos
      * 
@@ -897,14 +809,6 @@ class Contratos extends MY_Controller {
             # Se elimina la primera fila del encabezado
             unset($datosExcel[0]);
 
-            # Se obtiene un regimen de ejemplo
-            $regimen = $this->codegen_model->get(
-                'con_regimenes',
-                'regi_id AS id',
-                '',
-                1,NULL,true
-            );
-
             $errores = [];
 
             $this->load->library('../controllers/contratistas');
@@ -928,7 +832,6 @@ class Contratos extends MY_Controller {
                     'telefono'          => $datos[4],
                     'email'             => $datos[5],
                     'municipioid'       => isset($municipio->id) ? $municipio->id : '',
-                    'regimenid'         => $regimen->id,
                 ];
 
                 $verificacion = $this->codegen_model->get(

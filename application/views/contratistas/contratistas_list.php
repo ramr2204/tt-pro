@@ -23,7 +23,6 @@ var oTable = $('#tablaq').dataTable( {
 "aoColumns": [ 
                       { "sClass": "center"}, /*id 0*/
                       { "sClass": "item" }, 
-                      { "sClass": "item" }, 
                       { "sClass": "item" },
                       { "sClass": "item" },
                       { "sClass": "item" },  
@@ -57,7 +56,6 @@ var oTable = $('#tablaq').dataTable( {
      <th>Id</th>
      <th>NIT</th>
      <th>Nombre</th>
-     <th>Tipo de régimen</th>
      <th>Tipo de contratista</th>
      <th>Municipio</th>
      <th>Departamento</th>

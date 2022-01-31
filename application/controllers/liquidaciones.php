@@ -235,7 +235,7 @@ class Liquidaciones extends MY_Controller {
 				$codigo = 00000;
 				$idcontrato=$this->input->post('idcontrato');
 
-				$data = array(
+				$data = [
 					'liqu_contratoid'           => $this->input->post('idcontrato'),
 					'liqu_nombrecontratista'    => $this->input->post('nombrecontratista'),
 					'liqu_nit'                  => $this->input->post('nit'),
@@ -245,7 +245,6 @@ class Liquidaciones extends MY_Controller {
 					'liqu_valorconiva'          => $this->input->post('valorconiva'),
 					'liqu_valorsiniva'          => $this->input->post('valorconiva'),//$this->input->post('valorsiniva'),
 					'liqu_tipocontrato'         => $this->input->post('tipocontrato'),
-					'liqu_regimenid'            => $this->input->post('idregimen'),
 					'liqu_regimen'              => $this->input->post('regimen'),
 					'liqu_nombreestampilla'     => $this->input->post('nombreestampilla'),
 					'liqu_cuentas'              => $this->input->post('cuentas'),
@@ -257,7 +256,7 @@ class Liquidaciones extends MY_Controller {
 					'liqu_fecha'                => date('Y-m-d'),
 					'liqu_usuarioliquida'       => $usuario->id,
 					'liqu_tiempoliquida'        => date('Y-m-d H:i:s')
-				);
+                ];
 
 				$respuestaProceso = $this->codegen_model->add('est_liquidaciones',$data);
 				if ($respuestaProceso->bandRegistroExitoso)

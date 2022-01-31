@@ -77,8 +77,7 @@
      <td colspan="1"><?php echo $result->tico_nombre; ?>
      <input type="hidden" name="tipocontrato" value="<?php echo $result->tico_nombre; ?>">
      </td>
-     <td colspan="2" class="text-center"><strong>Régimen <?php echo $result->regi_nombre; ?></strong>
-     <input type="hidden" name="idregimen" value="<?php echo $result->regi_id; ?>">
+     <td colspan="2" class="text-center"></td>
 </tr>
 <tr>
      <td colspan="4"></td>
@@ -87,9 +86,7 @@
      <td colspan="1" class="text-center"><strong>Estampilla</strong></td>
      <td colspan="1" class="text-center"><strong>Cuenta de ahorro</strong></td>
      <td colspan="1" class="text-center"><strong>Porcentaje</strong></td>
-     <td colspan="1" class="text-center"><strong>Valor</strong>
-     <input type="hidden" name="regimen" value="<?php echo $result->regi_nombre; ?>">
-     </td>
+     <td colspan="1" class="text-center"><strong>Valor</strong></td>
 
 </tr>
 <?php $x=0; ?>

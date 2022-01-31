@@ -70,7 +70,6 @@ class Contratantes extends MY_Controller {
 			    $this->form_validation->set_rules('direccion', 'Direccion', 'required');
 			    $this->form_validation->set_rules('telefono', 'Telefono', 'required|numeric');
                 $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
-                $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
                 $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|greater_than[0]');
 
                 if ($this->form_validation->run() == false) 
@@ -83,7 +82,6 @@ class Contratantes extends MY_Controller {
                         'tipocontratistaid' => $this->input->post('tipocontratistaid'),
                         'nit'               => $this->input->post('nit'),
                         'municipioid'       => $this->input->post('municipioid'),
-                        'regimenid'         => $this->input->post('regimenid'),
                         'fecha'             => date('Y-m-d'),
                         'email'             => $this->input->post('email'),
 						'direccion'         => $this->input->post('direccion'),
@@ -155,7 +153,6 @@ class Contratantes extends MY_Controller {
 
                 $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]');
                 $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|greater_than[0]');
-                $this->form_validation->set_rules('regimenid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
                 $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|greater_than[0]');
                 $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
 			    $this->form_validation->set_rules('direccion', 'Direccion', 'required');
@@ -170,7 +167,6 @@ class Contratantes extends MY_Controller {
                         'nombre'            => $this->input->post('nombre'),
                         'nit'               => $this->input->post('nit'),
                         'municipioid'       => $this->input->post('municipioid'),
-                        'regimenid'         => $this->input->post('regimenid'),
                         'tipocontratistaid' => $this->input->post('tipocontratistaid'),
                         'email'             => $this->input->post('email'),
 						'direccion'         => $this->input->post('direccion'),
@@ -199,7 +195,7 @@ class Contratantes extends MY_Controller {
                 $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage')); 
                 $this->data['result'] = $this->codegen_model->get(
                     'con_contratantes',
-                    'id,nombre,nit,municipioid,regimenid,tipocontratistaid,,email,direccion,telefono',
+                    'id,nombre,nit,municipioid,tipocontratistaid,,email,direccion,telefono',
                     'id = '.$idContratante,
                     1,NULL,true
                 );
@@ -275,11 +271,10 @@ class Contratantes extends MY_Controller {
                     $this->datatables->add_column('edit', '', 'c.id');
                 }
 
-                $this->datatables->select('c.id,c.nit,c.nombre,r.regi_nombre,t.tpco_nombre,m.muni_nombre,d.depa_nombre');
+                $this->datatables->select('c.id,c.nit,c.nombre,t.tpco_nombre,m.muni_nombre,d.depa_nombre');
                 $this->datatables->from('con_contratantes c');
                 $this->datatables->join('par_municipios m', 'm.muni_id = c.municipioid', 'left');
                 $this->datatables->join('par_departamentos d', 'd.depa_id = m.muni_departamentoid', 'left');
-                $this->datatables->join('con_regimenes r', 'r.regi_id = c.regimenid', 'left');
                 $this->datatables->join('con_tiposcontratistas t', 't.tpco_id = c.tipocontratistaid', 'left');                      
                 echo $this->datatables->generate();        
             }else

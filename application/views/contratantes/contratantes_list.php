@@ -22,8 +22,7 @@
     "sServerMethod": "POST",
     "aoColumns": [
                           { "sClass": "center"}, /*id 0*/
-                          { "sClass": "item" }, 
-                          { "sClass": "item" }, 
+                          { "sClass": "item" },
                           { "sClass": "item" },
                           { "sClass": "item" },
                           { "sClass": "item" },  
@@ -53,7 +52,6 @@
                         <th>Id</th>
                         <th>NIT</th>
                         <th>Nombre</th>
-                        <th>Tipo de régimen</th>
                         <th>Tipo de contratante</th>
                         <th>Municipio</th>
                         <th>Departamento</th>

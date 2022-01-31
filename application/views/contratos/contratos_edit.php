@@ -125,29 +125,6 @@
                                           </div>
 
                                      </div>
-                                    
-                                    <?php
-                                    /*
-                                    * Valida el régimen del contratista actual
-                                    * para renderizar o no el campo de iva otros
-                                    */
-                                    if($result->cont_regimenid == 6)
-                                    {
-                                        echo '<div class="col-xs-12 column" id="cont_iva_otros">';
-                                    }else
-                                        {
-                                            echo '<div class="col-xs-12 column" id="cont_iva_otros" style="display:none;">';
-                                        }
-                                    ?>                                    
-                                        <div class="form-group">
-                                            <label for="valor_iva_otros">Valor IVA</label>
-                                            <div class="input-group">
-                                                <div class="input-group-addon">$</div>
-                                                    <input class="form-control" id="valor_iva_otros" type="text" name="valor_iva_otros" value="<?php echo $result->cntr_iva_otros; ?>" maxlength="100" />
-                                                </div>
-                                            <?php echo form_error('valor_iva_otros','<span class="text-danger">','</span>'); ?>
-                                        </div>
-                                    </div>
 
                                     <div class="col-md-6 column">
                                         <div class="form-group">
@@ -286,12 +263,6 @@
     for (var selector in config) {
         $(selector).chosen(config[selector]);
     }
-
-    /*
-    * Evento para establecer validacion de regimen de contratista para
-    * permitir ingresar el valor del IVA en contratos con AUI
-    */
-    $('#contratistaid').chosen({disable_search_threshold: 10}).change(validarRegimenContratista);
 
     $(function () {
         $('#valor').autoNumeric('init',{aSep: '.' , aDec: ',' }); 

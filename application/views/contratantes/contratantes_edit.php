@@ -86,21 +86,6 @@
                                            </select>
                                            <?php echo form_error('municipioid','<span class="text-danger">','</span>'); ?>
                                     </div>
-                                    <div class="form-group">
-                                           <label for="regimenid">Tipo de régimen</label>
-                                           <select class="form-control" id="regimenid" name="regimenid" required="required" >
-                                             <option value="0">Seleccione...</option>
-                                             <?php  foreach($regimenes as $row) { ?>
-                                                 <?php if ($row->regi_id==$result->regimenid) { ?>
-                                                 <option selected value="<?php echo $row->regi_id; ?>" ><?php echo $row->regi_nombre; ?></option>
-                                                 <?php } else { ?>
-                                                 <option value="<?php echo $row->regi_id; ?>"><?php echo $row->regi_nombre; ?></option>
-                                                 <?php } ?>
-
-                                             <?php   } ?>
-                                           </select>
-                                           <?php echo form_error('regimenid','<span class="text-danger">','</span>'); ?>
-                                    </div>
 
                                     <div class="pull-right">
                                      <?php  echo anchor('contratantes', '<i class="fa fa-arrow-left"></i> Regresar', 'class="btn btn-default"'); ?>
@@ -153,7 +138,6 @@
     //style selects
     var config = {
       '#municipioid'  : {disable_search_threshold: 10},
-      '#regimenid'  : {disable_search_threshold: 10},
       '#tipocontratistaid'  : {disable_search_threshold: 10}
     }
     for (var selector in config) {
