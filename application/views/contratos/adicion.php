@@ -28,9 +28,16 @@
                         <textarea class="form-control" id="observaciones_cont" name="observaciones"></textarea>
                     </div>
 
-                    <div class="col-xs-12 text-center">
-                        <button type="submit" class="btn btn-success">Agregar</button>
-                    </div>
+                    <?
+                        if($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/registrarAdicion'))
+                        {
+                            ?>
+                            <div class="col-xs-12 text-center">
+                                <button type="submit" class="btn btn-success">Agregar</button>
+                            </div>
+                            <?
+                        }
+                    ?>
                 <?= form_close() ?>
             </div>
         </div>

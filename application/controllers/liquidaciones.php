@@ -3685,7 +3685,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 	{
         if ($this->ion_auth->logged_in())
 		{
-			if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) 
+			if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/procesarRegistroCuota')) 
 			{
 				$this->data['successmessage'] = $this->session->flashdata('message');
 				$this->data['errormessage'] = '';
@@ -3947,7 +3947,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 			if ($this->uri->segment(3)==''){
 				redirect(base_url().'index.php/error_404');
 			}
-			if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar'))
+			if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/estampillasRetencion'))
             {
                 $this->data['successmessage'] = $this->session->flashdata('successmessage');
                 $this->data['errormessage']   = $this->session->flashdata('errormessage');
@@ -4032,59 +4032,6 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 		} else {
 			redirect(base_url().'index.php/users/login');
 		}
-	}
-
-    public function descuentoEstampilla()
-	{
-		if ($this->ion_auth->logged_in())
-		{
-			if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar')) 
-			{
-				$this->data['successmessage'] = $this->session->flashdata('message');
-				$this->data['errormessage'] = '';
-
-                # Se da formato al valor para que guarde los valores decimales
-                $valor = str_replace(',', '.', str_replace('.','',$this->input->post('valor')));
-
-				$this->form_validation->set_rules('id_factura', 'Identificador de la facturas', 'trim|xss_clean|numeric|integer|greater_than[0]');
-				$this->form_validation->set_rules('observaciones', 'Observaciones', 'trim|xss_clean');
-                $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');
-
-				if ($this->form_validation->run() == false) {
-					$this->session->set_flashdata('errorModal', true);
-					$this->session->set_flashdata('errormessage', (validation_errors() ? validation_errors(): false));
-					$this->session->set_flashdata('accion', 'retencion');
-					redirect(base_url().'index.php/liquidaciones/liquidar/'.$this->input->post('id_contrato'));
-				}
-
-				$guardo = $this->codegen_model->add(
-					'descuentos_estampillas',
-					array(
-						'factura_id'		=> $this->input->post('id_factura'),
-						'valor'				=> $valor,
-						'observaciones'		=> $this->input->post('observaciones'),
-						'fecha_insercion'	=> date('Y-m-d H:i:s')
-					)
-				);
-
-				if ($guardo->bandRegistroExitoso){
-					$this->session->set_flashdata('errorModal', true);
-					$this->session->set_flashdata('successmessage', 'Se agregó el descuento con éxito la factura');
-				}
-				else{
-					$this->session->set_flashdata('errorModal', true);
-					$this->session->set_flashdata('errormessage', '<strong>Error!</strong> Ocurrió un error al registrar el pago.');
-				}
-
-				$this->session->set_flashdata('accion', 'retencion');
-				redirect(base_url().'index.php/liquidaciones/liquidar/'.$this->input->post('id_contrato'));
-			}
-			else {
-				redirect(base_url().'index.php/error_404');
-			}
-		} else {
-            redirect(base_url().'index.php/users/login');
-        }
 	}
 
     private function obtenerInfoFacturas($idcontrato, $valor = null)
@@ -4179,7 +4126,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
     {
         if ($this->ion_auth->logged_in())
         {
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar'))
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/procesarRegistroCuota'))
             {
                 $respuestaRegistro = $this->procesarRegistroCuota();
 
@@ -4344,7 +4291,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
             if ($this->uri->segment(3)==''){
                 redirect(base_url().'index.php/error_404');
             }    
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar'))
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/adiciones'))
             {
                 $this->data['successmessage'] = $this->session->flashdata('message');
                 $this->data['infomessage'] = $this->session->flashdata('infomessage');
@@ -4388,7 +4335,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
     {
         if ($this->ion_auth->logged_in())
         {
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar'))
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/registrarAdicion'))
             {
                 $this->form_validation->set_rules('id_contrato', 'Identificador del contrato','required|trim|xss_clean|is_exists[con_contratos.cntr_id]');
                 $this->form_validation->set_rules('valor', 'Valor','required|trim|xss_clean');
