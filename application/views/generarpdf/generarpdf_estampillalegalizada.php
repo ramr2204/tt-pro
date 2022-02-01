@@ -83,7 +83,7 @@
                     <td class="text-center" style="height: 5mm; width: 38.5mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
-                        border-bottom: 0.5px solid black;"><?php echo $estampilla->liqu_regimen != '' ? $estampilla->liqu_regimen : 'N/A'; ?></td>
+                        border-bottom: 0.5px solid black;">N/A</td>
                 </tr>
 
                 <tr>

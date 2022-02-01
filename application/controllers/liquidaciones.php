@@ -245,7 +245,6 @@ class Liquidaciones extends MY_Controller {
 					'liqu_valorconiva'          => $this->input->post('valorconiva'),
 					'liqu_valorsiniva'          => $this->input->post('valorconiva'),//$this->input->post('valorsiniva'),
 					'liqu_tipocontrato'         => $this->input->post('tipocontrato'),
-					'liqu_regimen'              => $this->input->post('regimen'),
 					'liqu_nombreestampilla'     => $this->input->post('nombreestampilla'),
 					'liqu_cuentas'              => $this->input->post('cuentas'),
 					'liqu_porcentajes'          => $this->input->post('porcentajes'),
@@ -261,9 +260,9 @@ class Liquidaciones extends MY_Controller {
 				$respuestaProceso = $this->codegen_model->add('est_liquidaciones',$data);
 				if ($respuestaProceso->bandRegistroExitoso)
 				{
-					$data = array(
+					$data = [
 						'cntr_estadolocalid' => 1,
-					);
+					];
 					if ($this->codegen_model->edit('con_contratos',$data,'cntr_id',$idcontrato) == TRUE)
 					{
 						$this->session->set_flashdata('successmessage', 'La liquidación se realizó con éxito');
@@ -4033,7 +4032,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 		}
 	}
 
-    private function obtenerInfoFacturas($idcontrato, $valor = null)
+    public function obtenerInfoFacturas($idcontrato, $valor = null)
     {
         $respuesta = [];
 
@@ -4075,25 +4074,9 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
             $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla($value->estm_id, $contrato->cntr_fecha_firma, $contrato->cntr_tipocontratoid);
             if($bandRegistrarFactura)
             {
-                /*
-                * Para la estampilla procultura y que sean contratos de obra civil,
-                * suministros y bienes y servicios que superen los 25 salarios se
-                * les aplica el porcentaje de la estampilla
-                */
-                if($value->estm_id == 2 && in_array($contrato->cntr_tipocontratoid, array(2,4,43)) )
-                {
-                    if( $contrato->cntr_valor >= ($parametros->para_salariominimo * 25) )
-                    {
-                        $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
-                        $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
-                        array_push($respuesta['estampillas'], $value);
-                    }
-                }else
-                    {
-                        $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
-                        $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
-                        array_push($respuesta['estampillas'], $value);
-                    }
+                $totalestampilla[$value->estm_id] = (($valorsiniva*$value->esti_porcentaje)/100);
+                $totalestampilla[$value->estm_id] = round ( $totalestampilla[$value->estm_id], -$parametros->para_redondeo );
+                array_push($respuesta['estampillas'], $value);
 
                 if(isset($totalestampilla[$value->estm_id]))
                 {

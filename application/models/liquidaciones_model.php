@@ -42,7 +42,7 @@ class Liquidaciones_model extends CI_Model {
             liqu_nombrecontratista,liqu_tipocontratista,liqu_nit,
             liqu_numero,liqu_vigencia,liqu_valorsiniva,
             liqu_valorconiva,liqu_valortotal,liqu_tipocontrato,
-            liqu_regimen,liqu_cuentas,liqu_porcentajes,
+            liqu_cuentas,liqu_porcentajes,
             liqu_contratoid,liqu_soporteobjeto,liqu_usuarioliquida'
         );
         $this->db->from('est_liquidaciones li');
@@ -60,7 +60,7 @@ class Liquidaciones_model extends CI_Model {
     }
 
     function getrecibostramites($id){
-        $this->db->select('liqu_id, liqu_codigo,liqu_nombreestampilla,liqu_nombrecontratista,liqu_tipocontratista,liqu_nit, liqu_numero,liqu_vigencia,liqu_valorsiniva,liqu_valorconiva,liqu_valortotal,liqu_tipocontrato,liqu_regimen,liqu_cuentas,liqu_porcentajes,liqu_contratoid,liqu_tramiteid,liqu_usuarioliquida');
+        $this->db->select('liqu_id, liqu_codigo,liqu_nombreestampilla,liqu_nombrecontratista,liqu_tipocontratista,liqu_nit, liqu_numero,liqu_vigencia,liqu_valorsiniva,liqu_valorconiva,liqu_valortotal,liqu_tipocontrato,liqu_cuentas,liqu_porcentajes,liqu_contratoid,liqu_tramiteid,liqu_usuarioliquida');
         $this->db->from('est_liquidaciones li');
         $this->db->where('li.liqu_tramiteid',$id);
   
@@ -107,7 +107,7 @@ class Liquidaciones_model extends CI_Model {
 
     function getfactura_legalizada($id, $doc=FALSE){
         $this->db->select('co.cntr_id,li.liqu_contratoid,li.liqu_valorsiniva,
-            li.liqu_valorconiva,li.liqu_tipocontratista,li.liqu_regimen,
+            li.liqu_valorconiva,li.liqu_tipocontratista,
             li.liqu_tipocontrato,f.fact_id,f.fact_codigo,
             f.fact_nombre, f.fact_porcentaje, f.fact_valor,
             pa.pago_valor, pa.pago_fecha, im.impr_codigopapel,
@@ -131,7 +131,7 @@ class Liquidaciones_model extends CI_Model {
 
 
     function getfactura_legalizada_tramite($id, $doc=FALSE){
-        $this->db->select('li.liqu_nombrecontratista as cont_nombre,lt.litr_id as liqu_contratoid, tramitadores.nit as cont_nit, lt.litr_id as cntr_numero, lt.litr_fechaliquidacion as cntr_vigencia,f.fact_id,f.fact_codigo, f.fact_nombre, f.fact_porcentaje, f.fact_valor,pa.pago_valor, pa.pago_fecha, im.impr_codigopapel, im.impr_fecha, im.impr_estampillaid,f.fact_rutaimagen,li.liqu_valorsiniva,li.liqu_valorconiva,li.liqu_tipocontratista,li.liqu_regimen,li.liqu_tipocontrato');
+        $this->db->select('li.liqu_nombrecontratista as cont_nombre,lt.litr_id as liqu_contratoid, tramitadores.nit as cont_nit, lt.litr_id as cntr_numero, lt.litr_fechaliquidacion as cntr_vigencia,f.fact_id,f.fact_codigo, f.fact_nombre, f.fact_porcentaje, f.fact_valor,pa.pago_valor, pa.pago_fecha, im.impr_codigopapel, im.impr_fecha, im.impr_estampillaid,f.fact_rutaimagen,li.liqu_valorsiniva,li.liqu_valorconiva,li.liqu_tipocontratista,li.liqu_tipocontrato');
         $this->db->from('est_facturas f');
         $this->db->join('est_pagos pa', 'pa.pago_facturaid = f.fact_id', 'left');
         $this->db->join('est_impresiones im', 'im.impr_facturaid = f.fact_id AND im.impr_estado = 1', 'left');

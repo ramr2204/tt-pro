@@ -245,3 +245,4 @@ ALTER TABLE estampillas_pro_boyaca.con_contratantes DROP INDEX fk_con_contratant
 ALTER TABLE estampillas_pro_boyaca.con_contratantes DROP COLUMN regimenid;
 
 ALTER TABLE estampillas_pro_boyaca.est_liquidaciones DROP COLUMN liqu_regimenid;
+ALTER TABLE estampillas_pro_boyaca.est_liquidaciones DROP COLUMN liqu_regimen;
