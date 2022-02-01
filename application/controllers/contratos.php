@@ -9,13 +9,16 @@
 *
 */
 
+require_once(dirname(__FILE__).'/contratistas.php');
+require_once(dirname(__FILE__).'/liquidaciones.php');
+
 class Contratos extends MY_Controller {
     
 	function __construct() 
 	{
       	parent::__construct();
 		$this->load->library('form_validation');		
-		$this->load->helper(array('form','url','codegen_helper'));
+		$this->load->helper(['form','url','codegen_helper']);
 		$this->load->model('codegen_model','',TRUE);
 		$this->load->model('liquidaciones_model','',TRUE);
 		$this->load->helper('Equivalencias');
@@ -811,7 +814,8 @@ class Contratos extends MY_Controller {
 
             $errores = [];
 
-            $this->load->library('../controllers/contratistas');
+            $contratistaCtrl = new Contratistas;
+            $liquidacionCtrl = new Liquidaciones;
 
             $usuario = $this->ion_auth->user()->row();
 
@@ -836,7 +840,8 @@ class Contratos extends MY_Controller {
 
                 $verificacion = $this->codegen_model->get(
                     'con_contratistas',
-                    'cont_id AS id',
+                    'cont_id AS id, cont_nombre AS nombre, cont_tipocontratistaid AS tipocontratistaid,
+                    cont_nit AS nit',
                     'cont_nit = "'. $contratista['nit'] .'"',
                     1,NULL,true
                 );
@@ -845,13 +850,14 @@ class Contratos extends MY_Controller {
 
                 if(empty($verificacion) == false) {
                     $id_contratista = $verificacion->id;
+                    $contratista = (array)$verificacion;
                 }
                 else
                 {
                     # Definir los datos para la validacion y registro
                     $_POST = $contratista;
 
-                    $respuestaRegistro = $this->contratistas->registrarContratista();
+                    $respuestaRegistro = $contratistaCtrl->registrarContratista();
 
                     if($respuestaRegistro['exito'])
                     {
@@ -872,7 +878,7 @@ class Contratos extends MY_Controller {
                     );
 
                     # Definir los datos para la validacion y registro
-                    $_POST = [
+                    $contrato = [
                         'tipocontratoid'            => $datos[7],
                         'fecha'                     => $datos[8],
                         'numero'                    => $datos[9],
@@ -886,11 +892,80 @@ class Contratos extends MY_Controller {
                         'contratanteid'             => $usuario->id_empresa,
                     ];
 
+                    $_POST = $contrato;
+
                     $respuestaRegistro = $this->registrarContrato(true);
 
                     if($respuestaRegistro['exito'] == true)
                     {
-                        $registrosExitosos++;
+                        $infoFacturas       = $liquidacionCtrl->obtenerInfoFacturas($respuestaRegistro['id']);
+                        $vigencia           = explode('-', $contrato['fecha']);
+                        $valor              = str_replace(',', '.', str_replace('.','',$contrato['valor']));
+                        $totalestampillas   = '';
+                        $porcentajes        = '';
+                        $cuentas            = '';
+                        $tipoContratista    = $this->codegen_model->get(
+                            'con_tiposcontratistas',
+                            'tpco_nombre AS nombre',
+                            'tpco_id = "'. $contratista['tipocontratistaid'] .'"',
+                            1,NULL,true
+                        );
+                        $tipoContrato       = $this->codegen_model->get(
+                            'con_tiposcontratos',
+                            'tico_nombre AS nombre',
+                            'tico_id = "'. $contrato['tipocontratoid'] .'"',
+                            1,NULL,true
+                        );
+
+                        foreach($infoFacturas['estampillas'] AS $estampilla) {
+                            $totalestampillas .= '$'.number_format($infoFacturas['est_totalestampilla'][$estampilla->estm_id], 2, ',', '.').'|';
+                            $porcentajes .= $estampilla->esti_porcentaje.'|';
+                            $cuentas .= 'cuenta: '.$estampilla->estm_cuenta.' banco: '.$estampilla->banc_nombre.'|';
+                        }
+
+                        $data = [
+                            'liqu_contratoid'           => $respuestaRegistro['id'],
+                            'liqu_nombrecontratista'    => $contratista['nombre'],
+                            'liqu_nit'                  => $contratista['nit'],
+                            'liqu_tipocontratista'      => $tipoContratista->nombre,
+                            'liqu_numero'               => $contrato['numero'],
+                            'liqu_vigencia'             => $vigencia[0],
+                            'liqu_valorconiva'          => $valor,
+                            'liqu_valorsiniva'          => $valor,
+                            'liqu_tipocontrato'         => $tipoContrato->nombre,
+                            'liqu_nombreestampilla'     => 0,
+                            'liqu_cuentas'              => $cuentas,
+                            'liqu_porcentajes'          => $porcentajes,
+                            'liqu_totalestampilla'      => $totalestampillas,
+                            'liqu_valortotal'           => $infoFacturas['est_valortotal'],
+                            'liqu_comentarios'          => 0,
+                            'liqu_codigo'               => 00000,
+                            'liqu_fecha'                => date('Y-m-d'),
+                            'liqu_usuarioliquida'       => $usuario->id,
+                            'liqu_tiempoliquida'        => date('Y-m-d H:i:s'),
+                        ];
+        
+                        $respuestaProceso = $this->codegen_model->add('est_liquidaciones',$data);
+
+                        if ($respuestaProceso->bandRegistroExitoso)
+                        {
+                            $editoContrato = $this->codegen_model->edit(
+                                'con_contratos',
+                                [
+                                    'cntr_estadolocalid' => 1,
+                                ],
+                                'cntr_id',
+                                $respuestaRegistro['id']
+                            );
+
+                            if ($editoContrato == true) {
+                                $registrosExitosos++;
+                            } else {
+                                $errores[] = '<b>Fila '. ($linea+1) .'</b> No se pudo modificar correctamente el contrato';
+                            }
+                        } else {
+                            $errores[] = '<b>Fila '. ($linea+1) .'</b> No se pudo registrar correctamente la liquidación';
+                        }
                     } else {
                         $errores[] = '<b>Fila '. ($linea+1) .'</b> ' . $respuestaRegistro['error'];
                     }
