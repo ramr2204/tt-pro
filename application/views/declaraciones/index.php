@@ -245,18 +245,6 @@
                 switch (aData[6]) {
                     // Inicializada
                     case '1':
-                        if(permiso.cargar_pago) {
-                            acciones += `<button type="button"
-                                class="btn btn-primary cargar-soporte btn-xs"
-                                title="Cargar soporte"
-                                data-ref="${aData[0]}"
-                            >
-                                <i class="fa fa-upload"></i>
-                            </button>`;
-                        }
-                        break;
-                    // Pagada
-                    case '3':
                         acciones += boton_firmar.replaceAll(':id', aData[0])
                         break;
                     // Firmada
@@ -271,6 +259,18 @@
                             </button>`;
                         }
 
+                        if(permiso.cargar_pago) {
+                            acciones += `<button type="button"
+                                class="btn btn-primary cargar-soporte btn-xs"
+                                title="Cargar soporte"
+                                data-ref="${aData[0]}"
+                            >
+                                <i class="fa fa-upload"></i>
+                            </button>`;
+                        }
+                        break;
+                    // Pagada
+                    case '3':
                         if(permiso.comprobar) {
                             acciones += `<button
                                 class="btn btn-info comprobar btn-xs"
@@ -283,8 +283,8 @@
                         break;
                 }
 
-                // Permita solicitar correccion si es iniciada o pagada y es inicial
-                if(['1', '3'].includes(aData[6]) && aData[4] == declaracion_inicial) {
+                // Permita solicitar correccion si es iniciada y es inicial
+                if(aData[6] == '1' && aData[4] == declaracion_inicial) {
                     if(permiso.corregir) {
                         acciones += `<button
                             class="btn btn-info corregir btn-xs"
@@ -305,7 +305,7 @@
                     }
                 }
 
-                if(['2','6','7'].includes(aData[6])){
+                if(['2', '3', '6','7'].includes(aData[6])){
                     acciones += `<a class="btn btn-danger btn-xs"
                         href="${base_url}uploads/declaraciones/comprobante_declaracion_${aData[0]}.pdf"
                         title="Ver declaración"

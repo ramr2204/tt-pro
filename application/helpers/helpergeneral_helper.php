@@ -230,11 +230,11 @@ Class HelperGeneral extends CI_Controller
     */
     public function verificarRestriccionEmpresa()
     {
-        if($this->ion_auth->is_admin()) {
+        $usuario = $this->ion_auth->user()->row();
+
+        if($this->ion_auth->is_admin() || $usuario->perfilid == 10) {
             return true;
         }
-
-        $usuario = $this->ion_auth->user()->row();
 
         return $usuario->id_empresa;
     }

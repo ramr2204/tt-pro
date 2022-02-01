@@ -900,7 +900,8 @@ class Declaraciones extends MY_Controller
                 $declaracion = $this->codegen_model->get(
                     'declaraciones AS d',
                     'd.id_empresa, empresa.nombre AS empresa, d.tipo_declaracion',
-                    'd.id = '. $this->input->post('declaracion'),
+                    'd.id = '. $this->input->post('declaracion') . '
+                        AND d.estado = '. EquivalenciasFirmas::declaracionIniciada(),
                     1,NULL,true, '',
                     'con_contratantes empresa',
                     'empresa.id = d.id_empresa'
@@ -1172,7 +1173,7 @@ class Declaraciones extends MY_Controller
                         1,NULL,true
                     );
 
-                    if($declaracion->estado == EquivalenciasFirmas::declaracionFirmada())
+                    if($declaracion->estado == EquivalenciasFirmas::declaracionPagada())
                     {
                         $acepto = $this->input->post('opcion') == 'aceptar';
 
@@ -1203,7 +1204,7 @@ class Declaraciones extends MY_Controller
                         $respuesta['exito'] = true;
                         $respuesta['mensaje'] = 'La declaración ha sido comprobada con exito';
                     } else {
-                        $respuesta['mensaje'] = 'La declaración no esta actualmente firmada';
+                        $respuesta['mensaje'] = 'La declaración no esta actualmente pagada';
                     }
                 }
             } else {

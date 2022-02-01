@@ -20,6 +20,12 @@
     $a.= "]";
 ?>
 <script type="text/javascript" language="javascript" charset="utf-8">
+
+    permisos = {
+        'retencion': <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/estampillasRetencion')) ?>,
+        'adicion': <?= (int)($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/adiciones')) ?>,
+    }
+
 //generación de la tabla mediante json
 $(document).ready(function() {
     $('#btn-confirdata').on('click', function(event){
@@ -110,13 +116,13 @@ $(document).ready(function() {
                 // $("td:eq(8)", nRow).append('<a href="#" class="btn btn-info btn-xs pagar-contrato" data-toggle="modal" data-target="#modalLiquidacion" title="pse" id="'+aData[0]+'"><i class="fa fa-shopping-cart"></i></a>');
             }
 
-            if(aData[8] == 'Activo' || aData[8] == 'Liquidado') {
+            if(permisos.retencion && (aData[8] == 'Activo' || aData[8] == 'Liquidado')) {
                 $("td:eq(8)", nRow).append('<a href="'+ base_url + 'liquidaciones/estampillasRetencion/' + aData[0]+'" target="_blank" class="btn btn-warning btn-xs" title="Pagar estampillas por retencion"><i class="fa fa-legal"></i></a>');
             }
 
             var estadosPosiblesAdicion = [null, 'Activo', 'Legalizado', 'Liquidado'];
 
-            if(estadosPosiblesAdicion.includes(aData[8])) {
+            if(permisos.adicion && estadosPosiblesAdicion.includes(aData[8])) {
                 $("td:eq(8)", nRow).append(`<a
                     href="${base_url}liquidaciones/adiciones/${aData[0]}"
                     target="_blank"

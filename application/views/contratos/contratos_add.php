@@ -116,7 +116,7 @@
                             <div class="col-md-6 column">
                                 <div class="form-group">
                                     <label for="numero">Número de contrato</label>
-                                    <input class="form-control" id="numero" type="number" name="numero" value="<?php echo set_value('numero'); ?>" required="required" min="0" />
+                                    <input class="form-control" id="numero" type="text" name="numero" value="<?php echo set_value('numero'); ?>" required="required" min="0" />
                                     <?php echo form_error('numero','<span class="text-danger">','</span>'); ?>
                                 </div>
                             </div>
@@ -129,17 +129,6 @@
                                         <input class="form-control" id="valor" type="text" name="valor" value="<?php echo set_value('valor'); ?>" required="required" maxlength="100" />
                                     </div>
                                     <?php echo form_error('valor','<span class="text-danger">','</span>'); ?>
-                                </div>
-                            </div>
-
-                            <div class="col-xs-12 column" id="cont_iva_otros" style="display:none;">
-                                <div class="form-group">
-                                    <label for="valor_iva_otros">Valor IVA</label>
-                                    <div class="input-group">
-                                        <div class="input-group-addon">$</div>
-                                            <input class="form-control" id="valor_iva_otros" type="text" name="valor_iva_otros" value="<?php echo set_value('valor_iva_otros'); ?>" maxlength="100" />
-                                        </div>
-                                    <?php echo form_error('valor_iva_otros','<span class="text-danger">','</span>'); ?>
                                 </div>
                             </div>
 
@@ -190,7 +179,7 @@
                                     <input
                                         class="form-control"
                                         id="contrato_relacionado"
-                                        type="number"
+                                        type="text"
                                         name="contrato_relacionado"
                                         value="<?php echo set_value('contrato_relacionado'); ?>"
                                         min="0" />
@@ -244,12 +233,6 @@
     for (var selector in config) {
         $(selector).chosen(config[selector]);
     }
-
-    /*
-    * Evento para establecer validacion de regimen de contratista para
-    * permitir ingresar el valor del IVA en contratos con AUI
-    */
-    $('#contratistaid').chosen({disable_search_threshold: 10}).change(validarRegimenContratista);
 
   </script>
   <script type="text/javascript">

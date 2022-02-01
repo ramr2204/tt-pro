@@ -40,7 +40,7 @@ $(document).ready(function() {
     <div class="col-sm-12">    
         <h1>Documentos Normativos</h1>
         <?php
-            if ($this->ion_auth->is_admin()) 
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('documentosNormativos/add'))
             {
                 echo anchor(base_url().'documentosNormativos/add','<i class="fa fa-plus"></i> Nuevo Documento ','class="btn btn-large  btn-primary"');
             }

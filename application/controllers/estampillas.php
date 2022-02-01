@@ -160,7 +160,7 @@ class Estampillas extends MY_Controller {
 
               $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]');   
               $this->form_validation->set_rules('descripcion', 'Descripción', 'trim|xss_clean|max_length[256]');
-              $this->form_validation->set_rules('bancoid', 'Tipo de régimen',  'required|numeric|greater_than[0]');
+              $this->form_validation->set_rules('bancoid', 'Banco',  'required|numeric|greater_than[0]');
               /**
               * Valida si el numero codigo para barras es el mismo al registrado
               * o no para validarlo como unique

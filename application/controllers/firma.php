@@ -142,9 +142,9 @@ class Firma extends MY_Controller
             # Verificamos si el elemento esta creado , si no es la primera firma
             if (isset($elemento['elemento']))
             {
-                if ($elemento['elemento']->estado != EquivalenciasFirmas::declaracionPagada())
+                if ($elemento['elemento']->estado != EquivalenciasFirmas::declaracionIniciada())
                 {
-                    $response->message = 'La declaración no se encuentra en estado pagado.';
+                    $response->message = 'La declaración no se encuentra en estado iniciada.';
                     return $response;
                 }
                 # Verificamos si ya existe una firma del mismo tipo del usuario que va firmar
@@ -563,7 +563,7 @@ class Firma extends MY_Controller
             'declaraciones',
             'id',
             'id = "'. $referencia . '"
-                AND estado = '. EquivalenciasFirmas::declaracionPagada(),
+                AND estado = '. EquivalenciasFirmas::declaracionIniciada(),
             1,NULL,true
         );
         

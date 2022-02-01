@@ -237,3 +237,14 @@ CREATE TABLE `estampillas_contratos` (
   `porcentaje` float NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE estampillas_pro_boyaca.con_contratistas DROP INDEX fk_con_contratistas_1_idx;
+ALTER TABLE estampillas_pro_boyaca.con_contratistas DROP COLUMN cont_regimenid;
+
+ALTER TABLE estampillas_pro_boyaca.con_contratantes DROP INDEX fk_con_contratante_1_idx;
+ALTER TABLE estampillas_pro_boyaca.con_contratantes DROP COLUMN regimenid;
+
+ALTER TABLE estampillas_pro_boyaca.est_liquidaciones DROP COLUMN liqu_regimenid;
+ALTER TABLE estampillas_pro_boyaca.est_liquidaciones DROP COLUMN liqu_regimen;
+
+ALTER TABLE estampillas_pro_boyaca.con_contratos MODIFY COLUMN cntr_numero VARCHAR(200) DEFAULT 0 NOT NULL;

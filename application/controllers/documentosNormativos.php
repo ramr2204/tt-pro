@@ -32,7 +32,7 @@ class DocumentosNormativos extends MY_Controller {
     {
         if ($this->ion_auth->logged_in())
         {
-            if ($this->ion_auth->is_admin())
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('documentosNormativos/index'))
             {
                 $this->data['successmessage']=$this->session->flashdata('successmessage');
                 $this->data['errormessage']=$this->session->flashdata('errormessage');
@@ -62,10 +62,10 @@ class DocumentosNormativos extends MY_Controller {
     * Funcion que renderiza la vista para agregar documentos normativos
     */
     function add()
-    {        
+    {
         if ($this->ion_auth->logged_in()) 
         {
-            if ($this->ion_auth->is_admin()) 
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('documentosNormativos/add'))
             {
                 $this->data['successmessage'] = $this->session->flashdata('successmessage');
                 $this->data['errormessage'] = $this->session->flashdata('errormessage');
@@ -97,8 +97,7 @@ class DocumentosNormativos extends MY_Controller {
             {
                 redirect(base_url().'index.php/users/login');
             }
-
-  }	
+    }
 
     /*
     * Funcion que administra el registro de un
@@ -108,7 +107,7 @@ class DocumentosNormativos extends MY_Controller {
     {
         if ($this->ion_auth->logged_in()) 
         {
-            if ($this->ion_auth->is_admin()) 
+            if ($this->ion_auth->is_admin() ||  $this->ion_auth->in_menu('documentosNormativos/add')) 
             {                
                 $this->form_validation->set_rules('docnor_fecha', 'Fecha Documento', 'required|trim|xss_clean|required');   
                 $this->form_validation->set_rules('docnor_iniciovigencia', 'Fecha Inicio Vigencia', 'trim|xss_clean|required');
@@ -295,8 +294,8 @@ class DocumentosNormativos extends MY_Controller {
         }else
             {
                 redirect(base_url().'index.php/users/login');
-            }        
-  }
+            }
+    }
   
     /*
     * Funcion que administra la modificacion de un
@@ -306,7 +305,7 @@ class DocumentosNormativos extends MY_Controller {
     {
         if ($this->ion_auth->logged_in()) 
         {
-            if ($this->ion_auth->is_admin()) 
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('documentosNormativos/edit'))
             {
                 /*
                 * Valida que el documento normativo suministrado exista                        
@@ -462,19 +461,23 @@ class DocumentosNormativos extends MY_Controller {
     {
         if ($this->ion_auth->logged_in()) 
         {          
-            if ($this->ion_auth->is_admin()) 
-            {                                 
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('documentosNormativos/index')) 
+            {
+                $columnaEditar = ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('documentosNormativos/edit')) ?
+                    '<div class="btn-toolbar">
+                        <div class="btn-group text-center">
+                            <a href="'.base_url().'index.php/documentosNormativos/edit/$1" class="btn btn-default btn-xs" title="Modificar"><i class="fa fa-pencil-square-o"></i> Editar</a>
+                        </div>
+                    </div>' :
+                    '';
+
                 $this->load->library('datatables'); 
                 $this->datatables->select('dc.docnor_id,tdc.tidocn_nombre,dc.docnor_numero,dc.docnor_fecha,dc.docnor_iniciovigencia,dc.docnor_rutadocumento');
                 $this->datatables->from('est_documentosnorma dc');
                 $this->datatables->join('tipos_docnormativos tdc', 'tdc.tidocn_id = dc.docnor_tipo', 'left');
                 $this->datatables->edit_column('dc.docnor_rutadocumento','<a class="btn btn-success" href="'.base_url().'$1" target="_blank"><img src="'.base_url().'$1" class="file-preview-image" alt="Ver Documento" title="documento" height="120mm"></a>','dc.docnor_rutadocumento');
 
-                $this->datatables->add_column('edit', '<div class="btn-toolbar">'
-                    .'<div class="btn-group text-center">'
-                    .'<a href="'.base_url().'index.php/documentosNormativos/edit/$1" class="btn btn-default btn-xs" title="Modificar"><i class="fa fa-pencil-square-o"></i> Editar</a>'
-                    .'</div>'
-                    .'</div>', 'dc.docnor_id');
+                $this->datatables->add_column('edit', $columnaEditar, 'dc.docnor_id');
               echo $this->datatables->generate();
             }else
                 {

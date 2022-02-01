@@ -48,8 +48,11 @@ $total = 0;
                             </td>
                             <td>
                                 <?
-                                    if(!$cuota && number_format(($saldo_contrato +  $saldo_adiciones), 0, '', '') != 0)
-                                    {
+                                    if(
+                                        !$cuota &&
+                                        number_format(($saldo_contrato +  $saldo_adiciones), 0, '', '') != 0 &&
+                                        ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/procesarRegistroCuota'))
+                                    ) {
                                         ?>
                                         <button class="btn btn-primary" type="submit" style="margin-bottom: 5px;">Confirmar</button>
                                         <br>
@@ -92,7 +95,7 @@ $total = 0;
                 </table>
 
                 <?php
-                    if(count($facturas) > 0)
+                    if(count($facturas) > 0 && ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/procesarRegistroCuota')))
                     {
                         ?>
                         <table class="table table-striped table-bordered">
@@ -187,35 +190,6 @@ $total = 0;
         </div>
     </div>
 
-    <div class="col-sm-12" style="display:none" id="form_descuento_estampilla">
-        <div class="row">
-            <hr>
-            <?= form_open_multipart('liquidaciones/descuentoEstampilla','role="form"') ?>
-                <input type="hidden" name="id_factura" id="id_factura_desc">
-                <input type="hidden" name="id_contrato" value="<?= $id_contrato ?>">
-
-                <h4 class="text-center"><b>Descuento de Estampillas por Retención</b></h4>
-
-                <div class="form-group col-md-6">
-                    <label>Estampilla</label>
-                    <input type="text" class="form-control" id="nombre_estampilla_desc" disabled>
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="valor_desc">Valor</label>
-                    <input type="text" name="valor" class="form-control numerico_ret" id="valor_desc">
-                </div>
-                <div class="form-group col-sm-12">
-                    <label for="observaciones_desc">Observaciones</label>
-                    <textarea class="form-control" id="observaciones_desc" name="observaciones"></textarea>
-                </div>
-
-                <div class="col-sm-12 text-center">
-                    <button type="submit" class="btn btn-success">Registrar</button>
-                </div>
-            <?= form_close() ?>
-        </div>
-    </div>
-
     <div class="col-sm-12 col-md-6 col-md-offset-3" style="margin-top: 20px;">
         <div class="panel panel-success">
             <div class="panel-heading text-center">
@@ -270,7 +244,6 @@ $total = 0;
     $('.date').datepicker({format:'yyyy-mm-dd',type:'component'});
 
     $(document).on('click', '.pagar-estampilla', function(){
-        $('#form_descuento_estampilla').hide();
         $('#valor_cont').closest('.form-group').show();
 
         $('#nombre_estampilla').val($(this).attr('fact-nombre'));
@@ -288,11 +261,9 @@ $total = 0;
 
         $('#id_factura_desc').val($(this).attr('id-factura'));
         $('#nombre_estampilla_desc').val($(this).attr('fact-nombre'));
-        $('#form_descuento_estampilla').slideDown();
     });
 
     $(document).on('click', '#pagar_todo', function() {
-        $('#form_descuento_estampilla').hide();
         $('#valor_cont').closest('.form-group').show();
 
         $('#form_pago_estampilla').slideDown();

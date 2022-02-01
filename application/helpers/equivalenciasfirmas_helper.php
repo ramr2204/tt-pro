@@ -24,8 +24,8 @@ Class EquivalenciasFirmas extends CI_Controller
 
     private static $estadosDeclaracion = [
         1 => 'Iniciado',
-        3 => 'Pagado',
         2 => 'Firmado',
+        3 => 'Pagado',
         4 => 'Solicitado Corrección',
         5 => 'Corregido',
         6 => 'Aceptado',
@@ -33,8 +33,8 @@ Class EquivalenciasFirmas extends CI_Controller
     ];
 
     private static $declaracionIniciada = 1;
-    private static $declaracionPagada = 3;
     private static $declaracionFirmada = 2;
+    private static $declaracionPagada = 3;
     private static $declaracionSolicitadaCorreccion = 4;
     private static $declaracionCorregida = 5;
     private static $declaracionAceptada = 6;
