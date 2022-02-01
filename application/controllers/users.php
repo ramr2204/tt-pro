@@ -21,7 +21,7 @@ class Users extends MY_Controller {
 		$this->lang->load('auth');
 		$this->load->helper('language');
 
-		$this->load->helper('Equivalencias');
+		$this->load->helper(['Equivalencias', 'EquivalenciasFirmas']);
 	}
 
 	//redirect if needed, otherwise display the user list
@@ -36,22 +36,24 @@ class Users extends MY_Controller {
 		{
 			//redirect them to the home page because they must be an administrator to view this
 			redirect('error_404', 'refresh');
-			
 		}
 		else
 		{
+			$this->data['tipos_usuarios'] = EquivalenciasFirmas::tiposUsuarios();
+
 			//template data
-               $this->template->set('title', 'Usuarios');
-               $this->data['style_sheets']= array(
-                        'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
-                       );
-               $this->data['javascripts']= array(
-                        'js/jquery.dataTables.min.js',
-                        'js/plugins/dataTables/dataTables.bootstrap.js',
-                        'js/jquery.dataTables.defaults.js'
-                       );
-               $this->data['successmessage']=$this->session->flashdata('successmessage');
-               $this->data['message']=$this->session->flashdata('message');
+			$this->template->set('title', 'Usuarios');
+			$this->data['style_sheets'] = [
+				'css/plugins/dataTables/dataTables.bootstrap.css' => 'screen'
+			];
+			$this->data['javascripts'] = [
+				'js/jquery.dataTables.min.js',
+				'js/plugins/dataTables/dataTables.bootstrap.js',
+				'js/jquery.dataTables.defaults.js'
+			];
+			$this->data['successmessage'] = $this->session->flashdata('successmessage');
+			$this->data['message'] = $this->session->flashdata('message');
+
 			$this->template->load($this->config->item('admin_template'),'users/index', $this->data);
 		}
 	}
@@ -377,12 +379,12 @@ class Users extends MY_Controller {
              	$activate=$this->ion_auth->activate($id);
                if($activate==1)
                	  {
-                    $this->session->set_flashdata('message', '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>El usuario con id: '.$id.' se ha activado con éxito.</div>');
+                    $this->session->set_flashdata('successmessage', 'El usuario con id: '.$id.' se ha activado con éxito.');
 			        redirect("users", 'refresh');
                	  } else
                	  {
                	  	//redirect them to the forgot password page
-                    $this->session->set_flashdata('message', $this->ion_auth->errors());
+                    $this->session->set_flashdata('errormessage', $this->ion_auth->errors());
                     redirect("users", 'refresh');
                	  }
              }else 
@@ -409,16 +411,16 @@ class Users extends MY_Controller {
 		 {
 		  if ($this->ion_auth->is_admin())
 			 {
-			  $id = $this->config->item('use_mongodb', 'ion_auth') ? (string) $id : (int) $id;
+			  $id = $this->config->item('use_mongodb', 'ion_auth') ? (string) $id : (float) $id;
 			  // insert csrf check
 			  $this->data['csrf'] = $this->_get_csrf_nonce();
 			  $this->data['user'] = $this->ion_auth->user($id)->row();
-			  $this->ion_auth->deactivate($id);	
-			  $this->session->set_flashdata('message', '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>El usuario con id: '.$id.' se ha desactivado con éxito.</div>');
+			  $this->ion_auth->deactivate($id);
+			  $this->session->set_flashdata('successmessage', 'El usuario con id: '.$id.' se ha desactivado con éxito.');
 			  redirect('users', 'refresh');
              }else 
 			 {
-			  $this->session->set_flashdata('message', '<div class="alert alert-info"><button type="button" class="close" data-dismiss="alert">&times;</button>No tiene permisos para acceder a esta área.</div>');
+			  $this->session->set_flashdata('errormessage', 'No tiene permisos para acceder a esta área.');
 			  redirect(base_url().'error_404');
 			 }
 		 } else
@@ -779,25 +781,28 @@ class Users extends MY_Controller {
 
 
 
-	 function datatable (){
+	public function datatable ()
+	{
         if ($this->ion_auth->is_admin())
-           {
+		{
             $this->load->library('datatables');
-            $this->datatables->select('u.id,u.email,p.perf_nombre,u.active');
+            $this->datatables->select('u.id, u.email, empresa.nombre AS empresa, p.perf_nombre, firma.tipo , u.active');
             $this->datatables->from('users u');
             $this->datatables->join('adm_perfiles p','p.perf_id = u.perfilid','left');
+            $this->datatables->join('con_contratantes empresa','empresa.id = u.id_empresa','left');
+            $this->datatables->join('usuarios_firma firma','firma.id_usuario = u.id','left');
             $this->datatables->add_column('edit', '<div class="btn-toolbar" role="toolbar">
-                                                       <div class="btn-group">
-                                                        <a href="'.base_url().'users/edit/$1" class="btn btn-default btn-xs" title="Editar datos de usuario"><i class="fa fa-pencil-square-o"></i></a>
-                                                        <a href="'.base_url().'users/permisos/$1" class="btn btn-default btn-xs" title="Editar permisos predeterminados"><i class="fa fa-eye"></i></a>
-                                                       </div>
-                                                   </div>', 'u.id');
-             echo $this->datatables->generate();
-            }
-            else
-            {
-              redirect(base_url().'index.php/users/login');
-            }           
+				<div class="btn-group">
+				<a href="'.base_url().'users/edit/$1" class="btn btn-default btn-xs" title="Editar datos de usuario"><i class="fa fa-pencil-square-o"></i></a>
+				<a href="'.base_url().'users/permisos/$1" class="btn btn-default btn-xs" title="Editar permisos predeterminados"><i class="fa fa-eye"></i></a>
+				</div>
+			</div>', 'u.id');
+			echo $this->datatables->generate();
+		}
+		else
+		{
+			redirect(base_url().'index.php/users/login');
+		}
     }
     
 
