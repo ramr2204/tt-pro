@@ -246,3 +246,5 @@ ALTER TABLE estampillas_pro_boyaca.con_contratantes DROP COLUMN regimenid;
 
 ALTER TABLE estampillas_pro_boyaca.est_liquidaciones DROP COLUMN liqu_regimenid;
 ALTER TABLE estampillas_pro_boyaca.est_liquidaciones DROP COLUMN liqu_regimen;
+
+ALTER TABLE estampillas_pro_boyaca.con_contratos MODIFY COLUMN cntr_numero VARCHAR(200) DEFAULT 0 NOT NULL;

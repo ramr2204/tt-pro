@@ -155,9 +155,9 @@ class Contratos extends MY_Controller {
             'regex_match[/^(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/]',
         ]);
         $this->form_validation->set_rules('objeto', 'objeto',  'required|trim|xss_clean');  
-        $this->form_validation->set_rules('numero', 'Número','required|trim|xss_clean|numeric|greater_than[0]');
+        $this->form_validation->set_rules('numero', 'Número','required|trim|xss_clean');
         $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');
-        $this->form_validation->set_rules('clasificacion_contrato', 'Clasificación del contrato','required|trim|xss_clean|numeric|greater_than[0]');
+        $this->form_validation->set_rules('clasificacion_contrato', 'Clasificación del contrato','required|trim|xss_clean');
 
         $aplica_numero_relacionado = $this->input->post('clasificacion_contrato') != Equivalencias::contratoNormal();
 
@@ -302,7 +302,7 @@ class Contratos extends MY_Controller {
               $this->form_validation->set_rules('tipocontratoid', 'Tipo de contrato','required|trim|xss_clean|numeric|greater_than[0]');
               $this->form_validation->set_rules('fecha', 'Fecha',  'required|trim|xss_clean');  
               $this->form_validation->set_rules('objeto', 'objeto',  'required|trim|xss_clean');  
-              $this->form_validation->set_rules('numero', 'Número','required|trim|xss_clean|numeric|greater_than[0]');
+              $this->form_validation->set_rules('numero', 'Número','required|trim|xss_clean');
               $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean'); 
 			  $this->form_validation->set_rules('clasificacion_contrato', 'Clasificación del contrato','required|trim|xss_clean|numeric|greater_than[0]');
 

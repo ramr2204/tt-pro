@@ -116,7 +116,7 @@
                             <div class="col-md-6 column">
                                 <div class="form-group">
                                     <label for="numero">Número de contrato</label>
-                                    <input class="form-control" id="numero" type="number" name="numero" value="<?php echo set_value('numero'); ?>" required="required" min="0" />
+                                    <input class="form-control" id="numero" type="text" name="numero" value="<?php echo set_value('numero'); ?>" required="required" min="0" />
                                     <?php echo form_error('numero','<span class="text-danger">','</span>'); ?>
                                 </div>
                             </div>
@@ -179,7 +179,7 @@
                                     <input
                                         class="form-control"
                                         id="contrato_relacionado"
-                                        type="number"
+                                        type="text"
                                         name="contrato_relacionado"
                                         value="<?php echo set_value('contrato_relacionado'); ?>"
                                         min="0" />
