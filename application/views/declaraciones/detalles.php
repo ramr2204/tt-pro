@@ -9,7 +9,9 @@
                     echo anchor(base_url().'declaraciones/index','<i class="fa fa-reply"></i>','class="btn btn-large btn-default" title="Volver"');
                 }
             ?>
-            <?= anchor(base_url().'declaraciones/detallesExcel/'.$id_declaracion,'<i class="fa fa-file-excel-o"></i>','class="btn btn-large btn-success" title="Generar Excel"'); ?>
+            <?= isset($id_declaracion) ?
+                anchor(base_url().'declaraciones/detallesExcel/'.$id_declaracion,'<i class="fa fa-file-excel-o"></i>','class="btn btn-large btn-success" title="Generar Excel"') :
+                ''; ?>
         </div>
         <br><br>
         <div class="table-responsive">
@@ -44,7 +46,11 @@
         var oTable = $('#tablaq').dataTable( {
             'bProcessing': true,
             'bServerSide': true,
-            'sAjaxSource': '<?php echo base_url(); ?>index.php/declaraciones/detallesDatatable?id_declaracion=<?= $id_declaracion ?>',
+            'sAjaxSource': '<?php echo base_url(); ?>index.php/declaraciones/detallesDatatable?<?= isset($id_declaracion) ?
+                'id_declaracion=' . $id_declaracion :
+                'empresa=' . $empresa
+                    . '&tipo_estampilla='. $tipo_estampilla
+                    . '&periodo='. $periodo ?>',
             'sServerMethod': 'POST',
             'aoColumns': [
                 { 'sClass': 'item' },
