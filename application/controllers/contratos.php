@@ -98,12 +98,20 @@ class Contratos extends MY_Controller {
                 ];
                 $this->template->set('title', 'Ingreso manual de contrato');
 
+                $helper = new HelperGeneral;
+                $id_empresa = $helper->verificarRestriccionEmpresa();
+
                 $this->data['tiposcontratos']           = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
                 $this->data['contratistas']             = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
-                $this->data['contratantes']             = $this->codegen_model->getSelect('con_contratantes', 'id,nombre,nit');
                 $this->data['municipios']               = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 6');
                 $this->data['clasificacion_contrato']   = Equivalencias::clasificacionContratos();
                 $this->data['contrato_normal']          = Equivalencias::contratoNormal();
+
+                $this->data['contratantes']             = $this->codegen_model->getSelect(
+                    'con_contratantes',
+                    'id,nombre,nit',
+                    ($id_empresa === true ? '' : 'WHERE id = '.$id_empresa)
+                );
 
                 $this->template->load($this->config->item('admin_template'),'contratos/contratos_add', $this->data);
             } else {
@@ -367,16 +375,19 @@ class Contratos extends MY_Controller {
                             $this->data['errormessage'] = $msjError;
                         }
               }   
-                  $this->data['style_sheets']= array(
-                        'css/chosen.css' => 'screen',
-                        'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen'
-                    );
-              $this->data['javascripts']= array(
-                        'js/chosen.jquery.min.js',
-                        'js/plugins/bootstrap/moment.js',
-                        'js/plugins/bootstrap/bootstrap-datetimepicker.js',
-                        'js/autoNumeric.js'
-                    );
+                $this->data['style_sheets'] = [
+                    'css/chosen.css' => 'screen',
+                    'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen'
+                ];
+                $this->data['javascripts'] = [
+                    'js/chosen.jquery.min.js',
+                    'js/plugins/bootstrap/moment.js',
+                    'js/plugins/bootstrap/bootstrap-datetimepicker.js',
+                    'js/autoNumeric.js'
+                ];
+
+                $helper = new HelperGeneral;
+                $id_empresa = $helper->verificarRestriccionEmpresa();
 
                 $this->data['result'] = $this->codegen_model->get(
                     'con_contratos',
@@ -390,10 +401,16 @@ class Contratos extends MY_Controller {
                 );
                 $this->data['tiposcontratos']  = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
                 $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
-                $this->data['contratantes'] = $this->codegen_model->getSelect('con_contratantes', 'id,nombre,nit');
                 $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 6');
 				$this->data['clasificacion_contrato']  = Equivalencias::clasificacionContratos();
                 $this->data['contrato_normal']  = Equivalencias::contratoNormal();
+
+                $this->data['contratantes']             = $this->codegen_model->getSelect(
+                    'con_contratantes',
+                    'id,nombre,nit',
+                    ($id_empresa === true ? '' : 'WHERE id = '.$id_empresa)
+                );
+
                 $this->template->set('title', 'Editar contrato');
                 $this->template->load($this->config->item('admin_template'),'contratos/contratos_edit', $this->data);
 

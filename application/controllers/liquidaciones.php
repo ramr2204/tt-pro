@@ -3792,8 +3792,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
             $liquidacion = $liquidacion[0];
 
             $saldo = ($liquidacion->valor_total + $liquidacion->total_adicion) - $liquidacion->total_pagado;
-
-            echo '$algo<pre>';var_dump( $this->input->post('id_contrato') );echo '</pre>'; 
+ 
             # Si el saldo es 0, es decir se pago todo, pase a estado liquidado
             if(number_format($saldo, 0, '', '') == 0) {
                 $this->codegen_model->edit(
