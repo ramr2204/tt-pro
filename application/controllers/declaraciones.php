@@ -1262,4 +1262,37 @@ class Declaraciones extends MY_Controller
 
         echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
     }
+
+    public function info()
+    {
+        //redirect them to the login page
+        if (!$this->ion_auth->logged_in()) {
+			redirect('users/login', 'refresh');
+		}
+		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/detalles'))) {
+			redirect('error_404', 'refresh');
+		}
+        elseif ($this->uri->segment(3) == ''){
+            redirect(base_url().'index.php/error_404');
+        }
+
+        
+
+        $this->template->set('title', 'Información de la Declaración');
+
+        $this->data['style_sheets'] = [
+            'css/chosen.css' => 'screen',
+            'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen',
+            'css/plugins/bootstrap/fileinput.css' => 'screen',
+        ];
+        $this->data['javascripts'] = [
+            'js/chosen.jquery.min.js',
+            'js/plugins/bootstrap/moment.js',
+            'js/plugins/bootstrap/bootstrap-datetimepicker.js',
+            'js/plugins/bootstrap/fileinput.min.js',
+            'js/autoNumeric.js',
+        ];
+
+        $this->template->load($this->config->item('admin_template'),'declaraciones/create', $this->data);
+    }
 }
