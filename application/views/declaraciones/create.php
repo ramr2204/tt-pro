@@ -21,12 +21,12 @@
             <div class="col-md-10 column">
                 <div class="panel panel-default">
                     <div class="panel-heading" style="display: flex;align-items: end;">
-                        <h1 style="flex: 1 0 auto;">Generación de Declaraciones</h1>
+                        <h1 style="flex: 1 0 auto;"><?= $esVisualizar ? 'Ver Declaración' : 'Generación de Declaraciones' ?></h1>
                         <?
                             if(count($consulta) != 0)
                             {
                                 ?>
-                                <a href="<?php echo base_url(); ?>declaraciones/detalles/?empresa=<?= $form->set_value('empresa') ?>&tipo_estampilla=<?= $form->set_value('tipo_estampilla') ?>&periodo=<?= $form->set_value('periodo') ?>"
+                                <a href="<?php echo base_url(); ?>declaraciones/detalles/?empresa=<?= set_value('empresa', '', $esVisualizar) ?>&tipo_estampilla=<?= set_value('tipo_estampilla', '', $esVisualizar) ?>&periodo=<?= set_value('periodo', '', $esVisualizar) ?>"
                                     target="_blank"
                                     class="btn btn-primary"
                                     type="button"
@@ -55,7 +55,7 @@
                                                     ?>
                                                     <option
                                                         value="<?= $row->id; ?>"
-                                                        <?= $form->set_select('empresa', $row->id) ?>
+                                                        <?= set_select('empresa', $row->id, false, $esVisualizar) ?>
                                                     >
                                                         <?= $row->nombre; ?>
                                                     </option>
@@ -75,7 +75,7 @@
                                                 {
                                                     ?>
                                                     <option value="<?= $estampilla->id; ?>"
-                                                        <?= $form->set_select('tipo_estampilla', $estampilla->id) ?>
+                                                        <?= set_select('tipo_estampilla', $estampilla->id, false, $esVisualizar) ?>
                                                     ><?= $estampilla->nombre; ?></option>
                                                     <?php
                                                 }
@@ -90,7 +90,7 @@
                                             class="form-control fechas-mes"
                                             name="periodo"
                                             id="periodo"
-                                            value="<?= $form->set_value('periodo'); ?>"
+                                            value="<?= set_value('periodo', '', $esVisualizar); ?>"
                                             required="required"
                                             autocomplete="off"
                                         />
@@ -114,16 +114,16 @@
                                 ?>
                                 <?= form_open_multipart('declaraciones/create', 'role="form"'); ?>
 
-                                    <input type="hidden" name="empresa" value="<?= $_POST['empresa'] ?>">
-                                    <input type="hidden" name="tipo_estampilla" value="<?= $_POST['tipo_estampilla'] ?>">
-                                    <input type="hidden" name="periodo" value="<?= $_POST['periodo'] ?>">
+                                    <input type="hidden" name="empresa" value="<?= set_value('empresa', '', $esVisualizar) ?>">
+                                    <input type="hidden" name="tipo_estampilla" value="<?= set_value('tipo_estampilla', '', $esVisualizar) ?>">
+                                    <input type="hidden" name="periodo" value="<?= set_value('periodo', '', $esVisualizar) ?>">
 
                                     <div class="col-md-6 column form-group">
                                         <label for="tipo_declaracion">Tipo de declaración</label>
                                         <select class="form-control chosen-select" id="tipo_declaracion" name="tipo_declaracion">
                                             <option value="0">Seleccione...</option>
-                                            <option value="1" <?= $form->set_select('tipo_declaracion', '1') ?>>Inicial</option>
-                                            <option value="2" <?= $form->set_select('tipo_declaracion', '2') ?>>Corrección</option>
+                                            <option value="1" <?= set_select('tipo_declaracion', '1', false, $esVisualizar) ?>>Inicial</option>
+                                            <option value="2" <?= set_select('tipo_declaracion', '2', false, $esVisualizar) ?>>Corrección</option>
                                         </select>
                                         <?= form_error('tipo_declaracion','<span class="text-danger">','</span>'); ?>
                                     </div>
@@ -133,7 +133,7 @@
                                         <input id="recaudado"
                                             type="number"
                                             name="recaudado"
-                                            value="<?= $form->set_value('recaudado'); ?>"
+                                            value="<?= set_value('recaudado', 0, $esVisualizar); ?>"
                                             class="form-control"
                                             required="required"
                                             min="0" />
@@ -144,7 +144,7 @@
                                         <input id="sanciones"
                                             type="number"
                                             name="sanciones"
-                                            value="<?= $form->set_value('sanciones'); ?>"
+                                            value="<?= set_value('sanciones', 0, $esVisualizar); ?>"
                                             class="form-control"
                                             required="required"
                                             min="0" />
@@ -155,7 +155,7 @@
                                         <input id="intereses"
                                             type="number"
                                             name="intereses"
-                                            value="<?= $form->set_value('intereses'); ?>"
+                                            value="<?= set_value('intereses', 0, $esVisualizar); ?>"
                                             class="form-control"
                                             required="required"
                                             min="0" />
@@ -172,7 +172,7 @@
                                             <input id="declaracion_correccion"
                                                 type="number"
                                                 name="declaracion_correccion"
-                                                value="<?= $form->set_value('declaracion_correccion'); ?>"
+                                                value="<?= set_value('declaracion_correccion', '', $esVisualizar); ?>"
                                                 class="form-control"
                                                 min="0" />
                                             <?= form_error('declaracion_correccion','<span class="text-danger">','</span>'); ?>
@@ -183,7 +183,7 @@
                                             <input id="radicacion_correccion"
                                                 type="number"
                                                 name="radicacion_correccion"
-                                                value="<?= $form->set_value('radicacion_correccion'); ?>"
+                                                value="<?= set_value('radicacion_correccion', '', $esVisualizar); ?>"
                                                 class="form-control"
                                                 min="0" />
                                             <?= form_error('radicacion_correccion','<span class="text-danger">','</span>'); ?>
@@ -195,7 +195,7 @@
                                                 class="form-control fechas"
                                                 name="fecha_correccion"
                                                 id="fecha_correccion"
-                                                value="<?= $form->set_value('fecha_correccion'); ?>"
+                                                value="<?= set_value('fecha_correccion', '', $esVisualizar); ?>"
                                                 autocomplete="off"
                                             />
                                             <?= form_error('fecha_correccion','<span class="text-danger">','</span>'); ?>
@@ -207,7 +207,7 @@
                                                 class="form-control fechas-mes"
                                                 name="periodo_correccion"
                                                 id="periodo_correccion"
-                                                value="<?= $form->set_value('periodo_correccion'); ?>"
+                                                value="<?= set_value('periodo_correccion', '', $esVisualizar); ?>"
                                                 autocomplete="off"
                                             />
                                             <?= form_error('periodo_correccion','<span class="text-danger">','</span>'); ?>
@@ -255,7 +255,11 @@
                                                                     type="number"
                                                                     class="form-control"
                                                                     autocomplete="off"
-                                                                    value="<?= $form->set_value('detalle_vigencia_actual['. $detalle->clasificacion .']'); ?>"
+                                                                    value="<?= set_value(
+                                                                        'detalle_vigencia_actual['. $detalle->clasificacion .']',
+                                                                        (isset($detalle->vigencia_actual) ? $detalle->vigencia_actual : 0),
+                                                                        $esVisualizar
+                                                                    ); ?>"
                                                                 >
                                                             </td>
                                                             <td>
@@ -263,7 +267,11 @@
                                                                     type="number"
                                                                     class="form-control"
                                                                     autocomplete="off"
-                                                                    value="<?= $form->set_value('detalle_vigencia_anterior['. $detalle->clasificacion .']'); ?>"
+                                                                    value="<?= set_value(
+                                                                        'detalle_vigencia_anterior['. $detalle->clasificacion .']',
+                                                                        (isset($detalle->vigencia_anterior) ? $detalle->vigencia_anterior : 0),
+                                                                        $esVisualizar
+                                                                    ); ?>"
                                                                 >
                                                             </td>
                                                             <td>
@@ -325,7 +333,7 @@
                                             <input id="saldo_periodo_anterior"
                                                 type="number"
                                                 name="saldo_periodo_anterior"
-                                                value="<?= $form->set_value('saldo_periodo_anterior'); ?>"
+                                                value="<?= set_value('saldo_periodo_anterior', 0, $esVisualizar); ?>"
                                                 class="form-control"
                                                 required="required"
                                                 min="0" />
@@ -337,7 +345,7 @@
                                             <input id="sanciones_pago"
                                                 type="number"
                                                 name="sanciones_pago"
-                                                value="<?= $form->set_value('sanciones_pago'); ?>"
+                                                value="<?= set_value('sanciones_pago', 0, $esVisualizar); ?>"
                                                 class="form-control"
                                                 required="required"
                                                 min="0" />
@@ -349,7 +357,7 @@
                                             <input id="intereses_mora"
                                                 type="number"
                                                 name="intereses_mora"
-                                                value="<?= $form->set_value('intereses_mora'); ?>"
+                                                value="<?= set_value('intereses_mora', 0, $esVisualizar); ?>"
                                                 class="form-control"
                                                 required="required"
                                                 min="0" />
@@ -372,7 +380,7 @@
                                             <input id="saldo_favor"
                                                 type="number"
                                                 name="saldo_favor"
-                                                value="<?= $form->set_value('saldo_favor'); ?>"
+                                                value="<?= set_value('saldo_favor', 0, $esVisualizar); ?>"
                                                 class="form-control"
                                                 required="required"
                                                 min="0" />
@@ -382,9 +390,16 @@
 
                                     <div class="pull-right">
                                         <?= anchor('declaraciones', '<i class="fa fa-times"></i> Cancelar', 'class="btn btn-default"'); ?>
-                                        <button name="acc" value="generar"
-                                            type="submit" class="btn btn-success"
-                                        ><i class="fa fa-floppy-o"></i> Generar</button>
+                                        <?
+                                            if(!$esVisualizar)
+                                            {
+                                                ?>
+                                                <button name="acc" value="generar"
+                                                    type="submit" class="btn btn-success"
+                                                ><i class="fa fa-floppy-o"></i> Generar</button>
+                                                <?
+                                            }
+                                        ?>
                                     </div>
                                 <?= form_close();?>
                                 <?

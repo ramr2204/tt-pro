@@ -1319,8 +1319,7 @@ function verliquidartramite()
                 $this->datatables->where('co.cont_id = '. $_GET['persona']);
               }
 
-              $helper = new HelperGeneral;
-              $verificacion = $helper->verificarRestriccionEmpresa();
+              $verificacion = HelperGeneral::verificarRestriccionEmpresa($this);
 
               if($verificacion !== true) {
                   $this->datatables->where('c.cntr_contratanteid = "'. $verificacion .'"');

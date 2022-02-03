@@ -98,8 +98,7 @@ class Contratos extends MY_Controller {
                 ];
                 $this->template->set('title', 'Ingreso manual de contrato');
 
-                $helper = new HelperGeneral;
-                $id_empresa = $helper->verificarRestriccionEmpresa();
+                $id_empresa = HelperGeneral::verificarRestriccionEmpresa($this);
 
                 $this->data['tiposcontratos']           = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
                 $this->data['contratistas']             = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
@@ -386,8 +385,7 @@ class Contratos extends MY_Controller {
                     'js/autoNumeric.js'
                 ];
 
-                $helper = new HelperGeneral;
-                $id_empresa = $helper->verificarRestriccionEmpresa();
+                $id_empresa = HelperGeneral::verificarRestriccionEmpresa($this);
 
                 $this->data['result'] = $this->codegen_model->get(
                     'con_contratos',
@@ -729,8 +727,7 @@ class Contratos extends MY_Controller {
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
               $this->datatables->join('con_contratantes ctte', 'ctte.id = c.cntr_contratanteid', 'left');
 
-              $helper = new HelperGeneral;
-              $verificacion = $helper->verificarRestriccionEmpresa();
+              $verificacion = HelperGeneral::verificarRestriccionEmpresa($this);
 
               if($verificacion !== true) {
                   $this->datatables->where('c.cntr_contratanteid = "'. $verificacion .'"');

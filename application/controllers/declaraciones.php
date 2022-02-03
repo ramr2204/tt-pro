@@ -105,15 +105,14 @@ class Declaraciones extends MY_Controller
     {
         if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index'))
         {
+            $verificacion = HelperGeneral::verificarRestriccionEmpresa($this);
+
             $this->load->library('datatables');
             $this->datatables->select('d.id, empresa.nombre AS empresa, estampilla.estm_nombre AS estampilla,
                 d.periodo, d.tipo_declaracion, d.fecha_creacion, d.estado, d.soporte');
             $this->datatables->from('declaraciones AS d');
             $this->datatables->join('con_contratantes empresa','empresa.id = d.id_empresa','inner');
             $this->datatables->join('est_estampillas estampilla','estampilla.estm_id = d.id_estampilla','inner');
-
-            $helper = new HelperGeneral;
-            $verificacion = $helper->verificarRestriccionEmpresa();
 
             if($verificacion !== true) {
                 $this->datatables->where('d.id_empresa = "'. $verificacion .'"');
@@ -182,10 +181,7 @@ class Declaraciones extends MY_Controller
                     'js/autoNumeric.js',
                 ];
 
-                $this->data['form'] = $this->form_validation;
-
-                $helper = new HelperGeneral;
-                $id_empresa = $helper->verificarRestriccionEmpresa();
+                $id_empresa = HelperGeneral::verificarRestriccionEmpresa($this);
 
                 $this->data['empresas'] = $this->codegen_model->getSelect(
                     'con_contratantes',
@@ -197,6 +193,8 @@ class Declaraciones extends MY_Controller
                 $this->data['estampillas'] = $this->codegen_model->getSelect('est_estampillas', 'estm_id AS id, estm_nombre AS nombre');
 
                 $this->data['clasificaciones_contratos'] = $this->tipos_detalles;
+
+                $this->data['esVisualizar'] = false;
 
                 $this->template->load($this->config->item('admin_template'),'declaraciones/create', $this->data);
             } else {
@@ -738,8 +736,7 @@ class Declaraciones extends MY_Controller
         $this->datatables->where('DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. date('Y-m', strtotime($declaracion->periodo)) .'"');
         $this->datatables->where('contrato.cntr_contratanteid = '. $declaracion->id_empresa);
 
-        $helper = new HelperGeneral;
-        $verificacion = $helper->verificarRestriccionEmpresa();
+        $verificacion = HelperGeneral::verificarRestriccionEmpresa($this);
 
         # Valida si esta requerido la empresa genere una consulta vacia
         if($verificacion !== true && $verificacion != $declaracion->id_empresa) {
@@ -1276,7 +1273,47 @@ class Declaraciones extends MY_Controller
             redirect(base_url().'index.php/error_404');
         }
 
-        
+        $id_declaracion = $this->uri->segment(3);
+
+        $this->data['esVisualizar'] = true;
+
+        $declaracion = $this->codegen_model->get(
+            'declaraciones',
+            'id_empresa AS empresa, id_estampilla AS tipo_estampilla, periodo, tipo_declaracion, declaracion_correccion,
+                radicacion_correccion, fecha_correccion, periodo_correccion, recaudado, sanciones,
+                intereses, total_base, total_estampillas, saldo_periodo_anterior, sanciones_pago,
+                intereses_mora, total_cargo, saldo_favor, soporte, estado',
+            'id = "'. $id_declaracion .'"',
+            1,NULL,true
+        );
+
+        $_POST = (array)$declaracion;
+
+        $clasificaciones = Equivalencias::clasificacionContratos();
+        $clasificaciones[3] = 'Adiciones';
+
+        $consulta = $this->codegen_model->getSelect(
+            'detalles_declaracion',
+            'renglon AS clasificacion, base, porcentaje,
+                valor_estampilla AS pagado, vigencia_actual, vigencia_anterior',
+            'WHERE id_declaracion = "'. $id_declaracion .'"',
+            '', '',
+            'ORDER BY renglon'
+        );
+        $this->data['consulta'] = array_map(
+            function($detalle) use($clasificaciones) {
+                $detalle->clase = $clasificaciones[$detalle->clasificacion];
+                return $detalle;
+            },
+            $consulta
+        );
+
+        $estampilla = $this->codegen_model->getSelect(
+            'est_estampillas',
+            'estm_nombre AS nombre',
+            'WHERE estm_id = '.$declaracion->tipo_estampilla
+        );
+        $this->data['estampilla'] = $estampilla[0];
 
         $this->template->set('title', 'Información de la Declaración');
 
