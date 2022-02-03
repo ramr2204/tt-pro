@@ -193,7 +193,7 @@
                             <!-- <li class="text-center" style="font-size: 13px;">
                                 Sin notificaciones
                             </li> -->
-                            <li>
+                            <!-- <li>
                                 <div class="col-md-3 col-sm-3 col-xs-3">
                                     <div class="notify-img text-danger">
                                         <i class="glyphicon glyphicon-exclamation-sign"></i>
@@ -220,7 +220,7 @@
                                     </div>
                                     <p>Lorem ipsum sit dolor amet consilium.</p>
                                 </div>
-                            </li>
+                            </li> -->
                         </div>
                         <div class="notify-drop-footer text-center">
                             <div class="btn-group">

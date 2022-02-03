@@ -188,75 +188,14 @@ $(document).ready(function() {
                   </div>
               </div>
               <div class="col-xs-12">
-               <legend>Filtrar por fecha de pago</legend>
-              </div>
-              <div class="col-xs-12 col-md-6">
-                  <div class="form-group">
-                      <label for="f_inicial">Fecha Inicial</label>
-                      <div class='input-group date' id='datetimepicker_inicial_pago' data-date-format="YYYY-MM-DD">
-                          <input type='text' class="form-control" name="f_inicial_pago" required="required"/>
-                          <span class="input-group-addon">
-                              <span class="glyphicon glyphicon-time"></span>
-                          </span>
-                      </div>                      
-                  </div>
-              </div>
-              <div class="col-xs-12 col-md-6">
-                  <div class="form-group">
-                      <label for="f_final">Fecha Final</label>
-                      <div class='input-group date' id='datetimepicker_final_pago' data-date-format="YYYY-MM-DD">
-                          <input type='text' class="form-control" name="f_final_pago" required="required"/>
-                          <span class="input-group-addon">
-                              <span class="glyphicon glyphicon-time"></span>
-                          </span>
-                      </div>                       
-                  </div>
-              </div>
-            <div class="col-xs-12">
-               <legend>Filtrar por fecha de Impresi&oacute;n</legend>
-            </div>
-              <div class="col-xs-12 col-md-6">
-                  <div class="form-group">
-                      <label for="f_inicial">Fecha Inicial</label>
-                      <div class='input-group date' id='datetimepicker_inicial_impr' data-date-format="YYYY-MM-DD">
-                          <input type='text' class="form-control" name="f_inicial_impr" required="required"/>
-                          <span class="input-group-addon">
-                              <span class="glyphicon glyphicon-time"></span>
-                          </span>
-                      </div>                      
-                  </div>
-              </div>
-              <div class="col-xs-12 col-md-6">
-                  <div class="form-group">
-                      <label for="f_final">Fecha Final</label>
-                      <div class='input-group date' id='datetimepicker_final_impr' data-date-format="YYYY-MM-DD">
-                          <input type='text' class="form-control" name="f_final_impr" required="required"/>
-                          <span class="input-group-addon">
-                              <span class="glyphicon glyphicon-time"></span>
-                          </span>
-                      </div>                       
-                  </div>
-              </div>
-              <div class="col-xs-12">
                <legend>Filtros adicionales</legend>
                </div>
-              <div class="col-xs-12 col-md-6 btn-pdf">
+              <div class="col-xs-12 col-md-12 btn-pdf">
                   <div class="form-group">
                       <label for="tipoEst">Tipo Estampilla</label>
                       <select class="form-control chosen-modal" id="tipoEst">
                           <option value="0">Seleccione...</option>
                           <?php  foreach($estampillas as $id => $valor) { ?>
-                              <option value="<?php echo $id; ?>"><?php echo $valor; ?></option>
-                          <?php   } ?>
-                      </select>
-                  </div>
-              </div>
-              <div class="col-xs-12 col-md-6 btn-pdf">
-                  <div class="form-group">
-                      <label for="tipoActo">Tipo Acto</label>
-                      <select class="form-control" id="tipoActo">
-                          <option value="0">Seleccione...</option>
-                          <?php  foreach($tipos_acto as $id => $valor) { ?>
                               <option value="<?php echo $id; ?>"><?php echo $valor; ?></option>
                           <?php   } ?>
                       </select>

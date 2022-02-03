@@ -1514,14 +1514,6 @@ function consultar()
                   }
               }
 
-              if(count($tiposTramite) > 0)
-              {
-                  foreach($tiposTramite as $tipoA)
-                  {
-                      $vSubTiposActo['t_'.$tipoA->tram_id] = $tipoA->tram_nombre.' ( Tramite )';
-                  }
-              }
-
               $this->data['subtipos_acto'] = $vSubTiposActo;
 
               /*
@@ -1537,14 +1529,6 @@ function consultar()
                   foreach($contratistas as $contratista)
                   {
                       $vecContribuyentes['c_'.$contratista->cont_nit] = $contratista->cont_nit.' - '.$contratista->cont_nombre.' ( Contratista )';
-                  }
-              }
-
-              if(count($tramitadores) > 0)
-              {
-                  foreach($tramitadores as $tramitador)
-                  {
-                      $vecContribuyentes['t_'.$tramitador->nit] = $tramitador->nit.' - '.$tramitador->nombre.' ( Tramitador )';
                   }
               }
 
@@ -2059,49 +2043,12 @@ function renderizarDetalleRangoPDF()
         $strTipoFechaFiltrada = "";
 
         $bandFiltroFechaLiquidacion = true;
-        $bandFiltroFechaImpresion = true;
-        $bandFiltroFechaPago = true;
 
         /*
         * Valida cuales fechas llegan
         */
-        $fecha_inicial_impr = "";
-        $fecha_final_impr   = "";
-        $fecha_inicial_pago = "";
-        $fecha_final_pago   = "";
         $fecha_inicial_liqu = "";
         $fecha_final_liqu   = "";
-        if(isset($vectorGet['fecha_I_impr']) && !empty($vectorGet['fecha_I_impr']))
-        {
-            $fecha_inicial_impr = $vectorGet['fecha_I_impr'];
-        }else
-            {
-                $bandFiltroFechaImpresion = false;
-            }
-
-        if(isset($vectorGet['fecha_F_impr']) && !empty($vectorGet['fecha_F_impr']))
-        {
-            $fecha_final_impr = $vectorGet['fecha_F_impr'];
-        }else
-            {
-                $bandFiltroFechaImpresion = false;
-            }
-
-        if(isset($vectorGet['fecha_I_pago']) && !empty($vectorGet['fecha_I_pago']))
-        {
-            $fecha_inicial_pago = $vectorGet['fecha_I_pago'];
-        }else
-            {
-                $bandFiltroFechaPago = false;
-            }
-
-        if(isset($vectorGet['fecha_F_pago']) && !empty($vectorGet['fecha_F_pago']))
-        {
-            $fecha_final_pago = $vectorGet['fecha_F_pago'];
-        }else
-            {
-                $bandFiltroFechaPago = false;
-            }
         
         if(isset($vectorGet['fecha_I_liqu']) && !empty($vectorGet['fecha_I_liqu']))
         {
@@ -2119,22 +2066,13 @@ function renderizarDetalleRangoPDF()
                 $bandFiltroFechaLiquidacion = false;
             }
 
-        /*
-        * Valida que lleguen fechas solamente para un tipo de filtro
-        * impresión o pago
-        */
-        if(($bandFiltroFechaImpresion && $bandFiltroFechaPago) || ($bandFiltroFechaImpresion && $bandFiltroFechaLiquidacion) || ($bandFiltroFechaPago && $bandFiltroFechaLiquidacion) || ($bandFiltroFechaPago && $bandFiltroFechaLiquidacion && $bandFiltroFechaImpresion))
-        {
-            $this->session->set_flashdata('errormessage', 'Debe Elegir solamente un Rango de Fechas para el informe (Fecha de pago o Fecha de Impresi&oacute;n o Fecha de Liquidaci&oacute;n)!');
-            redirect(base_url().'index.php/liquidaciones/consultar');
-        }
 
         /*
         * Valida que lleguen fechas para por lo menos un tipo de filtro
         */
-        if(!$bandFiltroFechaImpresion && !$bandFiltroFechaPago && !$bandFiltroFechaLiquidacion)
+        if(!$bandFiltroFechaLiquidacion)
         {
-            $this->session->set_flashdata('errormessage', 'Debe Elegir un Rango de Fechas valido para el informe (Fecha de pago o Fecha de Impresi&oacute;n o Fecha de Liquidaci&oacute;n)!');
+            $this->session->set_flashdata('errormessage', 'Debe Elegir un Rango de Fechas valido para el informe (Fecha de Liquidaci&oacute;n)!');
             redirect(base_url().'index.php/liquidaciones/consultar');
         }
         
@@ -2192,22 +2130,6 @@ function renderizarDetalleRangoPDF()
         */
         $where = 'WHERE 1 = 1 ';
 
-        if($bandFiltroFechaImpresion)
-        {
-            // $fecha_inicial = $fecha_inicial_impr;
-            // $fecha_final   = $fecha_final_impr;
-            // $strTipoFechaFiltrada = "FECHA DE IMPRESION";
-            // $where .= ' AND date_format(imp.impr_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial_impr.'" AND "'.$fecha_final_impr.'"';
-        }
-
-        if($bandFiltroFechaPago)
-        {
-            $fecha_inicial = $fecha_inicial_pago;
-            $fecha_final   = $fecha_final_pago;
-            $strTipoFechaFiltrada = "FECHA DE PAGO";
-            $where .= ' AND date_format(pag.pago_fecha,"%Y-%m-%d") BETWEEN "'.$fecha_inicial_pago.'" AND "'.$fecha_final_pago.'"';
-        }
-
         if($bandFiltroFechaLiquidacion)
         {
             $fecha_inicial = $fecha_inicial_liqu;
@@ -2235,22 +2157,10 @@ function renderizarDetalleRangoPDF()
             $vecFiltrosAplicados['contribuyente'] = $coincidencia[1];
         }
 
-        if($tipoActo != '0')
-        {
-            if($tipoActo == '1') //Valida si se solicitan solo contratos
-            {
-                $where = Liquidaciones::concatenarWhere($where);
-                $where .= ' liq.liqu_contratoid <> 0';
+        $where = Liquidaciones::concatenarWhere($where);
+        $where .= ' liq.liqu_contratoid <> 0';
 
-                $vecFiltrosAplicados['tipo_acto'] = 'Contrato';
-            }elseif($tipoActo == '2') //Valida si se solicitan solo tramites
-                {
-                    $where = Liquidaciones::concatenarWhere($where);
-                    $where .= ' liq.liqu_contratoid = 0';
-
-                    $vecFiltrosAplicados['tipo_acto'] = 'Tramite';
-                }
-        }
+        $vecFiltrosAplicados['tipo_acto'] = 'Contrato';
 
         if($bandValidarSubtipoActo)
         {
