@@ -703,6 +703,8 @@ class Contratos extends MY_Controller {
       if ($this->ion_auth->logged_in()) {
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/manage') ) { 
+
+            $verificacion = HelperGeneral::verificarRestriccionEmpresa($this);
               
             /*
             * Se Valida si el usuario tiene la opcion de editar contratos
@@ -721,13 +723,11 @@ class Contratos extends MY_Controller {
                     $this->load->library('datatables');
                     $this->datatables->add_column('edit', '', 'c.cntr_id'); 
                 }
-              
+
               $this->datatables->select('c.cntr_id,c.cntr_numero,co.cont_nit,co.cont_nombre,ctte.nit,ctte.nombre,c.cntr_fecha_firma,c.cntr_objeto,c.cntr_valor,c.cntr_vigencia');
               $this->datatables->from('con_contratos c');
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
               $this->datatables->join('con_contratantes ctte', 'ctte.id = c.cntr_contratanteid', 'left');
-
-              $verificacion = HelperGeneral::verificarRestriccionEmpresa($this);
 
               if($verificacion !== true) {
                   $this->datatables->where('c.cntr_contratanteid = "'. $verificacion .'"');

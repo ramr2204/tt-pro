@@ -23,7 +23,7 @@
                     <div class="panel-heading" style="display: flex;align-items: end;">
                         <h1 style="flex: 1 0 auto;"><?= $esVisualizar ? 'Ver Declaración' : 'Generación de Declaraciones' ?></h1>
                         <?
-                            if(count($consulta) != 0)
+                            if(count($consulta) != 0 && ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/detalles')))
                             {
                                 ?>
                                 <a href="<?php echo base_url(); ?>declaraciones/detalles/?empresa=<?= set_value('empresa', '', $esVisualizar) ?>&tipo_estampilla=<?= set_value('tipo_estampilla', '', $esVisualizar) ?>&periodo=<?= set_value('periodo', '', $esVisualizar) ?>"

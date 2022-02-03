@@ -1288,6 +1288,8 @@ function verliquidartramite()
       {
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/liquidar') )
           {
+              $verificacion = HelperGeneral::verificarRestriccionEmpresa($this);
+
               $this->load->library('datatables');
               $this->datatables->select(
                   'c.cntr_id,c.cntr_numero,co.cont_nit,
@@ -1318,8 +1320,6 @@ function verliquidartramite()
               {
                 $this->datatables->where('co.cont_id = '. $_GET['persona']);
               }
-
-              $verificacion = HelperGeneral::verificarRestriccionEmpresa($this);
 
               if($verificacion !== true) {
                   $this->datatables->where('c.cntr_contratanteid = "'. $verificacion .'"');
