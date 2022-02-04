@@ -32,7 +32,7 @@ class Users extends MY_Controller {
 			//redirect them to the login page
 			redirect('users/login', 'refresh');
 		}
-		elseif (!$this->ion_auth->is_admin()) //remove this elseif if you want to enable this for non-admins
+		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->user()->row()->perfilid == 10)) //remove this elseif if you want to enable this for non-admins
 		{
 			//redirect them to the home page because they must be an administrator to view this
 			redirect('error_404', 'refresh');
@@ -374,7 +374,7 @@ class Users extends MY_Controller {
 	{
       if ($this->ion_auth->logged_in())
 		 {
-		  if ($this->ion_auth->is_admin())
+		  if ($this->ion_auth->is_admin() || $this->ion_auth->user()->row()->perfilid == 10)
              {
              	$activate=$this->ion_auth->activate($id);
                if($activate==1)
@@ -409,7 +409,7 @@ class Users extends MY_Controller {
 	{
 	  if ($this->ion_auth->logged_in())
 		 {
-		  if ($this->ion_auth->is_admin())
+		  if ($this->ion_auth->is_admin() || $this->ion_auth->user()->row()->perfilid == 10)
 			 {
 			  $id = $this->config->item('use_mongodb', 'ion_auth') ? (string) $id : (float) $id;
 			  // insert csrf check
@@ -437,7 +437,7 @@ class Users extends MY_Controller {
 		
       if ($this->ion_auth->logged_in())
 		 {
-		  if ($this->ion_auth->is_admin())
+		  if ($this->ion_auth->is_admin() || $this->ion_auth->user()->row()->perfilid == 10)
 			 {
 			  $this->data['title'] = "Crear usuario";
 		      $this->form_validation->set_rules('id', $this->lang->line('create_user_validation_id_label'), 'required|xss_clean|numeric|greater_than[0]|is_unique[users.id]');
@@ -523,7 +523,7 @@ class Users extends MY_Controller {
 	{
 	  if ($this->ion_auth->logged_in()) {
 		  
-		  if ($this->ion_auth->is_admin()) {
+		  if ($this->ion_auth->is_admin() || $this->ion_auth->user()->row()->perfilid == 10) {
 			  if ($id==0) 
 			  {
 			  	$id=$this->input->post('id');
@@ -783,7 +783,7 @@ class Users extends MY_Controller {
 
 	public function datatable ()
 	{
-        if ($this->ion_auth->is_admin())
+        if ($this->ion_auth->is_admin() || $this->ion_auth->user()->row()->perfilid == 10)
 		{
             $this->load->library('datatables');
             $this->datatables->select('u.id, u.email, empresa.nombre AS empresa, p.perf_nombre, firma.tipo , u.active');

@@ -253,17 +253,29 @@
 
 
           <ul class="nav navbar-nav navbar-right">
-            <?php if ($this->ion_auth->is_admin()) { ?>
+            <?php if ($this->ion_auth->is_admin() || $this->ion_auth->user()->row()->perfilid == 10) { ?>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">Administración<b class="caret"></b></a>
               <ul class="dropdown-menu">
-                <li><a href="<?php echo base_url(); ?>index.php/users">Usuarios</a></li>
-                <li><a href="<?php echo base_url(); ?>index.php/parametros">Parámetros</a></li>
-                <li><a href="<?php echo base_url(); ?>index.php/perfiles">Perfiles</a></li>
-                <li><a href="<?php echo base_url(); ?>index.php/procesos">Procesos</a></li>
-                <li><a href="<?php echo base_url(); ?>index.php/aplicaciones">Aplicaciones</a></li>
-                <li><a href="<?php echo base_url(); ?>index.php/modulos">Módulos</a></li>
-                <li><a href="<?php echo base_url(); ?>index.php/menus">Menús</a></li>
+                <?
+                  if ($this->ion_auth->is_admin() || $this->ion_auth->user()->row()->perfilid == 10)
+                  {
+                    ?>
+                      <li><a href="<?php echo base_url(); ?>index.php/users">Usuarios</a></li>
+                    <?
+                  }
+                  if ($this->ion_auth->is_admin())
+                  {
+                    ?>
+                    <li><a href="<?php echo base_url(); ?>index.php/parametros">Parámetros</a></li>
+                    <li><a href="<?php echo base_url(); ?>index.php/perfiles">Perfiles</a></li>
+                    <li><a href="<?php echo base_url(); ?>index.php/procesos">Procesos</a></li>
+                    <li><a href="<?php echo base_url(); ?>index.php/aplicaciones">Aplicaciones</a></li>
+                    <li><a href="<?php echo base_url(); ?>index.php/modulos">Módulos</a></li>
+                    <li><a href="<?php echo base_url(); ?>index.php/menus">Menús</a></li>
+                    <?
+                  }
+                ?>
               </ul>
             </li>
             <?php } ?>
