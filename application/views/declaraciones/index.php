@@ -223,6 +223,13 @@
 
                 var acciones = '';
 
+                acciones += `<a class="btn btn-default btn-xs"
+                    href="${base_url}declaraciones/info/${aData[0]}"
+                    title="Ver información"
+                >
+                    <i class="fa fa-eye"></i>
+                </a>`;
+
                 if(permiso.detalles) {
                     acciones += `<a class="btn btn-info btn-xs"
                         href="${base_url}declaraciones/detalles/${aData[0]}"

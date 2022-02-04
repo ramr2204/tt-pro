@@ -236,8 +236,8 @@ $(document).ready(function() {
                 bSmart: false
             },
             {    
+                type:"select",
                 sSelector: "#buscarano", 
-                type:"select" ,
                 values : <?php echo $a; ?>
             },
             null,

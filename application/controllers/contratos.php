@@ -98,12 +98,19 @@ class Contratos extends MY_Controller {
                 ];
                 $this->template->set('title', 'Ingreso manual de contrato');
 
+                $id_empresa = HelperGeneral::verificarRestriccionEmpresa($this);
+
                 $this->data['tiposcontratos']           = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
                 $this->data['contratistas']             = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
-                $this->data['contratantes']             = $this->codegen_model->getSelect('con_contratantes', 'id,nombre,nit');
                 $this->data['municipios']               = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 6');
                 $this->data['clasificacion_contrato']   = Equivalencias::clasificacionContratos();
                 $this->data['contrato_normal']          = Equivalencias::contratoNormal();
+
+                $this->data['contratantes']             = $this->codegen_model->getSelect(
+                    'con_contratantes',
+                    'id,nombre,nit',
+                    ($id_empresa === true ? '' : 'WHERE id = '.$id_empresa)
+                );
 
                 $this->template->load($this->config->item('admin_template'),'contratos/contratos_add', $this->data);
             } else {
@@ -367,16 +374,18 @@ class Contratos extends MY_Controller {
                             $this->data['errormessage'] = $msjError;
                         }
               }   
-                  $this->data['style_sheets']= array(
-                        'css/chosen.css' => 'screen',
-                        'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen'
-                    );
-              $this->data['javascripts']= array(
-                        'js/chosen.jquery.min.js',
-                        'js/plugins/bootstrap/moment.js',
-                        'js/plugins/bootstrap/bootstrap-datetimepicker.js',
-                        'js/autoNumeric.js'
-                    );
+                $this->data['style_sheets'] = [
+                    'css/chosen.css' => 'screen',
+                    'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen'
+                ];
+                $this->data['javascripts'] = [
+                    'js/chosen.jquery.min.js',
+                    'js/plugins/bootstrap/moment.js',
+                    'js/plugins/bootstrap/bootstrap-datetimepicker.js',
+                    'js/autoNumeric.js'
+                ];
+
+                $id_empresa = HelperGeneral::verificarRestriccionEmpresa($this);
 
                 $this->data['result'] = $this->codegen_model->get(
                     'con_contratos',
@@ -390,10 +399,16 @@ class Contratos extends MY_Controller {
                 );
                 $this->data['tiposcontratos']  = $this->codegen_model->getSelect('con_tiposcontratos','tico_id,tico_nombre');
                 $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
-                $this->data['contratantes'] = $this->codegen_model->getSelect('con_contratantes', 'id,nombre,nit');
                 $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 6');
 				$this->data['clasificacion_contrato']  = Equivalencias::clasificacionContratos();
                 $this->data['contrato_normal']  = Equivalencias::contratoNormal();
+
+                $this->data['contratantes']             = $this->codegen_model->getSelect(
+                    'con_contratantes',
+                    'id,nombre,nit',
+                    ($id_empresa === true ? '' : 'WHERE id = '.$id_empresa)
+                );
+
                 $this->template->set('title', 'Editar contrato');
                 $this->template->load($this->config->item('admin_template'),'contratos/contratos_edit', $this->data);
 
@@ -688,6 +703,8 @@ class Contratos extends MY_Controller {
       if ($this->ion_auth->logged_in()) {
           
           if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('contratos/manage') ) { 
+
+            $verificacion = HelperGeneral::verificarRestriccionEmpresa($this);
               
             /*
             * Se Valida si el usuario tiene la opcion de editar contratos
@@ -706,14 +723,11 @@ class Contratos extends MY_Controller {
                     $this->load->library('datatables');
                     $this->datatables->add_column('edit', '', 'c.cntr_id'); 
                 }
-              
+
               $this->datatables->select('c.cntr_id,c.cntr_numero,co.cont_nit,co.cont_nombre,ctte.nit,ctte.nombre,c.cntr_fecha_firma,c.cntr_objeto,c.cntr_valor,c.cntr_vigencia');
               $this->datatables->from('con_contratos c');
               $this->datatables->join('con_contratistas co', 'co.cont_id = c.cntr_contratistaid', 'left');
               $this->datatables->join('con_contratantes ctte', 'ctte.id = c.cntr_contratanteid', 'left');
-
-              $helper = new HelperGeneral;
-              $verificacion = $helper->verificarRestriccionEmpresa();
 
               if($verificacion !== true) {
                   $this->datatables->where('c.cntr_contratanteid = "'. $verificacion .'"');

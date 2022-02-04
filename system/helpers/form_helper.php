@@ -672,9 +672,9 @@ if ( ! function_exists('form_prep'))
  */
 if ( ! function_exists('set_value'))
 {
-	function set_value($field = '', $default = '')
+	function set_value($field = '', $default = '', $forzarPost = false)
 	{
-		if (FALSE === ($OBJ =& _get_validation_object()))
+		if ($forzarPost || FALSE === ($OBJ =& _get_validation_object()))
 		{
 			if ( ! isset($_POST[$field]))
 			{
@@ -704,11 +704,11 @@ if ( ! function_exists('set_value'))
  */
 if ( ! function_exists('set_select'))
 {
-	function set_select($field = '', $value = '', $default = FALSE)
+	function set_select($field = '', $value = '', $default = FALSE, $forzarPost = false)
 	{
 		$OBJ =& _get_validation_object();
 
-		if ($OBJ === FALSE)
+		if ($forzarPost || $OBJ === FALSE)
 		{
 			if ( ! isset($_POST[$field]))
 			{

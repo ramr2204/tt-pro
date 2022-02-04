@@ -2,37 +2,41 @@
 
 
 <script type="text/javascript" language="javascript" charset="utf-8">
-//generación de la tabla mediante json
-$(document).ready(function() {
 
-var oTable = $('#tablaq').dataTable( {
-"bProcessing": true,
-"bServerSide": true,
-"sAjaxSource": "<?php echo base_url(); ?>index.php/users/dataTable",
-"sServerMethod": "POST",
-"aoColumns": [ 
-                      { "sClass": "center","sWidth": "5%" }, /*id 0*/
-                      { "sClass": "item" }, 
-                      { "sClass": "item" },  
-                      { "sClass": "item","sWidth": "5%" }, 
-                      { "sClass": "center","bSortable": false,"bSearchable": false,"sWidth": "5%" },
+  tipos_usuarios = JSON.parse('<?= json_encode($tipos_usuarios) ?>');
 
-                    
-                      ],
- "fnRowCallback":function( nRow, aData, iDataIndex ) {
-          if ( aData[3] ==1 )
-            {
-               $('td:eq(3)', nRow).html( '<a href="<?php echo base_url(); ?>users/deactivate/'+aData[0]+'" class="btn btn-default btn-xs" title="Desactivar"><i class="fa fa-unlock" style="color:green"></i> </a>' );  
-            }else
-            {
-              $('td:eq(3)', nRow).html( '<a href="<?php echo base_url(); ?>users/activate/'+aData[0]+'" class="btn btn-default btn-xs"" title="Activar"><i class="fa fa-lock" style="color:red"></i></a>' );  
-            }
-         },                          
+  //generación de la tabla mediante json
+  $(document).ready(function() {
 
-} );
+    var oTable = $('#tablaq').dataTable( {
+      "bProcessing": true,
+      "bServerSide": true,
+      "sAjaxSource": "<?php echo base_url(); ?>index.php/users/dataTable",
+      "sServerMethod": "POST",
+      "aoColumns": [
+        { "sClass": "center","sWidth": "5%" }, /*id 0*/
+        { "sClass": "item" },
+        { "sClass": "item" },
+        { "sClass": "item" },
+        { "sClass": "item","bSortable": false,"bSearchable": false },
+        { "sClass": "item","sWidth": "5%" }, 
+        { "sClass": "center","bSortable": false,"bSearchable": false,"sWidth": "5%" },
+      ],
+      "fnRowCallback":function( nRow, aData, iDataIndex ) {
+        if ( aData[5] ==1 )
+        {
+          $('td:eq(5)', nRow).html( '<a href="<?php echo base_url(); ?>users/deactivate/'+aData[0]+'" class="btn btn-default btn-xs" title="Desactivar"><i class="fa fa-unlock" style="color:green"></i> </a>' );  
+        }else
+        {
+          $('td:eq(5)', nRow).html( '<a href="<?php echo base_url(); ?>users/activate/'+aData[0]+'" class="btn btn-default btn-xs"" title="Activar"><i class="fa fa-lock" style="color:red"></i></a>' );  
+        }
+
+        $('td:eq(4)', nRow).html(tipos_usuarios[aData[4]])
+      },
+    } );
 
     oTable.fnSearchHighlighting();
-} );
+  });
 </script>
 
 
@@ -47,9 +51,11 @@ var oTable = $('#tablaq').dataTable( {
  <thead>
     <tr>
      <th>Identificación</th>
-     <th>Email</th> 
-     <th>Perfil</th>  
-     <th>Estado</th> 
+     <th>Email</th>
+     <th>Empresa</th>
+     <th>Perfil</th>
+     <th>Tipo</th>
+     <th>Estado</th>
      <th>Acciones</th>
    </tr>
  </thead>

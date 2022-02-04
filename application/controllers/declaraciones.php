@@ -105,15 +105,14 @@ class Declaraciones extends MY_Controller
     {
         if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index'))
         {
+            $verificacion = HelperGeneral::verificarRestriccionEmpresa($this);
+
             $this->load->library('datatables');
             $this->datatables->select('d.id, empresa.nombre AS empresa, estampilla.estm_nombre AS estampilla,
                 d.periodo, d.tipo_declaracion, d.fecha_creacion, d.estado, d.soporte');
             $this->datatables->from('declaraciones AS d');
             $this->datatables->join('con_contratantes empresa','empresa.id = d.id_empresa','inner');
             $this->datatables->join('est_estampillas estampilla','estampilla.estm_id = d.id_estampilla','inner');
-
-            $helper = new HelperGeneral;
-            $verificacion = $helper->verificarRestriccionEmpresa();
 
             if($verificacion !== true) {
                 $this->datatables->where('d.id_empresa = "'. $verificacion .'"');
@@ -147,7 +146,13 @@ class Declaraciones extends MY_Controller
                 $this->data['consulta'] = [];
 
                 if($this->input->post('acc') == 'consultar') {
-                    $this->consultar();
+                    $validacion = $this->validacionInicial();
+
+                    if ($validacion[0]) {
+                        $this->consultarDatos();
+                    } else {
+                        $this->data['errormessage'] = $validacion[1];
+                    }
                 }
                 elseif($this->input->post('acc') == 'generar')
                 {
@@ -176,7 +181,7 @@ class Declaraciones extends MY_Controller
                     'js/autoNumeric.js',
                 ];
 
-                $id_empresa = $this->verificarRestriccionEmpresa();
+                $id_empresa = HelperGeneral::verificarRestriccionEmpresa($this);
 
                 $this->data['empresas'] = $this->codegen_model->getSelect(
                     'con_contratantes',
@@ -189,6 +194,8 @@ class Declaraciones extends MY_Controller
 
                 $this->data['clasificaciones_contratos'] = $this->tipos_detalles;
 
+                $this->data['esVisualizar'] = false;
+
                 $this->template->load($this->config->item('admin_template'),'declaraciones/create', $this->data);
             } else {
                 redirect(base_url().'index.php/error_404');
@@ -199,12 +206,14 @@ class Declaraciones extends MY_Controller
     }
 
     /**
-     * Valida los datos para  la consulta de valores de los contratos
+     * Valida los datos iniciales para la declaracion
      * 
-     * @return null
+     * @return array [exito, mensajeError]
      */
-    private function consultar()
+    private function validacionInicial()
     {
+        $respuesta = [true, ''];
+
         $this->form_validation->set_rules('empresa', 'Empresa','required|trim|xss_clean|is_exists[con_contratantes.id]');
         $this->form_validation->set_rules('tipo_estampilla', 'Tipo Estampilla','required|trim|xss_clean|is_exists[est_estampillas.estm_id]');
 
@@ -220,10 +229,10 @@ class Declaraciones extends MY_Controller
         );
 
         if ($this->form_validation->run() == false) {
-            $this->data['errormessage'] = (validation_errors() ? validation_errors() : false);
-        } else {
-            $this->consultarDatos();
+            $respuesta = [false, (validation_errors() ? validation_errors() : false)];
         }
+
+        return $respuesta;
     }
 
     /**
@@ -242,9 +251,9 @@ class Declaraciones extends MY_Controller
             'SUM(cuota.valor) as base,
                 SUM(pagos.valor) as pagado,
                 factura.fact_porcentaje AS porcentaje',
-            'WHERE factura.fact_estampillaid = '. $this->input->post('tipo_estampilla') .'
+            'WHERE factura.fact_estampillaid = "'. $this->input->post('tipo_estampilla') .'"
                 AND DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. $this->input->post('periodo') .'"
-                AND contrato.cntr_contratanteid = '. $this->input->post('empresa'),
+                AND contrato.cntr_contratanteid = "'. $this->input->post('empresa') .'"',
             'INNER JOIN est_facturas factura ON factura.fact_id = pagos.factura_id
                 INNER JOIN cuotas_liquidacion cuota ON (
                     cuota.id = factura.id_cuota_liquidacion
@@ -259,7 +268,7 @@ class Declaraciones extends MY_Controller
         $porcentajeDefecto = $this->data['empresas'] = $this->codegen_model->getSelect(
             'est_estampillas_tiposcontratos',
             'MAX(esti_porcentaje) AS porcentaje',
-            'WHERE esti_estampillaid = '. $this->input->post('tipo_estampilla'),
+            'WHERE esti_estampillaid = "'. $this->input->post('tipo_estampilla') .'"',
             '', '', '',
             'LIMIT 1'
         );
@@ -296,9 +305,9 @@ class Declaraciones extends MY_Controller
                 SUM(cuota.valor) as base,
                 SUM(pagos.valor) as pagado,
                 factura.fact_porcentaje AS porcentaje',
-            'WHERE factura.fact_estampillaid = '. $this->input->post('tipo_estampilla') .'
+            'WHERE factura.fact_estampillaid = "'. $this->input->post('tipo_estampilla') .'"
                 AND DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. $this->input->post('periodo') .'"
-                AND contrato.cntr_contratanteid = '. $this->input->post('empresa'),
+                AND contrato.cntr_contratanteid = "'. $this->input->post('empresa') .'"',
             'INNER JOIN est_facturas factura ON factura.fact_id = pagos.factura_id
                 INNER JOIN cuotas_liquidacion cuota ON (
                     cuota.id = factura.id_cuota_liquidacion
@@ -337,6 +346,7 @@ class Declaraciones extends MY_Controller
             }
         }
 
+        # Se deja true para que permita crear declaraciones sin pagos
         if(true)
         // if($consulto)
         {
@@ -617,6 +627,8 @@ class Declaraciones extends MY_Controller
      */
     public function detalles()
     {
+        $previsualizacion = isset($_GET['empresa']) && $_GET['tipo_estampilla'] && $_GET['periodo'];
+
         //redirect them to the login page
         if (!$this->ion_auth->logged_in()) {
 			redirect('users/login', 'refresh');
@@ -624,11 +636,17 @@ class Declaraciones extends MY_Controller
 		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/detalles'))) {
 			redirect('error_404', 'refresh');
 		}
-        elseif ($this->uri->segment(3)==''){
+        elseif ($this->uri->segment(3) == '' && !$previsualizacion){
             redirect(base_url().'index.php/error_404');
         }
 
-        $this->data['id_declaracion'] = $this->uri->segment(3);
+        if($previsualizacion) {
+            $this->data['empresa']          = $_GET['empresa'];
+            $this->data['tipo_estampilla']  = $_GET['tipo_estampilla'];
+            $this->data['periodo']          = $_GET['periodo'];
+        } else {
+            $this->data['id_declaracion'] = $this->uri->segment(3);
+        }
 
         $this->template->set('title', 'Detalle de declaracion');
         $this->data['style_sheets'] = [
@@ -651,6 +669,8 @@ class Declaraciones extends MY_Controller
      */
     public function detallesDatatable()
     {
+        $previsualizacion = isset($_GET['empresa']) && $_GET['tipo_estampilla'] && $_GET['periodo'];
+
         //redirect them to the login page
         if (!$this->ion_auth->logged_in()) {
 			redirect('users/login', 'refresh');
@@ -658,19 +678,42 @@ class Declaraciones extends MY_Controller
 		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/detalles'))) {
 			redirect('error_404', 'refresh');
 		}
-        elseif (!isset($_GET['id_declaracion'])){
+        elseif (!isset($_GET['id_declaracion']) && !$previsualizacion){
             redirect(base_url().'index.php/error_404');
         }
 
         $this->load->library('datatables');
 
-        $declaracion = $this->codegen_model->get(
-            'declaraciones AS d',
-            'd.id_estampilla, d.periodo, d.id_empresa',
-            'd.id = "'. $_GET['id_declaracion'] .'"',
-            1,NULL,true, '',
-            'est_estampillas e', 'e.estm_id = d.id_estampilla'
+        # Declaracion generada con valores en 0 para que la consulta no retorne nada
+        $declaracion = (object)array(
+            'id_empresa'    => 0,
+            'id_estampilla' => 0,
+            'periodo'       => 0,
         );
+
+        if($previsualizacion) {
+            $_POST['empresa']           = $_GET['empresa'];
+            $_POST['tipo_estampilla']   = $_GET['tipo_estampilla'];
+            $_POST['periodo']           = $_GET['periodo'];
+
+            list($exito) = $this->validacionInicial();
+
+            if($exito) {
+                $declaracion = (object)array(
+                    'id_empresa'    => $_GET['empresa'],
+                    'id_estampilla' => $_GET['tipo_estampilla'],
+                    'periodo'       => $_GET['periodo'],
+                );
+            }
+        } else {
+            $declaracion = $this->codegen_model->get(
+                'declaraciones AS d',
+                'd.id_estampilla, d.periodo, d.id_empresa',
+                'd.id = "'. $_GET['id_declaracion'] .'"',
+                1,NULL,true, '',
+                'est_estampillas e', 'e.estm_id = d.id_estampilla'
+            );
+        }
 
         $this->datatables->select('contratista.cont_nombre AS nombre_contratista,
             contratista.cont_nit AS nit_contratista,
@@ -693,12 +736,11 @@ class Declaraciones extends MY_Controller
         $this->datatables->where('DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. date('Y-m', strtotime($declaracion->periodo)) .'"');
         $this->datatables->where('contrato.cntr_contratanteid = '. $declaracion->id_empresa);
 
-        $helper = new HelperGeneral;
-        $verificacion = $helper->verificarRestriccionEmpresa();
+        $verificacion = HelperGeneral::verificarRestriccionEmpresa($this);
 
         # Valida si esta requerido la empresa genere una consulta vacia
         if($verificacion !== true && $verificacion != $declaracion->id_empresa) {
-            $this->datatables->where('0 != 1');
+            $this->datatables->where('0 = 1', null, false);
         }
 
         echo $this->datatables->generate();
@@ -723,9 +765,9 @@ class Declaraciones extends MY_Controller
                 liquidacion.liqu_valorsiniva AS valor_contrato,
                 cuota.valor as base_pago,
                 pagos.valor as pagado',
-            'WHERE factura.fact_estampillaid = '. $declaracion->id_estampilla .'
+            'WHERE factura.fact_estampillaid = "'. $declaracion->id_estampilla .'"
                 AND DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. date('Y-m', strtotime($declaracion->periodo)) .'"
-                AND contrato.cntr_contratanteid = '. $declaracion->id_empresa,
+                AND contrato.cntr_contratanteid = "'. $declaracion->id_empresa .'"',
             'INNER JOIN est_facturas factura ON factura.fact_id = pagos.factura_id
                 INNER JOIN est_liquidaciones liquidacion ON liquidacion.liqu_id = factura.fact_liquidacionid
                 INNER JOIN cuotas_liquidacion cuota ON cuota.id = factura.id_cuota_liquidacion
@@ -1218,19 +1260,76 @@ class Declaraciones extends MY_Controller
         echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
     }
 
-    /**
-     * Verifica si el usuario esta asociado a una empresa o tiene control total
-     * 
-     * @return bool|int
-    */
-    public function verificarRestriccionEmpresa()
+    public function info()
     {
-        if($this->ion_auth->is_admin()) {
-            return true;
+        //redirect them to the login page
+        if (!$this->ion_auth->logged_in()) {
+			redirect('users/login', 'refresh');
+		}
+		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/detalles'))) {
+			redirect('error_404', 'refresh');
+		}
+        elseif ($this->uri->segment(3) == ''){
+            redirect(base_url().'index.php/error_404');
         }
 
-        $usuario = $this->ion_auth->user()->row();
+        $id_declaracion = $this->uri->segment(3);
 
-        return $usuario->id_empresa;
+        $this->data['esVisualizar'] = true;
+
+        $declaracion = $this->codegen_model->get(
+            'declaraciones',
+            'id_empresa AS empresa, id_estampilla AS tipo_estampilla, periodo, tipo_declaracion, declaracion_correccion,
+                radicacion_correccion, fecha_correccion, periodo_correccion, recaudado, sanciones,
+                intereses, total_base, total_estampillas, saldo_periodo_anterior, sanciones_pago,
+                intereses_mora, total_cargo, saldo_favor, soporte, estado',
+            'id = "'. $id_declaracion .'"',
+            1,NULL,true
+        );
+
+        $_POST = (array)$declaracion;
+
+        $clasificaciones = Equivalencias::clasificacionContratos();
+        $clasificaciones[3] = 'Adiciones';
+
+        $consulta = $this->codegen_model->getSelect(
+            'detalles_declaracion',
+            'renglon AS clasificacion, base, porcentaje,
+                valor_estampilla AS pagado, vigencia_actual, vigencia_anterior',
+            'WHERE id_declaracion = "'. $id_declaracion .'"',
+            '', '',
+            'ORDER BY renglon'
+        );
+        $this->data['consulta'] = array_map(
+            function($detalle) use($clasificaciones) {
+                $detalle->clase = $clasificaciones[$detalle->clasificacion];
+                return $detalle;
+            },
+            $consulta
+        );
+
+        $estampilla = $this->codegen_model->getSelect(
+            'est_estampillas',
+            'estm_nombre AS nombre',
+            'WHERE estm_id = '.$declaracion->tipo_estampilla
+        );
+        $this->data['estampilla'] = $estampilla[0];
+
+        $this->template->set('title', 'Información de la Declaración');
+
+        $this->data['style_sheets'] = [
+            'css/chosen.css' => 'screen',
+            'css/plugins/bootstrap/bootstrap-datetimepicker.css' => 'screen',
+            'css/plugins/bootstrap/fileinput.css' => 'screen',
+        ];
+        $this->data['javascripts'] = [
+            'js/chosen.jquery.min.js',
+            'js/plugins/bootstrap/moment.js',
+            'js/plugins/bootstrap/bootstrap-datetimepicker.js',
+            'js/plugins/bootstrap/fileinput.min.js',
+            'js/autoNumeric.js',
+        ];
+
+        $this->template->load($this->config->item('admin_template'),'declaraciones/create', $this->data);
     }
 }
