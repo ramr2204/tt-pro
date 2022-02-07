@@ -715,6 +715,8 @@ class Declaraciones extends MY_Controller
             );
         }
 
+        $verificacion = HelperGeneral::verificarRestriccionEmpresa($this);
+
         $this->datatables->select('contratista.cont_nombre AS nombre_contratista,
             contratista.cont_nit AS nit_contratista,
             pagos.fecha,
@@ -735,8 +737,6 @@ class Declaraciones extends MY_Controller
         $this->datatables->where('factura.fact_estampillaid = '. $declaracion->id_estampilla);
         $this->datatables->where('DATE_FORMAT(pagos.fecha, "%Y-%m") = "'. date('Y-m', strtotime($declaracion->periodo)) .'"');
         $this->datatables->where('contrato.cntr_contratanteid = '. $declaracion->id_empresa);
-
-        $verificacion = HelperGeneral::verificarRestriccionEmpresa($this);
 
         # Valida si esta requerido la empresa genere una consulta vacia
         if($verificacion !== true && $verificacion != $declaracion->id_empresa) {

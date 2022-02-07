@@ -29,7 +29,7 @@ class usuariosFirma extends MY_Controller
 			//redirect them to the login page
 			redirect('users/login', 'refresh');
 		}
-		elseif (!$this->ion_auth->is_admin()) //remove this elseif if you want to enable this for non-admins
+		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('usuariosFirma/index'))) //remove this elseif if you want to enable this for non-admins
 		{
 			//redirect them to the home page because they must be an administrator to view this
 			redirect('error_404', 'refresh');
@@ -65,7 +65,7 @@ class usuariosFirma extends MY_Controller
 
     public function dataTable()
     {
-        if ($this->ion_auth->is_admin())
+        if (($this->ion_auth->is_admin() || $this->ion_auth->in_menu('usuariosFirma/index')))
         {
             $this->load->library('datatables');
             $this->datatables->select('
@@ -94,7 +94,7 @@ class usuariosFirma extends MY_Controller
     {
         if ($this->ion_auth->logged_in())
         {
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar'))
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('usuariosFirma/index'))
             {
                 $_POST = array_merge($_POST, ($this->session->flashdata('campos') ? $this->session->flashdata('campos') : []) );
 
@@ -199,7 +199,7 @@ class usuariosFirma extends MY_Controller
 
         if ($this->ion_auth->logged_in())
         {
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar'))
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('usuariosFirma/index'))
             {
                 $id_empresa = $this->uri->segment(3) ? $this->uri->segment(3) : 0;
 
@@ -226,7 +226,7 @@ class usuariosFirma extends MY_Controller
 
         if ($this->ion_auth->logged_in())
         {
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar'))
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('usuariosFirma/index'))
             {
                 if ($this->input->post('st') == 1) {
                     $estado = 0;
@@ -273,7 +273,7 @@ class usuariosFirma extends MY_Controller
 
         if ($this->ion_auth->logged_in())
         {
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/consultar'))
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('usuariosFirma/index'))
             {
                 if( $this->input->post('id') > 0 )
                 {

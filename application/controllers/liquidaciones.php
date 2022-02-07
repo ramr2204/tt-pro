@@ -4281,7 +4281,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
     {
         if ($this->ion_auth->logged_in())
         {
-            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/importar'))
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/importarLiquidaciones'))
             {
                 $this->data['successmessage'] = $this->session->flashdata('successmessage');
                 $this->data['errormessage'] = $this->session->flashdata('errormessage');
