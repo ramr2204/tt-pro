@@ -613,7 +613,14 @@ class Generarpdf extends CI_controller {
         }
 
         $this->data['estampilla'] = $estampilla;
-        $html = $this->load->view('generarpdf/generarpdf_estampillalegalizada', $this->data, TRUE);  
+        $this->data['cuota'] = $this->codegen_model->get(
+            'cuotas_liquidacion',
+            'valor',
+            'id_liquidacion = "' . $pago->id_liquidacion . '"',
+            1, null, true, ''
+        );;
+
+        $html = $this->load->view('generarpdf/generarpdf_estampillalegalizada', $this->data, TRUE);
         
         $pdf->writeHTML($html, true, false, true, false, '');
 

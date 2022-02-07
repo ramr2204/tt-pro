@@ -134,7 +134,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        font-size:7;"> Valor Acto con IVA</td>
+                        font-size:7;"> Valor Pagado</td>
 
                     <td style="height: 5mm; width: 3mm; border-top: 0.5px solid black;
                         border-left: 0.5px solid black;
@@ -143,7 +143,7 @@
                     <td style="height: 5mm; width: 21mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        text-align: right;"><?= number_format((double)$estampilla->liqu_valorconiva,2, ',', '.'); ?><span style="color:white;">.</span></td>
+                        text-align: right;"><?= number_format((double)$cuota->valor,2, ',', '.'); ?><span style="color:white;">.</span></td>
 
                     <td style="height: 5mm; width: 23mm; border-top: 0.5px solid black;
                         border-right: 0.5px solid black;
