@@ -163,7 +163,8 @@ class Liquidaciones_model extends CI_Model {
             factura.fact_id, factura.fact_nombre, factura.fact_valor AS valor_total,
             COALESCE(MAX(pago.numero), 0) AS numero_cuota,
             factura.fact_rutaimagen, factura.fact_liquidacionid AS id_liquidacion,
-            SUM(pago.valor) AS valor_pagado, factura.fact_porcentaje AS porcentaje',
+            SUM(pago.valor) AS valor_pagado, factura.fact_porcentaje AS porcentaje,
+            factura.id_cuota_liquidacion',
             false
         );
         $this->db->from('est_facturas AS factura');
