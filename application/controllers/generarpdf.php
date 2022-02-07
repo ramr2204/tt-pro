@@ -616,7 +616,7 @@ class Generarpdf extends CI_controller {
         $this->data['cuota'] = $this->codegen_model->get(
             'cuotas_liquidacion',
             'valor',
-            'id_liquidacion = "' . $pago->id_liquidacion . '"',
+            'id = "' . $pago->id_cuota_liquidacion . '"',
             1, null, true, ''
         );;
 
