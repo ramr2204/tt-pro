@@ -227,7 +227,7 @@
                                                     <td rowspan="2"> D.1. Clase</td>
                                                     <td colspan="3"> D.2. Valor</td>
                                                     <td rowspan="2"> D.3. Tarifa</td>
-                                                    <td rowspan="2"> D.4. Valor recaudo estampilla <?= $estampilla->nombre ?></td>
+                                                    <td rowspan="2"> D.4. Valor recaudo <?= strtolower($estampilla->nombre) ?></td>
                                                 </tr>
                                                 <tr>
                                                     <td> Valor base</td>
@@ -318,7 +318,7 @@
                                             <legend>Pagos</legend>
                                         </div>
                                         <div class="col-md-6 column form-group">
-                                            <label for="valor_liquidado">Valor liquidado estampilla pro cultura</label>
+                                            <label for="valor_liquidado">Valor liquidado <?= strtolower($estampilla->nombre) ?></label>
                                             <input id="valor_liquidado"
                                                 name="total_estampillas"
                                                 type="number"
