@@ -88,9 +88,22 @@
                                            </select>
                                            <?php echo form_error('tipocontratoid','<span class="text-danger">','</span>'); ?>
                                           </div>
-                                         
-
                                      </div>
+
+                                    <div class="col-md-6 column">
+                                        <div class="form-group">
+                                            <label for="estampillas_asociadas">Estampillas asociadas</label>
+                                            <select name="estampillas_asociadas[]"
+                                                class="form-control"
+                                                id="estampillas_asociadas"
+                                                multiple
+                                                data-placeholder="Seleccione al menos uno"
+                                            >
+                                            </select>
+
+                                            <?php echo form_error('estampillas_asociadas','<span class="text-danger">','</span>'); ?>
+                                        </div>
+                                    </div>
 
                                      <div class="col-md-6 column">
                                        <div class="form-group">
@@ -246,31 +259,26 @@
 </div>
 <?php echo form_close();?>
 <?php } ?>
-  <script type="text/javascript">
-      $(function () {
-          $('#datetimepicker5').datetimepicker({
-              pickTime: false
-          });
-      });
-  </script>
-  <script type="text/javascript">
+<script type="text/javascript">
+    $(function () {
+        $('#datetimepicker5').datetimepicker({
+            pickTime: false
+        });
+
+        $('#tipocontratoid').change(handlerTipoContrato);
+        $('#tipocontratoid').change();
+    });
+
     //style selects
     var config = {
       '#tipocontratoid'  : {disable_search_threshold: 10},
       '#cntr_municipio_origen'  : {disable_search_threshold: 10},
-      '#clasificacion_contrato'  : {disable_search_threshold: 10}
+      '#clasificacion_contrato'  : {disable_search_threshold: 10},
+      '#estampillas_asociadas'  : {disable_search_threshold: 10},
     }
     for (var selector in config) {
         $(selector).chosen(config[selector]);
     }
-
-    $(function () {
-        $('#valor').autoNumeric('init',{aSep: '.' , aDec: ',' }); 
-        $('#valor_iva_otros').autoNumeric('init',{aSep: '.' , aDec: ',' });
-
-        $('#clasificacion_contrato').change(handlerClasificacionContrato);
-        $('#clasificacion_contrato').change();
-    });
 
     function handlerClasificacionContrato()
     {
@@ -281,6 +289,39 @@
             $('#contrato_relacionado').closest('.column').show();
         }else{
             $('#contrato_relacionado').closest('.column').hide();
+        }
+    }
+
+    estampillas_seleccionadas = JSON.parse('<?= json_encode($estampillas_seleccionadas) ?>')
+
+    function handlerTipoContrato() {
+        var valor = $(this).val();
+
+        $('#estampillas_asociadas').empty().trigger('chosen:updated');
+
+        if(valor && valor != '0') {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: base_url + 'index.php/contratos/estampillasAsociadas/' + valor,
+                success: function (respuesta) {
+                    if(respuesta.exito) {
+                        var options = '';
+    
+                        respuesta.datos.forEach(function(estampilla) {
+                            options += `<option value="${estampilla.id}"
+                                ${estampillas_seleccionadas.length == 0 || estampillas_seleccionadas.includes(estampilla.id) ? 'selected' : ''}
+                            >${estampilla.nombre}</option>`
+                        });
+
+                        estampillas_seleccionadas = [];
+    
+                        $('#estampillas_asociadas').html(options).trigger('chosen:updated');
+                    } else {
+                        alert('Ha ocurrido un error\n' + respuesta.mensaje);
+                    }
+                }
+            });
         }
     }
 
