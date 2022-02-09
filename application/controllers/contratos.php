@@ -345,8 +345,41 @@ class Contratos extends MY_Controller {
                         $msjError .= '<br>No existe el contratante seleccionado!';
                     }
 
+                    $estampillasAsociadas = $this->input->post('estampillas_asociadas');
+
+                    if(is_array($estampillasAsociadas) && count($estampillasAsociadas) > 0)
+                    {
+                        $totalEstampillas = $this->estampillasAsociadas($this->input->post('tipocontratoid'), false);
+                        $totalEstampillas = $totalEstampillas['datos'] ? HelperGeneral::lists($totalEstampillas['datos'], 'porcentaje', 'id') : [];
+
+                        $estampillasFormateadas = [];
+        
+                        foreach($estampillasAsociadas AS $estampilla) {
+                            if(array_key_exists($estampilla, $totalEstampillas)) {
+                                $estampillasFormateadas[$estampilla] = $totalEstampillas[$estampilla];
+                            } else {
+                                $bandContinuar = false;
+                                $msjError .= '<br>Alguna de las estampillas no son validas!';
+                                break;
+                            }
+                        }
+                    } else {
+                        $bandContinuar = false;
+                        $msjError .= '<br>Ninguna estampilla selecccionada!';
+                    }
+
                     if ($bandContinuar)
                     {
+                        $this->codegen_model->delete('estampillas_contratos', 'id_contrato', $idcontrato);
+
+                        foreach($estampillasFormateadas AS $id => $porcentaje) {
+                            $this->codegen_model->add('estampillas_contratos', [
+                                'id_contrato'   => $idcontrato,
+                                'id_estampilla' => $id,
+                                'porcentaje'    => $porcentaje,
+                            ]);
+                        }
+
                         $data = array(
                             'cntr_contratistaid' => $this->input->post('contratistaid'),
                             'cntr_contratanteid' => $this->input->post('contratanteid'),
@@ -403,11 +436,19 @@ class Contratos extends MY_Controller {
 				$this->data['clasificacion_contrato']  = Equivalencias::clasificacionContratos();
                 $this->data['contrato_normal']  = Equivalencias::contratoNormal();
 
-                $this->data['contratantes']             = $this->codegen_model->getSelect(
+                $this->data['contratantes'] = $this->codegen_model->getSelect(
                     'con_contratantes',
                     'id,nombre,nit',
                     ($id_empresa === true ? '' : 'WHERE id = '.$id_empresa)
                 );
+
+                $this->data['estampillas_seleccionadas'] = $this->codegen_model->getSelect(
+                    'estampillas_contratos',
+                    'id_estampilla AS id',
+                    'WHERE id_contrato = '.$idcontrato,
+                    '', '', ''
+                );
+                $this->data['estampillas_seleccionadas'] = HelperGeneral::lists($this->data['estampillas_seleccionadas'], 'id');
 
                 $this->template->set('title', 'Editar contrato');
                 $this->template->load($this->config->item('admin_template'),'contratos/contratos_edit', $this->data);
