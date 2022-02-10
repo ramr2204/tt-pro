@@ -1266,7 +1266,7 @@ class Declaraciones extends MY_Controller
         if (!$this->ion_auth->logged_in()) {
 			redirect('users/login', 'refresh');
 		}
-		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/detalles'))) {
+		elseif (!($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index'))) {
 			redirect('error_404', 'refresh');
 		}
         elseif ($this->uri->segment(3) == ''){
