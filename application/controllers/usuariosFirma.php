@@ -176,7 +176,7 @@ class usuariosFirma extends MY_Controller
 
                 if ($edito == true)
                 {
-                    $this->inactivarFirmantesAnteriores($this->input->post('empresa'), $guardo->idInsercion);
+                    // $this->inactivarFirmantesAnteriores($this->input->post('empresa'), $guardo->idInsercion);
 
                     $this->session->set_flashdata('successmessage', 'El usuario de firma electrónica se ha registrado correctamente');
                     redirect(base_url().'index.php/usuariosFirma/');
@@ -254,7 +254,7 @@ class usuariosFirma extends MY_Controller
                             1,NULL,true, '',
                             'users', 'users.id = firma.id_usuario'
                         );
-                        $this->inactivarFirmantesAnteriores($usuario->id_empresa, $this->input->post('id'));
+                        // $this->inactivarFirmantesAnteriores($usuario->id_empresa, $this->input->post('id'));
                     }
 
                     $response['id'] = $this->input->post('id');
