@@ -18,7 +18,7 @@ class Declaraciones extends MY_Controller
         $this->load->helper(['Equivalencias', 'EquivalenciasFirmas', 'EquivalenciasNotificaciones']);
         $this->load->helper('HelperGeneral');
 
-        setlocale(LC_TIME, 'es_CO');
+        setlocale(LC_TIME, 'spanish');
 
         # Se toma como base las clasificaciones de los contratos pero se le agregan "Adiciones" por que se calcula de otra forma
         $this->tipos_detalles = Equivalencias::clasificacionContratos();
