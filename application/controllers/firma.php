@@ -1160,4 +1160,24 @@ class Firma extends MY_Controller
         }
         return $band;
     }
+
+    /**
+     * Funcion que genera manualmente el comprobante de la declaracion
+     */
+    public function generarArchivoManual()
+    {
+        if (!$this->ion_auth->logged_in()) {
+			redirect('users/login', 'refresh');
+		}
+		elseif (!$this->ion_auth->is_admin()) {
+			redirect('error_404', 'refresh');
+		}
+        elseif ($this->uri->segment(3) == ''){
+            redirect(base_url().'index.php/error_404');
+        }
+
+        $respuesta = $this->generadorPlantilla($this->uri->segment(3));
+
+        var_dump($respuesta);
+    }
 }
