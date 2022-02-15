@@ -3625,7 +3625,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
             'id' => null
         ];
 
-        $this->form_validation->set_rules('id_cuota', 'Identificador de la facturas', 'required|trim|xss_clean|numeric|integer|is_exists[cuotas_liquidacion.id]');
+        $this->form_validation->set_rules('id_cuota', 'Identificador de la cuota', 'required|trim|xss_clean|numeric|integer|is_exists[cuotas_liquidacion.id]');
         $this->form_validation->set_rules('id_contrato', 'Identificador del contrato', 'required|trim|xss_clean|numeric|integer|is_exists[con_contratos.cntr_id]');
         $this->form_validation->set_rules('fecha', 'Fecha', [
             'required',
@@ -3638,6 +3638,62 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
         if ($this->form_validation->run() == false) {
             $respuesta['error'] = ($this->form_validation->error_string() ? $this->form_validation->error_string(): false);
             return $respuesta;
+        }
+
+        $cuota = $this->codegen_model->get(
+            'cuotas_liquidacion',
+            'valor, tipo',
+            'id = "'. $this->input->post('id_cuota') .'"
+                AND estado = '.Equivalencias::cuotaPendiente(),
+            1,NULL,true
+        );
+
+        $liquidacion = $this->obtenerLiquidacionCuota(
+            $this->input->post('id_contrato'),
+            ($cuota->tipo == Equivalencias::cuotaAdicion())
+        );
+
+        $datos = $this->obtenerInfoFacturas( $this->input->post('id_contrato'), $cuota->valor );
+
+        foreach($datos['estampillas'] AS $factura)
+        {
+            # Valida si la factura viene en valor cero no guarda factura
+            $valor = $datos['est_totalestampilla'][$factura->estm_id];
+
+            if($valor > 0)
+            {
+                $data = [
+                    'fact_nombre'			=> $factura->estm_nombre,
+                    'fact_porcentaje'		=> $factura->esti_porcentaje,
+                    'fact_valor'			=> $valor,
+                    'fact_banco'			=> $factura->banc_nombre,
+                    'fact_cuenta'			=> $factura->estm_cuenta,
+                    'fact_liquidacionid'	=> $liquidacion->liqu_id,
+                    'fact_estampillaid'		=> $factura->estm_id,
+                    'fact_rutaimagen'		=> $factura->estm_rutaimagen,
+                    'id_cuota_liquidacion'  => $this->input->post('id_cuota'),
+                ];
+
+                /*
+                * Se valida si la estampilla a almacenar es pro electrificacion
+                * y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
+                * no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
+                */
+                $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla(
+                    $data['fact_estampillaid'],
+                    $datos['result']->cntr_fecha_firma,
+                    $datos['result']->cntr_tipocontratoid
+                );
+                if($bandRegistrarFactura)
+                {
+                    $this->codegen_model->add('est_facturas',$data);
+
+                    /**
+                    * Solicita la Asignación del codigo para el codigo de barras
+                    */
+                    $this->asignarCodigoParaBarras($liquidacion->liqu_id, $factura->estm_id);
+                }
+            }
         }
 
         $is_pagos = [];
@@ -3897,7 +3953,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
                 $this->data['liquidacion'] = $liquidacion;
 
                 if($cuota_activa) {
-                    $this->data['facturas'] = $this->liquidaciones_model->obtenerFacturasRetencion('factura.id_cuota_liquidacion', $cuota_activa->id);
+                    $this->data['facturas'] = $this->obtenerInfoFacturas( $idcontrato, $cuota_activa->valor );
                 }
 
                 $this->data['saldo_contrato'] = $liquidacion->valor_total - $liquidacion->total_pagado;
@@ -4022,7 +4078,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 
                 if($respuestaRegistro['exito'])
                 {
-                    $this->session->set_flashdata('successmessage', 'Se registro el valor de la cuota');
+                    $this->session->set_flashdata('successmessage', 'Se registró el valor de la cuota');
                 } else {
                     $this->session->set_flashdata('errormessage', $respuestaRegistro['error']);
                 }
@@ -4057,46 +4113,10 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
         # Se da formato al valor para que guarde los valores decimales
         $valor = str_replace(',', '.', str_replace('.','',$this->input->post('valor')));
 
-        $liquidacion = $this->codegen_model->get(
-            'est_liquidaciones',
-            'liqu_id, liqu_valorsiniva AS valor_total',
-            'liqu_contratoid = '.$this->input->post('id_contrato'),
-            1,NULL,true
+        $liquidacion = $this->obtenerLiquidacionCuota(
+            $this->input->post('id_contrato'),
+            $es_adicion
         );
-
-        if($es_adicion) {
-            $liquidacion = $this->codegen_model->getSelect(
-                'est_liquidaciones AS l',
-                'l.liqu_id, adicion.total AS valor_total, COALESCE(SUM(c.valor), 0) AS total_pagado',
-                'WHERE l.liqu_contratoid = '.$this->input->post('id_contrato'),
-                'LEFT JOIN cuotas_liquidacion c ON (
-                    c.id_liquidacion = l.liqu_id
-                    AND estado = '. Equivalencias::cuotaPaga() .'
-                    AND tipo = '. Equivalencias::cuotaAdicion() .'
-                )
-                LEFT JOIN (
-                    SELECT coalesce(SUM(ac.valor), 0) AS total, ac.id_contrato
-                    FROM adiciones_contratos ac
-                    GROUP by ac.id_contrato
-                ) adicion ON adicion.id_contrato = l.liqu_contratoid',
-                'GROUP BY l.liqu_id'
-            );
-        } else {
-            $liquidacion = $this->codegen_model->getSelect(
-                'est_liquidaciones AS l',
-                'l.liqu_id, l.liqu_valorsiniva AS valor_total, COALESCE(SUM(c.valor), 0) AS total_pagado',
-                'WHERE l.liqu_contratoid = '.$this->input->post('id_contrato'),
-                'LEFT JOIN cuotas_liquidacion c ON (
-                    c.id_liquidacion = l.liqu_id
-                    AND estado = '. Equivalencias::cuotaPaga() .'
-                    AND tipo = '. Equivalencias::cuotaNormal() .'
-                )',
-                'GROUP BY l.liqu_id'
-            );
-        }
-        $liquidacion = $liquidacion[0];
-
-        $datos = $this->obtenerInfoFacturas( $this->input->post('id_contrato'), $valor );
 
         $saldo_contrato = $liquidacion->valor_total - $liquidacion->total_pagado;
 
@@ -4118,47 +4138,6 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 
         if ($guardo->bandRegistroExitoso)
         {
-            foreach($datos['estampillas'] AS $factura)
-            {
-                # Valida si la factura viene en valor cero no guarda factura
-                $valor = $datos['est_totalestampilla'][$factura->estm_id];
-
-                if($valor > 0)
-                {
-                    $data = [
-                        'fact_nombre'			=> $factura->estm_nombre,
-                        'fact_porcentaje'		=> $factura->esti_porcentaje,
-                        'fact_valor'			=> $valor,
-                        'fact_banco'			=> $factura->banc_nombre,
-                        'fact_cuenta'			=> $factura->estm_cuenta,
-                        'fact_liquidacionid'	=> $liquidacion->liqu_id,
-                        'fact_estampillaid'		=> $factura->estm_id,
-                        'fact_rutaimagen'		=> $factura->estm_rutaimagen,
-                        'id_cuota_liquidacion'  => $guardo->idInsercion,
-                    ];
-
-                    /*
-                    * Se valida si la estampilla a almacenar es pro electrificacion
-                    * y si la fecha de liquidacion (fecha actual) es mayor al 21 de mayo de 2017
-                    * no se incluya la estampilla en las liquidaciones según ordenanza 026 de 2007
-                    */
-                    $bandRegistrarFactura = Liquidaciones::validarInclusionEstampilla(
-                        $data['fact_estampillaid'],
-                        $datos['result']->cntr_fecha_firma,
-                        $datos['result']->cntr_tipocontratoid
-                    );
-                    if($bandRegistrarFactura)
-                    {
-                        $this->codegen_model->add('est_facturas',$data);
-
-                        /**
-                        * Solicita la Asignación del codigo para el codigo de barras
-                        */
-                        $this->asignarCodigoParaBarras($liquidacion->liqu_id, $factura->estm_id);
-                    }
-                }
-            }
-
             $respuesta['exito'] = true;
             $respuesta['id'] = $guardo->idInsercion;
         }
@@ -4168,6 +4147,49 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 
         $this->form_validation->reset_validation();
         return $respuesta;
+    }
+
+    /**
+     * Obtiene la liquidacion con los datos necesarios para la cuota
+     * 
+     * @param int $id_contrato
+     * @param bool $es_adicion
+     * @return object
+     */
+    private function obtenerLiquidacionCuota($id_contrato, $es_adicion)
+    {
+        if($es_adicion) {
+            $liquidacion = $this->codegen_model->getSelect(
+                'est_liquidaciones AS l',
+                'l.liqu_id, adicion.total AS valor_total, COALESCE(SUM(c.valor), 0) AS total_pagado',
+                'WHERE l.liqu_contratoid = '.$id_contrato,
+                'LEFT JOIN cuotas_liquidacion c ON (
+                    c.id_liquidacion = l.liqu_id
+                    AND estado = '. Equivalencias::cuotaPaga() .'
+                    AND tipo = '. Equivalencias::cuotaAdicion() .'
+                )
+                LEFT JOIN (
+                    SELECT coalesce(SUM(ac.valor), 0) AS total, ac.id_contrato
+                    FROM adiciones_contratos ac
+                    GROUP by ac.id_contrato
+                ) adicion ON adicion.id_contrato = l.liqu_contratoid',
+                'GROUP BY l.liqu_id'
+            );
+        } else {
+            $liquidacion = $this->codegen_model->getSelect(
+                'est_liquidaciones AS l',
+                'l.liqu_id, l.liqu_valorsiniva AS valor_total, COALESCE(SUM(c.valor), 0) AS total_pagado',
+                'WHERE l.liqu_contratoid = '.$id_contrato,
+                'LEFT JOIN cuotas_liquidacion c ON (
+                    c.id_liquidacion = l.liqu_id
+                    AND estado = '. Equivalencias::cuotaPaga() .'
+                    AND tipo = '. Equivalencias::cuotaNormal() .'
+                )',
+                'GROUP BY l.liqu_id'
+            );
+        }
+
+        return $liquidacion[0];
     }
 
     /**
@@ -4511,5 +4533,66 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
         }
 
 		redirect(base_url().'index.php/liquidaciones/importarLiquidaciones');
+    }
+
+    /**
+     * Procesa la edicion de un valor de la cuota
+     * 
+     * @return null
+    */
+    public function editarCuotaLiquidacion()
+    {
+        if ($this->ion_auth->logged_in())
+        {
+            if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('liquidaciones/procesarRegistroCuota'))
+            {
+                $this->form_validation->set_rules('id_cuota', 'Identificador de la cuota', 'required|trim|xss_clean|numeric|integer|is_exists[cuotas_liquidacion.id]');
+                $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');
+                $this->form_validation->set_rules('id_contrato', 'Identificador del contrato', 'trim|xss_clean|numeric|integer|greater_than[0]'); 
+
+                if ($this->form_validation->run() == false) {
+                    $this->session->set_flashdata('errormessage', ($this->form_validation->error_string() ? $this->form_validation->error_string(): false));
+                    redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$this->input->post('id_contrato'));
+                }
+
+                # Se da formato al valor para que guarde los valores decimales
+                $valor = str_replace(',', '.', str_replace('.','',$this->input->post('valor')));
+
+                $cuota = $this->codegen_model->get(
+                    'cuotas_liquidacion',
+                    'tipo',
+                    'id = "'. $this->input->post('id_cuota') .'"
+                        AND estado = '.Equivalencias::cuotaPendiente(),
+                    1,NULL,true
+                );
+
+                $liquidacion = $this->obtenerLiquidacionCuota(
+                    $this->input->post('id_contrato'),
+                    ($cuota->tipo == Equivalencias::cuotaAdicion())
+                );
+        
+                $saldo_contrato = $liquidacion->valor_total - $liquidacion->total_pagado;
+        
+                if($valor > $saldo_contrato){
+                    $this->session->set_flashdata('errormessage', 'El pago de la cuota no puede ser mayor que el saldo.');
+                    redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$this->input->post('id_contrato'));
+                }
+
+                $this->codegen_model->edit(
+                    'cuotas_liquidacion',
+                    [
+                        'valor' => $valor
+                    ],
+                    'id', $this->input->post('id_cuota')
+                );
+
+                $this->session->set_flashdata('successmessage', 'Se modificó el valor de la cuota');
+                redirect(base_url().'index.php/liquidaciones/estampillasRetencion/'.$this->input->post('id_contrato'));
+            } else {
+                redirect(base_url().'index.php/error_404');
+            }
+        } else {
+            redirect(base_url().'index.php/users/login');
+        }
     }
 }
