@@ -19,7 +19,7 @@ $total = 0;
         <div id="errorModal"></div>
         <div class="table-responsive">
 
-            <?= form_open_multipart('liquidaciones/registrarCuotaLiquidacion','role="form"') ?>
+            <?= form_open_multipart('liquidaciones/'. ($cuota ? 'editarCuotaLiquidacion': 'registrarCuotaLiquidacion'),'role="form"') ?>
                 <input type="hidden" name="id_contrato" value="<?= $id_contrato ?>">
 
                 <table class="table table-striped table-bordered">
@@ -43,7 +43,7 @@ $total = 0;
                                 <input name="valor"
                                     type="text"
                                     class="form-control numerico_ret"
-                                    <?= $cuota ? ('disabled value="'. $cuota->valor .'"') : '' ?>
+                                    <?= $cuota ? ('value="'. $cuota->valor .'"') : '' ?>
                                 >
                             </td>
                             <td>
@@ -60,6 +60,15 @@ $total = 0;
                                             <input type="checkbox" name="es_adicion" value="1">
                                             Adición
                                         </label>
+                                        <?
+                                    }
+
+                                    if($cuota)
+                                    {
+                                        ?>
+                                        <button class="btn btn-info" type="submit" style="margin-bottom: 5px;">Modificar</button>
+                                        <input type="hidden" name="id_cuota" value="<?= $cuota->id ?>">
+                                        <input type="hidden" name="id_contrato" value="<?= $id_contrato ?>">
                                         <?
                                     }
                                 ?>
@@ -111,18 +120,18 @@ $total = 0;
                             </thead>
                             <tbody>
                                 <?php
-                                    foreach($facturas as $factura)
+                                    foreach($facturas['estampillas'] as $factura)
                                     {
                                         ?>
                                         <tr>
                                             <td colspan="1">
-                                                <?= $factura->fact_nombre; ?>
+                                                <?= $factura->estm_nombre; ?>
                                             </td>
-                                            <td colspan="1" class="text-center"><?= number_format($factura->porcentaje, 2, ',', '.') ?>%</td>
-                                            <td colspan="1" class="text-center"><?= '$'.number_format($factura->valor_total, 2, ',', '.') ?></td>
+                                            <td colspan="1" class="text-center"><?= number_format($factura->esti_porcentaje, 2, ',', '.') ?>%</td>
+                                            <td colspan="1" class="text-center"><?= '$'.number_format($facturas['est_totalestampilla'][$factura->estm_id], 2, ',', '.') ?></td>
                                         </tr>
                                         <?php
-                                            $total += $factura->valor_total;
+                                            $total += $facturas['est_totalestampilla'][$factura->estm_id];
                                     }
                                 ?>
                                 <tr>
