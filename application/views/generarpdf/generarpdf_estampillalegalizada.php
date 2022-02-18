@@ -207,7 +207,7 @@
                         border-right: 0.5px solid black;
                         border-left: 0.5px solid black;
                         border-bottom: 0.5px solid black;
-                        text-align: center;"><tcpdf method="write2DBarcode" params="<?php echo $params; ?>" /></td>
+                        text-align: center;"></td>
                 </tr>
 
                 <tr>
