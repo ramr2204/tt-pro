@@ -1058,22 +1058,24 @@ class Contratos extends MY_Controller {
 			redirect('error_404', 'refresh');
 		}
 
-        $this->data['tipos_contratistas'] = $this->codegen_model->getSelect(
+        $tipos_contratistas = $this->codegen_model->getSelect(
             'con_tiposcontratistas AS tipo',
             'tpco_id AS id, tpco_nombre AS nombre'
         );
 
-        $this->data['tipos_contratos'] = $this->codegen_model->getSelect(
+        $this->load->library('excel');
+        $tipos_contratos = $this->codegen_model->getSelect(
             'con_tiposcontratos AS tipo',
             'tico_id AS id, tico_nombre AS nombre'
         );
 
-        $this->data['clasificacion_contrato']  = Equivalencias::clasificacionContratos();
+        $clasificacion_contrato  = Equivalencias::clasificacionContratos();
 
         $_SESSION['fecha_informe_excel'] = 'Plantilla cargue contratos';
 
         // $this->template->load($this->config->item('excel_template'),'contratos/plantilla_excel.php', $this->data);
-        $this->load->view('contratos/plantilla_excel.php', $this->data);
+        //$this->load->view('contratos/plantilla_excel.php', $this->data);
+        include APPPATH.'views/contratos/plantilla_excel.php';
     }
 
     /**
