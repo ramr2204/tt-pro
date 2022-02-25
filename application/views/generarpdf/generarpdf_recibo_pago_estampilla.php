@@ -73,7 +73,7 @@
             <td colspan="1"><strong>Tipo de contrato</strong></td>
             <td colspan="1"><?php echo $result->liqu_tipocontrato; ?></td>
             <td colspan="1"><strong>Fecha</strong></td>
-            <td colspan="1"><?php echo $pagos->fecha ?></td>
+            <td colspan="1"><?php echo $pagos[0]->fecha ?></td>
         </tr>
         <tr>
             <td colspan="1"><strong>Objeto</strong></td>
