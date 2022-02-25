@@ -392,7 +392,8 @@ class Generarpdf extends CI_controller {
         $pagos = $this->codegen_model->getSelect(
             'pagos_estampillas AS pago',
             'factura.fact_liquidacionid AS id_liquidacion, pago.valor AS valor_cuota, factura.fact_valor AS valor_total,
-                pago.numero AS cuota, factura.fact_nombre, pago.id, factura.fact_porcentaje AS porcentaje',
+                pago.numero AS cuota, factura.fact_nombre, pago.id,
+                factura.fact_porcentaje AS porcentaje, pago.fecha',
             'WHERE pago.id IN (' . $ids_pago . ')',
             'INNER JOIN est_facturas factura ON factura.fact_id = pago.factura_id'
         );

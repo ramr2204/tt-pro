@@ -72,8 +72,8 @@
         <tr>
             <td colspan="1"><strong>Tipo de contrato</strong></td>
             <td colspan="1"><?php echo $result->liqu_tipocontrato; ?></td>
-            <td colspan="1"><strong>Fecha generación</strong></td>
-            <td colspan="1"><?php echo $contrato->fecha_insercion ?></td>
+            <td colspan="1"><strong>Fecha</strong></td>
+            <td colspan="1"><?php echo $pagos->fecha ?></td>
         </tr>
         <tr>
             <td colspan="1"><strong>Objeto</strong></td>
