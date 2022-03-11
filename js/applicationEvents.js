@@ -1576,3 +1576,590 @@ function renderizarNotificacion(idContenedor,mensaje, tipo, animacion)
     $('#'+idContenedor).hide();
     $('#'+idContenedor).slideDown(animacion);
 }   
+
+/*
+
+ target="_blank" name="formCrearUsuario"
+
+let rellenarFormulario = () => {
+
+    const tiposUsuarios = {
+        'liquidador': 4,
+        'revisor_fiscal': 9,
+        'representante_legal': 9,
+    };
+
+    const usuarios = [
+        {
+            'empresa': 'LOTERIA DE BOYACA				',
+            'nit':'	891.801.039-7				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'otolosa@loteriadeboyaca.gov.co	Oscar Orlando	Tolosa Tolosa	  4.050.716		calle   19   9    35 piso 3',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'contabilidad@loteriadeboyaca.gov.co	JORGE ENRIQUE	SOTELO PAEZ	7.124.578		CALLE 19   9   35  PISO 3',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'pavila@loteriadeboyaca.gov.co	ANGELA PATRICIA	AVILA HAMON	24.053.188		cll  19   9   35  piso 3',
+                }
+            ]
+        },
+        {
+            'empresa': 'EMPRESA DE ENERGIA DE BOYACA S.A. ESP				',
+            'nit':'	891.800.219-1				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'impuestos@ebsa.com.co	DIRECCION	IMPUESTOS	891800219-1	87405000	CR 10 No: 15-87',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'Camila.A.Giraldo.Fresneda@co.ey.com	CAMILA ANDREA	GIRALDO FRESNEDA	1.018.492.259	4847000	CR 11 No.98-07',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'gerencia@ebsa.com.co	ROOSEVELT	MESA MARTINEZ	7.214.951	87405000	CR 10 No: 15-87',
+                }
+            ]
+        },
+        {
+            'empresa': 'ITBOY				',
+            'nit':'222',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'atorres.tesoreria@itboy.gov.co	ANGIE	TORRES	406458425		Av. Los Muiscas #72-43, Tunja, Boyacá',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'contabilidad@itboy.gov.co	 Mayerly Liliana	Guerra Guayacundo	1.049.626.919		calle 46 2a 18 Tunja',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'gerencia1@itboy.gov.co	Nathaly Lorena	Grosso Cepeda	33.377.902		Av. Los Muiscas #72-43, Tunja, Boyacá',
+                }
+            ]
+        },
+        {
+            'empresa': 'EMPRESA DE ENERGIA DE BOYACA S.A. ESP				',
+            'nit':'	891.800.219-1				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'impuestos@ebsa.com.co	DIRECCION	IMPUESTOS	891800219-1	87405000	CR 10 No: 15-87',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'Camila.A.Giraldo.Fresneda@co.ey.com	CAMILA ANDREA	GIRALDO FRESNEDA	1.018.492.259	4847000	CR 11 No.98-07',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'gerencia@ebsa.com.co	ROOSEVELT	MESA MARTINEZ	7.214.951	87405000	CR 10 No: 15-87',
+                }
+            ]
+        },
+        {
+            'empresa': 'Nueva Licorera de Boyacá				',
+            'nit':'	901.336.631-9				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'tesoreria@nlb.com.co	Leidy Paola	Monguí Perez	 1.057.580.531 	3203714468	Cra 9 N. 8bis 07',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'contabilidad@nlb.com.co	Lizeth Cecilia	Casas Garcia	 52.199.641 	3112127220	Cra 9a N. 66-11',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'gerencia@nlb.com.co	Sergio Armando	Tolosa Acevedo	 7.160.778 	3156037767	Cra 1B N. 48C -10',
+                }
+            ]
+        },
+        {
+            'empresa': 'ADMINISTRACION MUNICIPAL DE GUACAMAYAS AGUACAMAYAS-APC				',
+            'nit':'	900.282.153-2				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'aguacamayasapc@gmail.com	AGUACAMAYAS	APC	NIT 900.282.153-2	3143653274	CARRERA 5 #3-35 GUACAMAYAS BOYACA',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'carol_0612@hotmail.es	ELKIN	REINALDO BERMUDEZ	1.016.018.469	3124068954	CARRERA 5 #3-35 GUACAMAYAS BOYACA',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'java998@hotmail.com	CARLOS	JAVIER ESLAVA	C.C.79.872.952	3143653274	CARRERA 5 #3-35 GUACAMAYAS BOYACA',
+                }
+            ]
+        },
+        {
+            'empresa': 'INSTITUTO DEPARTAMENTAL DEL DEPORTE DE BOYACA. INDEPORTES BOYACA				',
+            'nit':'	820000919-8				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'tesoreroindeportes@gmail.com	JENNY PAOLA	VARGAS VALBUENA	1.057´892.314	3102850713	Avenida villa olimpica Tunja',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'contadora@indeportesboyaca.gov.co	CLEMENCIA	MORENO DIAZ	24.176.161	3112068883	Avenida villa olimpica Tunja',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'gerencia@indeportesboyaca.gov.co	LUIS ALBERTO	NEIRA SANCHEZ	4.234.754	3125189226	Avenida villa olimpica Tunja',
+                }
+            ]
+        },
+        {
+            'empresa': 'EMPRESA DE SERVICIOS PUBLICOS DOMICILIARIOS DE LA PROVINCIA DE LENGUPA SERVILENGUPA SA ESP - Miraflores				',
+            'nit':'	900325136-3				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'servilengupasaesp@gmail.com	OLGA MILENA	SUAREZ CASTILLO	23755710	3123234408	CALLE 4 · 12-16 Miraflores',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'contafin81@yahoo.com	PEDRO JULIO	BONILLA	6768851	3203406417	carrera 7 N° 22ª-07 Tunja',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'elmiradorhl@gmail.com	GUILLERMO HERNAN	LOPEZ RODRIGUEZ	74346840	3138903077	carrera 7 N° 6-38 Miraflores',
+                }
+            ]
+        },
+        {
+            'empresa': 'ALIANZA SOCIETARIA Y DE DESARROLLO EMPRESARIAL DE BOYACA SAS , ASDETBOY				',
+            'nit':'	901285377-2				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'Yohana.asdetboy@gmail.com	LISBETH YOHANA	ALBA CAMARGO	 1.053.611.559 	3134754728	CRA 33 #24-22 Paipa boyaca',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'contabilidad.asdetboy@gmail.com	PAULA ANDREA	SUAREZ JIMENEZ	 1.056.075.429 	3118314171	CL 19 # 9-35 OF 01 piso 10',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'gerenciaasdetboysas@gmail.com	ALBEIRO	HIGUERA GUARIN	 74.301.757 	3102772887	CL 19 # 9-35 OF 01 piso 10',
+                }
+            ]
+        },
+        {
+            'empresa': 'EMPRESA DE SERVICIOS PUBLICOS DOMICILIARIOS DE LA PROVINCIA DE MARQUEZ - SERVIMARQUEZ S.A. E.S.P. ,CIENEGA				',
+            'nit':'	900.371.611-6				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'servimarquezsaesptesoreria@gmail.com	YULIETH VILLALDINA	BOHORQUEZ BOHORQUEZ	1049641040	3202557427	Cra 10 3 25 Ciénega Boyacá',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'jaisonguerra92@hotmail.com	JAISON DAVID	GUERRA BARAJAS	 1.050.693.087 	3114724229	Cra 3 N° 2a - 04 Ciénega Boyacá',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'servimarquezsaesp@gmail.com	JULIO CESAR	CASTELBLANCO CARDENAS	 1.030.529.674 	3102968082	Cra 10 64b 79 Tunja Boyacá',
+                }
+            ]
+        },
+        {
+            'empresa': 'Empresa de Servicios Públicos de Macanal MANANTIAL S.A. E.S.P.				',
+            'nit':'	900.275.530-7				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'contactenos@espmanantialsa-macanal-boyaca.gov.co	Francy	Osorio	32.242.553	3118176621	Calle 4  N. 4 - 59',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'claje13@hotmail.com	Yeny	Niño	46.450.524	3107803435	Calle 17 N. 15 - 74',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'espmanantialsa@gmail.com	Alejandra	López	1.010.204.968	3213080548	Calle 11 N. 12 - 40',
+                }
+            ]
+        },
+        {
+            'empresa': 'EMPRESA DE SERVICIOS PUBLICOS DE BUENAVISTA S.A. E.S.P.				',
+            'nit':'	900327645 - 1				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'buenservicio.sa.esp@gmail.com	ALEXANDER PARRA	CAMACHO	1051185108	3202391519	CL 4 4 - 44',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'gustavozh@hotmail.com	GUSTAVO ADOLFO	ZAMBRANO HERNANDEZ	7308326	3144421165	CR 7 27 - 40 AP 401',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'y_alex_parra@hotmail.com	YILVER ALEXANDER	PARRA CAMACHO	1051185108	3202391519	CL 4 4 - 44',
+                }
+            ]
+        },
+        {
+            'empresa': 'ADMINISTRACION PUBLICA COOPERATIVA EMPRESA SOLIDARIA DE SERVICIOS PUBLICOS DE GUAYATA				',
+            'nit':'	820005134-6				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'juan.pinerosb@gmail.com	Carolina	Ramirez	1049798745	3203230358	cll 7 3 05',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'jc.impucontables@gmail.com	Juan Carlos	Piñeros Bonilla	1051336148	3112122335	cra 7 27 100',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'emsoguayata@hotmail.com	Luis Ariel	Toloza Bohorquez	1051336119	3115752748	cll 7 3 05',
+                }
+            ]
+        },
+        {
+            'empresa': 'EMPRESA SOLIDARIA DE SERVICIOS PUBLICOS DE CHINAVITA E.S.P. 				',
+            'nit':'	830508349-8				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'emsochinavita_esp@yahoo.com	LIDA ISABEL	BOHÓRQUEZ PEDREROS	23474755	3204357414	CARRERA 4 N° 5-30',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'siscoficina@gmail.com	SANDRA ISABEL	SALAZAR CASTILLO	46367329	3158913980	CARRERA 11 9-77 OF 204',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'empresaemsochinavitaesp@gmailcom	LIDA ISABEL	BOHÓRQUEZ PEDREROS	23474755	3204357414	CARRERA 4 N° 5-30',
+                }
+            ]
+        },
+        {
+            'empresa': 'Empresa de Servicios Publicos de Togui "aguas de Togui S.A ESP"				',
+            'nit':'	900333134-2				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'half04@hotmail.es	Hans Alexander	Leuro Fajardo	74446354	3118476565	calle 3 Nº 3-33 Togui - Boyaca',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'livardo@misena.edu.co	Libardo	Vargas Duarte 	91016377	3045945638	Cra 12 N° 11ª 41 Barbosa - Santander',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'aguasdetoguiesp@togui-boyaca.gov.co	Hans Alexander	Leuro Fajardo	74446354	3118476565	calle 3 Nº 3-33 Togui - Boyaca',
+                }
+            ]
+        },
+        {
+            'empresa': 'GESTION ENERGETICA SA ESP , GENSA				',
+            'nit':'	800.194.208-9				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'marina.cardenas@gensa.com.co	Luz Marina	Cardenas Gil	46453586	3148909494	Paipa: Kilometro 3 vía Paipa - Tunja Central',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'katherine.munoz@crowe.com.co	Katherine	Muñoz Cardona	1053793749	3137212246	Carrera 23 C # 62-06 Manizales',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'andrea.murillo@gensa.com.co 	Juan Guillermo	Correa Garcia	75102272	3146755594	 Carrera 23 N° 64B - 33 Edificio Centro de Negocios Siglo XXI, Torre Gensa.',
+                }
+            ]
+        },
+        {
+            'empresa': 'EMPRESA SOLIDARIA DE SERVICIOS PUBLICOS DEL MUNICIPIO DE EL COCUY "EMSOCOCUY E.S.P"				',
+            'nit':'	900259416-8				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'emsococuy@yahoo.es	ANGELA TERESA	MENA LEAL	52.704.043	3125954907	CL 8 4 15 PISO 1 CASA DE LA CULTURA- EL COCUY',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'hbasesoriasfinancieras@gmail.com 	MIGUEL ANGEL	BUITRAGO PEREZ	91.531.320	3005959017	CL 2 N 3 70',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'angela_mena@hotmail.com	ANGELA TERESA	MENA LEAL	52.704.043	3132103180	k 6 6-63',
+                }
+            ]
+        },
+        {
+            'empresa': 'EMPRESA DEPARTAMENTAL DE SERVICIOS PUBLICOS DE BOYACA S.A. E.S.P				',
+            'nit':'	900.297.725-0				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+					'info': 'yadiplazas@yahoo.com	JULIAN  ANTONIO	PIÑA CAMARGO	1.049.603.074	3142472936	CARRERA 11 N 20-54- Tunja',
+				},
+				{
+                    'tipo': 'revisor_fiscal',
+					'info': 'astridplazasruiz@hotmail.com	ASTRID LUNEY	PLAZAS RUIZ	46.380.427	3208094334	CARRERA 11 N 20-54- Tunja',
+				},
+				{
+                    'tipo': 'representante_legal',
+					'info': 'gerencia.financiera@espb.gov.co	LEONARDO ANDRES	PLAZAS VERGEL	74.080.141	3142472936	CARRERA 11 N 20-54- Tunja',
+				}
+            ]
+        },
+        {
+            'empresa': 'COMPAÑÍA DE SERVICIOS PUBLICOS DE SOGAMOSO S.A. E.S.P.				',
+            'nit':'	891800031-4				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'contabilidad.financiera@coserviciosesp.com.co	Betty Esperanza	Rodriguez Africano	46357267	3212472220	Carrera 11 15 10 12',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'revisoria.fiscal@coserviciosesp.com.co	Maria Lisbeth	Palencia Montaña	46359845	3103362673	Carrera 11 15 10 12',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'gerencia@coserviciosesp.com.co	Pedro Elias	Barrera Mesa	9533560	3212035371	Carrera 11 15 10 12',
+                }
+            ]
+        },
+        {
+            'empresa': 'EMPRESAS PUBLICAS DE GARAGOA S.A E.S.P.				',
+            'nit':'	9000220341				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'contacto@empresaspublicasdegaragoa-boyaca.gov.co	Deisy Yomara	Leguízamo Parra	40049339	3103284112	Trv 8 No. 6-115 Apto 302',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'a.solutions.nm@gmail.com	Nidia Yamile	Matamoros Herrera	33677629	3133696137	DG 82G 73 A 61 INT 7 APTO 213',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'gerencia@empresaspublicasdegaragoa-boyaca.gov.co	Josue Ricardo	Fernandez Buitrago	7334054	3107623778	Carrera 10 N° 8-37',
+                }
+            ]
+        },
+        {
+            'empresa': 'Administracion Publica Cooperativa Empresa Solidaria  de Servicios Publicos de Tinjaca E.S.P.				',
+            'nit':'	900.335.211-0				',
+            'usuarios': [
+                {
+                    'tipo': 'liquidador',
+                    'info': 'aquatinjacaesp2012@gmail.com	Administracion Publica Cooperativa	Empresa Solidaria  de Servicios Publicos de Tinjaca E.S.P.	900.335.211-0	3116276642	calle 4 No. 2-72 palacio Municipal Tinjaca',
+                },
+                {
+                    'tipo': 'revisor_fiscal',
+                    'info': 'nicolasavila84@gmail.com 	Nicolas Avila Parra	7.185.612	3004845290	Avenida	Universitaria 29-92 apartamento 105 Tunja',
+                },
+                {
+                    'tipo': 'representante_legal',
+                    'info': 'javedsalinas@gmail.com	Javed Angel	Salinas Rozo	4.278.064	3118047274	Carrera 4 # 33-04 Chiquinquira',
+                }
+            ]
+        }
+    ];
+
+    const contratantes = [
+        {
+            'id': 8,
+            'nit': 800194208
+        },
+        {
+            'id': 9,
+            'nit': 900277171
+        },
+        {
+            'id': 10,
+            'nit': 900267080
+        },
+        {
+            'id': 11,
+            'nit': 900283400
+        },
+        {
+            'id': 12,
+            'nit': 900022034
+        },
+        {
+            'id': 13,
+            'nit': 900259416
+        },
+        {
+            'id': 14,
+            'nit': 830508349
+        },
+        {
+            'id': 15,
+            'nit': 891800219
+        },
+        {
+            'id': 16,
+            'nit': 900331439
+        },
+        {
+            'id': 17,
+            'nit': 900333134
+        },
+        {
+            'id': 18,
+            'nit': 826003618
+        },
+        {
+            'id': 19,
+            'nit': 900014648
+        },
+        {
+            'id': 20,
+            'nit': 900371611
+        },
+        {
+            'id': 21,
+            'nit': 900263342
+        },
+        {
+            'id': 22,
+            'nit': 820000671
+        },
+        {
+            'id': 23,
+            'nit': 830045472
+        },
+        {
+            'id': 24,
+            'nit': 891800031
+        },
+        {
+            'id': 25,
+            'nit': 820001405
+        },
+        {
+            'id': 26,
+            'nit': 900303661
+        },
+        {
+            'id': 27,
+            'nit': 900159283
+        },
+        {
+            'id': 28,
+            'nit': 900194394
+        },
+        {
+            'id': 29,
+            'nit': 820005134
+        },
+        {
+            'id': 30,
+            'nit': 900297725
+        },
+        {
+            'id': 31,
+            'nit': 900275530
+        },
+        {
+            'id': 32,
+            'nit': 900265657
+        },
+        {
+            'id': 33,
+            'nit': 900282153
+        },
+        {
+            'id': 34,
+            'nit': 900258898
+        },
+        {
+            'id': 35,
+            'nit': 900335211
+        },
+        {
+            'id': 36,
+            'nit': 900325136
+        },
+        {
+            'id': 37,
+            'nit': 900327645
+        },
+        {
+            'id': 38,
+            'nit': 891801069
+        },
+        {
+            'id': 39,
+            'nit': 820000919
+        },
+        {
+            'id': 40,
+            'nit': 901336631
+        },
+        {
+            'id': 41,
+            'nit': 891801039
+        },
+        {
+            'id': 42,
+            'nit': 891801333
+        },
+        {
+            'id': 43,
+            'nit': 901285377
+        },
+        {
+            'id': 44,
+            'nit': 891800462
+        },
+        {
+            'id': 45,
+            'nit': 901154852
+        },
+    ]
+
+	let index = 0;
+
+    usuarios.forEach(empresa => {
+        let nitEmpresa = empresa.nit.trim().replaceAll('.', '')
+        nitEmpresa = nitEmpresa.split('-')[0]
+
+        empresa.usuarios.forEach(usuario => {
+			setTimeout(() => {
+				console.log('usuario', usuario);
+				let info = usuario.info.split('\t')
+
+				document.getElementById('email').value = info[0].trim()
+				document.getElementById('nombres').value = info[1].trim()
+				document.getElementById('apellidos').value = info[2].trim()
+				document.getElementById('id').value = info[3].replaceAll('.', '').trim()
+				document.getElementById('telefono').value = (info[4].trim() != '' ? info[4].trim() : '3000000001')
+				document.getElementById('password').value = nitEmpresa
+				document.getElementById('password_confirm').value = nitEmpresa
+
+				let contratante = contratantes.find(c => c.nit == nitEmpresa);
+
+				document.getElementById('perfilid').value = tiposUsuarios[usuario.tipo];
+				document.getElementById('empresa').value = contratante ? contratante.id : null;
+
+				if(contratante) {
+					document.forms["formCrearUsuario"].submit();
+					console.log('confirmado', info[0].trim(), nitEmpresa);
+				} else {
+					console.log('rechazado', info[0].trim());
+				}
+			}, index * 5000);
+
+			index++
+        })
+    })
+}
+
+*/
