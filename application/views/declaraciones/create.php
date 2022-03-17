@@ -110,6 +110,9 @@
 
                         <?
                             if(count($consulta) > 0)
+                            $prueba2 = set_value('recaudado', 0, $esVisualizar);
+                            $prueba3 = set_value('sanciones', 0, $esVisualizar);
+                            $prueba4 = set_value('intereses', 0, $esVisualizar);
                             {
                                 ?>
                                 <?= form_open_multipart('declaraciones/create', 'role="form"'); ?>
@@ -133,7 +136,7 @@
                                         <input id="recaudado"
                                             type="number"
                                             name="recaudado"
-                                            value="<?= set_value('recaudado', 0, $esVisualizar); ?>"
+                                            value="<?=  number_format($prueba2, 0, '.', '');  ?>"
                                             class="form-control"
                                             required="required"
                                             min="0" />
@@ -144,7 +147,7 @@
                                         <input id="sanciones"
                                             type="number"
                                             name="sanciones"
-                                            value="<?= set_value('sanciones', 0, $esVisualizar); ?>"
+                                            value="<?=  number_format($prueba3, 0, '.', '');  ?>"
                                             class="form-control"
                                             required="required"
                                             min="0" />
@@ -155,7 +158,7 @@
                                         <input id="intereses"
                                             type="number"
                                             name="intereses"
-                                            value="<?= set_value('intereses', 0, $esVisualizar); ?>"
+                                            value="<?=  number_format($prueba4, 0, '.', '');  ?>"
                                             class="form-control"
                                             required="required"
                                             min="0" />
@@ -237,15 +240,29 @@
                                             </thead>
                                             <tbody>
                                                 <?
+
+
+                                                
+                                                
                                                     foreach($consulta AS $detalle)
+                                                    
                                                     {
+                                                         $prueba = set_value(
+                                                    'detalle_vigencia_actual['. $detalle->clasificacion .']',
+                                                    (isset($detalle->vigencia_actual) ? $detalle->vigencia_actual : 0),
+                                                    $esVisualizar);
+
+                                                    $prueba1 = set_value(
+                                                        'detalle_vigencia_anterior['. $detalle->clasificacion .']',
+                                                        (isset($detalle->vigencia_anterior) ? $detalle->vigencia_anterior : 0),
+                                                        $esVisualizar);
                                                         ?>
                                                         <tr class="text-center">
                                                             <td> <?= $detalle->clasificacion ?></td>
                                                             <td class="text-left"> <?= $detalle->clase ?></td>
                                                             <td>
                                                                 <input name="detalle_base[<?= $detalle->clasificacion ?>]"
-                                                                    value="<?= $detalle->base ?>"
+                                                                    value="<?=  number_format($detalle->base, 0, '.', ''); ?>"
                                                                     type="number"
                                                                     class="form-control base_detalle"
                                                                 >
@@ -255,11 +272,7 @@
                                                                     type="number"
                                                                     class="form-control"
                                                                     autocomplete="off"
-                                                                    value="<?= set_value(
-                                                                        'detalle_vigencia_actual['. $detalle->clasificacion .']',
-                                                                        (isset($detalle->vigencia_actual) ? $detalle->vigencia_actual : 0),
-                                                                        $esVisualizar
-                                                                    ); ?>"
+                                                                    value="<?=  number_format($prueba, 0, '.', '');  ?>"
                                                                 >
                                                             </td>
                                                             <td>
@@ -267,12 +280,8 @@
                                                                     type="number"
                                                                     class="form-control"
                                                                     autocomplete="off"
-                                                                    value="<?= set_value(
-                                                                        'detalle_vigencia_anterior['. $detalle->clasificacion .']',
-                                                                        (isset($detalle->vigencia_anterior) ? $detalle->vigencia_anterior : 0),
-                                                                        $esVisualizar
-                                                                    ); ?>"
-                                                                >
+                                                                    value="<?=  number_format($prueba1, 0, '.', '');  ?>"
+                                                                    >
                                                             </td>
                                                             <td>
                                                                 <?= number_format($detalle->porcentaje, 2, ',', '.') ?>%
@@ -285,8 +294,8 @@
                                                             <td>
                                                                 
                                                                 <input name="detalle_pagado[<?= $detalle->clasificacion ?>]"
-                                                                    
-                                                                    value="<?= $detalle->pagado  ?> "
+                                                                
+                                                                    value="<?=  number_format($detalle->pagado, 0, '.', ''); ?>"
                                                                     type="number"
                                                                     class="form-control pagado_detalle"
                                                                     readonly
@@ -314,6 +323,12 @@
                                     </div>
 
                                     <!-- Pagos -->
+                                    <?php
+                                    $prueba5 = set_value('saldo_periodo_anterior', 0, $esVisualizar);
+                                    $prueba6 = set_value('sanciones_pago', 0, $esVisualizar);
+                                    $prueba7 = set_value('intereses_mora', 0, $esVisualizar);
+                                    $prueba8 = set_value('saldo_favor', 0, $esVisualizar);
+                                    ?>
                                     <div>
                                         <div class="col-xs-12">
                                             <legend>Pagos</legend>
@@ -334,7 +349,7 @@
                                             <input id="saldo_periodo_anterior"
                                                 type="number"
                                                 name="saldo_periodo_anterior"
-                                                value="<?= set_value('saldo_periodo_anterior', 0, $esVisualizar); ?>"
+                                                value="<?=  number_format($prueba5, 0, '.', '');  ?>"
                                                 class="form-control"
                                                 required="required"
                                                 min="0" />
@@ -346,7 +361,7 @@
                                             <input id="sanciones_pago"
                                                 type="number"
                                                 name="sanciones_pago"
-                                                value="<?= set_value('sanciones_pago', 0, $esVisualizar); ?>"
+                                                value="<?=  number_format($prueba6, 0, '.', '');  ?>"
                                                 class="form-control"
                                                 required="required"
                                                 min="0" />
@@ -358,7 +373,7 @@
                                             <input id="intereses_mora"
                                                 type="number"
                                                 name="intereses_mora"
-                                                value="<?= set_value('intereses_mora', 0, $esVisualizar); ?>"
+                                                value="<?=  number_format($prueba7, 0, '.', '');  ?>"
                                                 class="form-control"
                                                 required="required"
                                                 min="0" />
@@ -381,7 +396,7 @@
                                             <input id="saldo_favor"
                                                 type="number"
                                                 name="saldo_favor"
-                                                value="<?= set_value('saldo_favor', 0, $esVisualizar); ?>"
+                                                value="<?=  number_format($prueba8, 0, '.', '');  ?>"
                                                 class="form-control"
                                                 required="required"
                                                 min="0" />
