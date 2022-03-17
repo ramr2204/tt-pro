@@ -479,10 +479,10 @@
         var valor_pagado = 0;
 
         $('.base_detalle').each(function(i, elemento) {
-            total_base += Number(elemento.value);
+            total_base +=Math.round( Number(elemento.value));
         });
 
-        valor_pagado = Math.round(( $(this).val() * $('.porcentaje_detalle').eq(indice).val() ) / 100)  ;
+        valor_pagado = Math.round((( $(this).val() * $('.porcentaje_detalle').eq(indice).val() ) / 100) /100 )*100 ;
         $('.pagado_detalle').eq(indice).val(valor_pagado);
 
         $('.pagado_detalle').each(function(i, elemento) {

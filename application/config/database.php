@@ -48,9 +48,9 @@
 $active_group = 'default';
 $active_record = TRUE;
 
-$db['default']['hostname'] = '10.0.0.4';
-$db['default']['username'] = 'estampillas_pro';
-$db['default']['password'] = 'tX4u8hEgDMGY4QEq';
+$db['default']['hostname'] = '127.0.0.1';
+$db['default']['username'] = 'root';
+$db['default']['password'] = 'root';
 $db['default']['database'] = 'estampillas_pro_boyaca';
 $db['default']['dbdriver'] = 'mysql';
 $db['default']['dbprefix'] = '';
