@@ -95,7 +95,9 @@ class Declaraciones extends MY_Controller
 
         for ($mes = 1; $mes <= 12; $mes++)
         {
-            $meses[$mes] = $mes_corto ? strftime('%b', mktime(0, 0, 0, $mes)) : strftime('%B', mktime(0, 0, 0, $mes));
+            $meses[$mes] = $mes_corto ?
+                strftime('%b', DateTime::createFromFormat('!m', $mes)->getTimestamp()) :
+                strftime('%B', DateTime::createFromFormat('!m', $mes)->getTimestamp());
         }
 
         return $meses;
