@@ -124,7 +124,7 @@ class Contratistas extends MY_Controller {
         $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|is_exists[con_tiposcontratistas.tpco_id]');
 
         if ($this->form_validation->run() == false) {
-            $resuesta['error'] = (validation_errors() ? validation_errors(): false);
+            $resuesta['error'] = $this->form_validation->error_string();
         }
         else
         {
