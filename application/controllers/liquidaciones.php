@@ -4357,7 +4357,7 @@ public static function validarInclusionEstampilla($idTipoEstampilla, $fecha_vali
 		$this->load->library('upload', $config);
 
 		if ( ! $this->upload->do_upload('archivo') ){
-            $this->data['errormessage'] = 'Ocurrio un problema al cargar el archivo.';
+            $this->data['errormessage'] = 'Ocurrio un problema al cargar el archivo. '.$this->upload->display_errors();
             return;
 		}
 
