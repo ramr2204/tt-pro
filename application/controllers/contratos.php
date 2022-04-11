@@ -242,6 +242,20 @@ class Contratos extends MY_Controller {
                 $msjError .= '<br>Ninguna estampilla selecccionada!';
             }
 
+            $validacionRepetido = $this->codegen_model->get(
+                'con_contratos',
+                'cntr_id AS id',
+                'cntr_numero = "'. $this->input->post('numero') .'"
+                    AND cntr_vigencia = "'. $vigencia[0] .'"
+                    AND cntr_contratanteid = "'. $this->input->post('contratanteid') .'"',
+                1,NULL,true
+            );
+
+            if(count($validacionRepetido) >= 1) {
+                $bandContinuar = false;
+                $msjError .= '<br>Un contrato con esa información ya existe!';
+            }
+
             if($bandContinuar)
             {
                 $data = [
