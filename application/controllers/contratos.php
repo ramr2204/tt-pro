@@ -104,7 +104,7 @@ class Contratos extends MY_Controller {
                 $this->data['contratistas']             = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
                 $this->data['municipios']               = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 6');
                 $this->data['clasificacion_contrato']   = Equivalencias::clasificacionContratos();
-                $this->data['contrato_normal']          = Equivalencias::contratoNormal();
+                $this->data['contrato_modificacion']          = Equivalencias::contratoModificacion();
 
                 $this->data['contratantes']             = $this->codegen_model->getSelect(
                     'con_contratantes',
@@ -166,7 +166,7 @@ class Contratos extends MY_Controller {
         $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean');
         $this->form_validation->set_rules('clasificacion_contrato', 'Clasificación del contrato','required|trim|xss_clean');
 
-        $aplica_numero_relacionado = $this->input->post('clasificacion_contrato') != Equivalencias::contratoNormal();
+        $aplica_numero_relacionado = $this->input->post('clasificacion_contrato') == Equivalencias::contratoModificacion();
 
         if($aplica_numero_relacionado){
             $this->form_validation->set_rules('contrato_relacionado', 'Número de contrato relacionado','required|trim|xss_clean|is_exists[con_contratos.cntr_numero]');
@@ -242,6 +242,20 @@ class Contratos extends MY_Controller {
                 $msjError .= '<br>Ninguna estampilla selecccionada!';
             }
 
+            $validacionRepetido = $this->codegen_model->get(
+                'con_contratos',
+                'cntr_id AS id',
+                'cntr_numero = "'. $this->input->post('numero') .'"
+                    AND cntr_vigencia = "'. $vigencia[0] .'"
+                    AND cntr_contratanteid = "'. $this->input->post('contratanteid') .'"',
+                1,NULL,true
+            );
+
+            if(count($validacionRepetido) >= 1) {
+                $bandContinuar = false;
+                $msjError .= '<br>Un contrato con esa información ya existe!';
+            }
+
             if($bandContinuar)
             {
                 $data = [
@@ -313,7 +327,7 @@ class Contratos extends MY_Controller {
               $this->form_validation->set_rules('valor', 'valor','required|trim|xss_clean'); 
 			  $this->form_validation->set_rules('clasificacion_contrato', 'Clasificación del contrato','required|trim|xss_clean|numeric|greater_than[0]');
 
-			  $aplica_numero_relacionado = $this->input->post('clasificacion_contrato') != Equivalencias::contratoNormal();
+			  $aplica_numero_relacionado = $this->input->post('clasificacion_contrato') == Equivalencias::contratoModificacion();
 
               if($aplica_numero_relacionado){
                 $this->form_validation->set_rules('contrato_relacionado', 'Número de contrato relacionado','required|trim|xss_clean|is_exists[con_contratos.cntr_numero]');
@@ -434,7 +448,7 @@ class Contratos extends MY_Controller {
                 $this->data['contratistas']  = $this->codegen_model->getSelect('con_contratistas','cont_id,cont_nombre,cont_nit');
                 $this->data['municipios']  = $this->codegen_model->getSelect('par_municipios','muni_id,muni_nombre', 'WHERE muni_departamentoid = 6');
 				$this->data['clasificacion_contrato']  = Equivalencias::clasificacionContratos();
-                $this->data['contrato_normal']  = Equivalencias::contratoNormal();
+                $this->data['contrato_modificacion']  = Equivalencias::contratoModificacion();
 
                 $this->data['contratantes'] = $this->codegen_model->getSelect(
                     'con_contratantes',
