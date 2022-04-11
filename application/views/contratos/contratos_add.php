@@ -153,6 +153,9 @@
                                 </div>
                             </div>
 
+                            <div class="col-md-12 column">
+                            </div>
+
                             <div class="col-md-6 column">
                                 <div class="form-group">
                                     <label for="clasificacion_contrato">Clasificación del contrato</label>
@@ -251,7 +254,7 @@
     {
         var valor = $(this).val();
 
-        if(valor != '0' && valor != '<?= $contrato_normal ?>')
+        if(valor != '0' && valor == '<?= $contrato_modificacion ?>')
         {
             $('#contrato_relacionado').closest('.column').show();
         }else{
