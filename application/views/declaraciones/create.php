@@ -247,15 +247,7 @@
                                                     foreach($consulta AS $detalle)
                                                     
                                                     {
-                                                       /*  $prueba = set_value(
-                                                    'detalle_vigencia_actual['. $detalle->clasificacion .']',
-                                                    (isset($detalle->vigencia_actual) ? $detalle->vigencia_actual : 0),
-                                                    $esVisualizar);
-
-                                                    $prueba1 = set_value(
-                                                        'detalle_vigencia_anterior['. $detalle->clasificacion .']',
-                                                        (isset($detalle->vigencia_anterior) ? $detalle->vigencia_anterior : 0),
-                                                        $esVisualizar);*/
+                                                      
                                                         ?>
                                                         <tr class="text-center">
                                                             <td> <?= $detalle->clasificacion ?></td>
@@ -483,10 +475,10 @@
 
         var totales_detalles_j = $('.base_detalle');
         totales_detalles_j.change(changeValorTotal);
-        totales_detalles_j.first().change();
+        totales_detalles_j.change();
 
         calculados_pagos_j.change(calcularTotalCargo);
-        calculados_pagos_j.first().change();
+        calculados_pagos_j.change();
     });
 
     function changeTipoDeclaracion() {
