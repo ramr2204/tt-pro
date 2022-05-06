@@ -119,7 +119,7 @@ class Contratistas extends MY_Controller {
         $this->form_validation->set_rules('nit', 'NIT', 'required|numeric|trim|xss_clean|max_length[100]|is_unique[con_contratistas.cont_nit]');   
         $this->form_validation->set_rules('direccion', 'Dirección', 'required|trim|xss_clean|max_length[256]');
         $this->form_validation->set_rules('telefono', 'Telefono', 'required|numeric|trim|xss_clean|max_length[15]');
-        $this->form_validation->set_rules('email', 'Email', 'required|valid_email|is_unique[con_contratistas.cont_email]');
+        $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
         $this->form_validation->set_rules('municipioid', 'Municipio',  'required|numeric|is_exists[par_municipios.muni_id]');
         $this->form_validation->set_rules('tipocontratistaid', 'Tipo tributario',  'required|numeric|is_exists[con_tiposcontratistas.tpco_id]');
 
@@ -183,7 +183,7 @@ class Contratistas extends MY_Controller {
                 if ($aplilo['cont_email']==$this->input->post('email')) {
                     $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
                 } else {
-                    $this->form_validation->set_rules('email', 'Email', 'required|valid_email|is_unique[con_contratistas.cont_email]');
+                    $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
                 }
 
               $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim|xss_clean|max_length[100]');   

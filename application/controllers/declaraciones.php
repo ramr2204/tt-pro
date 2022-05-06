@@ -60,6 +60,8 @@ class Declaraciones extends MY_Controller
             );
             $this->data['javascripts'] = array(
                 'js/plugins/bootstrap/fileinput.min.js',
+
+                
                 'js/jquery.dataTables.min.js',
                 'js/plugins/dataTables/dataTables.bootstrap.js',
                 'js/jquery.dataTables.defaults.js',
@@ -110,7 +112,77 @@ class Declaraciones extends MY_Controller
      */
     public function dataTable()
     {
-        if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index'))
+        
+			 $res=$this->codegen_model->getSelect(
+                'declaraciones AS d',
+                'd.id, d.id_empresa., estampilla.estm_nombre AS estampilla,
+                d.periodo, d.tipo_declaracion, d.fecha_creacion, d.estado, d.soporte',
+                '',
+                'INNER JOIN con_contratantes empresa', 'empresa.id = d.id_empresa',
+                'INNER JOIN est_estampillas estampilla', 'estampilla.estm_id = d.id_estampilla',
+                'ORDER BY d.id'
+            );
+
+
+
+			$user = $this->ion_auth->user()->row();
+            $data1 = array(
+                'id' => $this->input->post('id'),
+                'first_name' => $this->input->post('nombres'),
+                'last_name' => $this->input->post('apellidos'),
+                'phone' => $this->input->post('telefono')
+            );
+            $this->ion_auth->update($user->id, $data1);
+            
+            $datos=explode(', ', $data1->id_empresa);
+
+			if(count($datos)>1){
+				$txt='';
+				foreach ($datos as $x) {
+					$res2=$this->codegen_model->getSelect(
+						'con_contratantes',
+						'nombre',
+						'WHERE id = '.$x
+					);
+					if(isset($res2[0]->nombre)){
+						$txt .= ', '.$res2[0]->nombre;		
+					}
+				}
+				$usuarios_empresas1[] = [
+					$data1->id,
+					$data1->email,
+					substr($txt, 2), 
+					$data1->perf_nombre,
+					$data1->tipo,
+					$data1->active,
+					$estado
+				];
+			}else{
+				$id_emp=$data1->id_empresa;
+				$res2=$this->codegen_model->getSelect(
+					'con_contratantes',
+					'nombre',
+					'WHERE id = '.($id_emp?$id_emp:0)
+				);
+				$nombre = '';
+				if(isset($res2[0]->nombre)){
+					$nombre = $res2[0]->nombre;		
+				}
+				
+				$usuarios_empresas1[] = [
+					$data1->id,
+					$data1->email,
+					$nombre, 
+					$data1->perf_nombre,
+					$data1->tipo,
+					$data1->active,
+					$estado
+				];
+                }
+
+            
+
+        /*if ($this->ion_auth->is_admin() || $this->ion_auth->in_menu('declaraciones/index'))
         {
             $verificacion = HelperGeneral::verificarRestriccionEmpresa($this);
 
@@ -131,7 +203,7 @@ class Declaraciones extends MY_Controller
         else
         {
             redirect(base_url() . 'index.php/users/login');
-        }
+        }*/
     }
 
     /**
@@ -621,7 +693,7 @@ class Declaraciones extends MY_Controller
             'users',
             'first_name, last_name',
             'id = "' . $declaracion->creado_por . '"',
-            1, null, true
+             true
         );
 
         $this->data['declaracion'] = $declaracion;
@@ -759,7 +831,7 @@ class Declaraciones extends MY_Controller
                 'declaraciones AS d',
                 'd.id_estampilla, d.periodo, d.id_empresa',
                 'd.id = "' . $_GET['id_declaracion'] . '"',
-                1, null, true, '',
+                 null, true, '',
                 'est_estampillas e', 'e.estm_id = d.id_estampilla'
             );
         }

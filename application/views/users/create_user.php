@@ -31,7 +31,7 @@
                                           </div>
                                           <div class="form-group">
                                                  <label for="empresa">Empresa</label>
-                                                 <select class="form-control" id="empresa" name="empresa">
+                                                 <select multiple class="form-control" id="empresa" name="empresa[]">
                                                     <option value="">Seleccione...</option>
                                                         <?php
                                                             foreach($empresas as $empresa)

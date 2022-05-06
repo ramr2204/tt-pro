@@ -114,7 +114,7 @@ class usuariosFirma extends MY_Controller
 
                 $this->store();
 
-                $this->data['empresas'] = $this->codegen_model->getSelect(
+                $this->data['empresas'] = $this->codegen_model->getSelect(//a qui esta el select del  usuario
                     'con_contratantes',
                     'id, nombre',
                     '', '',

@@ -68,6 +68,10 @@ class Firma extends MY_Controller
     private function getInfoSign($id)
     {
         $info = [];
+ $multiple5 =  array_values ( $this->input->get('id_empresa') );
+				  $multiple5 = explode(', ', $multiple5);
+                  
+       
 
         # Consultamos el registro de la firma
         $result_sign = $this->codegen_model->get(
@@ -78,7 +82,7 @@ class Firma extends MY_Controller
         );
         $result_sign->tipo_nombre = $this->getLabelType($result_sign->tipo);
 
-        # Obtenemos la informacion del usuario
+        # Obtenemos la informacion del usuario                                          
         $result_user = $this->codegen_model->get(
             'users',
             'id, email, first_name, last_name, phone, id_empresa',
@@ -87,10 +91,12 @@ class Firma extends MY_Controller
         );
 
         $info['firma'] = (array)$result_sign;
+        $info['id_empresa'] = (array)$result_user;
         $info['usuario'] = (array)$result_user;
         $info['adicional'] = [
-            'empresa' => (array)$this->getInfoEmpresa($result_user->id_empresa)
+            'empresa' => $multiple5
         ];
+       
         return $info;
     }
 

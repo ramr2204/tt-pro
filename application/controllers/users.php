@@ -452,28 +452,40 @@ class Users extends MY_Controller {
 			  $id_empresa = null;
 			  
 			  if(in_array($this->input->post('perfilid'), Equivalencias::perfilesEmpresa())) {
-				  $this->form_validation->set_rules('empresa', 'Empresa',  'required|numeric|greater_than[0]|is_exists[con_contratantes.id]');
+				  $this->form_validation->set_rules('empresa', 'Empresa',  'required');
 				  $id_empresa = $this->input->post('empresa');
 			  }
 
 			  if ($this->form_validation->run() == false)
-				 {
+			  {    
+			
 				  $this->data['errormessage'] = (validation_errors() ? validation_errors() : $this->session->flashdata('errormessage'));
                   $this->data['successmessage'] = $this->session->flashdata('successmessage');
 				 } else
-				 {
+				 {	
+					 
+					$multiple =  array_values ( $this->input->post('empresa') );
+				  $multiple = implode(', ', $multiple);
+
+				 
+
 				  $username = $this->input->post('id'); //este id será el identificador de la tabla usuarios, no se usa nombre de usuario
 			      $email    = strtolower($this->input->post('email'));
 			      $password = $this->input->post('password');
+				  
                   $additional_data = array(
 					  'perfilid'	=> $this->input->post('perfilid'),
                       'first_name'	=> $this->input->post('nombres'),
                       'last_name'	=> $this->input->post('apellidos'),
                       'phone'		=> $this->input->post('telefono'),
                       'id'			=> $this->input->post('id'),
-					  'id_empresa'	=> $id_empresa
-				  );
+					  'id_empresa'	=> $multiple,
+					  
 
+					  
+				
+				  );
+				
 				  if ($this->ion_auth->register($username, $password, $email, $additional_data))
 					 {
 					   $usuarioid = $this->db->insert_id();
@@ -487,6 +499,22 @@ class Users extends MY_Controller {
 						   $respuestaProceso = $this->codegen_model->add('adm_usuarios_menus',$data);
                        }
 
+					   $multiple2 = array_values($this->input->post('empresa'));
+					   $multiple2 = implode(', ', $multiple2);
+					   
+					   
+					   
+					   $data1 = array(
+							
+							'id_usuario' => $this->input->post('id'),
+							'id_contratante'=>$multiple2,
+							
+
+					   );
+
+					   $this->db->insert('doble_empresa',$data1);
+
+
 					   $this->session->set_flashdata('successmessage', 'El usuario se ha creado con éxito');
 					   redirect(base_url().'users/create_user');
 					 } else
@@ -498,7 +526,7 @@ class Users extends MY_Controller {
 				  }
 				 $this->load->model('codegen_model','',TRUE); 
 				 $this->data['perfiles']  = $this->codegen_model->getSelect('adm_perfiles','perf_id,perf_nombre');
-
+				
 				 $this->data['empresas'] = $this->codegen_model->getSelect(
 					 'con_contratantes',
 					 'id, nombre',
@@ -560,19 +588,32 @@ class Users extends MY_Controller {
 			  $id_empresa = null;
 
 			  if(in_array($this->input->post('perfilid'), Equivalencias::perfilesEmpresa())) {
-				  $this->form_validation->set_rules('empresa', 'Empresa',  'required|numeric|greater_than[0]|is_exists[con_contratantes.id]');
+				  $this->form_validation->set_rules('empresa', 'Empresa',  'required');
 				  $id_empresa = $this->input->post('empresa');
 			  }
 
 			  if ($this->form_validation->run() === TRUE)
-			  {				  
+			  {			
+				  
+				$multiple3 = array_values($this->input->post('empresa'));
+				$multiple3 = implode(', ', $multiple3);
+				
 				    $datosActualizar['email'] 		= $this->input->post('email');
                     $datosActualizar['perfilid'] 	= $this->input->post('perfilid');
                     $datosActualizar['phone'] 		= $this->input->post('telefono');
                     $datosActualizar['last_name'] 	= $this->input->post('apellidos');
                     $datosActualizar['first_name'] 	= $this->input->post('nombres');
-                    $datosActualizar['id_empresa'] 	= $id_empresa;
+                    $datosActualizar['id_empresa'] 	= $multiple3;
 
+					$data1 = array(
+					 
+						'id_usuario' => $this->input->post('id'),
+						'id_contratante'=>$multiple3,
+						
+   
+				   );
+
+					$this->db->insert('doble_empresa',$data1);
 				    $this->ion_auth->update($user->id, $datosActualizar);
 
 				    /*
@@ -783,26 +824,108 @@ class Users extends MY_Controller {
 
 	public function datatable ()
 	{
-        if ($this->ion_auth->is_admin() || $this->ion_auth->user()->row()->perfilid == 10)
-		{
-            $this->load->library('datatables');
-            $this->datatables->select('u.id, u.email, empresa.nombre AS empresa, p.perf_nombre, firma.tipo , u.active');
-            $this->datatables->from('users u');
-            $this->datatables->join('adm_perfiles p','p.perf_id = u.perfilid','left');
-            $this->datatables->join('con_contratantes empresa','empresa.id = u.id_empresa','left');
-            $this->datatables->join('usuarios_firma firma','firma.id_usuario = u.id','left');
-            $this->datatables->add_column('edit', '<div class="btn-toolbar" role="toolbar">
-				<div class="btn-group">
-				<a href="'.base_url().'users/edit/$1" class="btn btn-default btn-xs" title="Editar datos de usuario"><i class="fa fa-pencil-square-o"></i></a>
-				<a href="'.base_url().'users/permisos/$1" class="btn btn-default btn-xs" title="Editar permisos predeterminados"><i class="fa fa-eye"></i></a>
-				</div>
-			</div>', 'u.id');
-			echo $this->datatables->generate();
+		$res=$this->codegen_model->getSelect(
+			'users as u',
+			'u.id, u.id_empresa, u.email, f.tipo, p.perf_nombre, u.active',
+			'',
+			'INNER JOIN adm_perfiles as p ON p.perf_id = u.perfilid 
+			LEFT JOIN usuarios_firma as f on f.id_usuario = u.id',
+			'',
+			'ORDER BY u.id'
+		);
+		$usuarios_empresas=[];
+		
+		foreach ($res as $data) {
+			$idU = $data->id;
+			$estado = '<div class="btn-toolbar" role="toolbar">
+					<div class="btn-group">
+						<a href="' . base_url() . 'users/edit/' . $idU . '" class="btn btn-default btn-xs" title="Editar datos de usuario"><i class="fa fa-pencil-square-o"></i></a>
+						<a href="' . base_url() . 'users/permisos/' . $idU . '" class="btn btn-default btn-xs" title="Editar permisos predeterminados"><i class="fa fa-eye"></i></a>
+					</div>
+				</div>';
+			$datos=explode(', ', $data->id_empresa);
+
+			if(count($datos)>1){
+				$txt='';
+				foreach ($datos as $x) {
+					$res2=$this->codegen_model->getSelect(
+						'con_contratantes',
+						'nombre',
+						'WHERE id = '.$x
+					);
+					if(isset($res2[0]->nombre)){
+						$txt .= ', '.$res2[0]->nombre;		
+					}
+				}
+				$usuarios_empresas[] = [
+					$data->id,
+					$data->email,
+					substr($txt, 2), 
+					$data->perf_nombre,
+					$data->tipo,
+					$data->active,
+					$estado
+				];
+			}else{
+				$id_emp=$data->id_empresa;
+				$res2=$this->codegen_model->getSelect(
+					'con_contratantes',
+					'nombre',
+					'WHERE id = '.($id_emp?$id_emp:0)
+				);
+				$nombre = '';
+				if(isset($res2[0]->nombre)){
+					$nombre = $res2[0]->nombre;		
+				}
+				
+				$usuarios_empresas[] = [
+					$data->id,
+					$data->email,
+					$nombre, 
+					$data->perf_nombre,
+					$data->tipo,
+					$data->active,
+					$estado
+				];
+			}
 		}
-		else
-		{
-			redirect(base_url().'index.php/users/login');
-		}
+
+		$array = [
+			'iTotalRecords' => count($usuarios_empresas),
+			'iTotalDisplayRecords' => count($usuarios_empresas), 
+			'aaData' => $usuarios_empresas,
+			'sColumns' => 'c.cntr_id,c.cntr_numero,co.cont_nit,co.cont_nombre,ctte.nit,ctte.nombre,c.cntr_fecha_firma,c.cntr_objeto,c.cntr_valor,c.cntr_vigencia,edit'
+		];  
+		
+		echo json_encode($array);exit();
+
+		/* print_r(json_encode($usuarios_empresas));
+
+		die; */
+        // if ($this->ion_auth->is_admin() || $this->ion_auth->user()->row()->perfilid == 10)
+		// {
+        //     $this->load->library('datatables');
+
+        //     $this->datatables->select('u.id, u.email, empresa.nombre AS empresa, p.perf_nombre, firma.tipo , u.active');
+        //     $this->datatables->from('users u');
+
+        //     $this->datatables->join('adm_perfiles p','p.perf_id = u.perfilid','left');
+        //     $this->datatables->join('con_contratantes empresa','empresa.id = u.id_empresa','left');
+        //     $this->datatables->join('usuarios_firma firma','firma.id_usuario = u.id','left');
+			
+        //     $this->datatables->add_column('edit', '<div class="btn-toolbar" role="toolbar">
+		// 		<div class="btn-group">
+		// 		<a href="'.base_url().'users/edit/$1" class="btn btn-default btn-xs" title="Editar datos de usuario"><i class="fa fa-pencil-square-o"></i></a>
+		// 		<a href="'.base_url().'users/permisos/$1" class="btn btn-default btn-xs" title="Editar permisos predeterminados"><i class="fa fa-eye"></i></a>
+		// 		</div>
+		// 	</div>', 'u.id');
+		// 	//print_r($this->datatables->generate());
+		// 	echo $this->datatables->generate();
+		// }
+		// else
+		// {
+		// 	redirect(base_url().'index.php/users/login');
+		// }
     }
     
 
